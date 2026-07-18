@@ -1,48 +1,51 @@
 #!/bin/bash
-# AmisAd POC - deploy a single-node NATS JetStream into the cluster.
+# AmisAd POC - install NATS JetStream as a host systemd service.
+# Deliberately NOT an in-cluster deployment: docker.io pulls fail in this
+# lab (invalid_token via the caching path, cycles 246-247), and the GitHub
+# release binary avoids Docker Hub entirely. Services reach NATS at
+# <node-ip>:4222; the in-cluster Service indirection returns when the
+# event-driven scenarios actually wire JetStream in.
 set -euo pipefail
 
-kubectl create namespace amisad-infra --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n amisad-infra apply -f - <<'MANIFEST'
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nats
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: nats
-  template:
-    metadata:
-      labels:
-        app: nats
-    spec:
-      containers:
-        - name: nats
-          image: nats:2.10-alpine
-          args: ["-js"]
-          ports:
-            - containerPort: 4222
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: nats
-spec:
-  selector:
-    app: nats
-  ports:
-    - port: 4222
-      targetPort: 4222
-MANIFEST
-# 600s: first-pull latency through the LAN cache exceeded 300s once
-# (cycle 246). On failure, dump pod state so the diagnostic says WHY.
-if ! kubectl -n amisad-infra rollout status deployment/nats --timeout=600s; then
-    echo "== nats rollout failed - diagnostics =="
-    kubectl -n amisad-infra get pods -o wide || true
-    kubectl -n amisad-infra describe deployment/nats | tail -20 || true
-    kubectl -n amisad-infra get events --sort-by=.lastTimestamp | tail -15 || true
-    exit 1
+NATS_VERSION=v2.10.29
+ARCH=$(uname -m)
+case "$ARCH" in
+    x86_64) NARCH=amd64 ;;
+    aarch64) NARCH=arm64 ;;
+    *) NARCH=amd64 ;;
+esac
+
+if ! command -v nats-server >/dev/null 2>&1; then
+    wget -qO /tmp/nats-server.tar.gz \
+        "https://github.com/nats-io/nats-server/releases/download/${NATS_VERSION}/nats-server-${NATS_VERSION}-linux-${NARCH}.tar.gz"
+    tar -xzf /tmp/nats-server.tar.gz -C /tmp
+    sudo install -m 0755 "/tmp/nats-server-${NATS_VERSION}-linux-${NARCH}/nats-server" /usr/local/bin/nats-server
+    rm -rf /tmp/nats-server.tar.gz "/tmp/nats-server-${NATS_VERSION}-linux-${NARCH}"
 fi
-echo "NATS JetStream deployed"
+
+sudo tee /etc/systemd/system/nats.service >/dev/null <<'UNIT'
+[Unit]
+Description=NATS JetStream (AmisAd POC)
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/nats-server -js -m 8222
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+sudo systemctl daemon-reload
+sudo systemctl enable --now nats
+
+for _ in $(seq 1 30); do
+    if curl -sf http://localhost:8222/healthz >/dev/null 2>&1; then
+        echo "NATS JetStream deployed"
+        exit 0
+    fi
+    sleep 2
+done
+echo "NATS failed to become healthy" >&2
+sudo systemctl status nats --no-pager | tail -10 || true
+exit 1

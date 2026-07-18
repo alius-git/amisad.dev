@@ -18,6 +18,7 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image }}
+          imagePullPolicy: {{ .Values.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: {{ .Values.port }}
           env:

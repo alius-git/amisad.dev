@@ -57,20 +57,19 @@ cargo build --release --workspace
 
 echo "== deploy services =="
 sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
-docker start registry 2>/dev/null || \
-    docker run -d -p 5000:5000 --restart=always --name registry registry:2
 SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
-# Thin runtime images from the release binaries built above - one compile
-# for all ten services instead of ten in-container workspace builds (the
-# committed per-service Dockerfiles remain the standalone/CI path).
+# docker.io is unreachable in this lab (invalid_token via the caching
+# path), so: distroless base from gcr.io, thin images from the release
+# binaries built above, imported STRAIGHT into the cluster's containerd
+# (no registry), and charts pinned to pullPolicy=Never.
 for svc in $SERVICES; do
-    printf 'FROM debian:bookworm-slim\nCOPY target/release/%s /usr/local/bin/%s\nENV PORT=8080\nEXPOSE 8080\nENTRYPOINT ["/usr/local/bin/%s"]\n' \
+    printf 'FROM gcr.io/distroless/cc-debian12\nCOPY target/release/%s /usr/local/bin/%s\nENV PORT=8080\nEXPOSE 8080\nENTRYPOINT ["/usr/local/bin/%s"]\n' \
         "$svc" "$svc" "$svc" > "/tmp/Dockerfile.${svc}"
-    docker build -f "/tmp/Dockerfile.${svc}" -t "localhost:5000/amisad/${svc}:latest" .
-    docker push "localhost:5000/amisad/${svc}:latest"
+    docker build -f "/tmp/Dockerfile.${svc}" -t "amisad/${svc}:poc" .
+    docker save "amisad/${svc}:poc" | sudo ctr -n k8s.io images import -
     helm upgrade --install "$svc" "workloads/services/${svc}" \
         --namespace amisad --create-namespace \
-        --set "image=localhost:5000/amisad/${svc}:latest"
+        --set "image=amisad/${svc}:poc" --set "pullPolicy=Never"
 done
 for svc in $SERVICES; do
     kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=600s
