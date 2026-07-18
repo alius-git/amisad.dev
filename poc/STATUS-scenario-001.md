@@ -4,9 +4,14 @@
 
 ## Live-run iteration log (newest first)
 
-- **Cycle 245**: `Start-VM` failed — stale Hyper-V disk lock from the prior
-  cycle's teardown (infrastructure transient, not code). Retrying via
-  commit-triggered resume.
+- **Cycle 245**: `Start-VM` failed — host memory exhaustion (operator
+  diagnosis): the persisted `build.amisad` VM was left running at 12GB while
+  a fresh 12GB test VM started on the 32GB host. Fixed per operator
+  instruction: fresh ubuntu VMs now provision at 10GB (framework
+  `New-VM.ps1`, operator-authorized edit), persisted `build.amisad` set to
+  8GB static, stale VMs stopped. 8GB judged sufficient for the build VM
+  (control plane ~2GB + PG/NATS ~1GB + sequential cargo/bazel peaks
+  ~2–3GB); verify headroom from the next run's guest diagnostics.
 - **Cycle 244**: chain green through BOTH baselines (`k8s.amisad` and
   `build.amisad` snapshots saved — db fix held). Scenario step failed:
   Bazel's bundled JVM lacks the caching proxy's CA (PKIX on
