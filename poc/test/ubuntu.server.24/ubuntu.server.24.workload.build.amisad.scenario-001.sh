@@ -10,6 +10,26 @@ set -euo pipefail
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
 . "$REAL_HOME/.cargo/env"
+
+echo "== obtain project tree (lab: host-served tarball of amisad.dev HEAD) =="
+# Same channel fetch-and-execute uses; project-poc.tar.gz is regenerated on
+# the host by poc/build/serve-local.ps1 after every commit. The GitHub+PAT
+# clone remains the production path (poc/README.md).
+if [ -r /etc/yuruna/host.env ]; then
+    # shellcheck disable=SC1091
+    . /etc/yuruna/host.env
+fi
+if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
+    echo "no host.env - cannot locate the host status server" >&2
+    exit 2
+fi
+rm -rf "$REAL_HOME/amisad.dev"
+mkdir -p "$REAL_HOME/amisad.dev"
+wget --no-proxy -qO /tmp/project-poc.tar.gz \
+    "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-repo/project-poc.tar.gz?nocache=${RANDOM}"
+tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
+rm -f /tmp/project-poc.tar.gz
+
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
 

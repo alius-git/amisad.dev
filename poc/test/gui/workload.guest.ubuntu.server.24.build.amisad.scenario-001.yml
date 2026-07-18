@@ -4,12 +4,15 @@
 # Automated Fulfillment) from source, inside the build VM.
 #
 # Operator setup (details: poc/README.md "Running scenarios under Yuruna"):
-# - Guest PAT comes from the Yuruna authentication vault, NOT from a variable:
-#   declare logical user `amisad-pat` in users.yml with vaultKey "amisad-pat"
-#   (operator-owned - the vault never auto-generates it), then store the PAT
-#   once with Set-Password. The step below renders it via
-#   ${ext:authentication.GetPassword(amisad-pat)} and is sensitive: true so
-#   it never appears in logs or OCR captures.
+# - LAB ITERATION MODE (current): the guest obtains the repo as a tarball
+#   from the host status server (/yuruna-repo/project-poc.tar.gz, regenerated
+#   from amisad.dev HEAD by poc/build/serve-local.ps1 after every commit) -
+#   the same channel fetch-and-execute uses. The guest script does the fetch.
+# - PRODUCTION PATH (kept for later): guest clones GitHub with a PAT from the
+#   Yuruna authentication vault - logical user `amisad-pat`, vaultKey
+#   "amisad-pat", stored once with Set-Password, rendered via
+#   ${ext:authentication.GetPassword(amisad-pat)} in a sensitive step.
+#   Restore by re-adding the credential-store + git clone steps here.
 # - variables.edgeHost: optional ssh target (user@host) of a second VM to run
 #   slice-runtime as the real edge node. When empty, the guest script runs
 #   slice-runtime on the build VM itself and says so - a documented
@@ -62,25 +65,6 @@ steps:
     pattern: "${username}@"
     timeoutSeconds: 90
     description: "OCR: shell prompt"
-
-  - action: inputTextAndEnter
-    text: "git config --global credential.helper store && printf 'https://oauth2:%s@github.com\\n' '${ext:authentication.GetPassword(amisad-pat)}' > ~/.git-credentials && echo CRED-STORED"
-    sensitive: true
-    description: "Store the PAT (from the auth vault) in the git credential store (sensitive)"
-
-  - action: waitForText
-    pattern: "CRED-STORED"
-    timeoutSeconds: 60
-    description: "OCR: credential stored"
-
-  - action: inputTextAndEnter
-    text: "rm -rf ~/amisad.dev && git clone https://github.com/alius-git/amisad.dev.git ~/amisad.dev && echo REPO-CLONED"
-    description: "Clone amisad.dev (credentials come from the store)"
-
-  - action: waitForText
-    pattern: "REPO-CLONED"
-    timeoutSeconds: 300
-    description: "OCR: repository cloned"
 
   - action: fetchAndExecute
     text: "EDGE_HOST='${edgeHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.build.amisad.scenario-001.sh"
