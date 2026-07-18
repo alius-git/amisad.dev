@@ -5,8 +5,11 @@
 # Mirrors the yuruna-project text-to-sql baseline chain.
 
 # Perf-log identity. Bump revision on step add/remove.
-sequenceGuid: 42098986-ed31-41e5-ac09-1e50119cc209
-sequenceRevision: 1
+# Rev 2: framework postgresql.sh replaced by a self-sufficient db.sh
+# (the framework script's cluster re-init raced nondeterministically -
+# "cluster configuration already exists", cycle 248).
+sequenceGuid:42098986-ed31-41e5-ac09-1e50119cc209
+sequenceRevision: 2
 
 description: "Ubuntu Server: log in, install Kubernetes + PostgreSQL + NATS, snapshot k8s.amisad."
 baseline:
@@ -54,16 +57,10 @@ steps:
     description: "OCR: Ready"
 
   - action: fetchAndExecute
-    text: "/usr/local/lib/yuruna/fetch-and-execute.sh guest/ubuntu.server.24/ubuntu.server.24.postgresql.sh"
-    description: "ubuntu.server.24.postgresql.sh (install PostgreSQL)"
+    text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.db.sh"
+    description: "AmisAd database bring-up (install PostgreSQL, create amisad DB, load schema.sql)"
     waitPattern: "FETCHED AND EXECUTED:"
     timeoutSeconds: 900
-
-  - action: fetchAndExecute
-    text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.db.sh"
-    description: "AmisAd database bring-up (create amisad DB, load schema.sql)"
-    waitPattern: "FETCHED AND EXECUTED:"
-    timeoutSeconds: 600
 
   - action: fetchAndExecute
     text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.nats.sh"

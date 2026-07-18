@@ -16,6 +16,20 @@ if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
     exit 2
 fi
 
+# Self-sufficient PostgreSQL install (Ubuntu's default packages): the
+# framework's pgdg-based script raced its own cluster re-init (cycle 248).
+if ! command -v psql >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    sudo apt-get update -y
+    sudo apt-get install -y postgresql
+fi
+sudo systemctl enable --now postgresql
+for _ in $(seq 1 30); do
+    if sudo -u postgres pg_isready -q 2>/dev/null; then break; fi
+    sleep 2
+done
+sudo -u postgres pg_isready
+
 SCHEMA=/tmp/amisad-schema.sql
 wget --no-proxy -qO "$SCHEMA" \
     "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
