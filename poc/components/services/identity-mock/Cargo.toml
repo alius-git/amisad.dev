@@ -1,0 +1,8 @@
+[package]
+name = "identity-mock"
+version = "0.1.0"
+edition = "2021"
+description = "OIDC-style token issuer standing in for Identity and Verification (AmisAd POC skeleton)"
+
+[dependencies]
+amisad-common = { path = "../../lib/amisad-common" }

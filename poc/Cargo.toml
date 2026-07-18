@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [
+    "components/lib/amisad-common",
+    "components/services/*",
+    "components/edge/slice-runtime",
+]

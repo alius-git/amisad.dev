@@ -1,0 +1,17 @@
+# Rust (Cargo.lock is checked in once first generated; do not ignore it)
+target/
+
+# Bazel
+bazel-*
+
+# Node
+node_modules/
+dist/
+
+# Flutter (hydrated by build.sh via `flutter create`; only lib/, assets/,
+# pubspec.yaml, and analysis_options.yaml are source-of-truth)
+components/apps/buyer-flutter/android/
+components/apps/buyer-flutter/build/
+components/apps/buyer-flutter/.dart_tool/
+components/apps/buyer-flutter/.flutter-plugins*
+components/apps/buyer-flutter/pubspec.lock

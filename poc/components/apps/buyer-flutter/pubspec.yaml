@@ -1,0 +1,19 @@
+name: amisad_buyer
+description: AmisAd buyer app POC skeleton - offline-first vault, private matching.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon-64.png

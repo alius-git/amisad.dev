@@ -1,0 +1,47 @@
+# AmisAd POC - Workloads information - localhost (skeleton).
+# Deploys the ten service charts into the amisad namespace. TLS/ingress and
+# the SPA static serving land when the applications grow real routes.
+---
+globalVariables:
+  ingressClass:          "nginx"
+
+workloads:
+- context: "${env:runTag}-${env:project}-${env:runId}"
+  deployments:
+    # Uninstall previous workloads: idempotent
+    - kubectl: "delete namespace ${env:namespace} --ignore-not-found=true --v=1"
+    # Install
+    - kubectl: "create namespace ${env:namespace} --v=1"
+    - kubectl: "config set-context --current --namespace=${env:namespace} --v=1"
+    - chart: "services/seller-svc"
+      variables:
+        installName: "seller-svc"
+    - chart: "services/resource-svc"
+      variables:
+        installName: "resource-svc"
+    - chart: "services/ads-svc"
+      variables:
+        installName: "ads-svc"
+    - chart: "services/insights-svc"
+      variables:
+        installName: "insights-svc"
+    - chart: "services/platform-svc"
+      variables:
+        installName: "platform-svc"
+    - chart: "services/audit-svc"
+      variables:
+        installName: "audit-svc"
+    - chart: "services/connect-svc"
+      variables:
+        installName: "connect-svc"
+    - chart: "services/fabric-coordinator"
+      variables:
+        installName: "fabric-coordinator"
+    - chart: "services/identity-mock"
+      variables:
+        installName: "identity-mock"
+    - chart: "services/ledger-svc"
+      variables:
+        installName: "ledger-svc"
+    - shell: 'Write-Information "-- Check containers started: kubectl get pods --all-namespaces"'
+    - shell: 'Write-Information ">>    Test: kubectl -n ${env:namespace} get deployments"'

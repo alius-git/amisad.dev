@@ -1,0 +1,9 @@
+-- AmisAd POC - seed skeleton for SCENARIO-009: Aggregate Insight Publication and the Demand-Planning Loop
+-- Loaded by test fixtures once the scenario is implemented; empty by design.
+-- TODO(SCENARIO-009):
+--   - Seed region A above and region B below the anonymity threshold
+--   - Environments emit aggregates only; the gate suppresses region B
+--   - Dana publishes a versioned outlook into seller and ads views
+--   - Elena stocks and Marcel scopes a campaign on identical figures
+--   - Unmet-demand flag carries category and region only
+--   - Assert: no below-threshold figure anywhere downstream

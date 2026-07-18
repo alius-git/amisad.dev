@@ -1,0 +1,8 @@
+[package]
+name = "ledger-svc"
+version = "0.1.0"
+edition = "2021"
+description = "Append-only hash-chained consent, settlement, and attestation ledgers (AmisAd POC skeleton)"
+
+[dependencies]
+amisad-common = { path = "../../lib/amisad-common" }

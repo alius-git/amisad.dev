@@ -74,19 +74,29 @@ Every mock implements the production interface; swapping it changes no caller.
 
 ## 6. Repository layout
 
+The POC mirrors the **yuruna-project convention** (components / config /
+workloads / test) so the Yuruna runner discovers and drives it, with **Bazel**
+(pinned via bazelisk) as the single build entry point:
+
 ```
 amisad.dev/
-  plan/                 # planning docs (this file, personas, applications, scenarios, design/)
+  plan/                     # planning docs (this file, personas, applications, scenarios, design/)
   poc/
-    contracts/          # OpenAPI specs + NATS event schemas, versioned — the compatibility gate
-    services/           # Rust workspace: seller, resource, ads, insights, platform, audit, connect,
-                        #   fabric-coordinator, identity-mock, ledger-svc + shared crates
-    edge/               # slice-runtime crate (also Rust, same workspace)
-    apps/
-      buyer_flutter/    # Flutter buyer app
-      web/              # React+TS SPA shell with role-scoped modules
-    deploy/             # Helm charts / k3s manifests + Yuruna project config
-    seed/               # synthetic personas, catalogs, and fixtures for SCENARIO-001…010
+    MODULE.bazel            # Bazel root (bzlmod, rules_rust pinned; .bazelversion via bazelisk)
+    build/                  # doctor.ps1 (toolchain check), build-all.ps1, images.ps1
+    contracts/              # OpenAPI specs + NATS event schemas — the compatibility gate
+    components/
+      services/             # 10 Rust services (seller-svc … ledger-svc)
+      edge/slice-runtime/   # stateless edge match runtime (Rust, same workspace)
+      apps/buyer-flutter/   # Flutter buyer app (Android side-loaded)
+      apps/web-spa/         # React+TS+Vite shell with role-scoped modules
+      lib/amisad-common/    # shared config/health plumbing crate
+      art/                  # canonical brand assets + palette tokens (from amisad.com)
+    config/localhost/       # three-phase deploy config (resources → components → workloads)
+    workloads/services/     # minimal Helm chart per service
+    db/                     # schema.sql (hash-chained ledgers) + per-scenario seeds
+    test/gui/               # Yuruna sequences: baseline snapshot + SCENARIO-001…010
+    test/ubuntu.server.24/  # guest scripts the sequences fetch-and-execute
 ```
 
 ## 7. Scenario execution

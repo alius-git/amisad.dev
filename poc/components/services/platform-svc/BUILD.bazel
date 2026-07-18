@@ -1,0 +1,9 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "platform-svc",
+    srcs = ["src/main.rs"],
+    edition = "2021",
+    deps = ["//components/lib/amisad-common"],
+    visibility = ["//visibility:public"],
+)

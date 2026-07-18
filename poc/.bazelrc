@@ -1,0 +1,3 @@
+# AmisAd POC Bazel defaults. Keep minimal and cloud-agnostic.
+build --verbose_failures
+test --test_output=errors

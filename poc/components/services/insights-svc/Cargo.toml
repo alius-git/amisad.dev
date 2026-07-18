@@ -1,0 +1,8 @@
+[package]
+name = "insights-svc"
+version = "0.1.0"
+edition = "2021"
+description = "Threshold-protected aggregate demand insights and outlooks (AmisAd POC skeleton)"
+
+[dependencies]
+amisad-common = { path = "../../lib/amisad-common" }

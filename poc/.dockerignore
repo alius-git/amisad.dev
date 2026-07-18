@@ -1,0 +1,5 @@
+# Service image builds need only the Rust workspace.
+components/apps/
+target/
+bazel-*
+node_modules/

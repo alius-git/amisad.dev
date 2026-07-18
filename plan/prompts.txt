@@ -140,3 +140,69 @@ Diagram principles:
   with a Note stating the Target Verification Point Yuruna asserts.
 - Keep each diagram readable: roughly 20 messages; if a scenario needs more,
   group steps rather than drop them.
+
+==== Code skeletons
+
+Act as the Principal Systems Architect for AmisAd. Based on the amisad.com content
+(brand assets) and the amisad.dev plan/ documents (applications, scenarios, design),
+create the POC code skeletons under poc/, mirroring the yuruna-project layout so the
+Yuruna runner can discover and drive them.
+
+Layout (yuruna-project convention; update design.md §6 to match, and note the change
+in README.md if it describes the layout):
+  poc/
+    MODULE.bazel  .bazelversion  BUILD.bazel   # Bazel root, bzlmod, pinned via bazelisk
+    build/                                      # doctor + helper scripts (PowerShell)
+    contracts/                                  # OpenAPI + event schemas (kept from design)
+    components/
+      services/<name>/                          # 10 Rust services: seller-svc, resource-svc,
+                                                #  ads-svc, insights-svc, platform-svc, audit-svc,
+                                                #  connect-svc, fabric-coordinator, identity-mock,
+                                                #  ledger-svc
+      edge/slice-runtime/                       # Rust slice runtime
+      apps/buyer-flutter/                       # Flutter placeholder app
+      apps/web-spa/                             # React+TS+Vite shell, 6 role-module routes
+      art/                                      # brand assets copied from amisad.com:
+                                                #  icon.svg, icon-64.png, palette tokens
+                                                #  (#2B3A67 navy, #E2725B terracotta), README
+    config/localhost/{resources,components,workloads}.yml   # three-phase deploy skeletons
+    workloads/<group>/<name>/                   # minimal Helm chart per service
+    db/                                         # schema.sql + seed skeletons per scenario
+    test/
+      gui/                                      # 10 sequence YAMLs, seq per SCENARIO-001..010,
+                                                #  plus one k3s+PostgreSQL+NATS baseline sequence
+      ubuntu.server.24/                         # guest scripts the sequences fetch-and-execute
+
+Build rules:
+- Bazel is the single entry point: `bazel build //...` must succeed on the first try
+  on a machine with bazelisk, rustup, Node, and the Flutter SDK installed (all three
+  toolchains are REQUIRED — build/doctor.ps1 checks versions and fails fast with a
+  clear message before any build starts).
+- Rust: rules_rust with a pinned toolchain and crate_universe lockfile; one library +
+  binary target per service; a shared crate for common config/health plumbing.
+- Flutter and web-spa: Bazel targets that wrap the flutter/Vite CLIs (genrule or
+  sh_binary) — Bazel orchestrates, the native toolchains do the work.
+- Container images are built by a script target (build/images.ps1), not part of the
+  `bazel build //...` gate — Docker may be absent on dev machines.
+
+Skeleton depth — deployable, not just compilable:
+- Each Rust service: GET /health and GET /version, config from environment variables,
+  multi-stage Dockerfile, and a minimal Helm chart under workloads/ that deploys it
+  with a liveness probe on /health.
+- buyer-flutter and web-spa: placeholder screens using the art/ brand assets; the SPA
+  shell routes to six empty role modules (seller, resource, ads, insights, platform,
+  audit, connect share the shell per design).
+- contracts/: one OpenAPI stub per service declaring only /health and /version now.
+
+Test skeletons:
+- Each test/gui/ sequence must validate against yuruna/test/schemas/sequence.schema.yml:
+  unique sequenceGuid, sequenceRevision 1, description naming its SCENARIO, baseline
+  chain to the k3s+PostgreSQL+NATS baseline sequence, and steps that fetch-and-execute
+  guest scripts which currently deploy the skeletons, curl /health, and end with a
+  TODO block enumerating the scenario's real steps from plan/scenarios.md.
+- Guest scripts: bash, set -euo pipefail, one per sequence plus shared bring-up,
+  modeled on the yuruna-project text-to-sql example.
+
+Done when: build/doctor.ps1 passes; `bazel build //...` is green; every Helm chart
+passes `helm lint`; every sequence YAML validates against the schema; design.md §6
+reflects this layout; nothing references paths that do not exist.

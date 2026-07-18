@@ -1,0 +1,8 @@
+[package]
+name = "resource-svc"
+version = "0.1.0"
+edition = "2021"
+description = "Carrier control plane: allocation policy, slice controller, telemetry, incidents (AmisAd POC skeleton)"
+
+[dependencies]
+amisad-common = { path = "../../lib/amisad-common" }

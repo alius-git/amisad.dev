@@ -1,0 +1,33 @@
+/* AmisAd brand tokens - canonical source: components/art/palette.css */
+:root {
+  --amisad-navy: #2b3a67;
+  --amisad-terracotta: #e2725b;
+  --amisad-white: #ffffff;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  color: var(--amisad-navy);
+}
+
+.amisad-home,
+.amisad-module {
+  max-width: 40rem;
+  margin: 4rem auto;
+  padding: 0 1rem;
+}
+
+.amisad-home nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.amisad-home nav a,
+.amisad-module header a {
+  color: var(--amisad-terracotta);
+  text-decoration: none;
+  font-weight: 600;
+}

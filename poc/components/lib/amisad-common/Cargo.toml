@@ -1,0 +1,9 @@
+[package]
+name = "amisad-common"
+version = "0.1.0"
+edition = "2021"
+description = "Shared config and health plumbing for AmisAd POC services"
+
+[lib]
+name = "amisad_common"
+path = "src/lib.rs"

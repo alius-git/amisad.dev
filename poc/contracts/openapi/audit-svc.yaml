@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: audit-svc
+  description: "Independent verification of ledgers, attestation chains, residency, and consent (AmisAd POC skeleton contract: health and version only)"
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      summary: Liveness probe
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  service: { type: string }
+  /version:
+    get:
+      summary: Build version
+      operationId: getVersion
+      responses:
+        "200":
+          description: Service name and version
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service: { type: string }
+                  version: { type: string }

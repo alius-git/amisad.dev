@@ -1,0 +1,22 @@
+"""AmisAd POC Bazel module.
+
+Rust builds through rules_rust with a pinned toolchain. There are deliberately
+no third-party crates yet, so crate_universe is not wired; add it together
+with the first external dependency (see poc/README.md).
+"""
+
+module(
+    name = "amisad_poc",
+    version = "0.1.0",
+)
+
+bazel_dep(name = "rules_rust", version = "0.56.0")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions = ["1.83.0"],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains("@rust_toolchains//:all")

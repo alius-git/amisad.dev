@@ -1,0 +1,32 @@
+# AmisAd POC - Components information - localhost (skeleton).
+# NOTE: the service Dockerfiles expect the poc/ workspace root as build
+# context (the Rust workspace lives there); buildPath entries below name the
+# component folder, and the buildCommand passes the workspace root context.
+---
+globalVariables:
+  DOCKER_SCAN_SUGGEST:   "false"
+  buildCommand: docker build --progress=plain --rm -f "${env:buildPath}/Dockerfile" -t "${env:containerPrefix}/${env:project}:latest" ../..
+  tagCommand: docker tag "${env:containerPrefix}/${env:project}:latest" "$([Environment]::GetEnvironmentVariable("${env:registryName}.registryLocation"))/${env:containerPrefix}/${env:project}:latest"
+  pushCommand: docker push "$([Environment]::GetEnvironmentVariable("${env:registryName}.registryLocation"))/${env:containerPrefix}/${env:project}:latest"
+
+components:
+- project: "seller-svc"
+  buildPath: "services/seller-svc"
+- project: "resource-svc"
+  buildPath: "services/resource-svc"
+- project: "ads-svc"
+  buildPath: "services/ads-svc"
+- project: "insights-svc"
+  buildPath: "services/insights-svc"
+- project: "platform-svc"
+  buildPath: "services/platform-svc"
+- project: "audit-svc"
+  buildPath: "services/audit-svc"
+- project: "connect-svc"
+  buildPath: "services/connect-svc"
+- project: "fabric-coordinator"
+  buildPath: "services/fabric-coordinator"
+- project: "identity-mock"
+  buildPath: "services/identity-mock"
+- project: "ledger-svc"
+  buildPath: "services/ledger-svc"

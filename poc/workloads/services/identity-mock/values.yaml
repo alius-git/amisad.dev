@@ -1,0 +1,4 @@
+namespace: amisad
+image: localhost:5000/amisad/identity-mock:latest
+port: 8080
+replicas: 1

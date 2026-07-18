@@ -1,0 +1,8 @@
+[package]
+name = "fabric-coordinator"
+version = "0.1.0"
+edition = "2021"
+description = "Routes encrypted need envelopes to sealed slice environments per jurisdiction policy (AmisAd POC skeleton)"
+
+[dependencies]
+amisad-common = { path = "../../lib/amisad-common" }

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ledger-svc
+description: AmisAd POC skeleton chart for ledger-svc
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

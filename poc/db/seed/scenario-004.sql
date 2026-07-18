@@ -1,0 +1,9 @@
+-- AmisAd POC - seed skeleton for SCENARIO-004: Sovereign Slice Allocation, Isolation Fault, and Attested Failover
+-- Loaded by test fixtures once the scenario is implemented; empty by design.
+-- TODO(SCENARIO-004):
+--   - Policy: two regions, one jurisdiction-restricted
+--   - Allocation picks the compliant region despite more capacity elsewhere
+--   - Inject isolation fault; environment self-terminates, abort attested
+--   - Retry completes in the compliant region; settlement recorded once
+--   - Repeat fault escalates a cross-party incident case
+--   - Assert: zero out-of-region environments; revenue only for the completed match

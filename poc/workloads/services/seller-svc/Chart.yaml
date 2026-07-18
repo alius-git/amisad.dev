@@ -1,0 +1,6 @@
+apiVersion: v2
+name: seller-svc
+description: AmisAd POC skeleton chart for seller-svc
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

@@ -1,0 +1,7 @@
+# Flutter has no mature Bazel rules; the wrapper delegates to the Flutter CLI.
+# Invoke with: bazel run //components/apps/buyer-flutter:build
+sh_binary(
+    name = "build",
+    srcs = ["build.sh"],
+    visibility = ["//visibility:public"],
+)

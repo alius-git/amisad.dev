@@ -1,0 +1,7 @@
+# The SPA builds with the native Vite toolchain; the wrapper delegates to npm.
+# Invoke with: bazel run //components/apps/web-spa:build
+sh_binary(
+    name = "build",
+    srcs = ["build.sh"],
+    visibility = ["//visibility:public"],
+)

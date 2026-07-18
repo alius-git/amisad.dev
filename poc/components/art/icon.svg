@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="AmisAd">
+  <!-- Two circles: one for the buyer, one for the seller. They meet, and the meeting is the spark. -->
+  <circle cx="23.5" cy="32" r="17.5" fill="#2B3A67"/>
+  <circle cx="40.5" cy="32" r="17.5" fill="#E2725B" fill-opacity="0.88"/>
+  <path d="M32 22.5 L34.6 29.4 L41.5 32 L34.6 34.6 L32 41.5 L29.4 34.6 L22.5 32 L29.4 29.4 Z" fill="#FFFFFF"/>
+</svg>

@@ -1,0 +1,10 @@
+{
+  "name": "AmisAd brand palette",
+  "source": "amisad.com logo (two circles + star)",
+  "colors": {
+    "navy": "#2B3A67",
+    "terracotta": "#E2725B",
+    "terracottaOpacity": 0.88,
+    "white": "#FFFFFF"
+  }
+}

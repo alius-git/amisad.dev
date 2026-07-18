@@ -1,0 +1,9 @@
+-- AmisAd POC - seed skeleton for SCENARIO-005: Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit
+-- Loaded by test fixtures once the scenario is implemented; empty by design.
+-- TODO(SCENARIO-005):
+--   - Marcel creates a campaign from the aggregate demand view
+--   - Brief to Kai; asset approved and placed
+--   - Buyer need in campaign region; creative renders inside the environment
+--   - Acceptance closes the match; attribution computed in the fabric
+--   - Agency and creator credit on the ledger; budget decrements by outcome
+--   - Assert: non-zero ad-partner credit, zero buyer signal campaign-side

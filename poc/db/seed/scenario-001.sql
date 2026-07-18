@@ -1,0 +1,9 @@
+-- AmisAd POC - seed skeleton for SCENARIO-001: Intent-Driven Edge Match and Automated Fulfillment
+-- Loaded by test fixtures once the scenario is implemented; empty by design.
+-- TODO(SCENARIO-001):
+--   - Maya states gift need (budget, city, deadline) with auto-close policy
+--   - Envelope routed to jurisdiction-compliant slice; environment attested
+--   - Standing deal auto-closes inside the environment; envelope never leaves
+--   - Elena ships; order matched -> committed -> provisioning -> fulfilled
+--   - Four-way settlement split recorded; carrier share visible to Tom
+--   - Assert: splits sum to match value, states consistent, attestation complete, zero egress

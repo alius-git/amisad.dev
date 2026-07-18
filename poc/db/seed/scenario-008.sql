@@ -1,0 +1,9 @@
+-- AmisAd POC - seed skeleton for SCENARIO-008: Zero-Knowledge Dispute Mediation and Settlement Adjustment
+-- Loaded by test fixtures once the scenario is implemented; empty by design.
+-- TODO(SCENARIO-008):
+--   - Maya reports non-delivery on a settled order
+--   - Sam mediates on metadata; buyer identity structurally absent
+--   - Consented disclosure: request -> grant -> artifact -> expiry
+--   - Refund posted as compensating entries referencing the case
+--   - Recurring pattern escalates to Priya
+--   - Assert: case identity-free end to end; post-expiry access fails

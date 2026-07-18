@@ -1,0 +1,8 @@
+# AmisAd POC workspace root.
+# Rust targets live under components/services/*, components/edge/*, and
+# components/lib/*; app build wrappers under components/apps/*.
+
+exports_files([
+    ".bazelversion",
+    "Cargo.toml",
+])

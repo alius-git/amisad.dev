@@ -1,0 +1,8 @@
+[package]
+name = "platform-svc"
+version = "0.1.0"
+edition = "2021"
+description = "Marketplace stewardship: registry, settlement oversight, zero-knowledge support desk (AmisAd POC skeleton)"
+
+[dependencies]
+amisad-common = { path = "../../lib/amisad-common" }

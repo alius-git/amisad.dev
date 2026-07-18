@@ -1,0 +1,9 @@
+/* AmisAd brand palette - canonical tokens.
+   Source: amisad.com (logo circles + star). Consumers copy or import these;
+   do not fork the values. */
+:root {
+  --amisad-navy: #2b3a67;
+  --amisad-terracotta: #e2725b;
+  --amisad-terracotta-opacity: 0.88;
+  --amisad-white: #ffffff;
+}

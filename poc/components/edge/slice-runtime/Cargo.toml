@@ -1,0 +1,8 @@
+[package]
+name = "slice-runtime"
+version = "0.1.0"
+edition = "2021"
+description = "Stateless edge match runtime with simulated attestation (AmisAd POC skeleton)"
+
+[dependencies]
+amisad-common = { path = "../../lib/amisad-common" }
