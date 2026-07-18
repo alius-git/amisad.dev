@@ -1,13 +1,28 @@
 #!/bin/bash
 # AmisAd POC - create the amisad database and load the skeleton schema.
-# TODO: open listen_addresses/pg_hba for in-cluster pods (mirror text-to-sql db script).
+# The schema is fetched from the host status server (the same channel
+# fetch-and-execute uses) into /tmp, because the postgres user cannot read
+# files under the login user's 0750 home directory.
+# TODO: open listen_addresses/pg_hba for in-cluster pods when services move
+# off in-memory state (mirror the text-to-sql db script).
 set -euo pipefail
 
-REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
-POC="$REAL_HOME/git/yuruna/project/poc"
+if [ -r /etc/yuruna/host.env ]; then
+    # shellcheck disable=SC1091
+    . /etc/yuruna/host.env
+fi
+if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
+    echo "no host.env - cannot locate the host status server" >&2
+    exit 2
+fi
+
+SCHEMA=/tmp/amisad-schema.sql
+wget --no-proxy -qO "$SCHEMA" \
+    "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
+chmod 644 "$SCHEMA"
 
 sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='amisad'" | grep -q 1 || \
     sudo -u postgres createdb amisad
-sudo -u postgres psql -d amisad -f "$POC/db/schema.sql"
+sudo -u postgres psql -v ON_ERROR_STOP=1 -d amisad -f "$SCHEMA"
+rm -f "$SCHEMA"
 echo "AmisAd database ready"
