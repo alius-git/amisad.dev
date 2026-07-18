@@ -1,0 +1,70 @@
+Prompts for AmisAd.dev
+
+==== Planning - Part 1
+
+Act as a principal systems architect and product strategist. Review all open projects, primarily drawing context from the core content of the amisad.com project.
+
+Your task is to generate two distinct, comprehensive Markdown files for amisad.dev that define our target personas and application ecosystem. Keep the descriptions natural, clear, and highly focused on the what and why (business and user needs) rather than the technical how (specific tech stack or implementation details).
+
+1. Define Personas (personas.md)
+Create a profiles document identifying the distinct user types served by AmisAd applications. Each persona should capture their core motivations, responsibilities, and primary interaction points with our ecosystem. Include the following essential roles and identify any missing gaps in the lifecycle:
+
+Maya (The Buyer): Uses the AmisAd/buyer application. Focused entirely on personal consumption—discovering, managing, and fulfillment tracking of "my needs and wants."
+
+Elena (The Seller): Uses the AmisAd/seller application. Responsible for defining products or services, managing inventory, tracking orders, and monitoring provisioning or payment statuses.
+
+Tom (The Telco Administrator): Uses the AmisAd/resource application. Manages network infrastructure, handles the dynamic allocation of network slices, and resolves systemic incidents.
+
+Marcel (The Ad Agency Administrator): Uses the AmisAd/ads application in campaign administration mode to manage budgets, target demographics, and run campaigns.
+
+Creative Partner (The Content Creator): Uses the AmisAd/ads application to produce creative assets (art, video, copy) for sellers. Functions as a "seller of advertising services" by tracking creative demands and performance.
+
+Note: Evaluate the end-to-end system and add any missing baseline personas (e.g., platforms operators, auditors, or data analysts) necessary to complete the operational cycle.
+
+2. Define the Application Ecosystem (applications.md)
+Create a foundational architecture document defining each application required in the ecosystem. For each system component, provide:
+
+A clear, high-level business objective.
+
+A brief summary of core user-facing functionality.
+
+The ideal architectural patterns or high-level technical paradigms suited for the job (e.g., real-time event streaming, offline-first mobile fabric, multi-tenant dashboard), avoiding specific framework or concrete vendor choices.
+
+Ensure both documents seamlessly align so that every user workflow identified in the personas file maps logically to an application capability. Maintain a professional, scannable, and definitive tone throughout.
+
+==== Planning - Part 2
+
+Act as the Principal Systems Architect and Product Strategist for AmisAd. Based on the initial structural baseline established in `personas.md` and `applications.md`, we are entering the formal design and verification planning phase.
+
+Execute the following three structural tasks, ensuring complete comprehensiveness across all artifacts before we begin prioritization. Move all deliverables into a unified `plan/` directory.
+
+#### 1. Expand the Core Foundation (`plan/personas.md` & `plan/applications.md`)
+
+Move the existing files into the `plan/` directory and expand them to include the previously deferred edge-case roles. We must ensure the system handles multi-party trust, delegated authority, and enterprise integration from day one.
+
+* **Add New Personas:**
+* *Alex (The Integration Partner):* Third-party developers or enterprise IT teams connecting external ERPs, inventories, or CRM systems via APIs.
+* *Sam (The Support Agent):* Zero-knowledge mediation agent handling billing anomalies or delivery disputes without violating buyer privacy thresholds.
+* *Pat (The Buyer-Side Delegate):* An authorized guardian, assistant, or corporate proxy executing procurement or managing "needs and wants" on behalf of Maya.
+
+
+* **Update the Applications:** Ensure `applications.md` and its multi-tenant, shared foundation definitions (Private Matching Fabric, Consent Ledger, etc.) are updated to explicitly support the workflows, API surfaces, and privacy constraints required by these new personas. Update the workflow alignment matrices accordingly.
+
+#### 2. Create the Verification Framework (`plan/scenarios.md`)
+
+Generate a definitive document containing **10 prioritized end-to-end test sequences**. These scenarios must map out the complete lifecycle of a transaction—from intent discovery to edge matching, network slice allocation, creative ad serving, and multi-party settlement.
+
+Design these sequences to serve as the ultimate functional blueprint for an end-to-end automated system demo using the **Yuruna** verification framework.
+
+* **Execution Environment Flexibility:** Scenarios can span web, local, or mobile application interfaces. Focus entirely on the end-to-end user and system journey, ignoring any current temporary guest-environment limitations within the Yuruna framework itself.
+* **Format Per Scenario:** Write each scenario in clean, highly structured natural language (do *not* write raw Yuruna test script code). For each of the 10 scenarios, provide:
+1. **ID & Title:** (e.g., `SCENARIO-001: Intent-Driven Edge Match and Automated Fulfillment`)
+2. **Objective & Priority:** What business/system milestone does this validate, and why is its priority ranked here?
+3. **Cross-References:** Explicitly list the Personas involved, the Applications traversed, and the Shared Foundations/Components invoked (e.g., *Cross-Refs: Maya, Elena, Tom; AmisAd/buyer, AmisAd/resource; Private Matching Fabric*).
+4. **Step-by-Step Sequence:** A concise, chronological narrative of the user actions and underlying system state changes (e.g., *User publishes need $\rightarrow$ Attested edge environment matches intent $\rightarrow$ Telco allocates network slice $\rightarrow$ Consent ledger logs immutable transaction*).
+5. **Target Verification Point:** The precise "desired state" or cryptographic proof Yuruna must assert to declare the test successful.
+
+
+#### 3. Traceability Assurance
+
+End the `scenarios.md` file with a brief verification matrix ensuring that every persona (including the 3 new roles) and every application/shared component is exercised by at least one of the 10 core test sequences. No orphan components, no unverified workflows.
