@@ -8,7 +8,7 @@
 # Rev 2: framework postgresql.sh replaced by a self-sufficient db.sh
 # (the framework script's cluster re-init raced nondeterministically -
 # "cluster configuration already exists", cycle 248).
-sequenceGuid:42098986-ed31-41e5-ac09-1e50119cc209
+sequenceGuid: 42098986-ed31-41e5-ac09-1e50119cc209
 sequenceRevision: 2
 
 description: "Ubuntu Server: log in, install Kubernetes + PostgreSQL + NATS, snapshot k8s.amisad."
