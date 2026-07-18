@@ -1,0 +1,7 @@
+# Yuruna cycle plan for the AmisAd POC.
+# Top-level workload sequences to drive each cycle; each sequence's own
+# baseline field pulls in its prerequisite chain automatically
+# (start.guest -> k8s.amisad -> build.amisad -> scenario-001).
+# Sequences live under poc/test/gui/; see poc/README.md for the lab setup.
+sequences:
+- workload.guest.ubuntu.server.24.build.amisad.scenario-001
