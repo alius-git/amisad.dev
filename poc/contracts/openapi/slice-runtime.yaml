@@ -1,34 +1,32 @@
 openapi: 3.0.3
 info:
   title: slice-runtime
-  description: "Stateless edge match runtime with simulated attestation (AmisAd POC skeleton contract: health and version only)"
+  description: "Sealed match environment on the edge: one full attested lifecycle per request, with a complete egress log (SCENARIO-001 surface)"
   version: 0.1.0
 paths:
   /health:
     get:
-      summary: Liveness probe
-      operationId: getHealth
+      summary: "Liveness probe"
       responses:
-        "200":
-          description: Service is alive
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string }
-                  service: { type: string }
+        "200": { description: "Service is alive" }
   /version:
     get:
-      summary: Build version
-      operationId: getVersion
+      summary: "Build version"
       responses:
-        "200":
-          description: Service name and version
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  service: { type: string }
-                  version: { type: string }
+        "200": { description: "Service name and version" }  /v1/environments:
+    post:
+      summary: "Run one environment lifecycle: created->attested->executed->destroyed (body: jurisdiction, envelope, offers). Opens the envelope, matches, emits the settlement instruction, returns the match record."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Match record (match_id, environment_id, offer, need_context)" }
+        "400": { description: "Bad envelope (aborted + destroyed attested)" }
+        "404": { description: "No fitting offer (executed + destroyed attested)" }
+  /v1/egress:
+    get:
+      summary: "Everything that ever left an environment on this runtime - the zero-leak assertion surface"
+      responses:
+        "200": { description: "entries: [string]" }

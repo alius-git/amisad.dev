@@ -1,34 +1,72 @@
 openapi: 3.0.3
 info:
   title: ledger-svc
-  description: "Append-only hash-chained consent, settlement, and attestation ledgers (AmisAd POC skeleton contract: health and version only)"
+  description: "Append-only hash-chained attestation and settlement ledgers with chain verification (SCENARIO-001 surface)"
   version: 0.1.0
 paths:
   /health:
     get:
-      summary: Liveness probe
-      operationId: getHealth
+      summary: "Liveness probe"
       responses:
-        "200":
-          description: Service is alive
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string }
-                  service: { type: string }
+        "200": { description: "Service is alive" }
   /version:
     get:
-      summary: Build version
-      operationId: getVersion
+      summary: "Build version"
       responses:
-        "200":
-          description: Service name and version
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  service: { type: string }
-                  version: { type: string }
+        "200": { description: "Service name and version" }  /v1/attestations:
+    post:
+      summary: "Append an attestation record (body: environment_id, lifecycle, ...)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Appended (index, hash)" }
+    get:
+      summary: "All attestation entries with hashes and head"
+      responses:
+        "200": { description: "entries, head" }
+  /v1/attestations/env/{environmentId}:
+    get:
+      summary: "Attestation payloads for one environment"
+      parameters:
+        - { name: environmentId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "entries: [payload]" }
+  /v1/settlements/instructions:
+    post:
+      summary: "Store a pending settlement instruction; splits must sum to value_cents (body: match_id, value_cents, splits{seller_cents, network_cents, platform_cents, ads_cents})"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Pending" }
+        "400": { description: "Splits do not sum to value" }
+        "409": { description: "Instruction exists" }
+  /v1/settlements/confirm:
+    post:
+      summary: "Confirm settlement: appends one chained entry per party (body: match_id)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Entries appended (entries, head)" }
+        "404": { description: "No instruction" }
+        "409": { description: "Already confirmed" }
+  /v1/settlements/match/{matchId}:
+    get:
+      summary: "Settlement view for a match"
+      parameters:
+        - { name: matchId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "value_cents, confirmed, entries, total_cents" }
+  /v1/verify:
+    get:
+      summary: "Recompute both hash chains"
+      responses:
+        "200": { description: "attestation_ok, settlement_ok, lengths" }

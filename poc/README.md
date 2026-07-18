@@ -50,8 +50,39 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **Sequences deploy then verify `/health` only.** Each scenario sequence
-  restores the `k8s.amisad` snapshot (Kubernetes + PostgreSQL + NATS), runs
-  the shared deploy script, and checks the services that scenario traverses.
-  The real steps are enumerated as TODO blocks pointing at
-  [../plan/scenarios.md](../plan/scenarios.md).
+- **Sequences deploy then verify `/health` only** (scenarios 002–010). Each
+  scenario sequence restores the `k8s.amisad` snapshot (Kubernetes +
+  PostgreSQL + NATS), runs the shared deploy script, and checks the services
+  that scenario traverses. The real steps are enumerated as TODO blocks
+  pointing at [../plan/scenarios.md](../plan/scenarios.md).
+
+## SCENARIO-001 implementation notes
+
+SCENARIO-001 is implemented end to end: `buyer-client` (the headless buyer)
+submits Maya's gift need as an opaque envelope; the coordinator verifies the
+token, gets a jurisdiction-checked placement, and dispatches envelope + offers
+to `slice-runtime`; the environment matches, attests its full lifecycle,
+emits the settlement instruction, and destroys itself; seller fulfillment
+confirms the four-way split on the hash-chained ledger. Two sequences drive
+it in VMs: `...build.amisad.baseline` (toolchains, snapshot `build.amisad`)
+and `...build.amisad.scenario-001` (PAT clone, `bazel build //...`,
+`cargo test --workspace`, deploy, happy path, full Target Verification Point).
+
+Deviations from the target design, deliberate and to be retired in later
+scenarios — the wire contracts (`contracts/openapi/`) are unchanged by all of
+them:
+
+- **In-memory state, not PostgreSQL.** ledger-svc, seller-svc, resource-svc,
+  and identity-mock keep state in process behind the real APIs;
+  `db/schema.sql` already holds the target tables.
+- **Envelope opacity instead of encryption.** Upstream services carry the
+  envelope as an opaque string and never parse it (checkable in code and by
+  the egress assert); actual envelope crypto is TODO.
+- **Polling instead of NATS events.** Order status flows by HTTP polling;
+  the JetStream wiring lands with the event-driven scenarios (003+).
+- **Logical ephemeral environments.** `slice-runtime` is a persistent edge
+  process; each request runs one attested created→attested→executed→destroyed
+  environment whose state drops at response time.
+- **Single-VM degraded mode.** With `edgeHost` unset, the scenario runs
+  slice-runtime on the build VM and says so; setting `edgeHost` (ssh target)
+  runs it on a real second VM per the design topology.

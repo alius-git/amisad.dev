@@ -206,3 +206,64 @@ Test skeletons:
 Done when: build/doctor.ps1 passes; `bazel build //...` is green; every Helm chart
 passes `helm lint`; every sequence YAML validates against the schema; design.md §6
 reflects this layout; nothing references paths that do not exist.
+
+==== Coding - ps1
+
+Act as the Principal Systems Architect for AmisAd. Implement SCENARIO-001
+(Intent-Driven Edge Match and Automated Fulfillment) end to end in the poc/
+skeletons, then create the Yuruna sequences that build and test it in VMs.
+References: plan/scenarios.md (steps + Target Verification Point), plan/design/
+seq-001.md (message flow), plan/design.md (contracts and foundations).
+
+1. Code — fill in what SCENARIO-001 traverses, nothing more:
+- fabric-coordinator: accept an encrypted need envelope, get a placement from
+  resource-svc, dispatch envelope + qualifying offers to slice-runtime on the
+  edge VM, relay match results and pseudonymous order status.
+- resource-svc: minimal allocation API (register edge endpoints per region,
+  answer placement requests, record slice lifecycle telemetry).
+- slice-runtime: per-match ephemeral environment — evaluate constraints against
+  offers, honor both auto-close policies, emit match record + settlement
+  instruction, write created→attested→executed→destroyed to the attestation
+  ledger, destroy itself; keep an egress log proving no need/identity leaves.
+- seller-svc: catalog with standing auto-close deals; order state machine
+  matched→committed→provisioning→fulfilled→settled with events on NATS.
+- ledger-svc: real hash-chained appends (attestation + settlement four-way
+  split), read APIs, and chain-head verification.
+- identity-mock: tokens for the buyer and seller actors in this flow.
+- buyer-client (new Rust CLI in components/apps/): submit Maya's gift need with
+  auto-close, wait for the match, follow status to Delivered — the automated
+  buyer driver.
+- buyer-flutter: wire the needs-list screen to the same APIs (submit a need,
+  see match and order status) for manual demo; UI automation stays out of scope.
+- db/seed/scenario-001.sql: Elena's catalog + standing deal, Maya's consent.
+- cargo tests: ledger hash-chaining, constraint matching, auto-close policy,
+  order state transitions. `bazel build //...` and `cargo test --workspace`
+  stay green.
+
+2. Baseline sequence "build VM" (test/gui/...build.amisad.baseline.yml):
+Chain from the existing k8s.amisad baseline (Kubernetes + PostgreSQL + NATS);
+add the build requirements — rustup + stable toolchain, bazelisk, git — via a
+new guest script; saveDiskSnapshot id "build.amisad".
+
+3. Sequence build-scenario-001 (test/gui/...build.amisad.scenario-001.yml):
+requiresSnapshot build.amisad, then:
+- Clone amisad.dev over HTTPS using a PAT supplied as a sequence variable the
+  operator sets from the host environment; mark every step touching it
+  sensitive: true so it never appears in logs or OCR captures.
+- Build (bazel build //...) and run cargo test --workspace inside the VM.
+- Deploy the services; bring up slice-runtime on a SECOND VM (the edge node,
+  per the design topology) and register it with resource-svc. Investigate
+  Yuruna's multi-guest/pool support first; if one sequence cannot orchestrate
+  two guests, drive the edge VM from the build VM over SSH (sshExec) at its
+  lab-network address, and document that choice in the sequence header.
+- Run buyer-client for the happy path, then assert the FULL Target
+  Verification Point from plan/scenarios.md: settlement splits sum exactly to
+  match value; buyer Delivered and seller Settled reference one match ID;
+  attestation chain complete for the environment; egress log holds zero
+  need/identity payloads.
+
+Done when: both sequences validate against yuruna's sequence schema (42-prefixed
+GUIDs); bazel build and cargo test pass; the scenario-001 sequence runs the
+happy path unattended and every TVP assert holds; seq-001.md and scenarios.md
+are updated only if implementation forced a contract deviation (note it, don't
+silently drift).

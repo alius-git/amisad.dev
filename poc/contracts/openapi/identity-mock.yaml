@@ -1,34 +1,37 @@
 openapi: 3.0.3
 info:
   title: identity-mock
-  description: "OIDC-style token issuer standing in for Identity and Verification (AmisAd POC skeleton contract: health and version only)"
+  description: "OIDC-style token issuer standing in for Identity and Verification (SCENARIO-001 surface)"
   version: 0.1.0
 paths:
   /health:
     get:
-      summary: Liveness probe
-      operationId: getHealth
+      summary: "Liveness probe"
       responses:
-        "200":
-          description: Service is alive
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string }
-                  service: { type: string }
+        "200": { description: "Service is alive" }
   /version:
     get:
-      summary: Build version
-      operationId: getVersion
+      summary: "Build version"
       responses:
-        "200":
-          description: Service name and version
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  service: { type: string }
-                  version: { type: string }
+        "200": { description: "Service name and version" }  /v1/tokens:
+    post:
+      summary: "Issue a token for an actor (body: actor, class)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Token issued (token)" }
+        "400": { description: "actor missing" }
+  /v1/verify:
+    post:
+      summary: "Verify a token (body: token)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "Verified (actor, class)" }
+        "404": { description: "Unknown token" }

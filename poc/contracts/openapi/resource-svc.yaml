@@ -1,34 +1,54 @@
 openapi: 3.0.3
 info:
   title: resource-svc
-  description: "Carrier control plane: allocation policy, slice controller, telemetry, incidents (AmisAd POC skeleton contract: health and version only)"
+  description: "Carrier control plane: edge registration, jurisdiction-checked placement, slice telemetry (SCENARIO-001 surface)"
   version: 0.1.0
 paths:
   /health:
     get:
-      summary: Liveness probe
-      operationId: getHealth
+      summary: "Liveness probe"
       responses:
-        "200":
-          description: Service is alive
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string }
-                  service: { type: string }
+        "200": { description: "Service is alive" }
   /version:
     get:
-      summary: Build version
-      operationId: getVersion
+      summary: "Build version"
       responses:
-        "200":
-          description: Service name and version
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  service: { type: string }
-                  version: { type: string }
+        "200": { description: "Service name and version" }  /v1/edges:
+    post:
+      summary: "Register or replace an edge slice endpoint (body: region, endpoint)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Edge registered" }
+    get:
+      summary: "List registered edges"
+      responses:
+        "200": { description: "edges: [{region, endpoint}]" }
+  /v1/placements:
+    post:
+      summary: "Request a placement; jurisdiction is enforced at allocation time (body: jurisdiction)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "Placement (region, endpoint)" }
+        "409": { description: "No edge capacity in jurisdiction" }
+  /v1/telemetry:
+    post:
+      summary: "Record slice lifecycle telemetry (body: environment_id, event)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "Recorded" }
+    get:
+      summary: "List telemetry entries"
+      responses:
+        "200": { description: "entries: [...]" }

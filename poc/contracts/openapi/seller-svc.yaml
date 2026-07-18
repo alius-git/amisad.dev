@@ -1,34 +1,64 @@
 openapi: 3.0.3
 info:
   title: seller-svc
-  description: "Seller catalog, inventory, order lifecycle, and settlement views (AmisAd POC skeleton contract: health and version only)"
+  description: "Seller catalog with standing auto-close deals and the order state machine (SCENARIO-001 surface). Order records structurally contain no buyer identity."
   version: 0.1.0
 paths:
   /health:
     get:
-      summary: Liveness probe
-      operationId: getHealth
+      summary: "Liveness probe"
       responses:
-        "200":
-          description: Service is alive
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string }
-                  service: { type: string }
+        "200": { description: "Service is alive" }
   /version:
     get:
-      summary: Build version
-      operationId: getVersion
+      summary: "Build version"
       responses:
-        "200":
-          description: Service name and version
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  service: { type: string }
-                  version: { type: string }
+        "200": { description: "Service name and version" }  /v1/offers:
+    post:
+      summary: "Create an offer (body: offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Offer stored" }
+        "400": { description: "Missing field" }
+  /v1/offers/region/{region}:
+    get:
+      summary: "Offers available in a region"
+      parameters:
+        - { name: region, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "offers: [...]" }
+  /v1/orders:
+    post:
+      summary: "Create a committed order from a match (body: match_id, offer_id, tenant, need_context)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Order committed" }
+        "409": { description: "Order exists" }
+  /v1/orders/advance:
+    post:
+      summary: "Advance an order (committed->provisioning->fulfilled); fulfilled confirms settlement and lands settled (body: match_id, state)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "New state" }
+        "404": { description: "No order" }
+        "409": { description: "Illegal transition" }
+  /v1/orders/match/{matchId}:
+    get:
+      summary: "Order by match id (need context only; no buyer identity field exists)"
+      parameters:
+        - { name: matchId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "match_id, offer_id, tenant, need_context, state" }
+        "404": { description: "No order" }

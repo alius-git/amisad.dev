@@ -1,0 +1,8 @@
+[package]
+name = "buyer-client"
+version = "0.1.0"
+edition = "2021"
+description = "Headless buyer driver for AmisAd scenario sequences (stands in for the mobile app in automated tests)"
+
+[dependencies]
+amisad-common = { path = "../../lib/amisad-common" }

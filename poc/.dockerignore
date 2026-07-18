@@ -1,5 +1,9 @@
-# Service image builds need only the Rust workspace.
-components/apps/
+# Service image builds copy the Rust workspace (which now includes
+# components/apps/buyer-client); exclude only non-Rust build products.
 target/
 bazel-*
-node_modules/
+**/node_modules
+components/apps/web-spa/dist
+components/apps/buyer-flutter/build
+components/apps/buyer-flutter/.dart_tool
+components/apps/buyer-flutter/android

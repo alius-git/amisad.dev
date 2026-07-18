@@ -1,34 +1,36 @@
 openapi: 3.0.3
 info:
   title: fabric-coordinator
-  description: "Routes encrypted need envelopes to sealed slice environments per jurisdiction policy (AmisAd POC skeleton contract: health and version only)"
+  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope (SCENARIO-001 surface)"
   version: 0.1.0
 paths:
   /health:
     get:
-      summary: Liveness probe
-      operationId: getHealth
+      summary: "Liveness probe"
       responses:
-        "200":
-          description: Service is alive
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string }
-                  service: { type: string }
+        "200": { description: "Service is alive" }
   /version:
     get:
-      summary: Build version
-      operationId: getVersion
+      summary: "Build version"
       responses:
-        "200":
-          description: Service name and version
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  service: { type: string }
-                  version: { type: string }
+        "200": { description: "Service name and version" }  /v1/needs:
+    post:
+      summary: "Submit a need (body: token, jurisdiction, envelope). The envelope is an opaque string opened only inside the sealed environment."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Match (handle, match_id, environment_id, offer)" }
+        "401": { description: "Unverified actor" }
+        "404": { description: "No fitting offer" }
+        "503": { description: "No placement / dependency unavailable" }
+  /v1/orders/{handle}:
+    get:
+      summary: "Pseudonymous order status for the buyer (in-progress | delivered)"
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "handle, status" }
+        "404": { description: "Unknown handle" }

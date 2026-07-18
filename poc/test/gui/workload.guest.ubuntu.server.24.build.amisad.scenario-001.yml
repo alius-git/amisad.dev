@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - build and test SCENARIO-001 (Intent-Driven Edge Match and
+# Automated Fulfillment) from source, inside the build VM.
+#
+# Operator setup:
+# - variables.pat: a GitHub PAT with read access to alius-git/amisad.dev.
+#   Set it before running (it is TO-SET below); every step touching it is
+#   sensitive: true so it never appears in logs or OCR captures.
+# - variables.edgeHost: optional ssh target (user@host) of a second VM to run
+#   slice-runtime as the real edge node. When empty, the guest script runs
+#   slice-runtime on the build VM itself and says so - a documented
+#   single-VM degraded mode, used until multi-guest orchestration is wired.
+#
+# The guest script builds (bazel build //...), tests (cargo test --workspace),
+# deploys all services, runs buyer-client's happy path, and asserts the FULL
+# SCENARIO-001 Target Verification Point (settlement sum, order states,
+# attestation lifecycle, chain verification, zero egress).
+
+# Perf-log identity. Bump revision on step add/remove.
+sequenceGuid: 4222bb02-7d1f-4c8e-8a4b-3f9e58d71b22
+sequenceRevision: 1
+
+description: "AmisAd SCENARIO-001: clone via PAT, bazel build + cargo test, deploy, run happy path, assert full TVP."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.build.amisad.baseline
+requiresSnapshot:
+  id: "build.amisad"
+variables:
+  username: yamisad
+  pat: "TO-SET"
+  edgeHost: ""
+
+steps:
+  - action: loadDiskSnapshot
+    id: "build.amisad"
+    description: "Restore the AmisAd build-VM baseline checkpoint"
+
+  - action: retry
+    maxAttempts: 2
+    description: "Login + retry"
+    steps:
+      - snippet: firstLoginPrime
+
+      - action: passwdPrompt
+        pattern: "login:"
+        timeoutSeconds: 600
+        text: "${username}"
+        description: "OCR: login:"
+
+      - action: passwdPrompt
+        pattern: "Password:"
+        text: "${ext:authentication.GetPassword(${username})}"
+        description: "OCR: Password:"
+
+  - action: waitForText
+    pattern: "${username}@"
+    timeoutSeconds: 90
+    description: "OCR: shell prompt"
+
+  - action: inputTextAndEnter
+    text: "git config --global credential.helper store && printf 'https://oauth2:%s@github.com\\n' '${pat}' > ~/.git-credentials && echo CRED-STORED"
+    sensitive: true
+    description: "Store the PAT in the git credential store (sensitive)"
+
+  - action: waitForText
+    pattern: "CRED-STORED"
+    timeoutSeconds: 60
+    description: "OCR: credential stored"
+
+  - action: inputTextAndEnter
+    text: "rm -rf ~/amisad.dev && git clone https://github.com/alius-git/amisad.dev.git ~/amisad.dev && echo REPO-CLONED"
+    description: "Clone amisad.dev (credentials come from the store)"
+
+  - action: waitForText
+    pattern: "REPO-CLONED"
+    timeoutSeconds: 300
+    description: "OCR: repository cloned"
+
+  - action: fetchAndExecute
+    text: "EDGE_HOST='${edgeHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.build.amisad.scenario-001.sh"
+    description: "Build, test, deploy, run SCENARIO-001 happy path, assert full TVP"
+    waitPattern: "FETCHED AND EXECUTED:"
+    timeoutSeconds: 3600
+
+  - action: saveSystemDiagnostic
+    id: "amisad.build-scenario-001"
+    description: "Capture diagnostics after the SCENARIO-001 run"

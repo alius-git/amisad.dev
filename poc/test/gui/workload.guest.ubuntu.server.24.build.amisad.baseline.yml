@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - "build VM" baseline: everything needed to build and test the
+# POC inside the VM. Chains the k8s.amisad infrastructure baseline
+# (Kubernetes + PostgreSQL + NATS) and adds the build toolchains
+# (rustup + pinned stable Rust, bazelisk, git, python3), then snapshots as
+# "build.amisad" for build/test sequences to warm-path from.
+
+# Perf-log identity. Bump revision on step add/remove.
+sequenceGuid: 4211aa01-5c0e-4b7d-9f3a-2e8d47c60a11
+sequenceRevision: 1
+
+description: "Ubuntu Server: restore k8s.amisad, install Rust + bazelisk + git build tools, snapshot build.amisad."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.k8s.amisad.baseline
+requiresSnapshot:
+  id: "k8s.amisad"
+variables:
+  username: yamisad
+
+steps:
+  - action: loadDiskSnapshot
+    id: "k8s.amisad"
+    description: "Restore the AmisAd k8s + PostgreSQL + NATS baseline checkpoint"
+
+  - action: retry
+    maxAttempts: 2
+    description: "Login + retry"
+    steps:
+      - snippet: firstLoginPrime
+
+      - action: passwdPrompt
+        pattern: "login:"
+        timeoutSeconds: 600
+        text: "${username}"
+        description: "OCR: login:"
+
+      - action: passwdPrompt
+        pattern: "Password:"
+        text: "${ext:authentication.GetPassword(${username})}"
+        description: "OCR: Password:"
+
+  - action: waitForText
+    pattern: "${username}@"
+    timeoutSeconds: 90
+    description: "OCR: shell prompt"
+
+  - action: fetchAndExecute
+    text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad.build-tools.sh"
+    description: "Install build tools (rustup, bazelisk, git, python3)"
+    waitPattern: "FETCHED AND EXECUTED:"
+    timeoutSeconds: 1800
+
+  - action: saveDiskSnapshot
+    id: "build.amisad"
+    description: "Snapshot the AmisAd build-VM baseline"

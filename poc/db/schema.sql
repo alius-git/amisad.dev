@@ -56,4 +56,30 @@ $$;
 GRANT USAGE ON SCHEMA ledger TO amisad_audit_ro;
 GRANT SELECT ON ALL TABLES IN SCHEMA ledger TO amisad_audit_ro;
 
--- TODO: per-service tables land with their scenarios (see db/seed/*.sql).
+-- Seller tables (landed with SCENARIO-001; see db/seed/scenario-001.sql).
+CREATE TABLE IF NOT EXISTS seller.offers (
+    offer_id        text PRIMARY KEY,
+    tenant          text        NOT NULL,
+    title           text        NOT NULL,
+    category        text        NOT NULL,
+    region          text        NOT NULL,
+    price_cents     bigint      NOT NULL CHECK (price_cents >= 0),
+    deliver_by_days integer,
+    auto_close      boolean     NOT NULL DEFAULT false,
+    created_at      timestamptz NOT NULL DEFAULT now()
+);
+
+-- Orders carry need context only; there is deliberately no buyer identity
+-- column - the privacy constraint is the schema.
+CREATE TABLE IF NOT EXISTS seller.orders (
+    match_id     text PRIMARY KEY,
+    offer_id     text        NOT NULL REFERENCES seller.offers (offer_id),
+    tenant       text        NOT NULL,
+    need_context text        NOT NULL DEFAULT '',
+    state        text        NOT NULL DEFAULT 'committed'
+        CHECK (state IN ('committed', 'provisioning', 'fulfilled', 'settled')),
+    created_at   timestamptz NOT NULL DEFAULT now(),
+    updated_at   timestamptz NOT NULL DEFAULT now()
+);
+
+-- TODO: remaining per-service tables land with their scenarios (see db/seed/*.sql).
