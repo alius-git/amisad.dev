@@ -36,5 +36,13 @@ spec:
     - port: 4222
       targetPort: 4222
 MANIFEST
-kubectl -n amisad-infra rollout status deployment/nats --timeout=300s
+# 600s: first-pull latency through the LAN cache exceeded 300s once
+# (cycle 246). On failure, dump pod state so the diagnostic says WHY.
+if ! kubectl -n amisad-infra rollout status deployment/nats --timeout=600s; then
+    echo "== nats rollout failed - diagnostics =="
+    kubectl -n amisad-infra get pods -o wide || true
+    kubectl -n amisad-infra describe deployment/nats | tail -20 || true
+    kubectl -n amisad-infra get events --sort-by=.lastTimestamp | tail -15 || true
+    exit 1
+fi
 echo "NATS JetStream deployed"
