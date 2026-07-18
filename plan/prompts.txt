@@ -68,3 +68,51 @@ Design these sequences to serve as the ultimate functional blueprint for an end-
 #### 3. Traceability Assurance
 
 End the `scenarios.md` file with a brief verification matrix ensuring that every persona (including the 3 new roles) and every application/shared component is exercised by at least one of the 10 core test sequences. No orphan components, no unverified workflows.
+
+==== Design - Part 1
+
+Act as the Principal Systems Architect for AmisAd. Based on the planning files
+(plan/applications.md, plan/personas.md, plan/scenarios.md), create the design for a
+proof-of-concept (POC) set of applications that can later grow into the full
+cloud-hosted and mobile ecosystem.
+
+POC environment: everything runs in local virtual machines, plus test mobile devices
+side-loading the POC mobile app. VM provisioning, deployment, and end-to-end
+verification are driven by the Yuruna framework, executing the sequences in
+plan/scenarios.md against synthetic data.
+
+Deliverables: a master plan/design.md, plus Mermaid diagrams under plan/design/ —
+one overall POC architecture diagram and one per application (for the format, see
+https://github.com/alissonsol/yuruna/tree/main/docs/design). Before writing, ask
+only the design questions the principles below do not already settle.
+
+Design principles:
+- Server-side applications run in K8s clusters and stay cloud-agnostic: no managed
+  cloud services; every dependency must run in-cluster.
+- PostgreSQL is the only database. Implement the ledgers (consent, settlement,
+  attestation) as append-only, hash-chained tables — no blockchain.
+- Telco-local "slice VMs" stay light and stateless: matches run in ephemeral,
+  confidential-computing environments. Where POC hardware lacks TEE support,
+  simulate attestation behind the same interface, so production hardware is a
+  drop-in replacement.
+- Simulate what the lab lacks (SIM-anchored identity, carrier slice control,
+  payments) but preserve production contracts: every mock implements the real
+  interface, and swapping it must not change any caller.
+- POC scope is scenario-driven: include exactly the applications and foundations
+  needed to execute SCENARIO-001 through SCENARIO-010 end to end; stub nothing a
+  scenario asserts against.
+- AmisAd/buyer is a mobile, offline-first app (side-loaded); all other user-facing
+  applications are web apps served from the cluster.
+- Minimize the technology count: one primary backend language/framework (propose
+  it), versioned OpenAPI-documented REST between applications, and one lightweight
+  in-cluster message broker for the event-driven flows.
+- Authentication is OIDC-style tokens from a mock identity service standing in for
+  Identity & Verification; secrets live in cluster secret storage.
+- Non-goals for the POC: performance and scale, real payments, real creative
+  production, and production security hardening beyond what the scenarios verify.
+
+  ==== Design - Part 2
+
+Create sequence diagrams for all the scenarios.
+
+Link to those from the design.md. Ensure design.md is linked to from README.md. Ensure all diagrams are as compatible as possible with GitHub.com mermaid rendering. 
