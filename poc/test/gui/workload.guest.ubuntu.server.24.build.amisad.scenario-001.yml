@@ -3,14 +3,19 @@
 # AmisAd POC - build and test SCENARIO-001 (Intent-Driven Edge Match and
 # Automated Fulfillment) from source, inside the build VM.
 #
-# Operator setup:
-# - variables.pat: a GitHub PAT with read access to alius-git/amisad.dev.
-#   Set it before running (it is TO-SET below); every step touching it is
-#   sensitive: true so it never appears in logs or OCR captures.
+# Operator setup (details: poc/README.md "Running scenarios under Yuruna"):
+# - Guest PAT comes from the Yuruna authentication vault, NOT from a variable:
+#   declare logical user `amisad-pat` in users.yml with vaultKey "amisad-pat"
+#   (operator-owned - the vault never auto-generates it), then store the PAT
+#   once with Set-Password. The step below renders it via
+#   ${ext:authentication.GetPassword(amisad-pat)} and is sensitive: true so
+#   it never appears in logs or OCR captures.
 # - variables.edgeHost: optional ssh target (user@host) of a second VM to run
 #   slice-runtime as the real edge node. When empty, the guest script runs
 #   slice-runtime on the build VM itself and says so - a documented
 #   single-VM degraded mode, used until multi-guest orchestration is wired.
+#   (Non-secret; a non-empty value must be committed to take effect, because
+#   the runner clones the project fresh every cycle.)
 #
 # The guest script builds (bazel build //...), tests (cargo test --workspace),
 # deploys all services, runs buyer-client's happy path, and asserts the FULL
@@ -29,7 +34,6 @@ requiresSnapshot:
   id: "build.amisad"
 variables:
   username: yamisad
-  pat: "TO-SET"
   edgeHost: ""
 
 steps:
@@ -60,9 +64,9 @@ steps:
     description: "OCR: shell prompt"
 
   - action: inputTextAndEnter
-    text: "git config --global credential.helper store && printf 'https://oauth2:%s@github.com\\n' '${pat}' > ~/.git-credentials && echo CRED-STORED"
+    text: "git config --global credential.helper store && printf 'https://oauth2:%s@github.com\\n' '${ext:authentication.GetPassword(amisad-pat)}' > ~/.git-credentials && echo CRED-STORED"
     sensitive: true
-    description: "Store the PAT in the git credential store (sensitive)"
+    description: "Store the PAT (from the auth vault) in the git credential store (sensitive)"
 
   - action: waitForText
     pattern: "CRED-STORED"

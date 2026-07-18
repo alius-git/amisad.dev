@@ -207,7 +207,7 @@ Done when: build/doctor.ps1 passes; `bazel build //...` is green; every Helm cha
 passes `helm lint`; every sequence YAML validates against the schema; design.md §6
 reflects this layout; nothing references paths that do not exist.
 
-==== Coding - ps1
+==== Coding - Scenario-001
 
 Act as the Principal Systems Architect for AmisAd. Implement SCENARIO-001
 (Intent-Driven Edge Match and Automated Fulfillment) end to end in the poc/
@@ -267,3 +267,55 @@ GUIDs); bazel build and cargo test pass; the scenario-001 sequence runs the
 happy path unattended and every TVP assert holds; seq-001.md and scenarios.md
 are updated only if implementation forced a contract deviation (note it, don't
 silently drift).
+
+==== Debug - Scenario-001
+
+Act as the unattended lab operator for AmisAd. Goal: SCENARIO-001 passing
+end-to-end under Yuruna on this machine, iterating until green. I am away
+~6 hours and expect to return to a working sample. Follow poc/README.md
+"Running scenarios under Yuruna"; adapt as reality requires.
+
+Environment:
+- Windows Hyper-V host with prior successful Yuruna runs.
+- Framework: c:\git\yuruna (do NOT modify framework code; editing
+  test/test.config.yml and the runtime auth files under test/status/ is fine).
+- Project: C:\git\alius-git\amisad.dev (change freely).
+- GitHub PAT: provided out-of-band in this session. Step 0: store it in
+  test.config.yml repositories.GH_TOKEN and the auth vault (amisad-pat).
+  NEVER write it into any file under amisad.dev, any commit, log, or report.
+
+Decisions (locked — do not re-ask):
+- Point repositories.projectUrl at the LOCAL repo (C:\git\alius-git\amisad.dev).
+- Guest source: adapt the scenario-001 sequence so the guest obtains the repo
+  from the freshest host-served copy (investigate how fetch-and-execute serves
+  project files and use that path or a host-reachable URL) instead of cloning
+  GitHub. Keep the credential-store steps working; the PAT stays exercised
+  host-side via GH_TOKEN.
+- Git policy: commit locally to main as fixes land (runner clones committed
+  state); NO pushes to GitHub.
+- Edge topology: single-VM degraded mode (edgeHost stays empty).
+
+Iteration playbook:
+- Shorten the loop before the first cycle: trim guestSequence to
+  guest.ubuntu.server.24; park every poc/test/gui sequence except the
+  build.amisad pair (move the scenario-002..010 skeletons and the old
+  k8s.amisad set to poc/test/gui-parked/ in a local commit); consider
+  shouldStopOnFailure: true and a short cycleDelaySeconds while iterating.
+- You may install host-side toolchains (rustup, etc. via winget) to run
+  cargo test locally and catch compile errors in minutes instead of
+  burning a VM cycle per fix. Expect the first cargo/bazel run to surface
+  small fixes in the new Rust code — that is normal; fix, commit, rerun.
+- Diagnose from http://localhost:8080/status/, the cycle logs, and
+  test/status/log diagnostics. The first cold chain
+  (start.guest -> k8s.amisad -> build.amisad -> scenario-001) takes 1h+;
+  start it early and do other verification while it runs.
+- Success: the cycle log shows all TVP asserts and
+  "SCENARIO-001 HAPPY PATH PASSED", and a second cycle warm-paths from the
+  build.amisad snapshot.
+
+Stop conditions and wrap-up (also on ~6h elapsed or an unavoidable operator
+decision): stop the test runner, leave the last VM and snapshots intact for
+inspection and demo, write poc/STATUS-scenario-001.md (result, every change
+made with commit hashes, config changes made to test.config.yml, exact next
+step if not green) and summarize in chat. Never block waiting on me:
+prefer the reversible choice, record it in the report.

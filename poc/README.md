@@ -56,6 +56,71 @@ sources.
   that scenario traverses. The real steps are enumerated as TODO blocks
   pointing at [../plan/scenarios.md](../plan/scenarios.md).
 
+## Running scenarios under Yuruna (common setup)
+
+One-time lab setup on the operator machine; every scenario sequence reuses it.
+
+1. **Get the framework.** Use the OS one-liner from the Yuruna repo's
+   `install/README.md` (Remote one-liners) — it installs dependencies and
+   clones the framework to `~/git/yuruna` (`%USERPROFILE%\git\yuruna` on
+   Windows).
+
+2. **Point Yuruna at AmisAd.** From the `yuruna` folder:
+
+   ```powershell
+   Copy-Item test/test.config.yml.template test/test.config.yml
+   ```
+
+   Edit `test/test.config.yml`:
+   - `repositories.projectUrl`: `https://github.com/alius-git/amisad.dev.git` —
+     the runner clones this into `project/` every cycle and discovers the
+     sequences under `poc/test/gui/` automatically.
+   - `repositories.GH_TOKEN`: a GitHub PAT with read access to the repo.
+     This is the **host** side of PAT access (the runner's own clone).
+   - `guestSequence`: trim to `- guest.ubuntu.server.24` — the only guest
+     the AmisAd sequences target.
+
+3. **Guest PAT (authentication vault).** Guests never see `GH_TOKEN`; the
+   scenario-001 sequence renders the PAT from Yuruna's authentication vault
+   via `${ext:authentication.GetPassword(amisad-pat)}` in a `sensitive: true`
+   step, so it reaches the guest's git credential store without ever
+   appearing in logs or OCR captures. One-time setup, from the `yuruna`
+   folder in `pwsh`:
+
+   ```powershell
+   Import-Module ./test/extension/authentication/default.psm1
+   Set-UserVaultKey -LogicalUser amisad-pat -VaultKey amisad-pat  # operator-owned: never auto-generated
+   Set-Password -Username amisad-pat -NewPassword '<the PAT>'
+   ```
+
+   Reusing the `GH_TOKEN` PAT is fine; read-only scope recommended. The
+   vault is a local, gitignored file.
+
+4. **Validate, then run.**
+
+   ```powershell
+   test/Test-Config.ps1
+   pwsh test/Invoke-TestRunner.ps1
+   ```
+
+   Watch progress at `http://localhost:8080/status/`.
+
+**Baselines are chained, not run by hand.** Every sequence declares its
+prerequisites; the runner walks the chain cold once, then warm-paths from
+disk snapshots (`requiresSnapshot`):
+
+```
+start.guest.ubuntu.server.24
+  -> k8s.amisad     (Kubernetes + PostgreSQL + NATS)
+  -> build.amisad   (rustup 1.83, bazelisk, git, python3)   <- the "build VM"
+  -> scenario sequences
+```
+
+So "building the build VM" is simply the first run of any sequence that
+requires the `build.amisad` snapshot: expect the cold path to take well over
+an hour; subsequent cycles restore the snapshot and skip straight to the
+top-level sequence.
+
 ## SCENARIO-001 implementation notes
 
 SCENARIO-001 is implemented end to end: `buyer-client` (the headless buyer)
@@ -86,3 +151,52 @@ them:
 - **Single-VM degraded mode.** With `edgeHost` unset, the scenario runs
   slice-runtime on the build VM and says so; setting `edgeHost` (ssh target)
   runs it on a real second VM per the design topology.
+
+### Running SCENARIO-001
+
+With the [common setup](#running-scenarios-under-yuruna-common-setup) done,
+the runner discovers and executes
+`workload.guest.ubuntu.server.24.build.amisad.scenario-001`, which:
+
+1. restores the `build.amisad` snapshot (building it first if absent);
+2. stores the vault PAT in the guest's git credential store (sensitive step)
+   and clones `amisad.dev` to `~/amisad.dev`;
+3. runs `bazel build //...` and `cargo test --workspace`;
+4. deploys the ten services to the in-VM cluster and exposes the NodePorts;
+5. starts `slice-runtime` — on the second VM when `edgeHost` is set
+   (committed value, since the project is re-cloned each cycle), otherwise
+   on the build VM in the documented degraded mode;
+6. runs the `buyer-client` happy path and asserts the full SCENARIO-001
+   Target Verification Point.
+
+Green means `SCENARIO-001 HAPPY PATH PASSED` in the cycle log, followed by
+the saved system diagnostic. Failures leave the VM up for inspection.
+
+### Running the demo by hand
+
+A passing run leaves everything deployed in the VM. NodePorts:
+coordinator `30080`, ledger `30081`, resource `30082`, seller `30083`,
+identity `30084`.
+
+**Console / ssh (headless demo):**
+
+```bash
+cd ~/amisad.dev/poc
+export COORDINATOR_URL=http://localhost:30080 IDENTITY_URL=http://localhost:30084
+target/release/buyer-client submit          # prints handle + match as JSON
+curl -X POST http://localhost:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'
+curl -X POST http://localhost:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'
+target/release/buyer-client wait <handle>   # -> status: delivered
+```
+
+**Mobile (manual demo):** build and side-load the buyer app against the VM's
+LAN address, state a need on the needs screen, and refresh its status while
+advancing the order as above:
+
+```bash
+cd components/apps/buyer-flutter
+flutter build apk --debug \
+  --dart-define=COORDINATOR_URL=http://<vm-ip>:30080 \
+  --dart-define=IDENTITY_URL=http://<vm-ip>:30084
+adb install build/app/outputs/flutter-apk/app-debug.apk
+```
