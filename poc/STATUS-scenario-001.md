@@ -1,6 +1,29 @@
 # SCENARIO-001 unattended run — status
 
-**Updated:** 2026-07-18 ~15:00 local · **Result: ARMED AND FULLY VERIFIED HOST-SIDE — blocked on elevation only**
+**Updated:** 2026-07-18 ~18:45 local · **Result: RUN IN PROGRESS — elevated runner live, iterating**
+
+## Live-run iteration log (newest first)
+
+- **Cycle 245**: `Start-VM` failed — stale Hyper-V disk lock from the prior
+  cycle's teardown (infrastructure transient, not code). Retrying via
+  commit-triggered resume.
+- **Cycle 244**: chain green through BOTH baselines (`k8s.amisad` and
+  `build.amisad` snapshots saved — db fix held). Scenario step failed:
+  Bazel's bundled JVM lacks the caching proxy's CA (PKIX on
+  `bcr.bazel.build`). Fixed in `9cc77f8`: `ca-certificates-java` +
+  `--host_jvm_args` truststore, cargo fallback, and one-compile thin
+  runtime images (timeout de-risk).
+- **Cycle 243**: DB bring-up failed — `sudo -u postgres` cannot read under
+  the 0750 login home. Fixed in `c5903d8`: schema fetched host-side into
+  `/tmp`, `ON_ERROR_STOP` added.
+- **Cycles 241–242**: vacuous passes exposed the missing cycle plan;
+  `test/test.runner.yml` added in `ab4da71`.
+- Elevation obtained via operator-approved UAC prompt; runner launched
+  through `test/status/launch-runner.ps1`.
+
+---
+
+**Earlier (pre-elevation) status follows.**
 
 ## TL;DR
 
