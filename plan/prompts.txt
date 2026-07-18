@@ -113,6 +113,30 @@ Design principles:
 
   ==== Design - Part 2
 
-Create sequence diagrams for all the scenarios.
+Act as the Principal Systems Architect for AmisAd. Create Mermaid sequence diagrams
+for all ten verification scenarios in plan/scenarios.md — one file per scenario under
+plan/design/ (seq-001.md … seq-010.md), each following the existing design-doc
+conventions ("One sentence:" header, links back to 00-index.md and scenarios.md).
 
-Link to those from the design.md. Ensure design.md is linked to from README.md. Ensure all diagrams are as compatible as possible with GitHub.com mermaid rendering. 
+Integration:
+- Add the ten files to the document table in plan/design/00-index.md.
+- Link the set from plan/design.md §9 (Diagrams).
+- Verify README.md still links to plan/design.md; fix it if it does not.
+
+Diagram principles:
+- GitHub-first Mermaid: plain sequenceDiagram syntax only — participant/actor
+  declarations, solid and dashed arrows, alt/opt/loop/par blocks, and Notes.
+  Avoid box grouping, create/destroy, critical/break, themes, custom config,
+  and HTML beyond <br/>, so GitHub.com rendering is never at risk.
+- Participants are the POC components from plan/design.md (buyer app,
+  fabric-coordinator, slice-runtime, seller-svc, ledger-svc, identity-mock, …)
+  with personas declared as actors. Use identical participant names across all
+  ten diagrams; cap each diagram at 8 participants, folding minor components
+  into their nearest neighbor rather than exceeding the cap.
+- Fidelity to scenarios.md: messages follow the scenario's numbered steps in
+  order — one message or small group per step; render fault injections,
+  refusals, and tamper checks (scenarios 004, 006, 007, 010) as alt blocks;
+  open each diagram with a Note stating the seeded preconditions and close
+  with a Note stating the Target Verification Point Yuruna asserts.
+- Keep each diagram readable: roughly 20 messages; if a scenario needs more,
+  group steps rather than drop them.

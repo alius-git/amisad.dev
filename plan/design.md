@@ -107,4 +107,4 @@ Yuruna provisions the four nodes, deploys via `poc/deploy/`, seeds from `poc/see
 
 ## 9. Diagrams
 
-Index at [design/00-index.md](design/00-index.md): the overall architecture and deployment topology in [01-overview.md](design/01-overview.md), then one document per application (02–09).
+Index at [design/00-index.md](design/00-index.md): the overall architecture and deployment topology in [01-overview.md](design/01-overview.md), one document per application (02–09), and one sequence diagram per verification scenario ([seq-001](design/seq-001.md) … [seq-010](design/seq-010.md)) tracing each scenario's steps through the POC components to its Target Verification Point.
