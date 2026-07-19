@@ -1,8 +1,36 @@
 # SCENARIO-001 unattended run — status
 
-**Updated:** 2026-07-18 ~18:45 local · **Result: RUN IN PROGRESS — elevated runner live, iterating**
+**Updated:** 2026-07-18 ~21:16 local · **Result: RUN IN PROGRESS — elevated runner live on the 64GB host, cold chain building**
 
 ## Live-run iteration log (newest first)
+
+- **New session on the transferred 64GB host — cold chain LAUNCHED.** The
+  zombie-VM blocker is gone (only `yuruna-stash-service` was resident; host
+  now 64GB, ~22GB free with a 12GB guest up). Re-armed the lab from scratch
+  after the machine transfer and got a clean cold cycle running:
+  - Operator granted elevation via a one-shot UAC launch (their choice);
+    runner started through `test/status/launch-runner.ps1` (rewritten to
+    `Start-Process -Verb RunAs` + Tee to `runner.console.log`). The framework
+    still hard-refuses Hyper-V without Administrator even though Hyper-V
+    cmdlets themselves succeed under this host's Hyper-V-Administrators token.
+  - Re-seeded the auth vault (`amisad-pat`; gitignored, lost on transfer) from
+    `test.config.yml` `repositories.GH_TOKEN`.
+  - **Config-gate fix:** bootstrapping `test/status/extension/notification/
+    transports.yml` from the template creates an empty `resend` block, which
+    Test-Config Section 10 turns from a benign "missing file" WARNING into a
+    hard FAIL. Rewrote it as `transports: {}` + empty subscriber lists →
+    schema-valid, gate downgrades to a warning. (Runtime file under
+    `test/status/`, not framework code.)
+  - Bumped `test.config.yml` mtime to break the outer runner out of its
+    failure-pause (the pause watches `test.config.yml`, not `transports.yml`).
+  - Host-side gates all green BEFORE the VM cycle (playbook "catch it in
+    minutes"): `cargo test --workspace` 17/17; `bazel build //...` **via
+    bazelisk (pinned 7.4.1)** 15 targets clean — note raw `bazel` 10.0-pre in
+    `C:\bin` fails on `sh_binary`/`rustdoc_test`, a Bazel-8+ artifact that does
+    NOT affect the VM; `helm lint` 10/10.
+  - Cold chain live: cycle 2393, guest `test-ubuntu-server-24-01` Running;
+    now walking start.guest → k8s.amisad → build.amisad → scenario-001
+    (expected 1h+). Watch `http://localhost:8080/status/`.
 
 - **Operator policy updates applied**: everything committed AND pushed from
   now on; framework stays pristine (my `New-VM.ps1` memory edit reverted —
