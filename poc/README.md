@@ -55,7 +55,7 @@ sources.
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
 - **Sequences deploy then verify `/health` only** (scenarios s002–s010,
   parked under `test/gui-parked/`). Each
-  scenario sequence restores the `k8s.amisad` snapshot (Kubernetes +
+  scenario sequence restores the `amisad.k8s` snapshot (Kubernetes +
   PostgreSQL + NATS), runs the shared deploy script, and checks the services
   that scenario traverses. The real steps are enumerated as TODO blocks
   pointing at [../plan/scenarios.md](../plan/scenarios.md).
@@ -115,13 +115,13 @@ disk snapshots (`requiresSnapshot`):
 
 ```
 start.guest.ubuntu.server.24
-  -> k8s.amisad     (Kubernetes + PostgreSQL + NATS)
-  -> build.amisad   (rustup 1.83, bazelisk, git, python3)   <- the "build VM"
-  -> scenario sequences
+  -> amisad.k8s     (Kubernetes + PostgreSQL + NATS)
+  -> amisad.build   (rustup 1.83, bazelisk, git, python3)   <- the "build VM"
+  -> amisad.s001.fulfillment   (scenario run; VM left live under this name)
 ```
 
 So "building the build VM" is simply the first run of any sequence that
-requires the `build.amisad` snapshot: expect the cold path to take well over
+requires the `amisad.build` snapshot: expect the cold path to take well over
 an hour; subsequent cycles restore the snapshot and skip straight to the
 top-level sequence.
 
@@ -153,7 +153,7 @@ token, gets a jurisdiction-checked placement, and dispatches envelope + offers
 to `slice-runtime`; the environment matches, attests its full lifecycle,
 emits the settlement instruction, and destroys itself; seller fulfillment
 confirms the four-way split on the hash-chained ledger. Two sequences drive
-it in VMs: `...build.amisad.baseline` (toolchains, snapshot `build.amisad`)
+it in VMs: `...build.amisad.baseline` (toolchains, snapshot `amisad.build`)
 and `...build.amisad.s001.fulfillment` (repo fetch, `bazel build //...`,
 `cargo test --workspace`, deploy, happy path, full Target Verification Point).
 
@@ -182,7 +182,7 @@ With the [common setup](#running-scenarios-under-yuruna-common-setup) done,
 the runner discovers and executes
 `workload.guest.ubuntu.server.24.build.amisad.s001.fulfillment`, which:
 
-1. restores the `build.amisad` snapshot (building it first if absent);
+1. restores the `amisad.build` snapshot (building it first if absent);
 2. fetches the committed tree to `~/amisad.dev` (lab iteration mode; the
    production PAT clone is described under the common setup above);
 3. runs `bazel build //...` and `cargo test --workspace`;

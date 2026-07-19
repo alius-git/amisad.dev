@@ -15,7 +15,7 @@ baseline:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.build.amisad.baseline
 requiresSnapshot:
-  id: "build.amisad"
+  id: "amisad.build"
 variables:
   # Distinct guest OS user per final VM (build chain: yamisad-build): avoids
   # the first-login password-rotation collision between VMs provisioned from
@@ -26,7 +26,7 @@ variables:
 
 steps:
   - action: loadDiskSnapshot
-    id: "build.amisad"
+    id: "amisad.build"
     description: "Restore the AmisAd build-VM baseline checkpoint"
 
   - action: retry
@@ -58,5 +58,19 @@ steps:
     timeoutSeconds: 3600
 
   - action: saveSystemDiagnostic
-    id: "amisad.build-s001.fulfillment"
+    id: "amisad.s001.fulfillment"
     description: "Capture diagnostics after the s001.fulfillment run"
+
+  # Promote the passed scenario VM into the amisad.* namespace and leave it live.
+  # saveDiskSnapshot stops the VM, checkpoints it, and renames it (amisad.build ->
+  # amisad.s001.fulfillment) but leaves it Off; loadDiskSnapshot then restores that
+  # checkpoint and Start-VMs it, so execution ends with a running VM named
+  # amisad.s001.fulfillment. Both steps are required: there is no rename-only or
+  # start-only action in the framework.
+  - action: saveDiskSnapshot
+    id: "amisad.s001.fulfillment"
+    description: "Checkpoint + rename the passed VM to amisad.s001.fulfillment"
+
+  - action: loadDiskSnapshot
+    id: "amisad.s001.fulfillment"
+    description: "Restart so the scenario VM is left live as amisad.s001.fulfillment"

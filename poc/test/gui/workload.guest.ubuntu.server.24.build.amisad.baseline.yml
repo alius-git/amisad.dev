@@ -1,20 +1,20 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - "build VM" baseline: chains the k8s.amisad infrastructure
-# baseline (Kubernetes + PostgreSQL + NATS), adds the build toolchains
-# (rustup + pinned stable Rust, bazelisk, git, python3), then snapshots as
-# "build.amisad" for build/test sequences to warm-path from.
+# AmisAd POC - "build VM" baseline: chains the k8s.amisad.baseline infrastructure
+# sequence (Kubernetes + PostgreSQL + NATS, snapshot amisad.k8s), adds the build
+# toolchains (rustup + pinned stable Rust, bazelisk, git, python3), then snapshots
+# as "amisad.build" for build/test sequences to warm-path from.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 4211aa01-5c0e-4b7d-9f3a-2e8d47c60a11
 sequenceRevision: 1
 
-description: "Ubuntu Server: restore k8s.amisad, install Rust + bazelisk + git build tools, snapshot build.amisad."
+description: "Ubuntu Server: restore amisad.k8s, install Rust + bazelisk + git build tools, snapshot amisad.build."
 baseline:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.k8s.amisad.baseline
 requiresSnapshot:
-  id: "k8s.amisad"
+  id: "amisad.k8s"
 variables:
   # Distinct guest OS user per final VM (see s001.fulfillment for the rationale).
   # When this baseline is the top of the chain it provisions the build VM under
@@ -24,7 +24,7 @@ variables:
 
 steps:
   - action: loadDiskSnapshot
-    id: "k8s.amisad"
+    id: "amisad.k8s"
     description: "Restore the AmisAd k8s + PostgreSQL + NATS baseline checkpoint"
 
   - action: retry
@@ -56,5 +56,5 @@ steps:
     timeoutSeconds: 1800
 
   - action: saveDiskSnapshot
-    id: "build.amisad"
+    id: "amisad.build"
     description: "Snapshot the AmisAd build-VM baseline"

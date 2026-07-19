@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s006.mandate: Delegated Procurement Under a Scoped Mandate
-# Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
+# Skeleton sequence: restores the amisad.k8s snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
 # TODO(s006.mandate): implement the real steps per plan/scenarios.md.
@@ -15,13 +15,13 @@ baseline:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.k8s.amisad.baseline
 requiresSnapshot:
-  id: "k8s.amisad"
+  id: "amisad.k8s"
 variables:
   username: yamisad
 
 steps:
   - action: loadDiskSnapshot
-    id: "k8s.amisad"
+    id: "amisad.k8s"
     description: "Restore the AmisAd k8s + PostgreSQL + NATS baseline checkpoint"
 
   - action: retry

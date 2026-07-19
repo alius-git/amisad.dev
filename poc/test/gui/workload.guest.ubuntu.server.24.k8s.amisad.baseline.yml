@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - baseline: Ubuntu Server + Kubernetes + PostgreSQL + NATS,
-# snapshotted as "k8s.amisad" for the ten scenario sequences to warm-path from.
+# snapshotted as "amisad.k8s" for the ten scenario sequences to warm-path from.
 # Mirrors the yuruna-project text-to-sql baseline chain.
 
 # Perf-log identity. Bump revision on step add/remove.
@@ -11,7 +11,7 @@
 sequenceGuid: 42098986-ed31-41e5-ac09-1e50119cc209
 sequenceRevision: 2
 
-description: "Ubuntu Server: log in, install Kubernetes + PostgreSQL + NATS, snapshot k8s.amisad."
+description: "Ubuntu Server: log in, install Kubernetes + PostgreSQL + NATS, snapshot amisad.k8s."
 baseline:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
@@ -72,5 +72,5 @@ steps:
     timeoutSeconds: 600
 
   - action: saveDiskSnapshot
-    id: "k8s.amisad"
+    id: "amisad.k8s"
     description: "Snapshot the AmisAd infrastructure baseline"
