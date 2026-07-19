@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: resource-svc
-  description: "Carrier control plane: edge registration, jurisdiction-checked placement, slice telemetry (SCENARIO-001 surface)"
+  description: "Carrier control plane: edge registration, jurisdiction-checked placement, slice telemetry (s001.fulfillment surface)"
   version: 0.1.0
 paths:
   /health:

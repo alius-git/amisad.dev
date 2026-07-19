@@ -1,0 +1,51 @@
+# s006.mandate sequence — Delegated Procurement Under a Scoped Mandate
+
+> One sentence: a mandate grants Pat bounded authority that the fabric enforces at match time — in-scope closes with dual attribution, over-cap routes to Maya, out-of-scope never reaches matching, and revocation is instant.
+
+See [../design.md](../design.md#9-diagrams) · [s006.mandate](../scenarios.md#s006mandate-delegated-procurement-under-a-scoped-mandate). Elena's standing offer is folded into the coordinator's offer fetch.
+
+```mermaid
+sequenceDiagram
+    actor Maya
+    actor Pat
+    participant BuyerApp as Buyer app
+    participant IdentityMock as identity-mock
+    participant LedgerSvc as ledger-svc
+    participant Coordinator as fabric-coordinator
+    participant SliceRT as slice-runtime
+
+    Note over Maya,SliceRT: Seeded - household-goods category, monthly cap, per-item closing limit, three-month expiry
+    Maya->>BuyerApp: Grant mandate to Pat
+    BuyerApp->>LedgerSvc: Mandate recorded in consent ledger
+    BuyerApp->>IdentityMock: Pat verified as delegate bound to Maya
+    Pat->>BuyerApp: Open delegate workspace - scope, remaining cap, expiry visible
+    Pat->>BuyerApp: State in-scope need under per-item limit
+    BuyerApp->>Coordinator: Envelope with mandate reference
+    Coordinator->>SliceRT: Environment - mandate checked at match time
+    SliceRT->>LedgerSvc: Match closes - dual attribution (actor Pat, principal Maya, mandate)
+    BuyerApp-->>Maya: Activity trail shows the delegated action
+    Pat->>BuyerApp: State second need - best match exceeds per-item limit
+    alt closing beyond delegated authority
+        SliceRT-->>BuyerApp: Match permitted, closing withheld
+        BuyerApp->>Maya: Approval handoff
+        Maya->>BuyerApp: Approve
+        BuyerApp->>Coordinator: Closing completes - attributed via principal approval
+    end
+    alt out-of-scope category
+        Pat->>BuyerApp: Attempt need outside mandated category
+        BuyerApp-->>Pat: Refused at submission - nothing reaches matching
+    end
+    Maya->>BuyerApp: Revoke mandate
+    BuyerApp->>LedgerSvc: Revocation recorded - principal view removed immediately
+    alt delegated attempt after revocation
+        Pat->>BuyerApp: Attempt delegated action
+        BuyerApp-->>Pat: Mandate check fails
+    end
+    Note over Maya,SliceRT: Yuruna asserts - every delegated match carries dual attribution to a then-valid mandate, over-cap closing exists only after recorded approval, out-of-scope attempt produced zero environments and entries, nothing delegated exists after revocation
+```
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 by Alisson Sol et al.

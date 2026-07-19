@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: seller-svc
-  description: "Seller catalog with standing auto-close deals and the order state machine (SCENARIO-001 surface). Order records structurally contain no buyer identity."
+  description: "Seller catalog with standing auto-close deals and the order state machine (s001.fulfillment surface). Order records structurally contain no buyer identity."
   version: 0.1.0
 paths:
   /health:

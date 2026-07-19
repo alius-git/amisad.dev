@@ -11,10 +11,10 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 |------|----------|
 | `MODULE.bazel`, `.bazelversion`, `BUILD.bazel` | Bazel root (bzlmod, pinned via bazelisk) |
 | `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `serve-local.ps1` (lab-mode guest source, served from HEAD) |
-| `contracts/` | OpenAPI specs per service — real `/v1` routes for the SCENARIO-001 services, `/health`/`/version` stubs for the rest — + event-schema placeholders |
+| `contracts/` | OpenAPI specs per service — real `/v1` routes for the s001.fulfillment services, `/health`/`/version` stubs for the rest — + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
-| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the SCENARIO-001 happy path |
+| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001.fulfillment happy path |
 | `components/apps/buyer-flutter/` | Flutter buyer app (Android side-loaded) |
 | `components/apps/web-spa/` | React + TS + Vite shell, 7 role-scoped module routes |
 | `components/lib/amisad-common/` | Shared config/health plumbing crate |
@@ -22,7 +22,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: `k8s.amisad` and `build.amisad` baselines + SCENARIO-001 |
+| `test/gui/` | Active Yuruna sequences: `k8s.amisad` and `build.amisad` baselines + s001.fulfillment |
 | `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 
@@ -41,7 +41,7 @@ sources.
 ## Deliberate skeleton choices
 
 - **No third-party crates yet.** The services serve their routes — including
-  the full SCENARIO-001 `/v1` surface — with a std-only responder in
+  the full s001.fulfillment `/v1` surface — with a std-only responder in
   `amisad-common`, so builds need no crate fetches and no committed lockfile.
   Wire **crate_universe** in `MODULE.bazel` together with the first external
   dependency (Actix replaces the responder when the surface outgrows it —
@@ -53,7 +53,7 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **Sequences deploy then verify `/health` only** (scenarios 002–010,
+- **Sequences deploy then verify `/health` only** (scenarios s002–s010,
   parked under `test/gui-parked/`). Each
   scenario sequence restores the `k8s.amisad` snapshot (Kubernetes +
   PostgreSQL + NATS), runs the shared deploy script, and checks the services
@@ -85,7 +85,7 @@ One-time lab setup on the operator machine; every scenario sequence reuses it.
      the AmisAd sequences target.
 
 3. **Guest PAT (authentication vault).** Guests never see `GH_TOKEN`; the
-   scenario-001 sequence renders the PAT from Yuruna's authentication vault
+   s001.fulfillment sequence renders the PAT from Yuruna's authentication vault
    via `${ext:authentication.GetPassword(amisad-pat)}` in a `sensitive: true`
    step, so it reaches the guest's git credential store without ever
    appearing in logs or OCR captures. One-time setup, from the `yuruna`
@@ -129,7 +129,7 @@ top-level sequence.
 cascades all the way down to `start.guest.ubuntu.server.24`, so each
 top-level sequence provisions its base VM under its own account with its own
 vault entry (`yamisad-build` for the build chain, `yamisad-s001` for the
-SCENARIO-001 sequence). This decouples the first-login forced-password
+s001.fulfillment sequence). This decouples the first-login forced-password
 rotation: the base Ubuntu image expires the password on first login, so two
 VMs provisioned from the same image under the *same* username fight over one
 vault entry — one VM's rotation invalidates what the next expects. Separate
@@ -145,16 +145,16 @@ fetch-and-execute uses; the guest script does the fetch. The production path
 restore it by re-adding the credential-store and git-clone steps to the
 scenario sequence.
 
-## SCENARIO-001 implementation notes
+## s001.fulfillment implementation notes
 
-SCENARIO-001 is implemented end to end: `buyer-client` (the headless buyer)
+s001.fulfillment is implemented end to end: `buyer-client` (the headless buyer)
 submits Maya's gift need as an opaque envelope; the coordinator verifies the
 token, gets a jurisdiction-checked placement, and dispatches envelope + offers
 to `slice-runtime`; the environment matches, attests its full lifecycle,
 emits the settlement instruction, and destroys itself; seller fulfillment
 confirms the four-way split on the hash-chained ledger. Two sequences drive
 it in VMs: `...build.amisad.baseline` (toolchains, snapshot `build.amisad`)
-and `...build.amisad.scenario-001` (repo fetch, `bazel build //...`,
+and `...build.amisad.s001.fulfillment` (repo fetch, `bazel build //...`,
 `cargo test --workspace`, deploy, happy path, full Target Verification Point).
 
 Deviations from the target design, deliberate and to be retired in later
@@ -168,7 +168,7 @@ them:
   envelope as an opaque string and never parse it (checkable in code and by
   the egress assert); actual envelope crypto is TODO.
 - **Polling instead of NATS events.** Order status flows by HTTP polling;
-  the JetStream wiring lands with the event-driven scenarios (003+).
+  the JetStream wiring lands with the event-driven scenarios (s003+).
 - **Logical ephemeral environments.** `slice-runtime` is a persistent edge
   process; each request runs one attested created→attested→executed→destroyed
   environment whose state drops at response time.
@@ -176,11 +176,11 @@ them:
   slice-runtime on the build VM and says so; setting `edgeHost` (ssh target)
   runs it on a real second VM per the design topology.
 
-### Running SCENARIO-001
+### Running s001.fulfillment
 
 With the [common setup](#running-scenarios-under-yuruna-common-setup) done,
 the runner discovers and executes
-`workload.guest.ubuntu.server.24.build.amisad.scenario-001`, which:
+`workload.guest.ubuntu.server.24.build.amisad.s001.fulfillment`, which:
 
 1. restores the `build.amisad` snapshot (building it first if absent);
 2. fetches the committed tree to `~/amisad.dev` (lab iteration mode; the
@@ -190,10 +190,10 @@ the runner discovers and executes
 5. starts `slice-runtime` — on the second VM when `edgeHost` is set
    (committed value, since the project is re-cloned each cycle), otherwise
    on the build VM in the documented degraded mode;
-6. runs the `buyer-client` happy path and asserts the full SCENARIO-001
+6. runs the `buyer-client` happy path and asserts the full s001.fulfillment
    Target Verification Point.
 
-Green means `SCENARIO-001 HAPPY PATH PASSED` in the cycle log, followed by
+Green means `s001.fulfillment HAPPY PATH PASSED` in the cycle log, followed by
 the saved system diagnostic. Failures leave the VM up for inspection.
 
 ### Running the demo by hand

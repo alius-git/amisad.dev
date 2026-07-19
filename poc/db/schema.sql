@@ -58,7 +58,7 @@ $$;
 GRANT USAGE ON SCHEMA ledger TO amisad_audit_ro;
 GRANT SELECT ON ALL TABLES IN SCHEMA ledger TO amisad_audit_ro;
 
--- Seller tables (landed with SCENARIO-001; see db/seed/scenario-001.sql).
+-- Seller tables (landed with s001.fulfillment; see db/seed/s001.fulfillment.sql).
 CREATE TABLE IF NOT EXISTS seller.offers (
     offer_id        text PRIMARY KEY,
     tenant          text        NOT NULL,

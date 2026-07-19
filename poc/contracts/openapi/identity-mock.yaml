@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: identity-mock
-  description: "OIDC-style token issuer standing in for Identity and Verification (SCENARIO-001 surface)"
+  description: "OIDC-style token issuer standing in for Identity and Verification (s001.fulfillment surface)"
   version: 0.1.0
 paths:
   /health:

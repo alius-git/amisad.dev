@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: slice-runtime
-  description: "Sealed match environment on the edge: one full attested lifecycle per request, with a complete egress log (SCENARIO-001 surface)"
+  description: "Sealed match environment on the edge: one full attested lifecycle per request, with a complete egress log (s001.fulfillment surface)"
   version: 0.1.0
 paths:
   /health:

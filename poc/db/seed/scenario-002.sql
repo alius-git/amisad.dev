@@ -1,5 +1,0 @@
--- LICENSEURI https://yuruna.link/license
--- Copyright (c) 2026 by Alisson Sol et al.
--- AmisAd POC - seed skeleton for SCENARIO-002: Considered Purchase, Constraint Fidelity, and In-Person Booking
--- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(SCENARIO-002): seed data for the real steps - see plan/scenarios.md (SCENARIO-002).

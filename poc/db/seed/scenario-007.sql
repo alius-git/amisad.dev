@@ -1,5 +1,0 @@
--- LICENSEURI https://yuruna.link/license
--- Copyright (c) 2026 by Alisson Sol et al.
--- AmisAd POC - seed skeleton for SCENARIO-007: Enterprise Integration Onboarding and Inventory-Truth Matching
--- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(SCENARIO-007): seed data for the real steps - see plan/scenarios.md (SCENARIO-007).

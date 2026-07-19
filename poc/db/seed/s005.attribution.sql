@@ -1,0 +1,5 @@
+-- LICENSEURI https://yuruna.link/license
+-- Copyright (c) 2026 by Alisson Sol et al.
+-- AmisAd POC - seed skeleton for s005.attribution: Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit
+-- Loaded by test fixtures once the scenario is implemented; empty by design.
+-- TODO(s005.attribution): seed data for the real steps - see plan/scenarios.md (s005.attribution).

@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - s004.failover: Sovereign Slice Allocation, Isolation Fault, and Attested Failover
+# Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
+# skeletons, and verifies /health for the services this scenario traverses.
+# See plan/scenarios.md for the full scenario and its Target Verification Point.
+# TODO(s004.failover): implement the real steps per plan/scenarios.md.
+
+# Perf-log identity. Bump revision on step add/remove.
+sequenceGuid: 427078bc-c296-4ce8-8d7f-bfc58eaa246d
+sequenceRevision: 1
+
+description: "AmisAd s004.failover skeleton: deploy POC services, verify /health (Sovereign Slice Allocation, Isolation Fault, and Attested Failover)."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.k8s.amisad.baseline
+requiresSnapshot:
+  id: "k8s.amisad"
+variables:
+  username: yamisad
+
+steps:
+  - action: loadDiskSnapshot
+    id: "k8s.amisad"
+    description: "Restore the AmisAd k8s + PostgreSQL + NATS baseline checkpoint"
+
+  - action: retry
+    maxAttempts: 2
+    description: "Login + retry"
+    steps:
+      - snippet: firstLoginPrime
+
+      - action: passwdPrompt
+        pattern: "login:"
+        timeoutSeconds: 600
+        text: "${username}"
+        description: "OCR: login:"
+
+      - action: passwdPrompt
+        pattern: "Password:"
+        text: "${ext:authentication.GetPassword(${username})}"
+        description: "OCR: Password:"
+
+  - action: waitForText
+    pattern: "${username}@"
+    timeoutSeconds: 90
+    description: "OCR: shell prompt"
+
+  - action: fetchAndExecute
+    text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh"
+    description: "Deploy AmisAd POC skeletons (build images, helm install all services)"
+    waitPattern: "FETCHED AND EXECUTED:"
+    timeoutSeconds: 3600
+
+  - action: fetchAndExecute
+    text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.s004.failover.sh"
+    description: "s004.failover skeleton checks: /health of traversed services"
+    waitPattern: "FETCHED AND EXECUTED:"
+    timeoutSeconds: 900
+
+  - action: saveSystemDiagnostic
+    id: "amisad.s004.failover"
+    description: "Capture diagnostics after s004.failover checks"

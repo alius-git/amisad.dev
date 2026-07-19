@@ -1,5 +1,0 @@
--- LICENSEURI https://yuruna.link/license
--- Copyright (c) 2026 by Alisson Sol et al.
--- AmisAd POC - seed skeleton for SCENARIO-004: Sovereign Slice Allocation, Isolation Fault, and Attested Failover
--- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(SCENARIO-004): seed data for the real steps - see plan/scenarios.md (SCENARIO-004).

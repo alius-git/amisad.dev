@@ -13,11 +13,11 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-001: Intent-Driven Edge Match and Automated Fulfillment
+## s001.fulfillment: Intent-Driven Edge Match and Automated Fulfillment
 
 **Objective & Priority.** Validate the golden path — the complete value loop of a private need auto-closing against a standing offer, fulfilled and settled across all four parties. **Priority: P0, ranked first** — this is the product: if a need cannot privately become a delivered, settled order, no other scenario has meaning.
 
-**Cross-Refs:** *Personas:* Maya, Elena, Tom · *Applications:* AmisAd/buyer, AmisAd/seller, AmisAd/resource · *Foundations:* Private Matching Fabric, Identity & Verification, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq-001](design/seq-001.md)
+**Cross-Refs:** *Personas:* Maya, Elena, Tom · *Applications:* AmisAd/buyer, AmisAd/seller, AmisAd/resource · *Foundations:* Private Matching Fabric, Identity & Verification, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s001.fulfillment](design/seq.s001.fulfillment.md)
 
 **Step-by-Step Sequence**
 
@@ -34,11 +34,11 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-002: Considered Purchase, Constraint Fidelity, and In-Person Booking
+## s002.fitting: Considered Purchase, Constraint Fidelity, and In-Person Booking
 
 **Objective & Priority.** Validate matching correctness under rich constraints (including exclusions) and the human-decision path: shortlist, explicit choice, one-tap booking of an in-person service. **Priority: P0, ranked second** — this is the flagship user story (Maya's dress); it proves matches *fit* and that the buyer keeps the final say.
 
-**Cross-Refs:** *Personas:* Maya, Elena · *Applications:* AmisAd/buyer, AmisAd/seller · *Foundations:* Private Matching Fabric, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq-002](design/seq-002.md)
+**Cross-Refs:** *Personas:* Maya, Elena · *Applications:* AmisAd/buyer, AmisAd/seller · *Foundations:* Private Matching Fabric, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s002.fitting](design/seq.s002.fitting.md)
 
 **Step-by-Step Sequence**
 
@@ -54,11 +54,11 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-003: Consent Revocation and the Right to Silence
+## s003.silence: Consent Revocation and the Right to Silence
 
 **Objective & Priority.** Validate the kill switch: pausing participation stops matching instantly, withdrawal is honored everywhere, and committed obligations still complete. **Priority: P0, ranked third** — "nothing about you leaves, and you can leave" is the license to operate; a privacy promise that cannot be revoked is not a promise.
 
-**Cross-Refs:** *Personas:* Maya, Elena · *Applications:* AmisAd/buyer, AmisAd/seller · *Foundations:* Consent Ledger, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-003](design/seq-003.md)
+**Cross-Refs:** *Personas:* Maya, Elena · *Applications:* AmisAd/buyer, AmisAd/seller · *Foundations:* Consent Ledger, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s003.silence](design/seq.s003.silence.md)
 
 **Step-by-Step Sequence**
 
@@ -74,11 +74,11 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-004: Sovereign Slice Allocation, Isolation Fault, and Attested Failover
+## s004.failover: Sovereign Slice Allocation, Isolation Fault, and Attested Failover
 
 **Objective & Priority.** Validate the infrastructure story: slices allocate where sovereignty rules demand, an isolation fault destroys the environment rather than risking it, the match retries cleanly, and the incident escalates across party lines. **Priority: P1, ranked fourth** — the P0 scenarios assume the fabric works; this proves it fails *safe*, which is what regulators and carriers actually buy.
 
-**Cross-Refs:** *Personas:* Tom, Priya · *Applications:* AmisAd/resource, AmisAd/platform · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-004](design/seq-004.md)
+**Cross-Refs:** *Personas:* Tom, Priya · *Applications:* AmisAd/resource, AmisAd/platform · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s004.failover](design/seq.s004.failover.md)
 
 **Step-by-Step Sequence**
 
@@ -94,11 +94,11 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-005: Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit
+## s005.attribution: Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit
 
 **Objective & Priority.** Validate the advertising economy end to end: brief → creative → campaign → aggregate targeting → creative rendered only inside the sealed environment → match → attribution credit for agency and creator. **Priority: P1, ranked fifth** — this is the revenue engine for the ad-partner side and the proof that attribution survives without tracking.
 
-**Cross-Refs:** *Personas:* Marcel, Kai, Elena, Maya · *Applications:* AmisAd/ads, AmisAd/seller, AmisAd/buyer, AmisAd/insights · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-005](design/seq-005.md)
+**Cross-Refs:** *Personas:* Marcel, Kai, Elena, Maya · *Applications:* AmisAd/ads, AmisAd/seller, AmisAd/buyer, AmisAd/insights · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s005.attribution](design/seq.s005.attribution.md)
 
 **Step-by-Step Sequence**
 
@@ -115,11 +115,11 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-006: Delegated Procurement Under a Scoped Mandate
+## s006.mandate: Delegated Procurement Under a Scoped Mandate
 
 **Objective & Priority.** Validate delegated authority end to end: mandate grant, in-scope autonomous action, over-cap approval routing, principal visibility, and instant revocation. **Priority: P1, ranked sixth** — delegation is a day-one trust boundary; a mandate that leaks scope or survives revocation would be a privacy breach with the principal's own name on it.
 
-**Cross-Refs:** *Personas:* Maya, Pat, Elena · *Applications:* AmisAd/buyer (delegate mode), AmisAd/seller · *Foundations:* Consent Ledger, Identity & Verification, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-006](design/seq-006.md)
+**Cross-Refs:** *Personas:* Maya, Pat, Elena · *Applications:* AmisAd/buyer (delegate mode), AmisAd/seller · *Foundations:* Consent Ledger, Identity & Verification, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s006.mandate](design/seq.s006.mandate.md)
 
 **Step-by-Step Sequence**
 
@@ -136,11 +136,11 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-007: Enterprise Integration Onboarding and Inventory-Truth Matching
+## s007.inventory: Enterprise Integration Onboarding and Inventory-Truth Matching
 
 **Objective & Priority.** Validate the integration lifecycle: partner verification, sandbox certification, seller-granted scoped credentials, live inventory sync driving matching, and order events returning to the external system. **Priority: P1, ranked seventh** — matching against stale inventory poisons buyer trust one disappointment at a time; this proves external truth governs matching.
 
-**Cross-Refs:** *Personas:* Alex, Elena, Priya · *Applications:* AmisAd/connect, AmisAd/seller, AmisAd/platform · *Foundations:* Identity & Verification, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-007](design/seq-007.md)
+**Cross-Refs:** *Personas:* Alex, Elena, Priya · *Applications:* AmisAd/connect, AmisAd/seller, AmisAd/platform · *Foundations:* Identity & Verification, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s007.inventory](design/seq.s007.inventory.md)
 
 **Step-by-Step Sequence**
 
@@ -158,15 +158,15 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-008: Zero-Knowledge Dispute Mediation and Settlement Adjustment
+## s008.mediation: Zero-Knowledge Dispute Mediation and Settlement Adjustment
 
 **Objective & Priority.** Validate support that cannot become surveillance: a delivery dispute resolved from metadata, a minimal consented disclosure when metadata is not enough, and a refund posted as a compensating entry — with the buyer anonymous throughout. **Priority: P1, ranked eighth** — support is where privacy promises historically die; this proves the mediation model holds under a real dispute.
 
-**Cross-Refs:** *Personas:* Maya, Sam, Elena, Priya · *Applications:* AmisAd/platform (support desk), AmisAd/buyer, AmisAd/seller · *Foundations:* Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq-008](design/seq-008.md)
+**Cross-Refs:** *Personas:* Maya, Sam, Elena, Priya · *Applications:* AmisAd/platform (support desk), AmisAd/buyer, AmisAd/seller · *Foundations:* Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s008.mediation](design/seq.s008.mediation.md)
 
 **Step-by-Step Sequence**
 
-1. From a settled order (seeded like SCENARIO-001's), Maya reports non-delivery in AmisAd/buyer → a support case opens in Sam's queue carrying operational metadata only: order states, timestamps, carrier confirmation, settlement entries.
+1. From a settled order (seeded like s001.fulfillment's), Maya reports non-delivery in AmisAd/buyer → a support case opens in Sam's queue carrying operational metadata only: order states, timestamps, carrier confirmation, settlement entries.
 2. Sam reviews the metadata → the delivery confirmation conflicts with the buyer's report; the case cannot close on metadata alone.
 3. Sam requests a consented disclosure from Maya: the delivery address's confirmation photo reference, scoped to this case, time-boxed → the request is recorded in the Consent Ledger.
 4. Maya grants it → Sam receives exactly the granted artifact, read-only; the grant, delivery, and expiry are all logged; Maya's identity remains withheld from the case.
@@ -179,11 +179,11 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-009: Aggregate Insight Publication and the Demand-Planning Loop
+## s009.suppression: Aggregate Insight Publication and the Demand-Planning Loop
 
 **Objective & Priority.** Validate the ecosystem's only analytical window: demand aggregates released solely above anonymity thresholds, published as versioned outlooks that inform seller stocking and campaign planning. **Priority: P2, ranked ninth** — insight is the growth flywheel, but it must be proven *after* the privacy machinery it depends on, because its central assertion is a suppression, not a feature.
 
-**Cross-Refs:** *Personas:* Dana, Elena, Marcel · *Applications:* AmisAd/insights, AmisAd/seller, AmisAd/ads · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-009](design/seq-009.md)
+**Cross-Refs:** *Personas:* Dana, Elena, Marcel · *Applications:* AmisAd/insights, AmisAd/seller, AmisAd/ads · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s009.suppression](design/seq.s009.suppression.md)
 
 **Step-by-Step Sequence**
 
@@ -199,18 +199,18 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ---
 
-## SCENARIO-010: Independent Certification of the Full Evidence Trail
+## s010.certification: Independent Certification of the Full Evidence Trail
 
-**Objective & Priority.** Validate that the entire system is *provable*: the auditor independently verifies attestation continuity, residency, consent (all three grant types), and settlement conservation across everything scenarios 001–009 produced — and detects deliberate tampering. **Priority: P2, ranked last by dependency, first by consequence** — it consumes the evidence of every other scenario; it is the capstone that turns nine passing tests into a certifiable system.
+**Objective & Priority.** Validate that the entire system is *provable*: the auditor independently verifies attestation continuity, residency, consent (all three grant types), and settlement conservation across everything scenarios s001–s009 produced — and detects deliberate tampering. **Priority: P2, ranked last by dependency, first by consequence** — it consumes the evidence of every other scenario; it is the capstone that turns nine passing tests into a certifiable system.
 
-**Cross-Refs:** *Personas:* Ingrid, Priya · *Applications:* AmisAd/audit, AmisAd/platform · *Foundations:* Private Matching Fabric (attestation evidence), Identity & Verification, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq-010](design/seq-010.md)
+**Cross-Refs:** *Personas:* Ingrid, Priya · *Applications:* AmisAd/audit, AmisAd/platform · *Foundations:* Private Matching Fabric (attestation evidence), Identity & Verification, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq.s010.certification](design/seq.s010.certification.md)
 
 **Step-by-Step Sequence**
 
-1. With the artifacts of scenarios 001–009 in place, Ingrid opens AmisAd/audit and starts a certification run scoped to the demo jurisdiction and time range.
-2. Attestation continuity → the run walks the cryptographically chained evidence log end to end: every environment shows a complete lifecycle (created → attested → executed/aborted → destroyed), including SCENARIO-004's aborted slice; chain verification requires no trust in the platform's word.
-3. Residency → every environment's location satisfies the jurisdiction rules in force at its allocation time, including the restricted-jurisdiction allocations of SCENARIO-004.
-4. Consent → every match maps to a valid participation consent at execution time; SCENARIO-003's revocation window contains zero matching activity; SCENARIO-006's mandate history and SCENARIO-008's disclosure grant each show grant → use-within-scope → termination honored.
+1. With the artifacts of scenarios s001–s009 in place, Ingrid opens AmisAd/audit and starts a certification run scoped to the demo jurisdiction and time range.
+2. Attestation continuity → the run walks the cryptographically chained evidence log end to end: every environment shows a complete lifecycle (created → attested → executed/aborted → destroyed), including s004.failover's aborted slice; chain verification requires no trust in the platform's word.
+3. Residency → every environment's location satisfies the jurisdiction rules in force at its allocation time, including the restricted-jurisdiction allocations of s004.failover.
+4. Consent → every match maps to a valid participation consent at execution time; s003.silence's revocation window contains zero matching activity; s006.mandate's mandate history and s008.mediation's disclosure grant each show grant → use-within-scope → termination honored.
 5. Settlement conservation → for every match, splits sum exactly to match value; every adjustment consists of compensating entries referencing a support case; derived balances equal the sum of history; nothing was edited.
 6. Tamper check → the harness injects a modification into a copy of one attestation record → chain verification flags exactly that record; Ingrid's investigation workspace isolates it and its dependents.
 7. Ingrid issues the certification: findings per dimension, the tamper detection documented, the regulator-facing report generated → Priya receives the findings record in AmisAd/platform.
@@ -228,41 +228,41 @@ Every persona, application, and shared foundation is exercised by at least one c
 
 | Persona | Exercised in |
 |---------|--------------|
-| Maya — Buyer | 001, 002, 003, 005, 006, 008 |
-| Elena — Seller | 001, 002, 003, 005, 006, 007, 008, 009 |
-| Tom — Telco Administrator | 001, 004 |
-| Marcel — Ad Agency Administrator | 005, 009 |
-| Kai — Creative Partner | 005 |
-| Priya — Platform Operator | 004, 007, 008, 010 |
-| Ingrid — Trust Auditor | 010 |
-| Dana — Demand Analyst | 009 |
-| Alex — Integration Partner | 007 |
-| Sam — Support Agent | 008 |
-| Pat — Buyer-Side Delegate | 006 |
+| Maya — Buyer | s001.fulfillment, s002.fitting, s003.silence, s005.attribution, s006.mandate, s008.mediation |
+| Elena — Seller | s001.fulfillment, s002.fitting, s003.silence, s005.attribution, s006.mandate, s007.inventory, s008.mediation, s009.suppression |
+| Tom — Telco Administrator | s001.fulfillment, s004.failover |
+| Marcel — Ad Agency Administrator | s005.attribution, s009.suppression |
+| Kai — Creative Partner | s005.attribution |
+| Priya — Platform Operator | s004.failover, s007.inventory, s008.mediation, s010.certification |
+| Ingrid — Trust Auditor | s010.certification |
+| Dana — Demand Analyst | s009.suppression |
+| Alex — Integration Partner | s007.inventory |
+| Sam — Support Agent | s008.mediation |
+| Pat — Buyer-Side Delegate | s006.mandate |
 
 ### Applications × Scenarios
 
 | Application | Exercised in |
 |-------------|--------------|
-| AmisAd/buyer | 001, 002, 003, 005, 006, 008 |
-| AmisAd/seller | 001, 002, 003, 005, 006, 007, 008, 009 |
-| AmisAd/resource | 001, 004 |
-| AmisAd/ads | 005, 009 |
-| AmisAd/insights | 005 (demand view), 009 |
-| AmisAd/platform | 004, 007, 008, 010 |
-| AmisAd/audit | 010 |
-| AmisAd/connect | 007 |
+| AmisAd/buyer | s001.fulfillment, s002.fitting, s003.silence, s005.attribution, s006.mandate, s008.mediation |
+| AmisAd/seller | s001.fulfillment, s002.fitting, s003.silence, s005.attribution, s006.mandate, s007.inventory, s008.mediation, s009.suppression |
+| AmisAd/resource | s001.fulfillment, s004.failover |
+| AmisAd/ads | s005.attribution, s009.suppression |
+| AmisAd/insights | s005.attribution (demand view), s009.suppression |
+| AmisAd/platform | s004.failover, s007.inventory, s008.mediation, s010.certification |
+| AmisAd/audit | s010.certification |
+| AmisAd/connect | s007.inventory |
 
 ### Shared Foundations × Scenarios
 
 | Foundation | Exercised in |
 |------------|--------------|
-| Private Matching Fabric | 001, 002, 003, 004, 005, 006, 007, 009, 010 (evidence) |
-| Identity & Verification | 001 (subscriber), 006 (delegate), 007 (workload, partner), 010 (audit) |
-| Consent Ledger | 001, 002, 003 (revocation), 006 (mandate), 008 (disclosure grant), 010 (audit) |
-| Settlement & Attribution Ledger | 001, 002, 003, 004, 005 (ad credit), 006, 007, 008 (adjustment), 009, 010 (conservation) |
+| Private Matching Fabric | s001.fulfillment, s002.fitting, s003.silence, s004.failover, s005.attribution, s006.mandate, s007.inventory, s009.suppression, s010.certification (evidence) |
+| Identity & Verification | s001.fulfillment (subscriber), s006.mandate (delegate), s007.inventory (workload, partner), s010.certification (audit) |
+| Consent Ledger | s001.fulfillment, s002.fitting, s003.silence (revocation), s006.mandate, s008.mediation (disclosure grant), s010.certification (audit) |
+| Settlement & Attribution Ledger | s001.fulfillment, s002.fitting, s003.silence, s004.failover, s005.attribution (ad credit), s006.mandate, s007.inventory, s008.mediation (adjustment), s009.suppression, s010.certification (conservation) |
 
-**Coverage statement.** All 11 personas, all 8 applications, and all 4 shared foundations appear in at least one sequence; the three P0 sequences alone cover the complete core value loop plus the privacy kill switch; and SCENARIO-010 closes the loop by independently certifying the evidence produced by every sequence before it.
+**Coverage statement.** All 11 personas, all 8 applications, and all 4 shared foundations appear in at least one sequence; the three P0 sequences alone cover the complete core value loop plus the privacy kill switch; and s010.certification closes the loop by independently certifying the evidence produced by every sequence before it.
 
 ---
 

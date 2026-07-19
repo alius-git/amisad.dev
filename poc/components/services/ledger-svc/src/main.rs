@@ -1,7 +1,7 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC ledger-svc: append-only hash-chained attestation and settlement
-// ledgers with read APIs and chain verification. In-memory for SCENARIO-001;
+// ledgers with read APIs and chain verification. In-memory for s001.fulfillment;
 // the PostgreSQL wiring behind the same API is a noted deviation (poc/README).
 // Chain rule: row_hash = sha256(prev_hash_hex + canonical_payload_json),
 // genesis prev = 64 zeros. History is never edited; balances are derived.

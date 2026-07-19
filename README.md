@@ -11,7 +11,7 @@ AmisAd development
 ## Proof of concept
 
 - [poc/](poc/README.md) — POC implementation: Bazel/Cargo workspace, service contracts, deploy config, and the Yuruna lab setup for running the scenarios.
-- [poc/STATUS-scenario-001.md](poc/STATUS-scenario-001.md) — status of the SCENARIO-001 unattended verification run.
+- [poc/STATUS.s001.fulfillment.md](poc/STATUS.s001.fulfillment.md) — status of the s001.fulfillment unattended verification run.
 
 ---
 

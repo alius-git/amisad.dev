@@ -1,0 +1,5 @@
+-- LICENSEURI https://yuruna.link/license
+-- Copyright (c) 2026 by Alisson Sol et al.
+-- AmisAd POC - seed skeleton for s006.mandate: Delegated Procurement Under a Scoped Mandate
+-- Loaded by test fixtures once the scenario is implemented; empty by design.
+-- TODO(s006.mandate): seed data for the real steps - see plan/scenarios.md (s006.mandate).

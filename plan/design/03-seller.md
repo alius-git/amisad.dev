@@ -30,13 +30,13 @@ flowchart TD
 
 **POC notes**
 
-- **Multi-tenant from day one:** tenant ID on every row in the `seller` schema; scenario seeds create Elena plus the deliberately out-of-range seller SCENARIO-002 asserts is filtered.
+- **Multi-tenant from day one:** tenant ID on every row in the `seller` schema; scenario seeds create Elena plus the deliberately out-of-range seller s002.fitting asserts is filtered.
 - **Matchability is the catalog's contract:** offers carry structured attributes (price, exclusion-relevant fields like color, reach, fitting slots, standing-deal terms) so environments evaluate them without interpretation.
 - **The order state machine is event-sourced onto NATS:** each transition is an `orders.*` event consumed by the SPA views, the buyer's pseudonymous status channel, connect-svc webhooks, and settlement triggering — one truth, four consumers.
-- **Match notifications contain need context only** — the seller-side record has no buyer identity field at all, so SCENARIO-002's assertion is structural, not filtered.
-- **Integration grants** define the ceiling connect-svc credentials can hold; revocation kills sync without touching catalog data (SCENARIO-007 steps 3, 9).
+- **Match notifications contain need context only** — the seller-side record has no buyer identity field at all, so s002.fitting's assertion is structural, not filtered.
+- **Integration grants** define the ceiling connect-svc credentials can hold; revocation kills sync without touching catalog data (s007.inventory steps 3, 9).
 
-**Scenario coverage:** 001, 002, 003, 005, 006, 007, 008, 009.
+**Scenario coverage:** s001.fulfillment, s002.fitting, s003.silence, s005.attribution, s006.mandate, s007.inventory, s008.mediation, s009.suppression.
 
 ---
 

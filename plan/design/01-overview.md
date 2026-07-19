@@ -35,7 +35,7 @@ flowchart TD
 | Foundation services | Fabric coordinator, OIDC-style mock issuer, three hash-chained ledgers | [../design.md](../design.md) §4 |
 | Slice runtime | Stateless Rust binary on edge VMs; one process per match | [../design.md](../design.md) §2 |
 | Data plane | One PostgreSQL (schema per service) + NATS JetStream, in-cluster | [../design.md](../design.md) §1 |
-| Yuruna harness | VM provisioning, deployment, SCENARIO-001…010 as sequences | [../scenarios.md](../scenarios.md) |
+| Yuruna harness | VM provisioning, deployment, s001…s010 as sequences | [../scenarios.md](../scenarios.md) |
 
 ## Deployment topology
 
@@ -71,7 +71,7 @@ flowchart LR
     foundations --> pg
 ```
 
-Two edge VMs are the minimum honest topology: SCENARIO-004 asserts a jurisdiction-restricted allocation choosing the compliant region, and SCENARIO-009 asserts one region above and one below the anonymity threshold. The slice VMs hold no state; a reboot must be indistinguishable from a fresh provision.
+Two edge VMs are the minimum honest topology: s004.failover asserts a jurisdiction-restricted allocation choosing the compliant region, and s009.suppression asserts one region above and one below the anonymity threshold. The slice VMs hold no state; a reboot must be indistinguishable from a fresh provision.
 
 ---
 

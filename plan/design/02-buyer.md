@@ -29,11 +29,11 @@ flowchart TD
 
 - **No buyer backend service exists.** The vault is device-resident (encrypted local storage); nothing syncs server-side. Losing the device loses the vault — acceptable for POC; vault backup is a growth-path item, designed as user-held key escrow, never a server copy.
 - **Matching path:** the app encrypts each need as an envelope keyed to the ephemeral environment; the coordinator routes it; core services never see plaintext. On-device matching is deferred (POC always uses edge slices) behind the same envelope contract.
-- **Closing policies** evaluate locally: auto-close emits a signed acceptance inside the envelope; manual needs return shortlists for explicit decisions (SCENARIO-002 asserts nothing commits without one).
+- **Closing policies** evaluate locally: auto-close emits a signed acceptance inside the envelope; manual needs return shortlists for explicit decisions (s002.fitting asserts nothing commits without one).
 - **Delegate mode** signs in as the delegate actor (identity-mock JWT), shows only mandate-scoped views per principal, and routes over-cap closings to the principal as approval handoffs; every action carries dual attribution.
-- **Notifications** are local push from subscribed pseudonymous subjects; the silence assertions (SCENARIO-002/003) count them.
+- **Notifications** are local push from subscribed pseudonymous subjects; the silence assertions (s002/s003) count them.
 
-**Scenario coverage:** 001, 002, 003, 005, 006, 008.
+**Scenario coverage:** s001.fulfillment, s002.fitting, s003.silence, s005.attribution, s006.mandate, s008.mediation.
 
 ---
 

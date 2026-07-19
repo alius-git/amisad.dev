@@ -1,5 +1,0 @@
--- LICENSEURI https://yuruna.link/license
--- Copyright (c) 2026 by Alisson Sol et al.
--- AmisAd POC - seed skeleton for SCENARIO-009: Aggregate Insight Publication and the Demand-Planning Loop
--- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(SCENARIO-009): seed data for the real steps - see plan/scenarios.md (SCENARIO-009).

@@ -1,7 +1,7 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
-// AmisAd POC buyer-client: the headless buyer driving SCENARIO-001's happy
-// path (plays Maya - poc/README.md "SCENARIO-001 implementation notes"). The
+// AmisAd POC buyer-client: the headless buyer driving s001.fulfillment's happy
+// path (plays Maya - poc/README.md "s001.fulfillment implementation notes"). The
 // need JSON deliberately contains no identity fields - the token
 // authenticates, the need describes. Usage: submit (print match as one JSON
 // line) | wait <handle> (poll until delivered; exit 1 on timeout) | run.
@@ -19,7 +19,7 @@ fn identity_url() -> String {
     std::env::var("IDENTITY_URL").unwrap_or_else(|_| String::from("http://identity-mock:8080"))
 }
 
-/// Maya's SCENARIO-001 need: wish-list gift, budget cap, delivery deadline,
+/// Maya's s001.fulfillment need: wish-list gift, budget cap, delivery deadline,
 /// automatic closing. `context` is the only part a seller ever sees.
 fn need_json() -> json::Json {
     json::obj(vec![

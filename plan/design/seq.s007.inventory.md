@@ -1,0 +1,54 @@
+# s007.inventory sequence — Enterprise Integration Onboarding and Inventory-Truth Matching
+
+> One sentence: a verified connector certifies in sandbox, syncs ERP truth into matching, mirrors order states back out, and is refused beyond its scope — with replay converging and revocation killing credentials, not data.
+
+See [../design.md](../design.md#9-diagrams) · [s007.inventory](../scenarios.md#s007inventory-enterprise-integration-onboarding-and-inventory-truth-matching). ledger-svc is folded into seller-svc's settlement step; the matching fabric is folded into the coordinator.
+
+```mermaid
+sequenceDiagram
+    actor Alex
+    actor Priya
+    actor Elena
+    participant ERP as ERP connector (sim)
+    participant ConnectSvc as connect-svc
+    participant SellerSvc as seller-svc
+    participant Coordinator as fabric-coordinator
+
+    Note over Alex,Coordinator: Seeded - Elena's ERP catalog with one item at a single unit of stock
+    Alex->>ConnectSvc: Register as integration partner
+    ConnectSvc->>Priya: Identity and standing check via participant registry
+    Priya-->>ConnectSvc: Verified - sandbox access only
+    Alex->>ConnectSvc: Build and certify connector in sandbox tenant
+    Elena->>SellerSvc: Grant scoped access - catalog, inventory, orders
+    SellerSvc-->>ConnectSvc: Grant defines credential ceiling
+    ConnectSvc-->>ERP: Scoped workload credentials issued
+    ERP->>ConnectSvc: Sync catalog into Elena's tenant
+    ConnectSvc->>SellerSvc: Offers matchable
+    Note over ERP: Counter sale in the shop - last unit of the item sells externally
+    ERP->>ConnectSvc: Inventory delta
+    ConnectSvc->>SellerSvc: Item availability zero within the sync window
+    Coordinator->>SellerSvc: Fetch offers for seeded buyer need
+    alt item out of stock
+        SellerSvc-->>Coordinator: No offer returned for the zeroed item
+    else in-stock alternative
+        SellerSvc-->>Coordinator: Alternative matches and closes
+    end
+    SellerSvc->>ConnectSvc: Order state transitions on the orders stream
+    ConnectSvc-->>ERP: Webhooks - every state mirrored through settlement
+    alt out-of-scope call
+        ERP->>ConnectSvc: Request beyond granted scope
+        ConnectSvc-->>ERP: Refused on credential scope - attempt logged, nothing returned
+    end
+    Note over ConnectSvc,ERP: Yuruna replays a dropped webhook - state converges, no duplicate effects
+    Elena->>SellerSvc: Revoke integration grant
+    SellerSvc-->>ConnectSvc: Credentials invalidated immediately
+    ERP->>ConnectSvc: Next sync attempt
+    ConnectSvc-->>ERP: Authentication fails - catalog intact and hand-editable
+    Note over Alex,Coordinator: Yuruna asserts - no match references externally zeroed inventory, ERP and seller order states identical at every transition, out-of-scope refused and logged, replay idempotent, zero buyer data in any integration payload or log
+```
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 by Alisson Sol et al.

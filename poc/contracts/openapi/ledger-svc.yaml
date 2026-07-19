@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: ledger-svc
-  description: "Append-only hash-chained attestation and settlement ledgers with chain verification (SCENARIO-001 surface)"
+  description: "Append-only hash-chained attestation and settlement ledgers with chain verification (s001.fulfillment surface)"
   version: 0.1.0
 paths:
   /health:

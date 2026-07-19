@@ -1,0 +1,38 @@
+# s010.certification sequence — Independent Certification of the Full Evidence Trail
+
+> One sentence: the auditor recomputes chains, residency, consent, and settlement conservation over everything scenarios s001–s009 produced, catches an injected tamper by recomputation, and certifies on evidence — read-only throughout.
+
+See [../design.md](../design.md#9-diagrams) · [s010.certification](../scenarios.md#s010certification-independent-certification-of-the-full-evidence-trail).
+
+```mermaid
+sequenceDiagram
+    actor Ingrid
+    participant AuditSvc as audit-svc
+    participant LedgerSvc as ledger-svc
+    participant PlatformSvc as platform-svc
+    actor Priya
+
+    Note over Ingrid,Priya: Seeded - the complete evidence corpus produced by s001 through s009
+    Ingrid->>AuditSvc: Start certification run - jurisdiction and time range
+    AuditSvc->>LedgerSvc: Read records and chain heads - read-only role
+    AuditSvc->>AuditSvc: Recompute attestation chains end to end - including the s004 abort
+    AuditSvc->>AuditSvc: Verify residency against rules in force at each allocation
+    AuditSvc->>AuditSvc: Verify consent - participation, mandates, disclosure grants all honored
+    AuditSvc->>AuditSvc: Verify settlement conservation - splits sum, adjustments compensate and reference cases
+    alt tamper check
+        Note over LedgerSvc: Yuruna injects a modified copy of one attestation record
+        AuditSvc->>AuditSvc: Chain recomputation flags exactly that record
+        AuditSvc-->>Ingrid: Investigation workspace isolates the record and its dependents
+    end
+    Ingrid->>AuditSvc: Issue certification - findings per dimension plus regulator report
+    AuditSvc-->>PlatformSvc: Findings record delivered
+    PlatformSvc->>Priya: Findings received in operations
+    Note over AuditSvc: Own access log - exclusively read-only operations, no personal-data scope ever exercised
+    Note over Ingrid,Priya: Yuruna asserts - all four dimensions report zero unexplained violations, the tamper is detected and localized, and the audit access log proves read-only isolation
+```
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 by Alisson Sol et al.

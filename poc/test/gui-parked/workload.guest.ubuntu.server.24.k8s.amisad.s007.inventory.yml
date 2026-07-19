@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - s007.inventory: Enterprise Integration Onboarding and Inventory-Truth Matching
+# Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
+# skeletons, and verifies /health for the services this scenario traverses.
+# See plan/scenarios.md for the full scenario and its Target Verification Point.
+# TODO(s007.inventory): implement the real steps per plan/scenarios.md.
+
+# Perf-log identity. Bump revision on step add/remove.
+sequenceGuid: 421e4385-ea9e-48bf-becf-7ac4e635da8d
+sequenceRevision: 1
+
+description: "AmisAd s007.inventory skeleton: deploy POC services, verify /health (Enterprise Integration Onboarding and Inventory-Truth Matching)."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.k8s.amisad.baseline
+requiresSnapshot:
+  id: "k8s.amisad"
+variables:
+  username: yamisad
+
+steps:
+  - action: loadDiskSnapshot
+    id: "k8s.amisad"
+    description: "Restore the AmisAd k8s + PostgreSQL + NATS baseline checkpoint"
+
+  - action: retry
+    maxAttempts: 2
+    description: "Login + retry"
+    steps:
+      - snippet: firstLoginPrime
+
+      - action: passwdPrompt
+        pattern: "login:"
+        timeoutSeconds: 600
+        text: "${username}"
+        description: "OCR: login:"
+
+      - action: passwdPrompt
+        pattern: "Password:"
+        text: "${ext:authentication.GetPassword(${username})}"
+        description: "OCR: Password:"
+
+  - action: waitForText
+    pattern: "${username}@"
+    timeoutSeconds: 90
+    description: "OCR: shell prompt"
+
+  - action: fetchAndExecute
+    text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh"
+    description: "Deploy AmisAd POC skeletons (build images, helm install all services)"
+    waitPattern: "FETCHED AND EXECUTED:"
+    timeoutSeconds: 3600
+
+  - action: fetchAndExecute
+    text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.s007.inventory.sh"
+    description: "s007.inventory skeleton checks: /health of traversed services"
+    waitPattern: "FETCHED AND EXECUTED:"
+    timeoutSeconds: 900
+
+  - action: saveSystemDiagnostic
+    id: "amisad.s007.inventory"
+    description: "Capture diagnostics after s007.inventory checks"

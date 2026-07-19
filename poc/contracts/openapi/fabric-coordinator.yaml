@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: fabric-coordinator
-  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope (SCENARIO-001 surface)"
+  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope (s001.fulfillment surface)"
   version: 0.1.0
 paths:
   /health:

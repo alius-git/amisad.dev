@@ -16,7 +16,7 @@
 | Code location | **`amisad.dev/poc/`** | POC status explicit; planning docs and code in one repo |
 | Kubernetes | **k3s**, single-node cluster in one VM | Lightest conformant K8s; nothing cloud-specific; Traefik ingress included |
 | Database | **PostgreSQL** (one in-cluster instance, schema per service) | Sole database per principles; ledgers as append-only hash-chained tables |
-| Events | **NATS JetStream** (in-cluster) | One lightweight broker; persistent streams give the idempotent replay SCENARIO-007 asserts |
+| Events | **NATS JetStream** (in-cluster) | One lightweight broker; persistent streams give the idempotent replay s007.inventory asserts |
 | Identity | **identity-mock**, a Rust OIDC-style JWT issuer | In-stack mock of Identity & Verification; four actor classes; swappable for carrier federation |
 | API style | Versioned REST/JSON under `/v1`, OpenAPI-documented, contracts checked in under `poc/contracts/` | Per principles; the contract files are the compatibility gate |
 
@@ -31,13 +31,13 @@ Four machines, all provisioned and driven by Yuruna (see [design/01-overview.md]
 | **vm-edge-a**, **vm-edge-b** | Two "slice VMs" — the telco-local edge, one per simulated region/jurisdiction |
 | **Test mobile device** | Flutter buyer app, side-loaded, reaching vm-core over the lab LAN |
 
-Two edge VMs are the minimum honest topology: SCENARIO-004 requires a jurisdiction-restricted allocation choosing between regions, and SCENARIO-009 requires one region above and one below the anonymity threshold.
+Two edge VMs are the minimum honest topology: s004.failover requires a jurisdiction-restricted allocation choosing between regions, and s009.suppression requires one region above and one below the anonymity threshold.
 
 **Slice VMs stay stateless.** Each runs only the `slice-runtime` binary: it accepts an allocation from the fabric coordinator, spawns an **ephemeral match environment** (one process per match, simulated enclave), reports its attestation lifecycle, emits the match record, and dies. No database, no persistent volume, no queue on the edge; a rebooted slice VM is indistinguishable from a fresh one.
 
 ## 3. Application inventory
 
-Every application from [applications.md](applications.md) exists in the POC — SCENARIO-001…010 assert against all of them, and the principles forbid stubbing anything a scenario asserts against.
+Every application from [applications.md](applications.md) exists in the POC — s001…s010 assert against all of them, and the principles forbid stubbing anything a scenario asserts against.
 
 | Application | POC realization | UI |
 |-------------|-----------------|----|
@@ -96,13 +96,13 @@ amisad.dev/
     config/localhost/       # three-phase deploy config (resources → components → workloads)
     workloads/services/     # minimal Helm chart per service
     db/                     # schema.sql (hash-chained ledgers) + per-scenario seeds
-    test/gui/               # Yuruna sequences: baseline snapshot + SCENARIO-001…010
+    test/gui/               # Yuruna sequences: baseline snapshot + s001…s010
     test/ubuntu.server.24/  # guest scripts the sequences fetch-and-execute
 ```
 
 ## 7. Scenario execution
 
-Yuruna provisions the four nodes, deploys via `poc/config/localhost/`, seeds from `poc/db/seed/`, and executes [scenarios.md](scenarios.md) as its discovered sequences — SCENARIO-001…009 in priority order, then SCENARIO-010 certifying the evidence corpus they produced. Each scenario's Target Verification Point maps to asserts against observable state: ledger sums and chain heads via `ledger-svc`/`audit-svc` APIs, environment lifecycles via the attestation ledger, application state via the `/v1` APIs, and the slice VMs' egress logs for the zero-leak assertions.
+Yuruna provisions the four nodes, deploys via `poc/config/localhost/`, seeds from `poc/db/seed/`, and executes [scenarios.md](scenarios.md) as its discovered sequences — s001…s009 in priority order, then s010.certification certifying the evidence corpus they produced. Each scenario's Target Verification Point maps to asserts against observable state: ledger sums and chain heads via `ledger-svc`/`audit-svc` APIs, environment lifecycles via the attestation ledger, application state via the `/v1` APIs, and the slice VMs' egress logs for the zero-leak assertions.
 
 ## 8. Growth path
 
@@ -136,23 +136,23 @@ One sequence diagram per verification scenario, faithful to the numbered steps i
 
 | Document | Sequence for |
 |----------|--------------|
-| [seq-001.md](design/seq-001.md) | SCENARIO-001 — Intent-Driven Edge Match and Automated Fulfillment |
-| [seq-002.md](design/seq-002.md) | SCENARIO-002 — Considered Purchase, Constraint Fidelity, and In-Person Booking |
-| [seq-003.md](design/seq-003.md) | SCENARIO-003 — Consent Revocation and the Right to Silence |
-| [seq-004.md](design/seq-004.md) | SCENARIO-004 — Sovereign Slice Allocation, Isolation Fault, and Attested Failover |
-| [seq-005.md](design/seq-005.md) | SCENARIO-005 — Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit |
-| [seq-006.md](design/seq-006.md) | SCENARIO-006 — Delegated Procurement Under a Scoped Mandate |
-| [seq-007.md](design/seq-007.md) | SCENARIO-007 — Enterprise Integration Onboarding and Inventory-Truth Matching |
-| [seq-008.md](design/seq-008.md) | SCENARIO-008 — Zero-Knowledge Dispute Mediation and Settlement Adjustment |
-| [seq-009.md](design/seq-009.md) | SCENARIO-009 — Aggregate Insight Publication and the Demand-Planning Loop |
-| [seq-010.md](design/seq-010.md) | SCENARIO-010 — Independent Certification of the Full Evidence Trail |
+| [seq.s001.fulfillment.md](design/seq.s001.fulfillment.md) | s001.fulfillment — Intent-Driven Edge Match and Automated Fulfillment |
+| [seq.s002.fitting.md](design/seq.s002.fitting.md) | s002.fitting — Considered Purchase, Constraint Fidelity, and In-Person Booking |
+| [seq.s003.silence.md](design/seq.s003.silence.md) | s003.silence — Consent Revocation and the Right to Silence |
+| [seq.s004.failover.md](design/seq.s004.failover.md) | s004.failover — Sovereign Slice Allocation, Isolation Fault, and Attested Failover |
+| [seq.s005.attribution.md](design/seq.s005.attribution.md) | s005.attribution — Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit |
+| [seq.s006.mandate.md](design/seq.s006.mandate.md) | s006.mandate — Delegated Procurement Under a Scoped Mandate |
+| [seq.s007.inventory.md](design/seq.s007.inventory.md) | s007.inventory — Enterprise Integration Onboarding and Inventory-Truth Matching |
+| [seq.s008.mediation.md](design/seq.s008.mediation.md) | s008.mediation — Zero-Knowledge Dispute Mediation and Settlement Adjustment |
+| [seq.s009.suppression.md](design/seq.s009.suppression.md) | s009.suppression — Aggregate Insight Publication and the Demand-Planning Loop |
+| [seq.s010.certification.md](design/seq.s010.certification.md) | s010.certification — Independent Certification of the Full Evidence Trail |
 
 How the documents relate:
 
 - Doc 1 names the blocks and places them on the lab network; docs 2–9 open one application each.
 - Foundation services (`fabric-coordinator`, `slice-runtime`, `identity-mock`, `ledger-svc`) appear as external boxes in every application diagram — they are defined in §4 above and drawn open in doc 1.
 - Scenario coverage per application is listed at the bottom of each document, tracing back to [scenarios.md](scenarios.md).
-- The seq-\* documents show docs 2–9's components exchanging messages in scenario order: each opens with a Note stating seeded preconditions and closes with a Note stating the Target Verification Point Yuruna asserts.
+- The seq.\* documents show docs 2–9's components exchanging messages in scenario order: each opens with a Note stating seeded preconditions and closes with a Note stating the Target Verification Point Yuruna asserts.
 
 ---
 
