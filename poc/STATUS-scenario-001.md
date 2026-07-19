@@ -1,6 +1,30 @@
 # SCENARIO-001 unattended run — status
 
-**Updated:** 2026-07-19 ~06:40 local · **Result: ✅ GREEN in the RUNNER CYCLE LOG — full cold chain passed under Yuruna (cycle 002401), plus SSH-proven earlier**
+**Updated:** 2026-07-19 ~08:35 local · **Result: ✅ GREEN — clean COLD START passes under Yuruna end-to-end (cycle 002404, user `yamisad-s001`); durable fix in place**
+
+## Durable fix: one guest username per final VM (cycle 002404)
+
+A clean cold start (all VMs deleted first) now runs the full chain green with
+**no `credential_expired`**: start.guest → k8s.amisad → build.amisad →
+scenario-001, scenario TVP step OK, under guest user **`yamisad-s001`**.
+
+Root cause (operator's diagnosis, confirmed): the base Ubuntu image expires the
+account password on first login, so provisioning two VMs from that image under
+the SAME username makes them fight over one vault entry — one VM's forced
+rotation invalidates what the next expects (`Login incorrect` →
+`credential_expired` at start.guest 6/9). Fix: **distinct guest OS username per
+final VM.** The top-of-chain `username` cascades all the way down to
+`start.guest`, so each top-level sequence provisions its base VM under its own
+account with its own vault entry:
+- `scenario-001` → `yamisad-s001`
+- build/k8s baselines → `yamisad-build`
+Guest scripts already resolve the user dynamically (`${SUDO_USER:-$USER}`), so
+no script changes were needed. Vault entries seeded keystroke-safe
+(alphanumeric) so the initial hash-set login also types exactly. Committed in
+`fd9ccea`; see memory `yuruna-guest-username-per-vm`. This supersedes the
+earlier "durability blocked" caveat — cold starts are now repeatable.
+
+
 
 ## Official runner-log green (cycle 002401)
 
