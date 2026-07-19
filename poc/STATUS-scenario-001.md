@@ -4,6 +4,18 @@
 
 ## Live-run iteration log (newest first)
 
+- **Fresh-runner cycle 2**: `Start-VM` memory failure again — this 32GB host
+  is at the edge even at 10GB/8GB VM sizing. Transfer kit for a bigger
+  machine staged at `C:\git\amisad-transfer\` (see TRANSFER.md there).
+- **Fresh-runner cycle 1 (folder 000252)**: clean-slate chain green through
+  both baselines (self-sufficient DB + systemd NATS worked); scenario step
+  reached Docker — in-VM bazel/cargo gates passed — then failed on
+  `.dockerignore` blocking `COPY target/release/*`. Fixed in `e370b0d`
+  (per-service /tmp contexts).
+- **Cycles 249–251**: vacuous passes — my comment edit broke
+  `sequenceGuid:` YAML (missing space); fixed in `36c4057`; lab reset
+  (operator-authorized) deleted all VMs and restarted the runner clean.
+
 - **Cycle 245**: `Start-VM` failed — host memory exhaustion (operator
   diagnosis): the persisted `build.amisad` VM was left running at 12GB while
   a fresh 12GB test VM started on the 32GB host. Fixed per operator
