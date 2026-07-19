@@ -95,12 +95,16 @@ echo "== slice-runtime (edge) =="
 if [ -n "${EDGE_HOST:-}" ]; then
     scp -o StrictHostKeyChecking=accept-new target/release/slice-runtime "${EDGE_HOST}:/tmp/slice-runtime"
     ssh -o StrictHostKeyChecking=accept-new "$EDGE_HOST" \
-        "pkill -f slice-runtime 2>/dev/null || true; PORT=8080 LEDGER_URL=$LEDGER RESOURCE_URL=$RESOURCE nohup /tmp/slice-runtime >/tmp/slice-runtime.log 2>&1 & sleep 1; echo edge-started"
+        "pkill -x slice-runtime 2>/dev/null || true; PORT=8080 LEDGER_URL=$LEDGER RESOURCE_URL=$RESOURCE nohup /tmp/slice-runtime >/tmp/slice-runtime.log 2>&1 & sleep 1; echo edge-started"
     EDGE_IP=$(ssh "$EDGE_HOST" "hostname -I | awk '{print \$1}'")
     SLICE_EP="http://${EDGE_IP}:8080"
 else
     echo "EDGE_HOST not set - slice-runtime on this VM (single-VM degraded mode)"
-    pkill -f slice-runtime 2>/dev/null || true
+    # pkill matches the process NAME (comm), not -f full-cmdline: fetch-and-
+    # execute runs this whole script via `bash -c "<text>"`, and the text
+    # contains "slice-runtime", so `pkill -f slice-runtime` would SIGTERM this
+    # very script (exit 143) before starting the server.
+    pkill -x slice-runtime 2>/dev/null || true
     PORT=8090 LEDGER_URL="$LEDGER" RESOURCE_URL="$RESOURCE" \
         nohup target/release/slice-runtime >/tmp/slice-runtime.log 2>&1 &
     sleep 1
