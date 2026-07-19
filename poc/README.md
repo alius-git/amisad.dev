@@ -10,10 +10,11 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | Path | Contents |
 |------|----------|
 | `MODULE.bazel`, `.bazelversion`, `BUILD.bazel` | Bazel root (bzlmod, pinned via bazelisk) |
-| `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1` |
-| `contracts/` | OpenAPI stubs per service (`/health`, `/version`) + event-schema placeholders |
-| `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger-svc) |
+| `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `serve-local.ps1` (lab-mode guest source, served from HEAD) |
+| `contracts/` | OpenAPI specs per service — real `/v1` routes for the SCENARIO-001 services, `/health`/`/version` stubs for the rest — + event-schema placeholders |
+| `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
+| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the SCENARIO-001 happy path |
 | `components/apps/buyer-flutter/` | Flutter buyer app (Android side-loaded) |
 | `components/apps/web-spa/` | React + TS + Vite shell, 7 role-scoped module routes |
 | `components/lib/amisad-common/` | Shared config/health plumbing crate |
@@ -21,7 +22,8 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Yuruna sequences: baseline (`k8s.amisad` snapshot) + SCENARIO-001…010 |
+| `test/gui/` | Active Yuruna sequences: `k8s.amisad` and `build.amisad` baselines + SCENARIO-001 |
+| `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 
 ## Building
@@ -38,10 +40,11 @@ sources.
 
 ## Deliberate skeleton choices
 
-- **No third-party crates yet.** The services serve `/health`/`/version` with
-  a std-only responder in `amisad-common`, so the first build needs no crate
-  fetches and no lockfile. Wire **crate_universe** in `MODULE.bazel` together
-  with the first real dependency (Actix lands with the first real routes —
+- **No third-party crates yet.** The services serve their routes — including
+  the full SCENARIO-001 `/v1` surface — with a std-only responder in
+  `amisad-common`, so builds need no crate fetches and no committed lockfile.
+  Wire **crate_universe** in `MODULE.bazel` together with the first external
+  dependency (Actix replaces the responder when the surface outgrows it —
   plan/design.md §1).
 - **App builds are `bazel run` wrappers.** Flutter and Vite have no mature
   Bazel rules, and their toolchains fight sandboxing (Gradle/pub/npm caches).
@@ -50,7 +53,8 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **Sequences deploy then verify `/health` only** (scenarios 002–010). Each
+- **Sequences deploy then verify `/health` only** (scenarios 002–010,
+  parked under `test/gui-parked/`). Each
   scenario sequence restores the `k8s.amisad` snapshot (Kubernetes +
   PostgreSQL + NATS), runs the shared deploy script, and checks the services
   that scenario traverses. The real steps are enumerated as TODO blocks

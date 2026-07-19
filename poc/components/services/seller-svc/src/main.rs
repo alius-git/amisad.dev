@@ -1,7 +1,8 @@
 // AmisAd POC seller-svc: offer catalog with standing auto-close deals and the
-// order state machine (matched -> committed -> provisioning -> fulfilled ->
-// settled). Advancing to fulfilled confirms settlement on the ledger. Order
-// records structurally contain no buyer identity - there is no such field.
+// order state machine (committed -> provisioning -> fulfilled; a closed match
+// creates the order already committed). Advancing to fulfilled confirms
+// settlement on the ledger. Order records structurally contain no buyer
+// identity - there is no such field.
 
 use amisad_common::{json, request, serve_app, Request, Response, ServiceInfo};
 

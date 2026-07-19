@@ -9,7 +9,7 @@ See [00-index.md](00-index.md) · [../design.md](../design.md).
 ```mermaid
 flowchart TD
     buyer["Buyer mobile app<br/>Flutter · offline-first vault"]
-    web["Web SPA shell<br/>6 role-scoped modules"]
+    web["Web SPA shell<br/>7 role-scoped modules"]
     core["Application services<br/>seller · resource · ads · insights · platform · audit · connect"]
     found["Foundation services<br/>fabric-coordinator · identity-mock · ledger-svc"]
     edge["Slice runtime<br/>ephemeral match environments"]

@@ -13,7 +13,8 @@ paths:
     get:
       summary: "Build version"
       responses:
-        "200": { description: "Service name and version" }  /v1/environments:
+        "200": { description: "Service name and version" }
+  /v1/environments:
     post:
       summary: "Run one environment lifecycle: created->attested->executed->destroyed (body: jurisdiction, envelope, offers). Opens the envelope, matches, emits the settlement instruction, returns the match record."
       requestBody:

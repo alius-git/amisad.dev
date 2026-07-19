@@ -1,6 +1,6 @@
 // AmisAd POC identity-mock: OIDC-style token issuer standing in for
 // Identity & Verification. Issues opaque tokens per actor and verifies them.
-// SCENARIO-001 uses it for the buyer and seller actors.
+// SCENARIO-001 uses it for the buyer actor; seller authentication is deferred.
 
 use amisad_common::{json, serve_app, sha256, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};

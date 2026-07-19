@@ -12,7 +12,7 @@
 |----------|--------|-----------|
 | Backend language | **Rust** (one Cargo workspace; Actix Web, matching the Ordem codebase) | One stack for all services and the slice runtime; tiny static binaries fit the light-slice principle |
 | Mobile app | **Flutter** (Android side-loaded for POC; iOS on the growth path) | One codebase for both platforms later; offline-first with an encrypted local vault |
-| Web UIs | **One shared SPA** — React + TypeScript + Vite, one app shell with role-scoped modules | Six UIs, one frontend toolchain; served as static assets from the cluster |
+| Web UIs | **One shared SPA** — React + TypeScript + Vite, one app shell with role-scoped modules | Seven UIs, one frontend toolchain; served as static assets from the cluster |
 | Code location | **`amisad.dev/poc/`** | POC status explicit; planning docs and code in one repo |
 | Kubernetes | **k3s**, single-node cluster in one VM | Lightest conformant K8s; nothing cloud-specific; Traefik ingress included |
 | Database | **PostgreSQL** (one in-cluster instance, schema per service) | Sole database per principles; ledgers as append-only hash-chained tables |
@@ -83,11 +83,12 @@ amisad.dev/
   plan/                     # planning docs (this file, personas, applications, scenarios, design/)
   poc/
     MODULE.bazel            # Bazel root (bzlmod, rules_rust pinned; .bazelversion via bazelisk)
-    build/                  # doctor.ps1 (toolchain check), build-all.ps1, images.ps1
+    build/                  # doctor.ps1 (toolchain check), build-all.ps1, images.ps1, serve-local.ps1
     contracts/              # OpenAPI specs + NATS event schemas — the compatibility gate
     components/
       services/             # 10 Rust services (seller-svc … ledger-svc)
       edge/slice-runtime/   # stateless edge match runtime (Rust, same workspace)
+      apps/buyer-client/    # headless buyer (Rust CLI) driving the scenario sequences
       apps/buyer-flutter/   # Flutter buyer app (Android side-loaded)
       apps/web-spa/         # React+TS+Vite shell with role-scoped modules
       lib/amisad-common/    # shared config/health plumbing crate
@@ -101,7 +102,7 @@ amisad.dev/
 
 ## 7. Scenario execution
 
-Yuruna provisions the four nodes, deploys via `poc/deploy/`, seeds from `poc/seed/`, and executes [scenarios.md](scenarios.md) as its discovered sequences — SCENARIO-001…009 in priority order, then SCENARIO-010 certifying the evidence corpus they produced. Each scenario's Target Verification Point maps to asserts against observable state: ledger sums and chain heads via `ledger-svc`/`audit-svc` APIs, environment lifecycles via the attestation ledger, application state via the `/v1` APIs, and the slice VMs' egress logs for the zero-leak assertions.
+Yuruna provisions the four nodes, deploys via `poc/config/localhost/`, seeds from `poc/db/seed/`, and executes [scenarios.md](scenarios.md) as its discovered sequences — SCENARIO-001…009 in priority order, then SCENARIO-010 certifying the evidence corpus they produced. Each scenario's Target Verification Point maps to asserts against observable state: ledger sums and chain heads via `ledger-svc`/`audit-svc` APIs, environment lifecycles via the attestation ledger, application state via the `/v1` APIs, and the slice VMs' egress logs for the zero-leak assertions.
 
 ## 8. Growth path
 

@@ -1,6 +1,6 @@
 # AmisAd Verification Scenarios
 
-**Companion documents:** [personas.md](personas.md) — the actors in these sequences · [applications.md](applications.md) — the applications and shared foundations they traverse.
+**Companion documents:** [personas.md](personas.md) — the actors in these sequences · [applications.md](applications.md) — the applications and shared foundations they traverse · [design.md](design.md) — the POC design that implements them, with one sequence diagram per scenario under [design/](design/00-index.md).
 
 This document is the functional blueprint for the end-to-end automated system demo, executed on the **Yuruna** verification framework. Yuruna asserts that resources are configured to verify components against anticipated workloads; each scenario below is one discoverable test **sequence**, written in structured natural language — the narrative contract a Yuruna sequence implements, not the script itself.
 
@@ -17,7 +17,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate the golden path — the complete value loop of a private need auto-closing against a standing offer, fulfilled and settled across all four parties. **Priority: P0, ranked first** — this is the product: if a need cannot privately become a delivered, settled order, no other scenario has meaning.
 
-**Cross-Refs:** *Personas:* Maya, Elena, Tom · *Applications:* AmisAd/buyer, AmisAd/seller, AmisAd/resource · *Foundations:* Private Matching Fabric, Identity & Verification, Consent Ledger, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Maya, Elena, Tom · *Applications:* AmisAd/buyer, AmisAd/seller, AmisAd/resource · *Foundations:* Private Matching Fabric, Identity & Verification, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq-001](design/seq-001.md)
 
 **Step-by-Step Sequence**
 
@@ -38,7 +38,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate matching correctness under rich constraints (including exclusions) and the human-decision path: shortlist, explicit choice, one-tap booking of an in-person service. **Priority: P0, ranked second** — this is the flagship user story (Maya's dress); it proves matches *fit* and that the buyer keeps the final say.
 
-**Cross-Refs:** *Personas:* Maya, Elena · *Applications:* AmisAd/buyer, AmisAd/seller · *Foundations:* Private Matching Fabric, Consent Ledger, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Maya, Elena · *Applications:* AmisAd/buyer, AmisAd/seller · *Foundations:* Private Matching Fabric, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq-002](design/seq-002.md)
 
 **Step-by-Step Sequence**
 
@@ -58,7 +58,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate the kill switch: pausing participation stops matching instantly, withdrawal is honored everywhere, and committed obligations still complete. **Priority: P0, ranked third** — "nothing about you leaves, and you can leave" is the license to operate; a privacy promise that cannot be revoked is not a promise.
 
-**Cross-Refs:** *Personas:* Maya, Elena · *Applications:* AmisAd/buyer, AmisAd/seller · *Foundations:* Consent Ledger, Private Matching Fabric, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Maya, Elena · *Applications:* AmisAd/buyer, AmisAd/seller · *Foundations:* Consent Ledger, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-003](design/seq-003.md)
 
 **Step-by-Step Sequence**
 
@@ -78,7 +78,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate the infrastructure story: slices allocate where sovereignty rules demand, an isolation fault destroys the environment rather than risking it, the match retries cleanly, and the incident escalates across party lines. **Priority: P1, ranked fourth** — the P0 scenarios assume the fabric works; this proves it fails *safe*, which is what regulators and carriers actually buy.
 
-**Cross-Refs:** *Personas:* Tom, Priya · *Applications:* AmisAd/resource, AmisAd/platform · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Tom, Priya · *Applications:* AmisAd/resource, AmisAd/platform · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-004](design/seq-004.md)
 
 **Step-by-Step Sequence**
 
@@ -98,7 +98,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate the advertising economy end to end: brief → creative → campaign → aggregate targeting → creative rendered only inside the sealed environment → match → attribution credit for agency and creator. **Priority: P1, ranked fifth** — this is the revenue engine for the ad-partner side and the proof that attribution survives without tracking.
 
-**Cross-Refs:** *Personas:* Marcel, Kai, Elena, Maya · *Applications:* AmisAd/ads, AmisAd/seller, AmisAd/buyer, AmisAd/insights · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Marcel, Kai, Elena, Maya · *Applications:* AmisAd/ads, AmisAd/seller, AmisAd/buyer, AmisAd/insights · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-005](design/seq-005.md)
 
 **Step-by-Step Sequence**
 
@@ -119,7 +119,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate delegated authority end to end: mandate grant, in-scope autonomous action, over-cap approval routing, principal visibility, and instant revocation. **Priority: P1, ranked sixth** — delegation is a day-one trust boundary; a mandate that leaks scope or survives revocation would be a privacy breach with the principal's own name on it.
 
-**Cross-Refs:** *Personas:* Maya, Pat, Elena · *Applications:* AmisAd/buyer (delegate mode), AmisAd/seller · *Foundations:* Consent Ledger, Identity & Verification, Private Matching Fabric, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Maya, Pat, Elena · *Applications:* AmisAd/buyer (delegate mode), AmisAd/seller · *Foundations:* Consent Ledger, Identity & Verification, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-006](design/seq-006.md)
 
 **Step-by-Step Sequence**
 
@@ -140,7 +140,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate the integration lifecycle: partner verification, sandbox certification, seller-granted scoped credentials, live inventory sync driving matching, and order events returning to the external system. **Priority: P1, ranked seventh** — matching against stale inventory poisons buyer trust one disappointment at a time; this proves external truth governs matching.
 
-**Cross-Refs:** *Personas:* Alex, Elena, Priya · *Applications:* AmisAd/connect, AmisAd/seller, AmisAd/platform · *Foundations:* Identity & Verification, Private Matching Fabric, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Alex, Elena, Priya · *Applications:* AmisAd/connect, AmisAd/seller, AmisAd/platform · *Foundations:* Identity & Verification, Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-007](design/seq-007.md)
 
 **Step-by-Step Sequence**
 
@@ -162,7 +162,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate support that cannot become surveillance: a delivery dispute resolved from metadata, a minimal consented disclosure when metadata is not enough, and a refund posted as a compensating entry — with the buyer anonymous throughout. **Priority: P1, ranked eighth** — support is where privacy promises historically die; this proves the mediation model holds under a real dispute.
 
-**Cross-Refs:** *Personas:* Maya, Sam, Elena, Priya · *Applications:* AmisAd/platform (support desk), AmisAd/buyer, AmisAd/seller · *Foundations:* Consent Ledger, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Maya, Sam, Elena, Priya · *Applications:* AmisAd/platform (support desk), AmisAd/buyer, AmisAd/seller · *Foundations:* Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq-008](design/seq-008.md)
 
 **Step-by-Step Sequence**
 
@@ -183,7 +183,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate the ecosystem's only analytical window: demand aggregates released solely above anonymity thresholds, published as versioned outlooks that inform seller stocking and campaign planning. **Priority: P2, ranked ninth** — insight is the growth flywheel, but it must be proven *after* the privacy machinery it depends on, because its central assertion is a suppression, not a feature.
 
-**Cross-Refs:** *Personas:* Dana, Elena, Marcel · *Applications:* AmisAd/insights, AmisAd/seller, AmisAd/ads · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Dana, Elena, Marcel · *Applications:* AmisAd/insights, AmisAd/seller, AmisAd/ads · *Foundations:* Private Matching Fabric, Settlement & Attribution Ledger · *Sequence diagram:* [seq-009](design/seq-009.md)
 
 **Step-by-Step Sequence**
 
@@ -203,7 +203,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 **Objective & Priority.** Validate that the entire system is *provable*: the auditor independently verifies attestation continuity, residency, consent (all three grant types), and settlement conservation across everything scenarios 001–009 produced — and detects deliberate tampering. **Priority: P2, ranked last by dependency, first by consequence** — it consumes the evidence of every other scenario; it is the capstone that turns nine passing tests into a certifiable system.
 
-**Cross-Refs:** *Personas:* Ingrid, Priya · *Applications:* AmisAd/audit, AmisAd/platform · *Foundations:* Private Matching Fabric (attestation evidence), Identity & Verification, Consent Ledger, Settlement & Attribution Ledger
+**Cross-Refs:** *Personas:* Ingrid, Priya · *Applications:* AmisAd/audit, AmisAd/platform · *Foundations:* Private Matching Fabric (attestation evidence), Identity & Verification, Consent Ledger, Settlement & Attribution Ledger · *Sequence diagram:* [seq-010](design/seq-010.md)
 
 **Step-by-Step Sequence**
 

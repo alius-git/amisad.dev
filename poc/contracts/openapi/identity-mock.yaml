@@ -13,7 +13,8 @@ paths:
     get:
       summary: "Build version"
       responses:
-        "200": { description: "Service name and version" }  /v1/tokens:
+        "200": { description: "Service name and version" }
+  /v1/tokens:
     post:
       summary: "Issue a token for an actor (body: actor, class)"
       requestBody:

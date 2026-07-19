@@ -13,7 +13,8 @@ paths:
     get:
       summary: "Build version"
       responses:
-        "200": { description: "Service name and version" }  /v1/offers:
+        "200": { description: "Service name and version" }
+  /v1/offers:
     post:
       summary: "Create an offer (body: offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close)"
       requestBody:

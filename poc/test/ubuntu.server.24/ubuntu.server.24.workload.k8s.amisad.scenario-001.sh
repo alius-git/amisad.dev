@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Services this scenario traverses (plan/scenarios.md cross-refs).
-SERVICES="seller-svc resource-svc fabric-coordinator ledger-svc"
+SERVICES="seller-svc resource-svc fabric-coordinator ledger-svc identity-mock"
 
 for svc in $SERVICES; do
     kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=300s

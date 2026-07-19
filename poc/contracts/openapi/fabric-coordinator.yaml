@@ -13,7 +13,8 @@ paths:
     get:
       summary: "Build version"
       responses:
-        "200": { description: "Service name and version" }  /v1/needs:
+        "200": { description: "Service name and version" }
+  /v1/needs:
     post:
       summary: "Submit a need (body: token, jurisdiction, envelope). The envelope is an opaque string opened only inside the sealed environment."
       requestBody:

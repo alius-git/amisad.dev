@@ -13,7 +13,8 @@ paths:
     get:
       summary: "Build version"
       responses:
-        "200": { description: "Service name and version" }  /v1/attestations:
+        "200": { description: "Service name and version" }
+  /v1/attestations:
     post:
       summary: "Append an attestation record (body: environment_id, lifecycle, ...)"
       requestBody:

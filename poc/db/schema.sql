@@ -1,5 +1,6 @@
 -- AmisAd POC database schema (skeleton).
--- One PostgreSQL instance, one schema per service (plan/design.md §1).
+-- One PostgreSQL instance, one schema per stateful service (plan/design.md §1;
+-- fabric-coordinator is a stateless router and has none).
 -- Ledgers are append-only, hash-chained tables (no blockchain): every row
 -- carries the sha256 of the previous row's hash + its own payload; balances
 -- and views are derived, never edited.

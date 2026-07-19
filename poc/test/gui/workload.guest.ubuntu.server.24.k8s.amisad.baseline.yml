@@ -64,7 +64,7 @@ steps:
 
   - action: fetchAndExecute
     text: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.nats.sh"
-    description: "Deploy NATS JetStream into the cluster"
+    description: "Install NATS JetStream as a host systemd service"
     waitPattern: "FETCHED AND EXECUTED:"
     timeoutSeconds: 600
 

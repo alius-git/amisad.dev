@@ -13,7 +13,8 @@ paths:
     get:
       summary: "Build version"
       responses:
-        "200": { description: "Service name and version" }  /v1/edges:
+        "200": { description: "Service name and version" }
+  /v1/edges:
     post:
       summary: "Register or replace an edge slice endpoint (body: region, endpoint)"
       requestBody:
