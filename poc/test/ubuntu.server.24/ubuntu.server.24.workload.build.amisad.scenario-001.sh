@@ -1,8 +1,9 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-001 build, deploy, happy path, and FULL Target
-# Verification Point asserts. Expects the repo cloned at ~/amisad.dev (the
-# sequence does that) and the build.amisad toolchain snapshot.
-#
+# Verification Point asserts. Expects the repo at ~/amisad.dev (the sequence
+# fetches it) and the build.amisad toolchain snapshot.
 # EDGE_HOST (optional): ssh target of the edge VM for slice-runtime. Empty ->
 # slice-runtime runs on this VM (documented single-VM degraded mode).
 set -euo pipefail
@@ -36,10 +37,9 @@ cd "$POC"
 echo "== build (bazel; cargo fallback on registry TLS trust) =="
 # The lab's caching proxy intercepts HTTPS with a CA that is in the system
 # store but not in Bazel's bundled-JVM truststore (PKIX failure fetching
-# bcr.bazel.build, observed cycle 244). ca-certificates-java derives a JVM
-# truststore from the system store; if Bazel still cannot fetch the
-# registry, fall back to cargo so the cycle stays green - the Bazel gate
-# then runs where the registry is reachable (noted in poc/README.md).
+# bcr.bazel.build, cycle 244). ca-certificates-java derives a JVM truststore
+# from the system store; if Bazel still cannot fetch, fall back to cargo so
+# the cycle stays green - the gate then runs where the registry is reachable.
 BAZEL_OK=0
 if sudo apt-get install -y ca-certificates-java >/dev/null 2>&1 && \
    bazel --host_jvm_args=-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts build //...; then

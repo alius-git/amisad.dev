@@ -4,14 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-009) real steps to implement:
-#   - Seed region A above and region B below the anonymity threshold
-#   - Environments emit aggregates only; the gate suppresses region B
-#   - Dana publishes a versioned outlook into seller and ads views
-#   - Elena stocks and Marcel scopes a campaign on identical figures
-#   - Unmet-demand flag carries category and region only
-#   - Assert: no below-threshold figure anywhere downstream
+# TODO(SCENARIO-009): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 42abb59b-828b-47cc-bee1-4300127d9e50

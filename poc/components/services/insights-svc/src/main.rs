@@ -1,3 +1,5 @@
+// LICENSEURI https://yuruna.link/license
+// Copyright (c) 2026 alius-git
 // AmisAd POC skeleton: Threshold-protected aggregate demand insights and outlooks.
 // Serves GET /health and GET /version; real routes arrive with the scenarios.
 

@@ -1,10 +1,5 @@
+-- LICENSEURI https://yuruna.link/license
+-- Copyright (c) 2026 alius-git
 -- AmisAd POC - seed skeleton for SCENARIO-003: Consent Revocation and the Right to Silence
 -- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(SCENARIO-003):
---   - Seed one in-flight order plus two open needs
---   - Pause participation; revocation timestamped in the consent ledger
---   - Matching refused at the consent check; no environments created
---   - A newly published fitting offer produces silence
---   - In-flight order settles; withdrawal ends aggregate contribution
---   - Resume; matching serves the open needs again
---   - Assert: zero match events in the paused window; immutable grant history
+-- TODO(SCENARIO-003): seed data for the real steps - see plan/scenarios.md (SCENARIO-003).

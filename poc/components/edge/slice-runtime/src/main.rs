@@ -1,13 +1,10 @@
-// AmisAd POC slice-runtime: the sealed match environment on the edge VM.
-// Each POST /v1/environments runs one full logical environment lifecycle:
-// created -> attested -> executed -> destroyed, written to the attestation
-// ledger and mirrored to resource telemetry. The need envelope is opened ONLY
-// here; everything that leaves is recorded in the egress log so the zero-leak
-// assertion is checkable from outside.
-//
-// POC deviations (noted in poc/README.md): the environment is logical (an
-// in-process context wiped after the response), and envelope encryption is
-// deferred - upstream services treat the envelope as an opaque string.
+// LICENSEURI https://yuruna.link/license
+// Copyright (c) 2026 alius-git
+// AmisAd POC slice-runtime: the sealed match environment on the edge VM. Each
+// POST /v1/environments runs one lifecycle (created -> attested -> executed
+// -> destroyed) written to the attestation ledger and mirrored to resource
+// telemetry; the envelope is opened ONLY here, and everything that leaves is
+// in the egress log, so zero-leak is checkable. Deviations: poc/README.md.
 
 use amisad_common::{json, request, serve_app, sha256, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};

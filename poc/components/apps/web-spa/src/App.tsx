@@ -1,3 +1,5 @@
+// LICENSEURI https://yuruna.link/license
+// Copyright (c) 2026 alius-git
 // AmisAd web SPA shell - POC skeleton.
 // One shell, seven role-scoped modules (per plan/design.md): seller, resource,
 // ads, insights, platform, audit, connect. Each module is an empty placeholder

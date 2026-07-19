@@ -2,7 +2,7 @@
 
 > One sentence: seller-svc runs the multi-tenant catalog, inventory, and order state machine that matching consumes and settlement pays — fed by hand through the SPA or by connectors through AmisAd/connect.
 
-See [00-index.md](00-index.md) · [../applications.md](../applications.md#amisadseller).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadseller).
 
 ```mermaid
 flowchart TD
@@ -37,3 +37,9 @@ flowchart TD
 - **Integration grants** define the ceiling connect-svc credentials can hold; revocation kills sync without touching catalog data (SCENARIO-007 steps 3, 9).
 
 **Scenario coverage:** 001, 002, 003, 005, 006, 007, 008, 009.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

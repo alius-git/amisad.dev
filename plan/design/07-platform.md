@@ -2,7 +2,7 @@
 
 > One sentence: platform-svc is the stewardship console — operations mode for Priya, zero-knowledge support desk for Sam — where the registry, settlement oversight, and dispute machinery live without any path into match content.
 
-See [00-index.md](00-index.md) · [../applications.md](../applications.md#amisadplatform).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadplatform).
 
 ```mermaid
 flowchart TD
@@ -36,3 +36,9 @@ flowchart TD
 - **Anomaly detection** in POC is rule-based over settlement and case metadata (rates, conflicts, repeat patterns) — enough for SCENARIO-008's recurring-pattern escalation; statistical models are growth path.
 
 **Scenario coverage:** 004, 007, 008, 010.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

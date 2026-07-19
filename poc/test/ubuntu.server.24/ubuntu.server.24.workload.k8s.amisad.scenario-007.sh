@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-007 skeleton checks.
 # Enterprise Integration Onboarding and Inventory-Truth Matching
 # The sequence runs the shared deploy script first; this script only verifies.
@@ -17,13 +19,6 @@ for svc in $SERVICES; do
     echo "OK ${svc}/health"
 done
 
-# TODO(SCENARIO-007): implement the real sequence from plan/scenarios.md:
-#   - Alex verified; connector certified in the sandbox tenant
-#   - Elena grants scoped tenant access; workload credentials issued
-#   - Catalog sync; a counter sale zeroes the last unit within the window
-#   - Zeroed item is unmatchable; the in-stock alternative closes
-#   - Webhooks mirror order states into the ERP; replay is idempotent
-#   - Out-of-scope call refused and logged; revocation kills credentials
-#   - Assert: no match on stale inventory; zero buyer data in any payload
+# TODO(SCENARIO-007): implement the real steps and Target Verification Point from plan/scenarios.md (SCENARIO-007).
 
 echo "SCENARIO-007 skeleton checks passed"

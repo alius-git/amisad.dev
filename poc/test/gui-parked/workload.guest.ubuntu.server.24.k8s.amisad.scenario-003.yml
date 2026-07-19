@@ -4,15 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-003) real steps to implement:
-#   - Seed one in-flight order plus two open needs
-#   - Pause participation; revocation timestamped in the consent ledger
-#   - Matching refused at the consent check; no environments created
-#   - A newly published fitting offer produces silence
-#   - In-flight order settles; withdrawal ends aggregate contribution
-#   - Resume; matching serves the open needs again
-#   - Assert: zero match events in the paused window; immutable grant history
+# TODO(SCENARIO-003): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 42b0e16a-99fa-4086-b2b2-6227ba35ea6a

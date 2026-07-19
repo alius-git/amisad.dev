@@ -312,3 +312,9 @@ new runner requires Hyper-V, hence Administrator.
   repos, blank `GH_TOKEN` — prior runs worked with it empty.
 - Framework checkout is 1 commit behind upstream (left un-pulled on
   purpose; don't update mid-lab).
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

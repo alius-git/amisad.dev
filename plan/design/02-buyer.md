@@ -2,7 +2,7 @@
 
 > One sentence: the Flutter buyer app holds the only copy of personal data in an encrypted on-device vault and reaches the ecosystem exclusively through need envelopes, consent records, and pseudonymous order channels.
 
-See [00-index.md](00-index.md) · [../applications.md](../applications.md#amisadbuyer).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadbuyer).
 
 ```mermaid
 flowchart TD
@@ -34,3 +34,9 @@ flowchart TD
 - **Notifications** are local push from subscribed pseudonymous subjects; the silence assertions (SCENARIO-002/003) count them.
 
 **Scenario coverage:** 001, 002, 003, 005, 006, 008.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

@@ -4,14 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-002) real steps to implement:
-#   - Need with exclusions (not dusty blue) and fitting deadline, manual closing
-#   - Shortlist contains only fully fitting offers
-#   - No commitment exists before the explicit decision
-#   - One-tap booking; seller sees requirements, never identity
-#   - Fulfill and settle; exactly two notifications delivered
-#   - Assert: excluded offers absent, notification count equals two
+# TODO(SCENARIO-002): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 42e7fc59-4aa9-4332-ae8e-82a20bdb30d0

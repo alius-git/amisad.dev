@@ -1,6 +1,6 @@
 # AmisAd Verification Scenarios
 
-**Companion documents:** [personas.md](personas.md) — the actors in these sequences · [applications.md](applications.md) — the applications and shared foundations they traverse · [design.md](design.md) — the POC design that implements them, with one sequence diagram per scenario under [design/](design/00-index.md).
+**Companion documents:** [personas.md](personas.md) — the actors in these sequences · [applications.md](applications.md) — the applications and shared foundations they traverse · [design.md](design.md) — the POC design that implements them, with one sequence diagram per scenario under [design/](design/).
 
 This document is the functional blueprint for the end-to-end automated system demo, executed on the **Yuruna** verification framework. Yuruna asserts that resources are configured to verify components against anticipated workloads; each scenario below is one discoverable test **sequence**, written in structured natural language — the narrative contract a Yuruna sequence implements, not the script itself.
 
@@ -263,3 +263,9 @@ Every persona, application, and shared foundation is exercised by at least one c
 | Settlement & Attribution Ledger | 001, 002, 003, 004, 005 (ad credit), 006, 007, 008 (adjustment), 009, 010 (conservation) |
 
 **Coverage statement.** All 11 personas, all 8 applications, and all 4 shared foundations appear in at least one sequence; the three P0 sequences alone cover the complete core value loop plus the privacy kill switch; and SCENARIO-010 closes the loop by independently certifying the evidence produced by every sequence before it.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

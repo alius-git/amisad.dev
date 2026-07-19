@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-010 skeleton checks.
 # Independent Certification of the Full Evidence Trail
 # The sequence runs the shared deploy script first; this script only verifies.
@@ -17,13 +19,6 @@ for svc in $SERVICES; do
     echo "OK ${svc}/health"
 done
 
-# TODO(SCENARIO-010): implement the real sequence from plan/scenarios.md:
-#   - Ingrid starts a certification run over the 001-009 corpus
-#   - Recompute attestation chains, including the aborted environment
-#   - Verify residency and consent (participation, mandates, disclosures)
-#   - Verify settlement conservation (splits sum, adjustments compensate)
-#   - Inject a tampered record copy; detection localizes it exactly
-#   - Findings delivered to platform; audit access log proves read-only
-#   - Assert: zero unexplained violations across all four dimensions
+# TODO(SCENARIO-010): implement the real steps and Target Verification Point from plan/scenarios.md (SCENARIO-010).
 
 echo "SCENARIO-010 skeleton checks passed"

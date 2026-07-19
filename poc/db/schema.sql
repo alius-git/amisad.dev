@@ -1,9 +1,10 @@
--- AmisAd POC database schema (skeleton).
--- One PostgreSQL instance, one schema per stateful service (plan/design.md §1;
--- fabric-coordinator is a stateless router and has none).
--- Ledgers are append-only, hash-chained tables (no blockchain): every row
--- carries the sha256 of the previous row's hash + its own payload; balances
--- and views are derived, never edited.
+-- LICENSEURI https://yuruna.link/license
+-- Copyright (c) 2026 alius-git
+-- AmisAd POC database schema (skeleton): one PostgreSQL instance, one schema
+-- per stateful service (plan/design.md section 1; fabric-coordinator is a
+-- stateless router and has none). Ledgers are append-only, hash-chained
+-- tables (no blockchain): every row carries the sha256 of the previous row's
+-- hash + its own payload; balances and views are derived, never edited.
 
 CREATE SCHEMA IF NOT EXISTS seller;
 CREATE SCHEMA IF NOT EXISTS resource;

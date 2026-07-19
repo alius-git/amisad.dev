@@ -4,14 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-008) real steps to implement:
-#   - Maya reports non-delivery on a settled order
-#   - Sam mediates on metadata; buyer identity structurally absent
-#   - Consented disclosure: request -> grant -> artifact -> expiry
-#   - Refund posted as compensating entries referencing the case
-#   - Recurring pattern escalates to Priya
-#   - Assert: case identity-free end to end; post-expiry access fails
+# TODO(SCENARIO-008): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 42a95e9f-3748-47f8-b8ad-cc9564d81776

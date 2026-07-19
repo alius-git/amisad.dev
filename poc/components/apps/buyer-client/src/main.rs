@@ -1,13 +1,10 @@
-// AmisAd POC buyer-client: the headless buyer driver for automated scenario
-// runs. Plays Maya's part in SCENARIO-001: obtain a verified token, state the
-// gift need (auto-close), receive the match, and follow the order to
-// Delivered. The need JSON deliberately contains no identity fields - the
-// token authenticates, the need describes.
-//
-// Usage:
-//   buyer-client submit          print the match result as one JSON line
-//   buyer-client wait <handle>   poll until status == delivered (exit 1 on timeout)
-//   buyer-client run             submit, then wait
+// LICENSEURI https://yuruna.link/license
+// Copyright (c) 2026 alius-git
+// AmisAd POC buyer-client: the headless buyer driving SCENARIO-001's happy
+// path (plays Maya - poc/README.md "SCENARIO-001 implementation notes"). The
+// need JSON deliberately contains no identity fields - the token
+// authenticates, the need describes. Usage: submit (print match as one JSON
+// line) | wait <handle> (poll until delivered; exit 1 on timeout) | run.
 
 use amisad_common::{json, request};
 use std::process::exit;

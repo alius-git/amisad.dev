@@ -125,6 +125,26 @@ requires the `build.amisad` snapshot: expect the cold path to take well over
 an hour; subsequent cycles restore the snapshot and skip straight to the
 top-level sequence.
 
+**One guest OS username per final VM.** The top-of-chain `username` variable
+cascades all the way down to `start.guest.ubuntu.server.24`, so each
+top-level sequence provisions its base VM under its own account with its own
+vault entry (`yamisad-build` for the build chain, `yamisad-s001` for the
+SCENARIO-001 sequence). This decouples the first-login forced-password
+rotation: the base Ubuntu image expires the password on first login, so two
+VMs provisioned from the same image under the *same* username fight over one
+vault entry — one VM's rotation invalidates what the next expects. Separate
+names mean separate vault entries and no cross-VM/cross-run collision.
+
+**Repo delivery: lab iteration mode vs production path.** In lab iteration
+mode (current), the guest obtains the repo as a tarball from the host status
+server (`/yuruna-repo/project-poc.tar.gz`, regenerated from `amisad.dev`
+HEAD by `poc/build/serve-local.ps1` after every commit) — the same channel
+fetch-and-execute uses; the guest script does the fetch. The production path
+(kept for later) clones GitHub with the vault PAT from step 3 rendered via
+`${ext:authentication.GetPassword(amisad-pat)}` in a `sensitive: true` step;
+restore it by re-adding the credential-store and git-clone steps to the
+scenario sequence.
+
 ## SCENARIO-001 implementation notes
 
 SCENARIO-001 is implemented end to end: `buyer-client` (the headless buyer)
@@ -134,7 +154,7 @@ to `slice-runtime`; the environment matches, attests its full lifecycle,
 emits the settlement instruction, and destroys itself; seller fulfillment
 confirms the four-way split on the hash-chained ledger. Two sequences drive
 it in VMs: `...build.amisad.baseline` (toolchains, snapshot `build.amisad`)
-and `...build.amisad.scenario-001` (PAT clone, `bazel build //...`,
+and `...build.amisad.scenario-001` (repo fetch, `bazel build //...`,
 `cargo test --workspace`, deploy, happy path, full Target Verification Point).
 
 Deviations from the target design, deliberate and to be retired in later
@@ -163,8 +183,8 @@ the runner discovers and executes
 `workload.guest.ubuntu.server.24.build.amisad.scenario-001`, which:
 
 1. restores the `build.amisad` snapshot (building it first if absent);
-2. stores the vault PAT in the guest's git credential store (sensitive step)
-   and clones `amisad.dev` to `~/amisad.dev`;
+2. fetches the committed tree to `~/amisad.dev` (lab iteration mode; the
+   production PAT clone is described under the common setup above);
 3. runs `bazel build //...` and `cargo test --workspace`;
 4. deploys the ten services to the in-VM cluster and exposes the NodePorts;
 5. starts `slice-runtime` — on the second VM when `edgeHost` is set
@@ -204,3 +224,9 @@ flutter build apk --debug \
   --dart-define=IDENTITY_URL=http://<vm-ip>:30084
 adb install build/app/outputs/flutter-apk/app-debug.apk
 ```
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

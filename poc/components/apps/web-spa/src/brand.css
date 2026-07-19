@@ -1,3 +1,5 @@
+/* LICENSEURI https://yuruna.link/license */
+/* Copyright (c) 2026 alius-git */
 /* AmisAd brand tokens - canonical source: components/art/palette.css */
 :root {
   --amisad-navy: #2b3a67;
@@ -21,8 +23,13 @@ body {
 .amisad-home nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
   margin-top: 1.5rem;
+}
+
+/* Margins, not flex gap: gap in flex is unsupported on iPhone X-era Safari
+   (<14.5) and old Android WebView. */
+.amisad-home nav a {
+  margin: 0 0.75rem 0.5rem 0;
 }
 
 .amisad-home nav a,

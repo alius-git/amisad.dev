@@ -2,7 +2,7 @@
 
 > One sentence: connect-svc is the supply-side integration gateway — versioned contracts, sandbox tenants, least-privilege workload credentials, and replayable event sync — with no buyer-related surface in any contract, by construction.
 
-See [00-index.md](00-index.md) · [../applications.md](../applications.md#amisadconnect).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadconnect).
 
 ```mermaid
 flowchart TD
@@ -38,3 +38,9 @@ flowchart TD
 - **POC ships one reference connector** (a small Rust binary simulating Elena's ERP) used by the scenario seeds; real ERP adapters are Alex's product, not ours.
 
 **Scenario coverage:** 007.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

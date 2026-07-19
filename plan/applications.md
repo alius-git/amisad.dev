@@ -308,3 +308,9 @@ Every persona workflow from [personas.md](personas.md) traced to the capability 
 | Pat routes an over-cap closing for approval | AmisAd/buyer — approval handoffs (delegate → principal) |
 
 No persona workflow lacks a serving capability, and no application capability exists without a persona who needs it. [scenarios.md](scenarios.md) exercises every row end to end.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

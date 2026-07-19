@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-005 skeleton checks.
 # Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit
 # The sequence runs the shared deploy script first; this script only verifies.
@@ -17,12 +19,6 @@ for svc in $SERVICES; do
     echo "OK ${svc}/health"
 done
 
-# TODO(SCENARIO-005): implement the real sequence from plan/scenarios.md:
-#   - Marcel creates a campaign from the aggregate demand view
-#   - Brief to Kai; asset approved and placed
-#   - Buyer need in campaign region; creative renders inside the environment
-#   - Acceptance closes the match; attribution computed in the fabric
-#   - Agency and creator credit on the ledger; budget decrements by outcome
-#   - Assert: non-zero ad-partner credit, zero buyer signal campaign-side
+# TODO(SCENARIO-005): implement the real steps and Target Verification Point from plan/scenarios.md (SCENARIO-005).
 
 echo "SCENARIO-005 skeleton checks passed"

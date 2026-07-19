@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-009 skeleton checks.
 # Aggregate Insight Publication and the Demand-Planning Loop
 # The sequence runs the shared deploy script first; this script only verifies.
@@ -17,12 +19,6 @@ for svc in $SERVICES; do
     echo "OK ${svc}/health"
 done
 
-# TODO(SCENARIO-009): implement the real sequence from plan/scenarios.md:
-#   - Seed region A above and region B below the anonymity threshold
-#   - Environments emit aggregates only; the gate suppresses region B
-#   - Dana publishes a versioned outlook into seller and ads views
-#   - Elena stocks and Marcel scopes a campaign on identical figures
-#   - Unmet-demand flag carries category and region only
-#   - Assert: no below-threshold figure anywhere downstream
+# TODO(SCENARIO-009): implement the real steps and Target Verification Point from plan/scenarios.md (SCENARIO-009).
 
 echo "SCENARIO-009 skeleton checks passed"

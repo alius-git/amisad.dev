@@ -1,8 +1,7 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - "build VM" baseline: everything needed to build and test the
-# POC inside the VM. Chains the k8s.amisad infrastructure baseline
-# (Kubernetes + PostgreSQL + NATS) and adds the build toolchains
+# AmisAd POC - "build VM" baseline: chains the k8s.amisad infrastructure
+# baseline (Kubernetes + PostgreSQL + NATS), adds the build toolchains
 # (rustup + pinned stable Rust, bazelisk, git, python3), then snapshots as
 # "build.amisad" for build/test sequences to warm-path from.
 

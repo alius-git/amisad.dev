@@ -415,3 +415,9 @@ The five founding personas cover demand (Maya), supply (Elena, Kai), infrastruct
 | Pat — Buyer-Side Delegate | AmisAd/buyer (delegate mode) | Acts under mandates recorded in the Consent Ledger |
 
 Every workflow above maps to an application capability defined in [applications.md](applications.md); the alignment matrix there provides the workflow-level trace, and [scenarios.md](scenarios.md) proves each one end to end.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

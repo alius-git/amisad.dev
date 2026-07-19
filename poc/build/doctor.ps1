@@ -1,3 +1,19 @@
+<#PSScriptInfo
+.VERSION 2026.07.19
+.GUID 425d945d-2301-4544-a649-eeff38675bca
+.AUTHOR Alisson Sol et al.
+.COPYRIGHT (c) 2026 alius-git
+.TAGS amisad poc toolchain doctor
+.LICENSEURI https://yuruna.link/license
+.PROJECTURI https://amisad.com
+.ICONURI
+.EXTERNALMODULEDEPENDENCIES
+.REQUIREDSCRIPTS
+.EXTERNALSCRIPTDEPENDENCIES
+.RELEASENOTES
+.PRIVATEDATA
+#>
+
 # AmisAd POC toolchain doctor. All three toolchains are REQUIRED (plus Bazel):
 # fails fast with a clear message before any build starts.
 # Optional tools (docker, helm, kubectl) are reported but do not fail the check.

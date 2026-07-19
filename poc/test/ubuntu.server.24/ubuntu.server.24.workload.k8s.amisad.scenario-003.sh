@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-003 skeleton checks.
 # Consent Revocation and the Right to Silence
 # The sequence runs the shared deploy script first; this script only verifies.
@@ -17,13 +19,6 @@ for svc in $SERVICES; do
     echo "OK ${svc}/health"
 done
 
-# TODO(SCENARIO-003): implement the real sequence from plan/scenarios.md:
-#   - Seed one in-flight order plus two open needs
-#   - Pause participation; revocation timestamped in the consent ledger
-#   - Matching refused at the consent check; no environments created
-#   - A newly published fitting offer produces silence
-#   - In-flight order settles; withdrawal ends aggregate contribution
-#   - Resume; matching serves the open needs again
-#   - Assert: zero match events in the paused window; immutable grant history
+# TODO(SCENARIO-003): implement the real steps and Target Verification Point from plan/scenarios.md (SCENARIO-003).
 
 echo "SCENARIO-003 skeleton checks passed"

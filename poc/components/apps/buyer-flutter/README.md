@@ -10,3 +10,9 @@ Output: `build/app/outputs/flutter-apk/app-debug.apk`, side-loadable via
 `adb install`.
 
 Brand assets come from `components/art/` (icon copied into `assets/`).
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

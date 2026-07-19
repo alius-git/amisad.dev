@@ -1,4 +1,4 @@
-# Service image builds copy the Rust workspace (which now includes
+# Service image builds copy the Rust workspace (including
 # components/apps/buyer-client); exclude only non-Rust build products.
 target/
 bazel-*

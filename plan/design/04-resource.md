@@ -2,7 +2,7 @@
 
 > One sentence: resource-svc is the carrier control plane — declarative allocation policy, the slice controller that drives the edge VMs, telemetry, incidents, and the carrier's settlement view.
 
-See [00-index.md](00-index.md) · [../applications.md](../applications.md#amisadresource).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadresource).
 
 ```mermaid
 flowchart TD
@@ -38,3 +38,9 @@ flowchart TD
 - **Carrier settlement** is a read model over ledger-svc filtered to network-share entries — hosting revenue exists only for completed matches (aborted environments earn nothing, asserted in SCENARIO-004).
 
 **Scenario coverage:** 001, 004.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

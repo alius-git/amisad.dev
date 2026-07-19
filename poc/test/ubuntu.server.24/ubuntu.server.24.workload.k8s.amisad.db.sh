@@ -1,8 +1,9 @@
 #!/bin/bash
-# AmisAd POC - create the amisad database and load the skeleton schema.
-# The schema is fetched from the host status server (the same channel
-# fetch-and-execute uses) into /tmp, because the postgres user cannot read
-# files under the login user's 0750 home directory.
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
+# AmisAd POC - create the amisad database and load the skeleton schema. The
+# schema is fetched from the host status server (fetch-and-execute's channel)
+# into /tmp because the postgres user cannot read the login user's 0750 home.
 # TODO: open listen_addresses/pg_hba for in-cluster pods when services move
 # off in-memory state (mirror the text-to-sql db script).
 set -euo pipefail

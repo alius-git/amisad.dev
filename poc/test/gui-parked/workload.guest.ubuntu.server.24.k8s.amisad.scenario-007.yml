@@ -4,15 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-007) real steps to implement:
-#   - Alex verified; connector certified in the sandbox tenant
-#   - Elena grants scoped tenant access; workload credentials issued
-#   - Catalog sync; a counter sale zeroes the last unit within the window
-#   - Zeroed item is unmatchable; the in-stock alternative closes
-#   - Webhooks mirror order states into the ERP; replay is idempotent
-#   - Out-of-scope call refused and logged; revocation kills credentials
-#   - Assert: no match on stale inventory; zero buyer data in any payload
+# TODO(SCENARIO-007): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 421e4385-ea9e-48bf-becf-7ac4e635da8d

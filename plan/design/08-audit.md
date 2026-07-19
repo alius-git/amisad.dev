@@ -2,7 +2,7 @@
 
 > One sentence: audit-svc independently verifies the hash chains, residency, consent, and settlement conservation of everything the other services produced — holding read-only credentials and no personal-data scope, so its independence is architectural.
 
-See [00-index.md](00-index.md) · [../applications.md](../applications.md#amisadaudit).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadaudit).
 
 ```mermaid
 flowchart TD
@@ -36,3 +36,9 @@ flowchart TD
 - **Reports** are generated artifacts (jurisdiction-scoped findings + public summary) stored with the run; the POC asserts completeness against the seeded corpus of scenarios 001–009.
 
 **Scenario coverage:** 010 (consuming the evidence of 001–009).
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

@@ -4,15 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-010) real steps to implement:
-#   - Ingrid starts a certification run over the 001-009 corpus
-#   - Recompute attestation chains, including the aborted environment
-#   - Verify residency and consent (participation, mandates, disclosures)
-#   - Verify settlement conservation (splits sum, adjustments compensate)
-#   - Inject a tampered record copy; detection localizes it exactly
-#   - Findings delivered to platform; audit access log proves read-only
-#   - Assert: zero unexplained violations across all four dimensions
+# TODO(SCENARIO-010): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 429faede-b8b2-447e-97dd-882a44e9b8d4

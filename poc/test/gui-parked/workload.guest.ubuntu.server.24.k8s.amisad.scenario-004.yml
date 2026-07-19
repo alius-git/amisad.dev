@@ -4,14 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-004) real steps to implement:
-#   - Policy: two regions, one jurisdiction-restricted
-#   - Allocation picks the compliant region despite more capacity elsewhere
-#   - Inject isolation fault; environment self-terminates, abort attested
-#   - Retry completes in the compliant region; settlement recorded once
-#   - Repeat fault escalates a cross-party incident case
-#   - Assert: zero out-of-region environments; revenue only for the completed match
+# TODO(SCENARIO-004): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 427078bc-c296-4ce8-8d7f-bfc58eaa246d

@@ -4,14 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-001) real steps to implement:
-#   - Maya states gift need (budget, city, deadline) with auto-close policy
-#   - Envelope routed to jurisdiction-compliant slice; environment attested
-#   - Standing deal auto-closes inside the environment; envelope never leaves
-#   - Elena ships; order matched -> committed -> provisioning -> fulfilled
-#   - Four-way settlement split recorded; carrier share visible to Tom
-#   - Assert: splits sum to match value, states consistent, attestation complete, zero egress
+# TODO(SCENARIO-001): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 426ecd0d-da07-42d9-9328-4e4a8f4996e4

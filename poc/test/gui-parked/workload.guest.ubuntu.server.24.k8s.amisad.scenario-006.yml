@@ -4,14 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-006) real steps to implement:
-#   - Maya grants Pat a scoped mandate (category, caps, expiry)
-#   - In-scope need closes on the delegate authority with dual attribution
-#   - Over-cap match routes an approval handoff to Maya
-#   - Out-of-scope attempt is refused at submission
-#   - Revocation removes delegated access instantly
-#   - Assert: every delegated record references a then-valid mandate
+# TODO(SCENARIO-006): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 42c436f1-875b-452c-80b5-e8cff1ce93c4

@@ -1,6 +1,6 @@
 # AmisAd POC — Master Design
 
-**Companion documents:** [personas.md](personas.md) · [applications.md](applications.md) · [scenarios.md](scenarios.md) · diagrams under [design/](design/00-index.md)
+**Companion documents:** [personas.md](personas.md) · [applications.md](applications.md) · [scenarios.md](scenarios.md) · diagrams under [design/](design/), indexed in [§9](#9-diagrams)
 
 > One sentence: how the eight AmisAd applications and four shared foundations become a proof-of-concept that runs in local VMs and side-loaded test devices, executes all ten verification scenarios under Yuruna, and grows into the full cloud-hosted and mobile ecosystem without contract changes.
 
@@ -118,4 +118,44 @@ Yuruna provisions the four nodes, deploys via `poc/config/localhost/`, seeds fro
 
 ## 9. Diagrams
 
-Index at [design/00-index.md](design/00-index.md): the overall architecture and deployment topology in [01-overview.md](design/01-overview.md), one document per application (02–09), and one sequence diagram per verification scenario ([seq-001](design/seq-001.md) … [seq-010](design/seq-010.md)) tracing each scenario's steps through the POC components to its Target Verification Point.
+The documents under [design/](design/) visualize this design, they do not restate it. Every diagram holds at most seven boxes; planned/growth-path items use dashed edges.
+
+| # | Document | Diagram type | Shows |
+|---|----------|--------------|-------|
+| 1 | [POC overview](design/01-overview.md) | flowchart ×2 | The seven top-level POC blocks; the four-node deployment topology. |
+| 2 | [AmisAd/buyer](design/02-buyer.md) | flowchart | Flutter app internals: vault, matching path, delegate mode. |
+| 3 | [AmisAd/seller](design/03-seller.md) | flowchart | seller-svc: catalog, inventory, order state machine, grants. |
+| 4 | [AmisAd/resource](design/04-resource.md) | flowchart | resource-svc: policy, slice controller, telemetry, incidents. |
+| 5 | [AmisAd/ads](design/05-ads.md) | flowchart | ads-svc: campaign + studio modes, assets, attribution. |
+| 6 | [AmisAd/insights](design/06-insights.md) | flowchart | insights-svc: threshold pipeline, workbench, outlooks. |
+| 7 | [AmisAd/platform](design/07-platform.md) | flowchart | platform-svc: operations + support desk, registry, adjustments. |
+| 8 | [AmisAd/audit](design/08-audit.md) | flowchart | audit-svc: chain verification, certification, reporting. |
+| 9 | [AmisAd/connect](design/09-connect.md) | flowchart | connect-svc: contracts, sandbox, credentials, webhooks. |
+
+One sequence diagram per verification scenario, faithful to the numbered steps in [scenarios.md](scenarios.md); participants are the POC components above, personas as actors, at most 8 lifelines each. Each traces its scenario's steps through the POC components to its Target Verification Point.
+
+| Document | Sequence for |
+|----------|--------------|
+| [seq-001.md](design/seq-001.md) | SCENARIO-001 — Intent-Driven Edge Match and Automated Fulfillment |
+| [seq-002.md](design/seq-002.md) | SCENARIO-002 — Considered Purchase, Constraint Fidelity, and In-Person Booking |
+| [seq-003.md](design/seq-003.md) | SCENARIO-003 — Consent Revocation and the Right to Silence |
+| [seq-004.md](design/seq-004.md) | SCENARIO-004 — Sovereign Slice Allocation, Isolation Fault, and Attested Failover |
+| [seq-005.md](design/seq-005.md) | SCENARIO-005 — Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit |
+| [seq-006.md](design/seq-006.md) | SCENARIO-006 — Delegated Procurement Under a Scoped Mandate |
+| [seq-007.md](design/seq-007.md) | SCENARIO-007 — Enterprise Integration Onboarding and Inventory-Truth Matching |
+| [seq-008.md](design/seq-008.md) | SCENARIO-008 — Zero-Knowledge Dispute Mediation and Settlement Adjustment |
+| [seq-009.md](design/seq-009.md) | SCENARIO-009 — Aggregate Insight Publication and the Demand-Planning Loop |
+| [seq-010.md](design/seq-010.md) | SCENARIO-010 — Independent Certification of the Full Evidence Trail |
+
+How the documents relate:
+
+- Doc 1 names the blocks and places them on the lab network; docs 2–9 open one application each.
+- Foundation services (`fabric-coordinator`, `slice-runtime`, `identity-mock`, `ledger-svc`) appear as external boxes in every application diagram — they are defined in §4 above and drawn open in doc 1.
+- Scenario coverage per application is listed at the bottom of each document, tracing back to [scenarios.md](scenarios.md).
+- The seq-\* documents show docs 2–9's components exchanging messages in scenario order: each opens with a Note stating seeded preconditions and closes with a Note stating the Target Verification Point Yuruna asserts.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - install the build toolchains on the build VM:
 # rustup (pinned stable Rust), bazelisk (as /usr/local/bin/bazel), git, python3.
 set -euo pipefail

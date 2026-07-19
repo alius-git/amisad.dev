@@ -1,11 +1,10 @@
+// LICENSEURI https://yuruna.link/license
+// Copyright (c) 2026 alius-git
 //! AmisAd POC shared plumbing, deliberately std-only (no third-party crates):
-//! - a small HTTP server (`serve_app`) and client (`request`)
-//! - a minimal JSON value type with parser and serializer (`json`)
-//! - SHA-256 (`sha256`) for the hash-chained ledgers, self-tested against
-//!   the FIPS 180-4 test vectors
-//!
-//! A real web framework and driver crates replace these when the POC grows
-//! past scenario work; the wire contracts are the stable part.
+//! a small HTTP server (`serve_app`) and client (`request`), a minimal JSON
+//! value type with parser and serializer (`json`), and SHA-256 (`sha256`) for
+//! the hash-chained ledgers, self-tested against the FIPS 180-4 vectors. A
+//! real web framework replaces these when the POC outgrows scenario work.
 
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream, ToSocketAddrs};

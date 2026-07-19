@@ -1,3 +1,19 @@
+<#PSScriptInfo
+.VERSION 2026.07.19
+.GUID 42f28106-215e-4fc9-8c1c-5cfcc18afd53
+.AUTHOR Alisson Sol et al.
+.COPYRIGHT (c) 2026 alius-git
+.TAGS amisad poc lab serve
+.LICENSEURI https://yuruna.link/license
+.PROJECTURI https://amisad.com
+.ICONURI
+.EXTERNALMODULEDEPENDENCIES
+.REQUIREDSCRIPTS
+.EXTERNALSCRIPTDEPENDENCIES
+.RELEASENOTES
+.PRIVATEDATA
+#>
+
 # Lab helper: publish the committed amisad.dev tree to the Yuruna status
 # server as /yuruna-repo/project-poc.tar.gz (the guest fetches it in lab
 # iteration mode - see the scenario-001 sequence header). Run after every

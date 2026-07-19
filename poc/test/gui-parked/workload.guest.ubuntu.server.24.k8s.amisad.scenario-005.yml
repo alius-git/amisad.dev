@@ -4,14 +4,7 @@
 # Skeleton sequence: restores the k8s.amisad snapshot, deploys the service
 # skeletons, and verifies /health for the services this scenario traverses.
 # See plan/scenarios.md for the full scenario and its Target Verification Point.
-#
-# TODO(SCENARIO-005) real steps to implement:
-#   - Marcel creates a campaign from the aggregate demand view
-#   - Brief to Kai; asset approved and placed
-#   - Buyer need in campaign region; creative renders inside the environment
-#   - Acceptance closes the match; attribution computed in the fabric
-#   - Agency and creator credit on the ledger; budget decrements by outcome
-#   - Assert: non-zero ad-partner credit, zero buyer signal campaign-side
+# TODO(SCENARIO-005): implement the real steps per plan/scenarios.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 42566d8a-628d-47e3-b8ce-abf76390b1e3

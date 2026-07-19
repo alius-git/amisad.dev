@@ -1,10 +1,11 @@
 #!/bin/bash
-# AmisAd POC - install NATS JetStream as a host systemd service.
-# Deliberately NOT an in-cluster deployment: docker.io pulls fail in this
-# lab (invalid_token via the caching path, cycles 246-247), and the GitHub
-# release binary avoids Docker Hub entirely. Services reach NATS at
-# <node-ip>:4222; the in-cluster Service indirection returns when the
-# event-driven scenarios actually wire JetStream in.
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
+# AmisAd POC - install NATS JetStream as a host systemd service. Deliberately
+# NOT in-cluster: docker.io pulls fail in this lab (invalid_token via the
+# caching path, cycles 246-247); the GitHub release binary avoids Docker Hub.
+# Services reach NATS at <node-ip>:4222; the in-cluster Service indirection
+# returns when the event-driven scenarios actually wire JetStream in.
 set -euo pipefail
 
 NATS_VERSION=v2.10.29

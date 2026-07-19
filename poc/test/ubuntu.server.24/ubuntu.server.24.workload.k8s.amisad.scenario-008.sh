@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-008 skeleton checks.
 # Zero-Knowledge Dispute Mediation and Settlement Adjustment
 # The sequence runs the shared deploy script first; this script only verifies.
@@ -17,12 +19,6 @@ for svc in $SERVICES; do
     echo "OK ${svc}/health"
 done
 
-# TODO(SCENARIO-008): implement the real sequence from plan/scenarios.md:
-#   - Maya reports non-delivery on a settled order
-#   - Sam mediates on metadata; buyer identity structurally absent
-#   - Consented disclosure: request -> grant -> artifact -> expiry
-#   - Refund posted as compensating entries referencing the case
-#   - Recurring pattern escalates to Priya
-#   - Assert: case identity-free end to end; post-expiry access fails
+# TODO(SCENARIO-008): implement the real steps and Target Verification Point from plan/scenarios.md (SCENARIO-008).
 
 echo "SCENARIO-008 skeleton checks passed"

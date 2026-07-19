@@ -13,3 +13,9 @@ site repository (`assets/`); update there first, then re-copy here.
 Consumers in this repo: `components/apps/web-spa/public/icon.svg` and
 `src/brand.css`; `components/apps/buyer-flutter/assets/icon-64.png` and the
 color constants in `lib/main.dart`. Keep them in sync with this folder.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

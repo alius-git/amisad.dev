@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-006 skeleton checks.
 # Delegated Procurement Under a Scoped Mandate
 # The sequence runs the shared deploy script first; this script only verifies.
@@ -17,12 +19,6 @@ for svc in $SERVICES; do
     echo "OK ${svc}/health"
 done
 
-# TODO(SCENARIO-006): implement the real sequence from plan/scenarios.md:
-#   - Maya grants Pat a scoped mandate (category, caps, expiry)
-#   - In-scope need closes on the delegate authority with dual attribution
-#   - Over-cap match routes an approval handoff to Maya
-#   - Out-of-scope attempt is refused at submission
-#   - Revocation removes delegated access instantly
-#   - Assert: every delegated record references a then-valid mandate
+# TODO(SCENARIO-006): implement the real steps and Target Verification Point from plan/scenarios.md (SCENARIO-006).
 
 echo "SCENARIO-006 skeleton checks passed"

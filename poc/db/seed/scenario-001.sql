@@ -1,10 +1,10 @@
+-- LICENSEURI https://yuruna.link/license
+-- Copyright (c) 2026 alius-git
 -- AmisAd POC - SCENARIO-001 seed: Elena's catalog with standing auto-close
--- deals in region-a.
---
--- NOTE: the live scenario sequence seeds these via the seller-svc API today,
--- because the services keep in-memory state pending the PostgreSQL wiring
--- (deviation noted in poc/README.md). This file is the same seed expressed
--- against db/schema.sql, so the API seeding retires when PG lands.
+-- deals in region-a. NOTE: the live sequence seeds these via the seller-svc
+-- API today, because the services keep in-memory state pending the
+-- PostgreSQL wiring (deviation noted in poc/README.md). This file is the
+-- same seed against db/schema.sql; the API seeding retires when PG lands.
 
 INSERT INTO seller.offers
     (offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close)

@@ -1,29 +1,10 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - build and test SCENARIO-001 (Intent-Driven Edge Match and
-# Automated Fulfillment) from source, inside the build VM.
-#
-# Operator setup (details: poc/README.md "Running scenarios under Yuruna"):
-# - LAB ITERATION MODE (current): the guest obtains the repo as a tarball
-#   from the host status server (/yuruna-repo/project-poc.tar.gz, regenerated
-#   from amisad.dev HEAD by poc/build/serve-local.ps1 after every commit) -
-#   the same channel fetch-and-execute uses. The guest script does the fetch.
-# - PRODUCTION PATH (kept for later): guest clones GitHub with a PAT from the
-#   Yuruna authentication vault - logical user `amisad-pat`, vaultKey
-#   "amisad-pat", stored once with Set-Password, rendered via
-#   ${ext:authentication.GetPassword(amisad-pat)} in a sensitive step.
-#   Restore by re-adding the credential-store + git clone steps here.
-# - variables.edgeHost: optional ssh target (user@host) of a second VM to run
-#   slice-runtime as the real edge node. When empty, the guest script runs
-#   slice-runtime on the build VM itself and says so - a documented
-#   single-VM degraded mode, used until multi-guest orchestration is wired.
-#   (Non-secret; a non-empty value must be committed to take effect, because
-#   the runner clones the project fresh every cycle.)
-#
-# The guest script builds (bazel build //...), tests (cargo test --workspace),
-# deploys all services, runs buyer-client's happy path, and asserts the FULL
-# SCENARIO-001 Target Verification Point (settlement sum, order states,
-# attestation lifecycle, chain verification, zero egress).
+# Automated Fulfillment) from source, inside the build VM: build, test,
+# deploy, run buyer-client's happy path, assert the FULL Target Verification
+# Point. Operator setup, repo delivery (lab tarball vs production PAT clone),
+# and edgeHost semantics: poc/README.md "Running scenarios under Yuruna".
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 4222bb02-7d1f-4c8e-8a4b-3f9e58d71b22
@@ -36,14 +17,10 @@ baseline:
 requiresSnapshot:
   id: "build.amisad"
 variables:
-  # Distinct guest OS user per final VM. The top-of-chain username cascades all
-  # the way down to start.guest.ubuntu.server.24, so each top-level sequence
-  # provisions its base VM under its own account with its own vault entry. This
-  # decouples the first-login forced-password rotation: the base Ubuntu image
-  # expires the password on first login, so two VMs provisioned from the same
-  # image under the SAME username fight over one vault entry (one VM's rotation
-  # invalidates what the next expects). Separate names => separate vault entries
-  # => no cross-VM/cross-run collision. Build chain uses yamisad-build.
+  # Distinct guest OS user per final VM (build chain: yamisad-build): avoids
+  # the first-login password-rotation collision between VMs provisioned from
+  # one image under one username - poc/README.md "Running scenarios under
+  # Yuruna" has the full rationale.
   username: yamisad-s001
   edgeHost: ""
 

@@ -1,9 +1,5 @@
+-- LICENSEURI https://yuruna.link/license
+-- Copyright (c) 2026 alius-git
 -- AmisAd POC - seed skeleton for SCENARIO-006: Delegated Procurement Under a Scoped Mandate
 -- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(SCENARIO-006):
---   - Maya grants Pat a scoped mandate (category, caps, expiry)
---   - In-scope need closes on the delegate authority with dual attribution
---   - Over-cap match routes an approval handoff to Maya
---   - Out-of-scope attempt is refused at submission
---   - Revocation removes delegated access instantly
---   - Assert: every delegated record references a then-valid mandate
+-- TODO(SCENARIO-006): seed data for the real steps - see plan/scenarios.md (SCENARIO-006).

@@ -2,7 +2,7 @@
 
 > One sentence: insights-svc turns threshold-protected aggregate contributions from the fabric into versioned demand outlooks — and the anonymity threshold is enforced in the pipeline, not by analyst discipline.
 
-See [00-index.md](00-index.md) · [../applications.md](../applications.md#amisadinsights).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadinsights).
 
 ```mermaid
 flowchart TD
@@ -35,3 +35,9 @@ flowchart TD
 - **POC threshold is a config value** (deliberately low so lab-scale seeds can cross it); production tuning is a growth-path concern, the gate's position in the pipeline is not.
 
 **Scenario coverage:** 005 (demand views), 009.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

@@ -1,3 +1,5 @@
+// LICENSEURI https://yuruna.link/license
+// Copyright (c) 2026 alius-git
 // AmisAd POC resource-svc: minimal carrier control plane for SCENARIO-001.
 // Registers edge slice endpoints per region, answers placement requests with
 // the jurisdiction constraint enforced at allocation time, and records slice

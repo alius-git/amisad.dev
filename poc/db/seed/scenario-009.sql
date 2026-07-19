@@ -1,9 +1,5 @@
+-- LICENSEURI https://yuruna.link/license
+-- Copyright (c) 2026 alius-git
 -- AmisAd POC - seed skeleton for SCENARIO-009: Aggregate Insight Publication and the Demand-Planning Loop
 -- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(SCENARIO-009):
---   - Seed region A above and region B below the anonymity threshold
---   - Environments emit aggregates only; the gate suppresses region B
---   - Dana publishes a versioned outlook into seller and ads views
---   - Elena stocks and Marcel scopes a campaign on identical figures
---   - Unmet-demand flag carries category and region only
---   - Assert: no below-threshold figure anywhere downstream
+-- TODO(SCENARIO-009): seed data for the real steps - see plan/scenarios.md (SCENARIO-009).

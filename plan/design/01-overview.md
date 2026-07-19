@@ -2,7 +2,7 @@
 
 > One sentence: the seven top-level blocks of the AmisAd POC and the four lab nodes they deploy to.
 
-See [00-index.md](00-index.md) · [../design.md](../design.md).
+See [../design.md](../design.md#9-diagrams).
 
 ## Level-1 components
 
@@ -72,3 +72,9 @@ flowchart LR
 ```
 
 Two edge VMs are the minimum honest topology: SCENARIO-004 asserts a jurisdiction-restricted allocation choosing the compliant region, and SCENARIO-009 asserts one region above and one below the anonymity threshold. The slice VMs hold no state; a reboot must be indistinguishable from a fresh provision.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

@@ -1,10 +1,5 @@
+-- LICENSEURI https://yuruna.link/license
+-- Copyright (c) 2026 alius-git
 -- AmisAd POC - seed skeleton for SCENARIO-007: Enterprise Integration Onboarding and Inventory-Truth Matching
 -- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(SCENARIO-007):
---   - Alex verified; connector certified in the sandbox tenant
---   - Elena grants scoped tenant access; workload credentials issued
---   - Catalog sync; a counter sale zeroes the last unit within the window
---   - Zeroed item is unmatchable; the in-stock alternative closes
---   - Webhooks mirror order states into the ERP; replay is idempotent
---   - Out-of-scope call refused and logged; revocation kills credentials
---   - Assert: no match on stale inventory; zero buyer data in any payload
+-- TODO(SCENARIO-007): seed data for the real steps - see plan/scenarios.md (SCENARIO-007).

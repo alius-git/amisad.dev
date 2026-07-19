@@ -2,7 +2,7 @@
 
 > One sentence: ads-svc runs campaigns and the creative studio as two role-scoped modes over one marketplace core, with creative rendered only inside sealed environments and credit arriving only from the attribution ledger.
 
-See [00-index.md](00-index.md) · [../applications.md](../applications.md#amisadads).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadads).
 
 ```mermaid
 flowchart TD
@@ -35,3 +35,9 @@ flowchart TD
 - **Asset store** is file upload + metadata for POC (production creative tooling is out of scope); the lifecycle states and revision history are real.
 
 **Scenario coverage:** 005, 009.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 alius-git

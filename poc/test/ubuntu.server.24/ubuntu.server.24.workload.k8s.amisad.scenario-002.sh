@@ -1,4 +1,6 @@
 #!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 alius-git
 # AmisAd POC - SCENARIO-002 skeleton checks.
 # Considered Purchase, Constraint Fidelity, and In-Person Booking
 # The sequence runs the shared deploy script first; this script only verifies.
@@ -17,12 +19,6 @@ for svc in $SERVICES; do
     echo "OK ${svc}/health"
 done
 
-# TODO(SCENARIO-002): implement the real sequence from plan/scenarios.md:
-#   - Need with exclusions (not dusty blue) and fitting deadline, manual closing
-#   - Shortlist contains only fully fitting offers
-#   - No commitment exists before the explicit decision
-#   - One-tap booking; seller sees requirements, never identity
-#   - Fulfill and settle; exactly two notifications delivered
-#   - Assert: excluded offers absent, notification count equals two
+# TODO(SCENARIO-002): implement the real steps and Target Verification Point from plan/scenarios.md (SCENARIO-002).
 
 echo "SCENARIO-002 skeleton checks passed"
