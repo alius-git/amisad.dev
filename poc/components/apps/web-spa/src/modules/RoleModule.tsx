@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // Placeholder for a role-scoped module. Real workspaces (catalog, control
 // plane, campaigns, ...) replace this per module as scenarios land.
 

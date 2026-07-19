@@ -1,6 +1,6 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
-# Copyright (c) 2026 alius-git
+# Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - SCENARIO-001 build, deploy, happy path, and FULL Target
 # Verification Point asserts. Expects the repo at ~/amisad.dev (the sequence
 # fetches it) and the build.amisad toolchain snapshot.

@@ -1,6 +1,6 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
-# Copyright (c) 2026 alius-git
+# Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - create the amisad database and load the skeleton schema. The
 # schema is fetched from the host status server (fetch-and-execute's channel)
 # into /tmp because the postgres user cannot read the login user's 0750 home.

@@ -1,5 +1,5 @@
 -- LICENSEURI https://yuruna.link/license
--- Copyright (c) 2026 alius-git
+-- Copyright (c) 2026 by Alisson Sol et al.
 -- AmisAd POC - seed skeleton for SCENARIO-010: Independent Certification of the Full Evidence Trail
 -- Loaded by test fixtures once the scenario is implemented; empty by design.
 -- TODO(SCENARIO-010): seed data for the real steps - see plan/scenarios.md (SCENARIO-010).

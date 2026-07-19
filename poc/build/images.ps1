@@ -2,7 +2,7 @@
 .VERSION 2026.07.19
 .GUID 42a2eacb-2a3b-4355-b2b9-cb0661aadd16
 .AUTHOR Alisson Sol et al.
-.COPYRIGHT (c) 2026 alius-git
+.Copyright (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc docker images
 .LICENSEURI https://yuruna.link/license
 .PROJECTURI https://amisad.com

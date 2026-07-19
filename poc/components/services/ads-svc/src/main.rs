@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC skeleton: Campaign administration and creative studio marketplace.
 // Serves GET /health and GET /version; real routes arrive with the scenarios.
 

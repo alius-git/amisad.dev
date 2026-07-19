@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 //! AmisAd POC shared plumbing, deliberately std-only (no third-party crates):
 //! a small HTTP server (`serve_app`) and client (`request`), a minimal JSON
 //! value type with parser and serializer (`json`), and SHA-256 (`sha256`) for

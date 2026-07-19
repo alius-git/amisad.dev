@@ -77,4 +77,4 @@ Two edge VMs are the minimum honest topology: SCENARIO-004 asserts a jurisdictio
 
 LICENSEURI https://yuruna.link/license
 
-Copyright (c) 2026 alius-git
+Copyright (c) 2026 by Alisson Sol et al.

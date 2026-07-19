@@ -1,6 +1,6 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
-# Copyright (c) 2026 alius-git
+# Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd buyer app - build wrapper invoked via `bazel run //components/apps/buyer-flutter:build`.
 # Hydrates the Android platform scaffolding on first run, then builds a debug APK.
 set -euo pipefail

@@ -1,5 +1,5 @@
 -- LICENSEURI https://yuruna.link/license
--- Copyright (c) 2026 alius-git
+-- Copyright (c) 2026 by Alisson Sol et al.
 -- AmisAd POC - SCENARIO-001 seed: Elena's catalog with standing auto-close
 -- deals in region-a. NOTE: the live sequence seeds these via the seller-svc
 -- API today, because the services keep in-memory state pending the

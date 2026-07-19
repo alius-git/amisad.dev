@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC slice-runtime: the sealed match environment on the edge VM. Each
 // POST /v1/environments runs one lifecycle (created -> attested -> executed
 // -> destroyed) written to the attestation ledger and mirrored to resource

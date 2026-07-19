@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC skeleton: Independent verification of ledgers, attestation chains, residency, and consent.
 // Serves GET /health and GET /version; real routes arrive with the scenarios.
 

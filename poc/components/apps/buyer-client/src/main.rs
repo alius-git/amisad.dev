@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC buyer-client: the headless buyer driving SCENARIO-001's happy
 // path (plays Maya - poc/README.md "SCENARIO-001 implementation notes"). The
 // need JSON deliberately contains no identity fields - the token

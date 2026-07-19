@@ -1,5 +1,5 @@
 -- LICENSEURI https://yuruna.link/license
--- Copyright (c) 2026 alius-git
+-- Copyright (c) 2026 by Alisson Sol et al.
 -- AmisAd POC database schema (skeleton): one PostgreSQL instance, one schema
 -- per stateful service (plan/design.md section 1; fabric-coordinator is a
 -- stateless router and has none). Ledgers are append-only, hash-chained

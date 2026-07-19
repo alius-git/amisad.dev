@@ -17,4 +17,4 @@ AmisAd development
 
 LICENSEURI https://yuruna.link/license
 
-Copyright (c) 2026 alius-git
+Copyright (c) 2026 by Alisson Sol et al.

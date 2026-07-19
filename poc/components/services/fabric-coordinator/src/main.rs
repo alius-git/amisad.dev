@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC fabric-coordinator: routes need envelopes to sealed slice
 // environments and relays results. By construction this service NEVER parses
 // the envelope - it is carried as an opaque string from the buyer to the

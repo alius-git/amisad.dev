@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd buyer app - SCENARIO-001 manual demo.
 // The needs-list screen drives the same APIs as the automated buyer-client:
 // obtain a token, submit the need as an opaque envelope, show the match, and

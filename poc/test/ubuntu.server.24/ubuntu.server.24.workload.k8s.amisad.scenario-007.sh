@@ -1,6 +1,6 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
-# Copyright (c) 2026 alius-git
+# Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - SCENARIO-007 skeleton checks.
 # Enterprise Integration Onboarding and Inventory-Truth Matching
 # The sequence runs the shared deploy script first; this script only verifies.

@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC ledger-svc: append-only hash-chained attestation and settlement
 // ledgers with read APIs and chain verification. In-memory for SCENARIO-001;
 // the PostgreSQL wiring behind the same API is a noted deviation (poc/README).

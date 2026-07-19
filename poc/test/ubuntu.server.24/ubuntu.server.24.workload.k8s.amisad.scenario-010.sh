@@ -1,6 +1,6 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
-# Copyright (c) 2026 alius-git
+# Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - SCENARIO-010 skeleton checks.
 # Independent Certification of the Full Evidence Trail
 # The sequence runs the shared deploy script first; this script only verifies.

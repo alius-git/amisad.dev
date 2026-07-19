@@ -313,4 +313,4 @@ No persona workflow lacks a serving capability, and no application capability ex
 
 LICENSEURI https://yuruna.link/license
 
-Copyright (c) 2026 alius-git
+Copyright (c) 2026 by Alisson Sol et al.

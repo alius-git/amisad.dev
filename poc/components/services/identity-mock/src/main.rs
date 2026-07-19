@@ -1,5 +1,5 @@
 // LICENSEURI https://yuruna.link/license
-// Copyright (c) 2026 alius-git
+// Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC identity-mock: OIDC-style token issuer standing in for
 // Identity & Verification. Issues opaque tokens per actor and verifies them.
 // SCENARIO-001 uses it for the buyer actor; seller authentication is deferred.

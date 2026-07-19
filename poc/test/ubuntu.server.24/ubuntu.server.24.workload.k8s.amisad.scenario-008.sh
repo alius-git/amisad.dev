@@ -1,6 +1,6 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
-# Copyright (c) 2026 alius-git
+# Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - SCENARIO-008 skeleton checks.
 # Zero-Knowledge Dispute Mediation and Settlement Adjustment
 # The sequence runs the shared deploy script first; this script only verifies.
