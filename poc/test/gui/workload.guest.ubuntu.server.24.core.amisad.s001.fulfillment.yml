@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - s001.fulfillment (Intent-Driven Edge Match and Automated
+# Fulfillment) run against the deployed amisad.core cluster: restore amisad.core,
+# start slice-runtime, seed Elena's offers, drive Maya's auto-close happy path,
+# and assert the FULL Target Verification Point. Grouped onto vm-core with the
+# other core scenarios; the run leaves the VM live as amisad.core. Operator
+# setup and edgeHost semantics: poc/README.md "Running scenarios under Yuruna".
+
+# Perf-log identity. Bump revision on step add/remove.
+# GUID carried over from the pre-split build.amisad.s001.fulfillment for perf continuity.
+sequenceGuid: 4222bb02-7d1f-4c8e-8a4b-3f9e58d71b22
+sequenceRevision: 2
+
+description: "AmisAd s001.fulfillment: run Maya's auto-close happy path on the deployed amisad.core cluster, assert full TVP."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.core.amisad.baseline
+requiresSnapshot:
+  id: "amisad.core"
+variables:
+  # Per-VM guest username (see usernames.md): the core VM is yamisad-core.
+  username: yamisad-core
+  edgeHost: ""
+
+steps:
+  - action: loadDiskSnapshot
+    id: "amisad.core"
+    description: "Restore the deployed AmisAd vm-core cluster"
+
+  - action: retry
+    maxAttempts: 2
+    description: "Login + retry"
+    steps:
+      - snippet: firstLoginPrime
+
+      - action: passwdPrompt
+        pattern: "login:"
+        timeoutSeconds: 600
+        text: "${username}"
+        description: "OCR: login:"
+
+      - action: passwdPrompt
+        pattern: "Password:"
+        text: "${ext:authentication.GetPassword(${username})}"
+        description: "OCR: Password:"
+
+  - action: waitForText
+    pattern: "${username}@"
+    timeoutSeconds: 90
+    description: "OCR: shell prompt"
+
+  - action: fetchAndExecute
+    text: "EDGE_HOST='${edgeHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.workload.core.amisad.s001.fulfillment.sh"
+    description: "Run s001.fulfillment happy path on amisad.core, assert full TVP"
+    waitPattern: "FETCHED AND EXECUTED:"
+    timeoutSeconds: 1800
+
+  - action: saveSystemDiagnostic
+    id: "amisad.s001.fulfillment"
+    description: "Capture diagnostics after the s001.fulfillment run"

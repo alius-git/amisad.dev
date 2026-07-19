@@ -114,26 +114,29 @@ prerequisites; the runner walks the chain cold once, then warm-paths from
 disk snapshots (`requiresSnapshot`):
 
 ```
-start.guest.ubuntu.server.24
-  -> amisad.k8s     (Kubernetes + PostgreSQL + NATS)
-  -> amisad.build   (rustup 1.83, bazelisk, git, python3)   <- the "build VM"
-  -> amisad.s001.fulfillment   (scenario run; VM left live under this name)
+BUILD lineage (amisad.build VM, user yamisad-build):
+  start.guest.ubuntu.server.24
+    -> amisad.build   (rustup 1.83, bazelisk, git)  -- compiles binaries,
+                                                       uploads to the stash
+
+CORE lineage (amisad.core VM = vm-core, user yamisad-core):
+  start.guest.ubuntu.server.24
+    -> amisad.k8s     (Kubernetes + PostgreSQL + NATS)
+    -> amisad.core    (python3; downloads binaries from the stash, deploys
+                       the 10 services)  -- runs s001.fulfillment, s002.fitting, ...
 ```
 
-So "building the build VM" is simply the first run of any sequence that
-requires the `amisad.build` snapshot: expect the cold path to take well over
-an hour; subsequent cycles restore the snapshot and skip straight to the
-top-level sequence.
+The two lineages are independent VMs with an ordering dependency (build must
+upload before core downloads), driven as two ordered `Test-Sequence` runs by
+`poc/build/launch-phase1.ps1` — the single-cycle runner can't drive both. Each
+cold path takes well over an hour; warm cycles restore the snapshots.
 
-**One guest OS username per final VM.** The top-of-chain `username` variable
-cascades all the way down to `start.guest.ubuntu.server.24`, so each
-top-level sequence provisions its base VM under its own account with its own
-vault entry (`yamisad-build` for the build chain, `yamisad-s001` for the
-s001.fulfillment sequence). This decouples the first-login forced-password
-rotation: the base Ubuntu image expires the password on first login, so two
-VMs provisioned from the same image under the *same* username fight over one
-vault entry — one VM's rotation invalidates what the next expects. Separate
-names mean separate vault entries and no cross-VM/cross-run collision.
+**One guest OS username per VM.** The top-of-chain `username` variable cascades
+down to `start.guest.ubuntu.server.24`, so each VM provisions under its own
+account and vault entry — `yamisad-build` for the build VM, `yamisad-core` for
+vm-core. This decouples the first-login forced-password rotation (two VMs from
+the same image under the *same* username fight over one vault entry). The full
+username map is in [usernames.md](usernames.md).
 
 **Repo delivery: lab iteration mode vs production path.** In lab iteration
 mode (current), the guest obtains the repo as a tarball from the host status
@@ -152,10 +155,11 @@ submits Maya's gift need as an opaque envelope; the coordinator verifies the
 token, gets a jurisdiction-checked placement, and dispatches envelope + offers
 to `slice-runtime`; the environment matches, attests its full lifecycle,
 emits the settlement instruction, and destroys itself; seller fulfillment
-confirms the four-way split on the hash-chained ledger. Two sequences drive
-it in VMs: `...build.amisad.baseline` (toolchains, snapshot `amisad.build`)
-and `...build.amisad.s001.fulfillment` (repo fetch, `bazel build //...`,
-`cargo test --workspace`, deploy, happy path, full Target Verification Point).
+confirms the four-way split on the hash-chained ledger. It runs across two VMs:
+the `amisad.build` VM compiles the release binaries and uploads them to the
+stash service; the `amisad.core` VM downloads them, builds thin images, deploys
+the ten services, then runs the happy path and asserts the full Target
+Verification Point. See "Split build and runtime VMs" below.
 
 Deviations from the target design, deliberate and to be retired in later
 scenarios — the wire contracts (`contracts/openapi/`) are unchanged by all of
@@ -173,28 +177,38 @@ them:
   process; each request runs one attested created→attested→executed→destroyed
   environment whose state drops at response time.
 - **Single-VM degraded mode.** With `edgeHost` unset, the scenario runs
-  slice-runtime on the build VM and says so; setting `edgeHost` (ssh target)
-  runs it on a real second VM per the design topology.
+  slice-runtime on the core VM and says so; setting `edgeHost` (ssh target)
+  runs it on a real edge VM per the design topology.
 
-### Running s001.fulfillment
+### Split build and runtime VMs
 
-With the [common setup](#running-scenarios-under-yuruna-common-setup) done,
-the runner discovers and executes
-`workload.guest.ubuntu.server.24.build.amisad.s001.fulfillment`, which:
+The build and runtime roles are separate VMs, connected through the stash
+service (`yuruna-stash-service`), which keeps a durable record of each uploaded
+artifact for later investigation:
 
-1. restores the `amisad.build` snapshot (building it first if absent);
-2. fetches the committed tree to `~/amisad.dev` (lab iteration mode; the
-   production PAT clone is described under the common setup above);
-3. runs `bazel build //...` and `cargo test --workspace`;
-4. deploys the ten services to the in-VM cluster and exposes the NodePorts;
-5. starts `slice-runtime` — on the second VM when `edgeHost` is set
-   (committed value, since the project is re-cloned each cycle), otherwise
-   on the build VM in the documented degraded mode;
-6. runs the `buyer-client` happy path and asserts the full s001.fulfillment
-   Target Verification Point.
+- **`amisad.build`** (user `yamisad-build`) — Rust toolchain only. Runs
+  `cargo build --release --workspace` and `scp`s the binaries tarball to the
+  stash (label `amisad-poc` / `amisad-binaries.tgz`). No Kubernetes.
+- **`amisad.core`** (user `yamisad-core`, = vm-core) — minimal Ubuntu + the
+  `amisad.k8s` runtime stack + `python3`. Finds the artifact via
+  `GET /api/stashes?username=amisad-poc&filename=amisad-binaries`, downloads it,
+  builds the thin distroless images, deploys the ten services (snapshot
+  `amisad.core`), then runs the scenario. `slice-runtime` and `buyer-client`
+  run as bare prebuilt binaries.
 
-Green means `s001.fulfillment HAPPY PATH PASSED` in the cycle log, followed by
-the saved system diagnostic. Failures leave the VM up for inspection.
+With the [common setup](#running-scenarios-under-yuruna-common-setup) done, run
+both VMs in order from an **elevated** PowerShell:
+
+```powershell
+poc\build\serve-local.ps1                 # publish HEAD to the status server
+pwsh poc\build\launch-phase1.ps1 -NoConfigGate
+```
+
+`launch-phase1.ps1` runs `Test-Sequence` twice: (1) `...build.amisad.compile`
+(build + upload), then — only if it exits 0 — (2)
+`...core.amisad.s001.fulfillment` (download + deploy + run). Green means
+`s001.fulfillment HAPPY PATH PASSED`; the run leaves `amisad.build` and a live
+`amisad.core` for inspection.
 
 ### Running the demo by hand
 

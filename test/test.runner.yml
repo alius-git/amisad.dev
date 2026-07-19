@@ -1,7 +1,18 @@
 # Yuruna cycle plan for the AmisAd POC.
-# Top-level workload sequences to drive each cycle; each sequence's own
-# baseline field pulls in its prerequisite chain automatically
-# (start.guest -> k8s.amisad -> build.amisad -> s001.fulfillment).
-# Sequences live under poc/test/gui/; see poc/README.md for the lab setup.
+#
+# The POC now uses TWO independent VMs with an ordering dependency, which the
+# single-cycle runner cannot express (it merges same-guest top-levels onto one
+# VM). They are driven as two ordered Test-Sequence invocations by
+# poc/build/launch-phase1.ps1 instead:
+#   1. workload.guest.ubuntu.server.24.build.amisad.compile
+#        start.guest -> amisad.build -> compile: builds binaries, uploads to the
+#        stash service. Must finish (exit 0) first.
+#   2. workload.guest.ubuntu.server.24.core.amisad.s001.fulfillment
+#        start.guest -> amisad.k8s -> amisad.core (downloads binaries from the
+#        stash + deploys) -> runs s001.fulfillment. Leaves vm-core live.
+# See poc/README.md "Split build and runtime VMs" and poc/usernames.md.
+#
+# The entry below is the primary scenario for reference; do NOT rely on the
+# runner to drive both VMs from one cycle.
 sequences:
-- workload.guest.ubuntu.server.24.build.amisad.s001.fulfillment
+- workload.guest.ubuntu.server.24.core.amisad.s001.fulfillment

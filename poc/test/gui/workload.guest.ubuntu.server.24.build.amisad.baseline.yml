@@ -1,32 +1,27 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - "build VM" baseline: chains the k8s.amisad.baseline infrastructure
-# sequence (Kubernetes + PostgreSQL + NATS, snapshot amisad.k8s), adds the build
-# toolchains (rustup + pinned stable Rust, bazelisk, git, python3), then snapshots
-# as "amisad.build" for build/test sequences to warm-path from.
+# AmisAd POC - "build VM" baseline: a fresh Ubuntu Server plus the build
+# toolchains only (rustup + pinned stable Rust, bazelisk, git, python3),
+# snapshotted as "amisad.build". This VM compiles binaries and nothing else -
+# it is deliberately decoupled from amisad.k8s (no Kubernetes here), which also
+# keeps its guest username (yamisad-build) on its own snapshot lineage.
 
 # Perf-log identity. Bump revision on step add/remove.
+# Rev 2: decoupled from amisad.k8s (build VM needs no Kubernetes); chains
+# start.guest directly instead of restoring the k8s baseline.
 sequenceGuid: 4211aa01-5c0e-4b7d-9f3a-2e8d47c60a11
-sequenceRevision: 1
+sequenceRevision: 2
 
-description: "Ubuntu Server: restore amisad.k8s, install Rust + bazelisk + git build tools, snapshot amisad.build."
+description: "Ubuntu Server: install Rust + bazelisk + git build tools on a fresh VM, snapshot amisad.build."
 baseline:
   ubuntu.server.24:
-    - workload.guest.ubuntu.server.24.k8s.amisad.baseline
-requiresSnapshot:
-  id: "amisad.k8s"
+    - start.guest.ubuntu.server.24
 variables:
-  # Distinct guest OS user per final VM (see s001.fulfillment for the rationale).
-  # When this baseline is the top of the chain it provisions the build VM under
-  # yamisad-build; when it runs as a baseline of a scenario, the scenario's
-  # top-level username cascades down and wins.
+  # Per-VM guest username (see usernames.md): the build VM is yamisad-build.
+  # Cascades down to start.guest so the whole build lineage uses one account.
   username: yamisad-build
 
 steps:
-  - action: loadDiskSnapshot
-    id: "amisad.k8s"
-    description: "Restore the AmisAd k8s + PostgreSQL + NATS baseline checkpoint"
-
   - action: retry
     maxAttempts: 2
     description: "Login + retry"
