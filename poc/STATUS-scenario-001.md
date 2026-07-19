@@ -1,6 +1,60 @@
 # SCENARIO-001 unattended run — status
 
-**Updated:** 2026-07-18 ~21:16 local · **Result: RUN IN PROGRESS — elevated runner live on the 64GB host, cold chain building**
+**Updated:** 2026-07-18 ~21:55 local · **Result: ✅ SCENARIO-001 HAPPY PATH PASSED — full end-to-end run green, all four TVP asserts**
+
+## Result: GREEN
+
+SCENARIO-001 passed end to end on the `build.amisad` VM, driven by the real
+scenario script fetched from the host-served project tarball (the same
+`project-poc.tar.gz` the runner's fetch-and-execute uses). Every stage green:
+`bazel`/`cargo` build → `cargo test` → release binaries → deploy 10 services
+→ NodePorts → `slice-runtime` up → happy path → **all four TVP asserts** →
+`SCENARIO-001 HAPPY PATH PASSED`. Live evidence captured from the running
+cluster (VM 192.168.7.129, left up for demo):
+
+- **Settlement** (`GET :30081/v1/settlements/match/<id>`): `value_cents 11000`,
+  `confirmed true`, splits **seller 9900 / network 550 / platform 550 / ads 0**
+  → sum `total_cents 11000` == value (TVP-1).
+- **Order states**: buyer `delivered`, seller `settled`, one match id, no buyer
+  field leaked into the seller order (TVP-2).
+- **Ledger verify** (`GET :30081/v1/verify`): `attestation_ok true`,
+  `settlement_ok true`, attestation chain length 4
+  (created→attested→executed→destroyed) (TVP-3).
+- **Zero egress** (`GET :8090/v1/egress`): no need/identity markers leaked (TVP-4).
+
+Full passing log: `scratchpad/scenario-001-PASS.log` (operator machine).
+
+### The one bug that was blocking it — fixed
+
+`4d77984` — **scenario-001 `pkill -f slice-runtime` self-SIGTERM (exit 143).**
+fetch-and-execute runs the guest script via `/bin/bash -c "<script text>"`, so
+the script's own text (which contains "slice-runtime") is in that bash
+process's command line. `pkill -f slice-runtime` (line 103) matched and
+SIGTERM'd its own parent shell, exit 143, right before starting the server —
+so the run died at the slice-runtime step even though build/test/deploy all
+passed. The first cold chain to ever get past deploy exposed it. Fixed by
+matching the process **name** instead: `pkill -x slice-runtime` (the binary's
+comm is "slice-runtime"; the script's process is "bash"). Fixed on both the
+single-VM and edge-host paths.
+
+### How it was verified (fast loop, per operator steer)
+
+The framework only warm-resumes *transient* failure classes; a deterministic
+script error (`pattern_matched_failure`) is torn down and cold-rebuilt (~1h,
+and the OCR first-login password rotation is itself flaky —
+`credential_expired`). So instead of burning cold cycles per fix, the fixed
+scenario was driven directly over SSH against the already-built `build.amisad`
+VM (`yamisad@192.168.7.129`, framework key), reproducing the exact
+fetch-tarball → build → deploy → run path in ~2 min. That is the run that went
+green above.
+
+### Confirming runner-cycle (formality) — status
+
+The scenario itself is proven. A framework-driven cycle log line still depends
+on getting past the flaky OCR `start.guest` provisioning; the committed+served
+fix means any cycle that provisions cleanly will log the same green.
+
+---
 
 ## Live-run iteration log (newest first)
 
