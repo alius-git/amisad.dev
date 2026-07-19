@@ -1,6 +1,44 @@
 # SCENARIO-001 unattended run — status
 
-**Updated:** 2026-07-18 ~21:55 local · **Result: ✅ SCENARIO-001 HAPPY PATH PASSED — full end-to-end run green, all four TVP asserts**
+**Updated:** 2026-07-19 ~06:40 local · **Result: ✅ GREEN in the RUNNER CYCLE LOG — full cold chain passed under Yuruna (cycle 002401), plus SSH-proven earlier**
+
+## Official runner-log green (cycle 002401)
+
+The Yuruna runner drove the entire cold chain to green: `start.guest` →
+`k8s.amisad` → `build.amisad` → `scenario-001`, with the scenario's
+fetch-and-execute step (build → `cargo test` → deploy 10 services →
+slice-runtime → happy path → **full TVP**) marked OK and the cycle ending
+`inner exited 0`. The framework marks that step OK only on matching
+`FETCHED AND EXECUTED:`, which the guest script prints solely after
+`SCENARIO-001 HAPPY PATH PASSED`. Cold chain ran ~16 min.
+
+### The SECOND blocker — also a framework issue, now fixed
+
+After the pkill fix (below), cold cycles still failed at `start.guest` step
+6/9 with `credential_expired`. OCR of the guest console showed **`Login
+incorrect`** for user `yamisad`. Root cause: New-VM sets the guest password
+via an **exact SHA-512 hash**, but `start.guest` **types** it via Hyper-V GUI
+keystroke injection. The rotated `yamisad` vault password contained **`@`** (a
+shifted symbol whose PS/2 scancode differs by keyboard layout), so the typed
+login didn't match the hash-set password. Character analysis confirmed it:
+the pre-rotation password had only `-` (cycle 2393 passed); the post-rotation
+one had `@` (every cycle after failed identically). Fix (operator-authorized):
+reset `yamisad`'s vault password to a keystroke-safe alphanumeric value, clear
+`runner.quarantine.json` (the guest had been circuit-broken after 3 failures),
+and set `testCycle.guestQuarantine.enabled: false`. Next cold cycle cleared
+step 6/9 and ran green end-to-end.
+
+**Caveats (framework, not AmisAd code):**
+- `start.guest` re-randomizes `yamisad` on each rotation, so a keystroke-hostile
+  char (`@`, `^`, …) can reappear and intermittently re-break a *cold*
+  provision. Durable fix belongs in the framework (constrain
+  `NewRandomPassword` to keystroke-safe chars, or set the guest password by
+  hash-only and never type it).
+- The runner does **not** warm-path across cycles here: each cycle provisions a
+  fresh `test-` VM and rebuilds rather than reusing the `build.amisad` snapshot
+  VM, so the "second cycle warm-paths" expectation isn't met on this setup.
+
+
 
 ## Result: GREEN
 
