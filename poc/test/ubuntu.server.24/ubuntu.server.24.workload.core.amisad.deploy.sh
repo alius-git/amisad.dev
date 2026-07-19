@@ -46,9 +46,11 @@ curl -fsS --noproxy '*' --connect-timeout 20 "${STASH}/healthz" >/dev/null || {
     echo "STASH UNREACHABLE at ${STASH} - is yuruna-stash-service running and reachable from this guest?" >&2
     exit 3
 }
+# `|| true`: grep exits 1 when the list is empty (no artifact yet), which under
+# `set -o pipefail` would abort here BEFORE the guard below could explain why.
 PERMALINK=$(curl -fsS --noproxy '*' \
     "${STASH}/api/stashes?username=amisad-poc&filename=amisad-binaries&limit=1" \
-    | grep -o '"permalink":"[^"]*"' | head -n1 | cut -d'"' -f4)
+    | grep -o '"permalink":"[^"]*"' | head -n1 | cut -d'"' -f4 || true)
 if [ -z "$PERMALINK" ]; then
     echo "no stash artifact found for label amisad-poc/amisad-binaries - did amisad.build run first?" >&2
     exit 3

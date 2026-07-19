@@ -17,6 +17,14 @@ cd "$POC"
 
 echo "== wait for the deployed services to recover (post-restore boot) =="
 sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
+# amisad.core is a disk snapshot of a running cluster: loadDiskSnapshot cold-boots
+# it, and kubelet's static-pod kube-apiserver only starts answering seconds after
+# shell login. `kubectl wait` does NOT retry a refused TCP dial, so poll a raw
+# endpoint first (up to 300s) before waiting on the deployments.
+for _ in $(seq 1 60); do
+    if kubectl get --raw='/readyz' >/dev/null 2>&1; then break; fi
+    sleep 5
+done
 SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
 for svc in $SERVICES; do
     kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=600s

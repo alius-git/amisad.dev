@@ -61,6 +61,13 @@ BINS="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connec
 # shellcheck disable=SC2086
 tar czf /tmp/amisad-binaries.tgz -C target/release $BINS
 ls -l /tmp/amisad-binaries.tgz
+# The stash sink caps each file at 100 MB and truncates SILENTLY (exits 0), which
+# would surface only as a corrupt gunzip on amisad.core. Fail loud here instead.
+SZ=$(stat -c%s /tmp/amisad-binaries.tgz)
+if [ "$SZ" -ge 104857600 ]; then
+    echo "binaries tarball ${SZ}B exceeds the stash 100MB per-file cap; strip binaries or split." >&2
+    exit 4
+fi
 
 echo "== upload binaries to the stash service =="
 # The stash records the upload (username=amisad-poc, filename=amisad-binaries.tgz)
