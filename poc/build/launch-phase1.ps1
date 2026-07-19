@@ -61,6 +61,19 @@ if ($coreExists) {
     }
 }
 
+# Ensure only the core VM's console is active during first-login keystroke
+# injection: stop the build VM and close stray vmconnect windows. A second
+# live vmconnect (e.g. amisad.build left running after the compile) can steal
+# GUI keystroke focus and corrupt the core VM's login (observed cold-test hang).
+Hyper-V\Get-VM -Name 'amisad.build' -ErrorAction SilentlyContinue |
+    Where-Object { $_.State -eq 'Running' } |
+    ForEach-Object {
+        Write-Output "Stopping $($_.Name) so its console does not steal keystroke focus."
+        Hyper-V\Stop-VM -Name $_.Name -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+Get-Process vmconnect -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 3
+
 $coreExit = Invoke-Seq 'workload.guest.ubuntu.server.24.core.amisad.s001.fulfillment'
 
 Write-Output "--- final VM inventory ---"
