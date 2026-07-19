@@ -63,10 +63,16 @@ SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc co
 # binaries built above, imported STRAIGHT into the cluster's containerd
 # (no registry), and charts pinned to pullPolicy=Never.
 for svc in $SERVICES; do
-    printf 'FROM gcr.io/distroless/cc-debian12\nCOPY target/release/%s /usr/local/bin/%s\nENV PORT=8080\nEXPOSE 8080\nENTRYPOINT ["/usr/local/bin/%s"]\n' \
-        "$svc" "$svc" "$svc" > "/tmp/Dockerfile.${svc}"
-    docker build -f "/tmp/Dockerfile.${svc}" -t "amisad/${svc}:poc" .
+    # Tiny per-service build context (just the binary): the poc context's
+    # .dockerignore excludes target/, which blocked COPY (cycle 252).
+    ctx="/tmp/ctx-${svc}"
+    rm -rf "$ctx" && mkdir -p "$ctx"
+    cp "target/release/${svc}" "$ctx/${svc}"
+    printf 'FROM gcr.io/distroless/cc-debian12\nCOPY %s /usr/local/bin/%s\nENV PORT=8080\nEXPOSE 8080\nENTRYPOINT ["/usr/local/bin/%s"]\n' \
+        "$svc" "$svc" "$svc" > "$ctx/Dockerfile"
+    docker build -t "amisad/${svc}:poc" "$ctx"
     docker save "amisad/${svc}:poc" | sudo ctr -n k8s.io images import -
+    rm -rf "$ctx"
     helm upgrade --install "$svc" "workloads/services/${svc}" \
         --namespace amisad --create-namespace \
         --set "image=amisad/${svc}:poc" --set "pullPolicy=Never"
