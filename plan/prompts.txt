@@ -280,8 +280,8 @@ Environment:
 - Framework: c:\git\yuruna (do NOT modify framework code; editing
   test/test.config.yml and the runtime auth files under test/status/ is fine).
 - Project: C:\git\alius-git\amisad.dev (change freely).
-- GitHub PAT: provided out-of-band in this session. Step 0: store it in
-  test.config.yml repositories.GH_TOKEN and the auth vault (amisad-pat).
+- GitHub PAT: ask user if not already in test.config.yml repositories.GH_TOKEN.
+  Store copy in the auth vault (amisad-pat).
   NEVER write it into any file under amisad.dev, any commit, log, or report.
 
 Decisions (locked — do not re-ask):
