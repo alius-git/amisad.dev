@@ -4,6 +4,19 @@
 
 ## Live-run iteration log (newest first)
 
+- **Operator policy updates applied**: everything committed AND pushed from
+  now on; framework stays pristine (my `New-VM.ps1` memory edit reverted —
+  and note: the as-is framework has NO memory parameter in
+  `guest.ubuntu.server.24/New-VM.ps1` (only VMName/CachingProxyUrl/
+  Username), so VMs are fixed at 12GB until a parameter lands upstream).
+- **Fresh-runner cycles 2–3**: Start-VM OOM caused by a ZOMBIE
+  `test-ubuntu-server-24-01` (12GB, VHDX locked) at 192.168.7.148 from an
+  interrupted cycle. Automation classifier blocks both UAC elevation and
+  SSH shutdown from the agent; operator eviction needed (one command:
+  `Stop-VM -Name test-ubuntu-server-24-01 -TurnOff -Force` elevated, or
+  ssh + `sudo poweroff` with the yuruna key). A memory watcher resumes
+  the loop automatically once freed.
+
 - **Fresh-runner cycle 2**: `Start-VM` memory failure again — this 32GB host
   is at the edge even at 10GB/8GB VM sizing. Transfer kit for a bigger
   machine staged at `C:\git\amisad-transfer\` (see TRANSFER.md there).
