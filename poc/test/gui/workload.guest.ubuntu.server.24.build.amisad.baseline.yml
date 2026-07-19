@@ -17,7 +17,11 @@ baseline:
 requiresSnapshot:
   id: "k8s.amisad"
 variables:
-  username: yamisad
+  # Distinct guest OS user per final VM (see scenario-001 for the rationale).
+  # When this baseline is the top of the chain it provisions the build VM under
+  # yamisad-build; when it runs as a baseline of a scenario, the scenario's
+  # top-level username cascades down and wins.
+  username: yamisad-build
 
 steps:
   - action: loadDiskSnapshot

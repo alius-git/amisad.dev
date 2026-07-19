@@ -36,7 +36,15 @@ baseline:
 requiresSnapshot:
   id: "build.amisad"
 variables:
-  username: yamisad
+  # Distinct guest OS user per final VM. The top-of-chain username cascades all
+  # the way down to start.guest.ubuntu.server.24, so each top-level sequence
+  # provisions its base VM under its own account with its own vault entry. This
+  # decouples the first-login forced-password rotation: the base Ubuntu image
+  # expires the password on first login, so two VMs provisioned from the same
+  # image under the SAME username fight over one vault entry (one VM's rotation
+  # invalidates what the next expects). Separate names => separate vault entries
+  # => no cross-VM/cross-run collision. Build chain uses yamisad-build.
+  username: yamisad-s001
   edgeHost: ""
 
 steps:
