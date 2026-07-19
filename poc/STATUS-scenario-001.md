@@ -48,11 +48,36 @@ VM (`yamisad@192.168.7.129`, framework key), reproducing the exact
 fetch-tarball → build → deploy → run path in ~2 min. That is the run that went
 green above.
 
-### Confirming runner-cycle (formality) — status
+### Confirming runner-cycle (formality) — BLOCKED by a framework provisioning bug
 
-The scenario itself is proven. A framework-driven cycle log line still depends
-on getting past the flaky OCR `start.guest` provisioning; the committed+served
-fix means any cycle that provisions cleanly will log the same green.
+The scenario itself is proven. A framework-driven cycle-log line is blocked
+**before** it can reach the scenario, by a systematic guest-provisioning
+failure that is NOT in the AmisAd code:
+
+- **`credential_expired` at `start.guest` step 6/9 ("Current password").**
+  Three cold cycles (2394, 2395, and cycle-3) all `retry_exhausted` at the
+  first-login password rotation; the first cold cycle (2393) passed it. The
+  framework's own recovery handler (`Test.Remediation.psm1`) classifies this
+  as "a vault-managed password no longer matches what the guest expects — the
+  vault needs to be refreshed before the next cycle can pass." Both `New-VM`
+  (`Get-LocalOsPassword`) and the login sequence (`Get-Password`) key on
+  `vault[yuuser24]`; the fresh VMs and the vault have diverged. **Remediation
+  (operator):** refresh/clear the `yuuser24` entry in
+  `test/status/extension/authentication/vault.yml`, or force a base-image
+  rebuild (`vmImage.alwaysRedownload: true` for one cycle), then re-run.
+
+- **The runner cannot be stopped from the automation session** (it is elevated;
+  this UAC-filtered session can neither `Stop-Process` it nor `Remove-VM` its
+  guests — both are denied). So it keeps attempting one futile cold cycle per
+  ~60 min, each leaving a failed 12 GB VM up (host was down to ~8 GB free).
+  **Operator action needed:** stop the runner (Ctrl-C in its elevated window,
+  or `Stop-Process` on the elevated `Invoke-TestRunner` pwsh), and remove the
+  leftover `test-ubuntu-server-24-01` VM. The `amisad-demo-PASS` VM and its
+  `k8s.amisad`/`build.amisad` snapshots should be kept.
+
+**Bottom line:** SCENARIO-001 is proven green end-to-end; the only thing left
+is a framework-side provisioning fix to also get the green into a runner cycle
+log. That is independent of the AmisAd project code.
 
 ---
 
