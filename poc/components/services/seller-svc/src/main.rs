@@ -14,6 +14,10 @@ struct Order {
     tenant: String,
     need_context: String,
     state: String,
+    // In-person booking (s002.fitting): the appointment slot, empty for
+    // plain fulfillment orders. Structurally identity-free like the rest.
+    slot_id: String,
+    slot_day: String,
 }
 
 struct State {
@@ -35,13 +39,23 @@ fn next_state(current: &str, requested: &str) -> bool {
 }
 
 fn order_json(order: &Order) -> json::Json {
-    json::obj(vec![
+    let mut pairs = vec![
         ("match_id", json::s(&order.match_id)),
         ("offer_id", json::s(&order.offer_id)),
         ("tenant", json::s(&order.tenant)),
         ("need_context", json::s(&order.need_context)),
         ("state", json::s(&order.state)),
-    ])
+    ];
+    if !order.slot_id.is_empty() {
+        pairs.push((
+            "appointment",
+            json::obj(vec![
+                ("slot_id", json::s(&order.slot_id)),
+                ("day", json::s(&order.slot_day)),
+            ]),
+        ));
+    }
+    json::obj(pairs)
 }
 
 fn handle(state: &mut State, req: &Request) -> Response {
@@ -86,6 +100,8 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 tenant,
                 need_context: body.str_of("need_context").unwrap_or("").to_string(),
                 state: String::from("committed"),
+                slot_id: body.str_of("slot_id").unwrap_or("").to_string(),
+                slot_day: body.str_of("slot_day").unwrap_or("").to_string(),
             };
             state.orders.push(order);
             Response::json(
@@ -93,6 +109,18 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 &json::obj(vec![
                     ("match_id", json::s(&match_id)),
                     ("state", json::s("committed")),
+                ]),
+            )
+        }
+        ("GET", "/v1/orders") => {
+            // The order board: everything on it, appointment included. Also
+            // how the harness asserts "zero commitments before the buyer acts".
+            let orders: Vec<json::Json> = state.orders.iter().map(order_json).collect();
+            Response::json(
+                200,
+                &json::obj(vec![
+                    ("count", json::n(state.orders.len() as i64)),
+                    ("orders", json::arr(orders)),
                 ]),
             )
         }
@@ -198,10 +226,34 @@ mod tests {
             tenant: "elena-atelier".to_string(),
             need_context: "wish-list serving set, deliver by day 14".to_string(),
             state: "committed".to_string(),
+            slot_id: String::new(),
+            slot_day: String::new(),
         };
         let text = order_json(&order).dump();
         for marker in ["buyer", "identity", "subscriber", "maya", "token"] {
             assert!(!text.contains(marker), "order leaked marker: {marker}");
+        }
+        assert!(!text.contains("appointment"), "no appointment without a slot");
+    }
+
+    #[test]
+    fn booked_order_carries_an_identity_free_appointment() {
+        let order = Order {
+            match_id: "m2".to_string(),
+            offer_id: "linen-midi-04".to_string(),
+            tenant: "elena-atelier".to_string(),
+            need_context: "midi dress fitting before Friday".to_string(),
+            state: "committed".to_string(),
+            slot_id: "thu-1".to_string(),
+            slot_day: "thursday".to_string(),
+        };
+        let record = order_json(&order);
+        let appointment = record.get("appointment").expect("appointment present");
+        assert_eq!(appointment.str_of("slot_id"), Some("thu-1"));
+        assert_eq!(appointment.str_of("day"), Some("thursday"));
+        let text = record.dump();
+        for marker in ["buyer", "identity", "subscriber", "maya", "token"] {
+            assert!(!text.contains(marker), "appointment leaked marker: {marker}");
         }
     }
 }

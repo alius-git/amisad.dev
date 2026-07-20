@@ -1,10 +1,11 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
-// AmisAd POC buyer-client: the headless buyer driving s001.fulfillment's happy
-// path (plays Maya - poc/README.md "s001.fulfillment implementation notes"). The
-// need JSON deliberately contains no identity fields - the token
-// authenticates, the need describes. Usage: submit (print match as one JSON
-// line) | wait <handle> (poll until delivered; exit 1 on timeout) | run.
+// AmisAd POC buyer-client: the headless buyer playing Maya. s001.fulfillment:
+// submit (auto-close match as one JSON line) | wait <handle> | run.
+// s002.fitting: shortlist (manual dress need -> handle + shortlist) |
+// book <handle> <offer_id> <slot_id> | notifications <handle>. The need JSON
+// deliberately contains no identity fields - the token authenticates, the
+// need describes.
 
 use amisad_common::{json, request};
 use std::process::exit;
@@ -35,12 +36,43 @@ fn need_json() -> json::Json {
     ])
 }
 
+/// Maya's s002.fitting need: a considered purchase with layered constraints,
+/// an explicit exclusion, a fitting deadline (day ordinal, Monday=1), and
+/// MANUAL closing - nothing may commit until she books.
+fn dress_need_json() -> json::Json {
+    json::obj(vec![
+        ("category", json::s("dresses")),
+        ("budget_cents", json::n(20000)),
+        ("region", json::s("region-a")),
+        ("deadline_days", json::n(4)),
+        ("auto_close", json::b(false)),
+        (
+            "attributes",
+            json::arr(vec![
+                json::s("midi"),
+                json::s("sleeves"),
+                json::s("warm-fabric"),
+            ]),
+        ),
+        ("exclusions", json::arr(vec![json::s("dusty-blue")])),
+        ("fitting_before_ordinal", json::n(5)),
+        (
+            "context",
+            json::s("Midi dress with sleeves in a warm-weather fabric; fitting near the office before Friday"),
+        ),
+    ])
+}
+
 fn fail(message: &str) -> ! {
     eprintln!("buyer-client: {message}");
     exit(1)
 }
 
 fn submit() -> json::Json {
+    submit_need(&need_json())
+}
+
+fn submit_need(need: &json::Json) -> json::Json {
     let token_body = json::obj(vec![
         ("actor", json::s("maya")),
         ("class", json::s("person")),
@@ -66,7 +98,7 @@ fn submit() -> json::Json {
     let need_body = json::obj(vec![
         ("token", json::s(&token)),
         ("jurisdiction", json::s("region-a")),
-        ("envelope", json::s(&need_json().dump())),
+        ("envelope", json::s(&need.dump())),
     ])
     .dump();
     match request(
@@ -82,6 +114,36 @@ fn submit() -> json::Json {
             Err(e) => fail(&format!("match result unreadable: {e}")),
         },
         Ok((status, body)) => fail(&format!("need submission failed ({status}): {body}")),
+        Err(e) => fail(&format!("coordinator unreachable: {e}")),
+    }
+}
+
+fn book(handle: &str, offer_id: &str, slot_id: &str) {
+    let body = json::obj(vec![
+        ("handle", json::s(handle)),
+        ("offer_id", json::s(offer_id)),
+        ("slot_id", json::s(slot_id)),
+    ])
+    .dump();
+    match request(
+        "POST",
+        &format!("{}/v1/bookings", coordinator_url()),
+        Some(&body),
+    ) {
+        Ok((201, text)) => println!("{}", text.trim()),
+        Ok((status, body)) => fail(&format!("booking failed ({status}): {body}")),
+        Err(e) => fail(&format!("coordinator unreachable: {e}")),
+    }
+}
+
+fn notifications(handle: &str) {
+    match request(
+        "GET",
+        &format!("{}/v1/notifications/{handle}", coordinator_url()),
+        None,
+    ) {
+        Ok((200, text)) => println!("{}", text.trim()),
+        Ok((status, body)) => fail(&format!("notifications failed ({status}): {body}")),
         Err(e) => fail(&format!("coordinator unreachable: {e}")),
     }
 }
@@ -127,7 +189,20 @@ fn main() {
                 None => fail("no handle in match result"),
             }
         }
-        _ => fail("usage: buyer-client submit | wait <handle> | run"),
+        Some("shortlist") => {
+            submit_need(&dress_need_json());
+        }
+        Some("book") => match (args.get(2), args.get(3), args.get(4)) {
+            (Some(handle), Some(offer_id), Some(slot_id)) => book(handle, offer_id, slot_id),
+            _ => fail("usage: buyer-client book <handle> <offer_id> <slot_id>"),
+        },
+        Some("notifications") => match args.get(2) {
+            Some(handle) => notifications(handle),
+            None => fail("usage: buyer-client notifications <handle>"),
+        },
+        _ => fail(
+            "usage: buyer-client submit | wait <handle> | run | shortlist | book <handle> <offer_id> <slot_id> | notifications <handle>",
+        ),
     }
 }
 
@@ -145,5 +220,18 @@ mod tests {
         assert_eq!(need.i64_of("budget_cents"), Some(12000));
         assert_eq!(need.bool_of("auto_close"), Some(true));
         assert!(need.str_of("context").is_some());
+    }
+
+    #[test]
+    fn dress_need_is_manual_with_exclusions() {
+        let need = dress_need_json();
+        assert_eq!(need.bool_of("auto_close"), Some(false));
+        assert_eq!(need.i64_of("fitting_before_ordinal"), Some(5));
+        let exclusions = need.get("exclusions").and_then(|e| e.as_arr()).unwrap();
+        assert!(exclusions.iter().any(|e| e.as_str() == Some("dusty-blue")));
+        let text = need.dump();
+        for marker in ["maya", "identity", "subscriber", "token", "phone"] {
+            assert!(!text.contains(marker), "dress need leaked marker: {marker}");
+        }
     }
 }

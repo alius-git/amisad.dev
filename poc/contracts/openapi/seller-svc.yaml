@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: seller-svc
-  description: "Seller catalog with standing auto-close deals and the order state machine (s001.fulfillment surface). Order records structurally contain no buyer identity."
-  version: 0.1.0
+  description: "Seller catalog with standing auto-close deals, fitting slots, and the order state machine (s001.fulfillment + s002.fitting surface). Order records structurally contain no buyer identity."
+  version: 0.2.0
 paths:
   /health:
     get:
@@ -16,7 +16,7 @@ paths:
         "200": { description: "Service name and version" }
   /v1/offers:
     post:
-      summary: "Create an offer (body: offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close)"
+      summary: "Create an offer (body: offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close; optional attributes[], fitting_slots[{slot_id, day, day_ordinal}])"
       requestBody:
         required: true
         content:
@@ -34,7 +34,7 @@ paths:
         "200": { description: "offers: [...]" }
   /v1/orders:
     post:
-      summary: "Create a committed order from a match (body: match_id, offer_id, tenant, need_context)"
+      summary: "Create a committed order from a match or booking (body: match_id, offer_id, tenant, need_context; optional slot_id, slot_day for an in-person appointment)"
       requestBody:
         required: true
         content:
@@ -43,6 +43,10 @@ paths:
       responses:
         "201": { description: "Order committed" }
         "409": { description: "Order exists" }
+    get:
+      summary: "The order board: every order, appointments included (also how the harness asserts zero pre-booking commitments)"
+      responses:
+        "200": { description: "count, orders: [...]" }
   /v1/orders/advance:
     post:
       summary: "Advance an order (committed->provisioning->fulfilled); fulfilled confirms settlement and lands settled (body: match_id, state)"
@@ -61,5 +65,5 @@ paths:
       parameters:
         - { name: matchId, in: path, required: true, schema: { type: string } }
       responses:
-        "200": { description: "match_id, offer_id, tenant, need_context, state" }
+        "200": { description: "match_id, offer_id, tenant, need_context, state; appointment {slot_id, day} when booked" }
         "404": { description: "No order" }

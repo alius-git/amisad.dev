@@ -6,6 +6,7 @@
 # fully cold, each chain under its own per-scenario user (poc/usernames.md) and
 # ending in its own live VM (amisad.sNNN.<word>). The single-cycle runner
 # cannot express that ordering (it merges same-guest top-levels onto one VM),
-# so the entry below is the primary scenario for cycle monitoring only.
+# so the entry below is the latest implemented scenario, for cycle monitoring
+# only (its cold chain covers the same build-artifact + deploy path).
 sequences:
-- workload.guest.ubuntu.server.24.core.amisad.s001.fulfillment
+- workload.guest.ubuntu.server.24.core.amisad.s002.fitting

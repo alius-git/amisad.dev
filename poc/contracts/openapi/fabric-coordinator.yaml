@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: fabric-coordinator
-  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope (s001.fulfillment surface)"
-  version: 0.1.0
+  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope (s001.fulfillment + s002.fitting surface)"
+  version: 0.2.0
 paths:
   /health:
     get:
@@ -16,17 +16,39 @@ paths:
         "200": { description: "Service name and version" }
   /v1/needs:
     post:
-      summary: "Submit a need (body: token, jurisdiction, envelope). The envelope is an opaque string opened only inside the sealed environment."
+      summary: "Submit a need (body: token, jurisdiction, envelope). The envelope is an opaque string opened only inside the sealed environment. Auto-close needs return a committed match; manual-policy needs return a shortlist and commit nothing."
       requestBody:
         required: true
         content:
           application/json:
             schema: { type: object }
       responses:
-        "201": { description: "Match (handle, match_id, environment_id, offer)" }
+        "201": { description: "Match (handle, match_id, environment_id, offer) or shortlist (handle, environment_id, shortlist) for manual policy" }
         "401": { description: "Unverified actor" }
         "404": { description: "No fitting offer" }
         "503": { description: "No placement / dependency unavailable" }
+  /v1/bookings:
+    post:
+      summary: "Book a shortlist offer's fitting slot (body: handle, offer_id, slot_id). This is the commitment for a manual-policy need: posts the settlement instruction and creates the seller order with the appointment - need context only, no buyer identity."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Booking (handle, match_id, offer_id, slot_id, slot_day, state committed); delivers the booking-confirmed notification" }
+        "400": { description: "Missing handle/offer_id/slot_id" }
+        "404": { description: "Unknown handle / offer not on shortlist / slot not offered" }
+        "409": { description: "Already booked" }
+        "502": { description: "Ledger or seller rejected the commitment" }
+        "503": { description: "Ledger unavailable" }
+  /v1/notifications/{handle}:
+    get:
+      summary: "Per-handle notification log, in delivery order (the buyer's only notification surface; s002.fitting asserts its exact length)"
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "notifications: [{kind}]" }
   /v1/orders/{handle}:
     get:
       summary: "Pseudonymous order status for the buyer (in-progress | delivered)"

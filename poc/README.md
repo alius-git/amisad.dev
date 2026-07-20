@@ -11,10 +11,10 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 |------|----------|
 | `MODULE.bazel`, `.bazelversion`, `BUILD.bazel` | Bazel root (bzlmod, pinned via bazelisk) |
 | `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `serve-local.ps1` (lab-mode guest source, served from HEAD) |
-| `contracts/` | OpenAPI specs per service — real `/v1` routes for the s001.fulfillment services, `/health`/`/version` stubs for the rest — + event-schema placeholders |
+| `contracts/` | OpenAPI specs per service — real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest — + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
-| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001.fulfillment happy path |
+| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001.fulfillment and s002.fitting paths |
 | `components/apps/buyer-flutter/` | Flutter buyer app (Android side-loaded) |
 | `components/apps/web-spa/` | React + TS + Vite shell, 7 role-scoped module routes |
 | `components/lib/amisad-common/` | Shared config/health plumbing crate |
@@ -22,7 +22,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: build/k8s/core baselines, the build-VM compile, and s001.fulfillment |
+| `test/gui/` | Active Yuruna sequences: build/k8s/core baselines, the build-VM compile, s001.fulfillment, s002.fitting |
 | `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 | `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
@@ -42,7 +42,7 @@ sources.
 ## Deliberate skeleton choices
 
 - **No third-party crates yet.** The services serve their routes — including
-  the full s001.fulfillment `/v1` surface — with a std-only responder in
+  the implemented scenarios' full `/v1` surface — with a std-only responder in
   `amisad-common`, so builds need no crate fetches and no committed lockfile.
   Wire **crate_universe** in `MODULE.bazel` together with the first external
   dependency (Actix replaces the responder when the surface outgrows it —
@@ -54,12 +54,11 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **Sequences deploy then verify `/health` only** (scenarios s002–s010,
-  parked under `test/gui-parked/`). Each
-  scenario sequence restores the `amisad.k8s` snapshot (Kubernetes +
-  PostgreSQL + NATS), runs the shared deploy script, and checks the services
-  that scenario traverses. The real steps are enumerated as TODO blocks
-  pointing at [../plan/scenarios.md](../plan/scenarios.md).
+- **Sequences deploy then verify `/health` only** (scenarios s003–s010,
+  parked under `test/gui-parked/`). Each parked skeleton still targets the
+  k8s tier; the rework needed to activate one is the checklist in
+  [test.md](test.md). The real steps are enumerated as TODO blocks pointing
+  at [../plan/scenarios.md](../plan/scenarios.md).
 
 ## Running it
 
@@ -107,6 +106,20 @@ them:
 - **Single-VM degraded mode.** With `edgeHost` unset, the scenario runs
   slice-runtime on the scenario VM and says so; setting `edgeHost` (ssh target)
   runs it on a real edge VM per the design topology.
+
+## s002.fitting implementation notes
+
+s002.fitting adds the manual-policy path on the same services: the sealed
+environment evaluates the extended constraints (required attributes,
+exclusions, fitting availability) and, for a manual need, returns a
+**shortlist** and commits nothing — no match id, no settlement instruction.
+The buyer's explicit booking (`buyer-client book`) is the commitment: the
+coordinator posts the settlement instruction (splits shared with the sealed
+auto path via `amisad-common`), creates the seller order with an
+**identity-free appointment** (slot id + day), and delivers the second of
+exactly two notifications (`shortlist`, `booking-confirmed`) on its per-handle
+log — the buyer's only surface. Elena advancing the order to fulfilled settles
+the split as in s001.
 
 ---
 

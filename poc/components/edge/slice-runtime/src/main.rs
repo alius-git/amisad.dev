@@ -6,7 +6,7 @@
 // telemetry; the envelope is opened ONLY here, and everything that leaves is
 // in the egress log, so zero-leak is checkable. Deviations: poc/README.md.
 
-use amisad_common::{json, request, serve_app, sha256, Request, Response, ServiceInfo};
+use amisad_common::{json, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct State {
@@ -25,6 +25,55 @@ fn now_nanos() -> u128 {
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_nanos())
         .unwrap_or(0)
+}
+
+/// Attribute constraints (s002.fitting): every required attribute must be on
+/// the offer, and no excluded attribute may be. A need that states nothing
+/// requires nothing; an offer missing a required attribute fails closed.
+fn attributes_ok(need: &json::Json, offer: &json::Json) -> bool {
+    let empty = Vec::new();
+    let offer_attrs: Vec<&str> = offer
+        .get("attributes")
+        .and_then(|a| a.as_arr())
+        .unwrap_or(&empty)
+        .iter()
+        .filter_map(|a| a.as_str())
+        .collect();
+    if let Some(required) = need.get("attributes").and_then(|a| a.as_arr()) {
+        for want in required {
+            match want.as_str() {
+                Some(w) if offer_attrs.contains(&w) => {}
+                _ => return false,
+            }
+        }
+    }
+    if let Some(excluded) = need.get("exclusions").and_then(|a| a.as_arr()) {
+        for banned in excluded {
+            if let Some(b) = banned.as_str() {
+                if offer_attrs.contains(&b) {
+                    return false;
+                }
+            }
+        }
+    }
+    true
+}
+
+/// A stated fitting requirement (day ordinal, Monday=1) needs at least one
+/// bookable slot strictly earlier. No requirement stated = no check.
+fn fitting_ok(need: &json::Json, offer: &json::Json) -> bool {
+    let before = match need.i64_of("fitting_before_ordinal") {
+        Some(d) => d,
+        None => return true,
+    };
+    offer
+        .get("fitting_slots")
+        .and_then(|s| s.as_arr())
+        .is_some_and(|slots| {
+            slots
+                .iter()
+                .any(|slot| slot.i64_of("day_ordinal").is_some_and(|d| d < before))
+        })
 }
 
 /// An offer fits when every stated constraint holds. Missing fields fail
@@ -46,21 +95,16 @@ fn qualifies(need: &json::Json, offer: &json::Json) -> bool {
         (Some(deadline), Some(days)) => days <= deadline,
         _ => false,
     };
-    category_ok && price_ok && region_ok && deadline_ok
+    category_ok
+        && price_ok
+        && region_ok
+        && deadline_ok
+        && attributes_ok(need, offer)
+        && fitting_ok(need, offer)
 }
 
 fn auto_closable(need: &json::Json, offer: &json::Json) -> bool {
     need.bool_of("auto_close") == Some(true) && offer.bool_of("auto_close") == Some(true)
-}
-
-/// Four-way split: network 5%, platform 5%, ads 0 (no campaign in this
-/// scenario), seller the remainder - sums exactly by construction.
-fn splits_for(value_cents: i64) -> (i64, i64, i64, i64) {
-    let network = value_cents * 5 / 100;
-    let platform = value_cents * 5 / 100;
-    let ads = 0;
-    let seller = value_cents - network - platform - ads;
-    (seller, network, platform, ads)
 }
 
 /// Every outbound payload goes through here so the egress log is complete.
@@ -125,6 +169,59 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     return Response::error(400, &format!("bad envelope: {e}"));
                 }
             };
+
+            if need.bool_of("auto_close") != Some(true) {
+                // Manual policy (s002.fitting): the environment returns a
+                // shortlist of every fully-fitting offer and commits NOTHING -
+                // no match id, no settlement instruction, no order. The buyer's
+                // explicit booking is the only path to a commitment.
+                // Only slots the need's fitting constraint allows may leave
+                // the environment - the shortlist must honor EVERY constraint,
+                // and the coordinator cannot re-check (it never parses the
+                // sealed need).
+                let before = need.i64_of("fitting_before_ordinal");
+                let entries: Vec<json::Json> = offers
+                    .iter()
+                    .filter(|offer| qualifies(&need, offer))
+                    .map(|offer| {
+                        let allowed_slots: Vec<json::Json> = offer
+                            .get("fitting_slots")
+                            .and_then(|s| s.as_arr())
+                            .map(|slots| {
+                                slots
+                                    .iter()
+                                    .filter(|slot| match before {
+                                        Some(b) => slot
+                                            .i64_of("day_ordinal")
+                                            .is_some_and(|d| d < b),
+                                        None => true,
+                                    })
+                                    .cloned()
+                                    .collect()
+                            })
+                            .unwrap_or_default();
+                        json::obj(vec![
+                            ("offer_id", json::s(offer.str_of("offer_id").unwrap_or(""))),
+                            ("tenant", json::s(offer.str_of("tenant").unwrap_or(""))),
+                            ("title", json::s(offer.str_of("title").unwrap_or(""))),
+                            ("price_cents", json::n(offer.i64_of("price_cents").unwrap_or(0))),
+                            ("fitting_slots", json::arr(allowed_slots)),
+                        ])
+                    })
+                    .collect();
+                let shortlist = json::obj(vec![
+                    ("environment_id", json::s(&environment_id)),
+                    ("shortlist", json::arr(entries)),
+                    (
+                        "need_context",
+                        json::s(need.str_of("context").unwrap_or("")),
+                    ),
+                ]);
+                state.egress.push(format!("shortlist-record:{}", shortlist.dump()));
+                attest(state, &environment_id, &jurisdiction, "executed");
+                attest(state, &environment_id, &jurisdiction, "destroyed");
+                return Response::json(201, &shortlist);
+            }
 
             let best = offers
                 .iter()
@@ -258,5 +355,50 @@ mod tests {
             assert_eq!(seller + network + platform + ads, value);
             assert!(seller >= 0 && network >= 0 && platform >= 0 && ads >= 0);
         }
+    }
+
+    fn dress_need() -> json::Json {
+        json::parse(
+            "{\"category\":\"dresses\",\"budget_cents\":20000,\"region\":\"region-a\",\"deadline_days\":4,\"auto_close\":false,\"attributes\":[\"midi\",\"sleeves\",\"warm-fabric\"],\"exclusions\":[\"dusty-blue\"],\"fitting_before_ordinal\":5,\"context\":\"midi dress, fitting before Friday\"}",
+        )
+        .unwrap()
+    }
+
+    fn dress_offer(attrs: &str, slot_ordinal: Option<i64>) -> json::Json {
+        let slots = match slot_ordinal {
+            Some(d) => format!(
+                "[{{\"slot_id\":\"s1\",\"day\":\"thursday\",\"day_ordinal\":{d}}}]"
+            ),
+            None => String::from("[]"),
+        };
+        json::parse(&format!(
+            "{{\"offer_id\":\"d1\",\"tenant\":\"elena-atelier\",\"title\":\"dress\",\"category\":\"dresses\",\"region\":\"region-a\",\"price_cents\":18000,\"deliver_by_days\":3,\"auto_close\":false,\"attributes\":{attrs},\"fitting_slots\":{slots}}}"
+        ))
+        .unwrap()
+    }
+
+    #[test]
+    fn attribute_constraints_and_exclusions_gate_the_shortlist() {
+        let n = dress_need();
+        // Fully fitting: all required attributes, no excluded one, Thursday slot.
+        assert!(qualifies(&n, &dress_offer("[\"midi\",\"sleeves\",\"warm-fabric\"]", Some(4))));
+        // Excluded attribute (dusty-blue) disqualifies even when all else fits.
+        assert!(!qualifies(
+            &n,
+            &dress_offer("[\"midi\",\"sleeves\",\"warm-fabric\",\"dusty-blue\"]", Some(4))
+        ));
+        // Missing a required attribute fails closed.
+        assert!(!qualifies(&n, &dress_offer("[\"midi\",\"sleeves\"]", Some(4))));
+        // No fitting slot before Friday (ordinal 5) fails the fitting constraint.
+        assert!(!qualifies(&n, &dress_offer("[\"midi\",\"sleeves\",\"warm-fabric\"]", Some(6))));
+        assert!(!qualifies(&n, &dress_offer("[\"midi\",\"sleeves\",\"warm-fabric\"]", None)));
+    }
+
+    #[test]
+    fn s001_needs_state_no_attribute_constraints() {
+        // The s001 need has no attributes/exclusions/fitting fields, so the
+        // extended checks are vacuous and the base constraints still decide.
+        let n = need();
+        assert!(qualifies(&n, &offer(11000, "housewares", "region-a", 10, true)));
     }
 }

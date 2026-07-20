@@ -33,6 +33,7 @@ For running the demo by hand instead, see [demo.md](demo.md).
    # One keystroke-safe (alphanumeric) password per username — see usernames.md:
    Set-Password -Username yamisad-build -NewPassword '<alnum>'
    Set-Password -Username yamisad-s001  -NewPassword '<alnum>'
+   Set-Password -Username yamisad-s002  -NewPassword '<alnum>'
    ```
 
    The vault is a local, gitignored file. Seed each `yamisad-sNNN` before its

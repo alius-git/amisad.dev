@@ -33,6 +33,7 @@ New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 # Ordered scenario registry: append here as scenarios are implemented (test.md).
 $Scenarios = @(
     @{ Sequence = 'workload.guest.ubuntu.server.24.core.amisad.s001.fulfillment'; FinalVm = 'amisad.s001.fulfillment' }
+    @{ Sequence = 'workload.guest.ubuntu.server.24.core.amisad.s002.fitting'; FinalVm = 'amisad.s002.fitting' }
 )
 
 function Stop-LabConsole {

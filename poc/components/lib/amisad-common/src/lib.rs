@@ -197,6 +197,18 @@ pub fn request(method: &str, url: &str, body: Option<&str>) -> Result<(u16, Stri
     Ok((status, response_body))
 }
 
+/// Four-way settlement split: network 5%, platform 5%, ads 0 (campaign-free
+/// scenarios), seller the remainder — sums exactly by construction. Shared so
+/// the sealed auto-close path (slice-runtime) and the manual booking
+/// commitment (fabric-coordinator) cannot drift apart.
+pub fn splits_for(value_cents: i64) -> (i64, i64, i64, i64) {
+    let network = value_cents * 5 / 100;
+    let platform = value_cents * 5 / 100;
+    let ads = 0;
+    let seller = value_cents - network - platform - ads;
+    (seller, network, platform, ads)
+}
+
 pub mod sha256 {
     //! SHA-256 (FIPS 180-4), used for the hash-chained ledgers and derived ids.
 

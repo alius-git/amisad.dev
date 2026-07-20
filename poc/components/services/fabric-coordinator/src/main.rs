@@ -3,12 +3,25 @@
 // AmisAd POC fabric-coordinator: routes need envelopes to sealed slice
 // environments and relays results. By construction this service NEVER parses
 // the envelope - it is carried as an opaque string from the buyer to the
-// environment; only the slice-runtime opens it.
+// environment; only the slice-runtime opens it. Manual-policy needs
+// (s002.fitting) come back as a shortlist: nothing commits until the buyer
+// books, and the coordinator is the buyer's only surface, so it also keeps
+// the per-handle notification log the scenario asserts on.
 
-use amisad_common::{json, request, serve_app, sha256, Request, Response, ServiceInfo};
+use amisad_common::{json, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
+
+struct Shortlist {
+    handle: String,
+    environment_id: String,
+    need_context: String,
+    entries: Vec<json::Json>,
+    booked: bool,
+}
 
 struct State {
     orders: Vec<(String, String)>, // (handle, match_id)
+    shortlists: Vec<Shortlist>,
+    notifications: Vec<(String, String)>, // (handle, kind), in delivery order
 }
 
 fn identity_url() -> String {
@@ -20,9 +33,19 @@ fn resource_url() -> String {
 fn seller_url() -> String {
     std::env::var("SELLER_URL").unwrap_or_else(|_| String::from("http://seller-svc:8080"))
 }
+fn ledger_url() -> String {
+    std::env::var("LEDGER_URL").unwrap_or_else(|_| String::from("http://ledger-svc:8080"))
+}
 
 fn handle_for(match_id: &str) -> String {
     sha256::hex_digest(format!("{match_id}|handle").as_bytes())[..16].to_string()
+}
+
+/// Same derivation the sealed environment uses for auto-closed matches, so a
+/// manual booking's match id is coherent with the attestation trail of the
+/// environment that produced its shortlist.
+fn booking_match_id(environment_id: &str, offer_id: &str) -> String {
+    sha256::hex_digest(format!("{environment_id}|{offer_id}").as_bytes())
 }
 
 /// Pseudonymous buyer-facing view of the seller-side order state.
@@ -120,7 +143,33 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(e) => return Response::error(503, &format!("slice unavailable: {e}")),
             };
 
-            // 5. Committed order to the seller: need context only, no identity.
+            // 5a. Manual policy: the environment returned a shortlist, not a
+            // match. Deliver it (notification 1) and commit NOTHING - no
+            // seller order exists until the buyer books.
+            if let Some(entries) = match_record.get("shortlist").and_then(|s| s.as_arr()) {
+                let environment_id =
+                    match_record.str_of("environment_id").unwrap_or("").to_string();
+                let need_context =
+                    match_record.str_of("need_context").unwrap_or("").to_string();
+                let entries = entries.clone();
+                let handle = handle_for(&environment_id);
+                let response = json::obj(vec![
+                    ("handle", json::s(&handle)),
+                    ("environment_id", json::s(&environment_id)),
+                    ("shortlist", json::arr(entries.clone())),
+                ]);
+                state.shortlists.push(Shortlist {
+                    handle: handle.clone(),
+                    environment_id,
+                    need_context,
+                    entries,
+                    booked: false,
+                });
+                state.notifications.push((handle, String::from("shortlist")));
+                return Response::json(201, &response);
+            }
+
+            // 5b. Committed order to the seller: need context only, no identity.
             let match_id = match_record.str_of("match_id").unwrap_or("").to_string();
             let offer = match_record.get("offer").cloned().unwrap_or(json::Json::Null);
             let order_body = json::obj(vec![
@@ -133,12 +182,16 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ),
             ])
             .dump();
-            if let Err(e) = request(
+            match request(
                 "POST",
                 &format!("{}/v1/orders", seller_url()),
                 Some(&order_body),
             ) {
-                return Response::error(502, &format!("order create failed: {e}"));
+                Ok((201, _)) => {}
+                Ok((status, body)) => {
+                    return Response::error(502, &format!("order create ({status}): {body}"))
+                }
+                Err(e) => return Response::error(502, &format!("order create failed: {e}")),
             }
 
             let handle = handle_for(&match_id);
@@ -156,7 +209,138 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ]),
             )
         }
+        ("POST", "/v1/bookings") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let (handle, offer_id, slot_id) = match (
+                body.str_of("handle"),
+                body.str_of("offer_id"),
+                body.str_of("slot_id"),
+            ) {
+                (Some(h), Some(o), Some(s)) => (h.to_string(), o.to_string(), s.to_string()),
+                _ => return Response::error(400, "handle, offer_id, slot_id required"),
+            };
+            let index = match state.shortlists.iter().position(|s| s.handle == handle) {
+                Some(i) => i,
+                None => return Response::error(404, "unknown handle"),
+            };
+            if state.shortlists[index].booked {
+                return Response::error(409, "already booked");
+            }
+            let (environment_id, need_context, entry) = {
+                let sl = &state.shortlists[index];
+                let entry = match sl
+                    .entries
+                    .iter()
+                    .find(|e| e.str_of("offer_id") == Some(offer_id.as_str()))
+                {
+                    Some(e) => e.clone(),
+                    None => return Response::error(404, "offer not on shortlist"),
+                };
+                (sl.environment_id.clone(), sl.need_context.clone(), entry)
+            };
+            // Fail closed like every other missing field: a slot without a
+            // day is not a bookable slot.
+            let slot_day = entry
+                .get("fitting_slots")
+                .and_then(|s| s.as_arr())
+                .and_then(|slots| {
+                    slots
+                        .iter()
+                        .find(|s| s.str_of("slot_id") == Some(slot_id.as_str()))
+                        .and_then(|s| s.str_of("day").map(|d| d.to_string()))
+                });
+            let slot_day = match slot_day {
+                Some(d) => d,
+                None => return Response::error(404, "slot not offered"),
+            };
+            let tenant = entry.str_of("tenant").unwrap_or("").to_string();
+            let value_cents = entry.i64_of("price_cents").unwrap_or(0);
+            let match_id = booking_match_id(&environment_id, &offer_id);
+
+            // The booking IS the commitment: settlement instruction first
+            // (fail closed - no instruction, no order), then the seller order
+            // with the appointment. Need context only, no identity.
+            let (seller, network, platform, ads) = splits_for(value_cents);
+            let instruction = json::obj(vec![
+                ("match_id", json::s(&match_id)),
+                ("value_cents", json::n(value_cents)),
+                (
+                    "splits",
+                    json::obj(vec![
+                        ("seller_cents", json::n(seller)),
+                        ("network_cents", json::n(network)),
+                        ("platform_cents", json::n(platform)),
+                        ("ads_cents", json::n(ads)),
+                    ]),
+                ),
+            ])
+            .dump();
+            match request(
+                "POST",
+                &format!("{}/v1/settlements/instructions", ledger_url()),
+                Some(&instruction),
+            ) {
+                Ok((201, _)) => {}
+                Ok((status, body)) => {
+                    return Response::error(502, &format!("settlement instruction ({status}): {body}"))
+                }
+                Err(e) => return Response::error(503, &format!("ledger unavailable: {e}")),
+            }
+            let order_body = json::obj(vec![
+                ("match_id", json::s(&match_id)),
+                ("offer_id", json::s(&offer_id)),
+                ("tenant", json::s(&tenant)),
+                ("need_context", json::s(&need_context)),
+                ("slot_id", json::s(&slot_id)),
+                ("slot_day", json::s(&slot_day)),
+            ])
+            .dump();
+            match request(
+                "POST",
+                &format!("{}/v1/orders", seller_url()),
+                Some(&order_body),
+            ) {
+                Ok((201, _)) => {}
+                Ok((status, body)) => {
+                    return Response::error(502, &format!("order create ({status}): {body}"))
+                }
+                Err(e) => return Response::error(502, &format!("order create failed: {e}")),
+            }
+            state.shortlists[index].booked = true;
+            state.orders.push((handle.clone(), match_id.clone()));
+            state
+                .notifications
+                .push((handle.clone(), String::from("booking-confirmed")));
+            Response::json(
+                201,
+                &json::obj(vec![
+                    ("handle", json::s(&handle)),
+                    ("match_id", json::s(&match_id)),
+                    ("offer_id", json::s(&offer_id)),
+                    ("slot_id", json::s(&slot_id)),
+                    ("slot_day", json::s(&slot_day)),
+                    ("state", json::s("committed")),
+                ]),
+            )
+        }
         _ => {
+            if let ("GET", Some(handle)) =
+                (req.method.as_str(), req.path.strip_prefix("/v1/notifications/"))
+            {
+                let list: Vec<json::Json> = state
+                    .notifications
+                    .iter()
+                    .filter(|(h, _)| h == handle)
+                    .map(|(_, kind)| json::obj(vec![("kind", json::s(kind))]))
+                    .collect();
+                return Response::json(
+                    200,
+                    &json::obj(vec![("notifications", json::arr(list))]),
+                );
+            }
             if let ("GET", Some(handle)) =
                 (req.method.as_str(), req.path.strip_prefix("/v1/orders/"))
             {
@@ -197,7 +381,11 @@ fn main() -> std::io::Result<()> {
             name: "fabric-coordinator",
             version: env!("CARGO_PKG_VERSION"),
         },
-        State { orders: Vec::new() },
+        State {
+            orders: Vec::new(),
+            shortlists: Vec::new(),
+            notifications: Vec::new(),
+        },
         handle,
     )
 }
@@ -214,6 +402,17 @@ mod tests {
         assert_eq!(a, b);
         assert_ne!(a, c);
         assert_eq!(a.len(), 16);
+    }
+
+    #[test]
+    fn booking_match_id_matches_the_sealed_derivation() {
+        // Must stay sha256("<environment_id>|<offer_id>") - the same formula
+        // slice-runtime uses for auto-closed matches - so manual bookings
+        // reference the producing environment coherently.
+        let a = booking_match_id("env-1", "offer-1");
+        let b = sha256::hex_digest("env-1|offer-1".as_bytes());
+        assert_eq!(a, b);
+        assert_ne!(a, booking_match_id("env-1", "offer-2"));
     }
 
     #[test]
