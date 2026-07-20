@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - s003.silence (Consent Revocation and the Right to Silence)
+# against the design topology: restore amisad-vm-core (that restore IS the
+# per-scenario state reset), then over SSH start slice-runtime on
+# amisad-vm-edge-a, seed the in-flight order and two open needs, pause
+# participation, prove silence (a perfectly fitting new offer produces no
+# match, no environment, no notification), settle the pre-revocation order,
+# withdraw (aggregation drops her contribution), resume (open needs served
+# again), and assert the FULL Target Verification Point. Entirely SSH-driven.
+# The VM stays amisad-vm-core and is left live.
+
+# Perf-log identity. Bump revision on step add/remove.
+# Rev 2: real implementation on the design topology (skeleton unparked).
+sequenceGuid: 42b0e16a-99fa-4086-b2b2-6227ba35ea6a
+sequenceRevision: 2
+
+description: "AmisAd s003.silence: restore amisad-vm-core, pause/withdraw/resume Maya's consent, assert silence, honored commitments, and the immutable consent history."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.amisad-vm-core.deploy
+requiresSnapshot:
+  id: "amisad-vm-core"
+variables:
+  username: amisad-vm-core-admin
+  hostname: amisad-vm-core
+
+steps:
+  - action: loadDiskSnapshot
+    id: "amisad-vm-core"
+    description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
+
+  - action: sshWaitReady
+    timeoutSeconds: 300
+    description: "SSH up after the restore"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-core.s003.silence.sh"
+    timeoutSeconds: 1800
+    description: "Run s003.silence consent revocation flow (edge on amisad-vm-edge-a), assert full TVP"
+
+  - action: saveSystemDiagnostic
+    id: "amisad.s003.silence"
+    description: "Capture diagnostics after the s003.silence run"

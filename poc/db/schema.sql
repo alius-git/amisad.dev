@@ -26,8 +26,8 @@ CREATE SCHEMA IF NOT EXISTS ledger;
 -- hard insert failure instead of a silently non-verifying chain.
 CREATE TABLE IF NOT EXISTS ledger.consent_ledger (
     id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    grant_type  text        NOT NULL, -- participation | mandate | disclosure
-    payload     text        NOT NULL,
+    grant_type  text        NOT NULL, -- participation | contribution | mandate | disclosure
+    payload     text        NOT NULL, -- {subject, grant_type, action, ts}; subject is a pseudonymous hash
     prev_hash   text        NOT NULL UNIQUE,
     row_hash    text        NOT NULL,
     created_at  timestamptz NOT NULL DEFAULT now()

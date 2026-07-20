@@ -1,7 +1,11 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
-// AmisAd POC ledger-svc: append-only hash-chained attestation and settlement
-// ledgers with read APIs and chain verification. With DATABASE_URL set, every
+// AmisAd POC ledger-svc: append-only hash-chained attestation, settlement,
+// and consent ledgers with read APIs and chain verification. Consent entries
+// (grant_type participation | contribution, action grant | revoke, keyed by
+// a pseudonymous subject hash) fold newest-wins into a per-subject state;
+// the chain is the immutable history s003.silence asserts. With
+// DATABASE_URL set, every
 // append persists to PostgreSQL FIRST (write-through) and the chains reload on
 // start, so the ledgers survive pod restarts; without it the store is
 // in-memory (tests, skeleton mode). Payloads persist as canonical TEXT - jsonb
@@ -92,8 +96,30 @@ struct Instruction {
 struct State {
     attestation: Chain,
     settlement: Chain,
+    consent: Chain,
     instructions: Vec<Instruction>,
     db: Option<Client>,
+}
+
+const GRANT_TYPES: [&str; 2] = ["participation", "contribution"];
+
+/// Newest-wins fold of one subject's consent entries for one grant type:
+/// "granted", "revoked", or "none" (no entry - the coordinator decides the
+/// default policy; the ledger only reports facts).
+fn consent_state(chain: &Chain, subject: &str, grant_type: &str) -> &'static str {
+    let mut state = "none";
+    for entry in &chain.entries {
+        if entry.payload.str_of("subject") == Some(subject)
+            && entry.payload.str_of("grant_type") == Some(grant_type)
+        {
+            state = match entry.payload.str_of("action") {
+                Some("grant") => "granted",
+                Some("revoke") => "revoked",
+                _ => state,
+            };
+        }
+    }
+    state
 }
 
 /// DATABASE_URL unset/empty -> in-memory. Set but unreachable -> exit(1);
@@ -362,13 +388,48 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ]),
             )
         }
+        ("POST", "/v1/consents") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let grant_type = body.str_of("grant_type").unwrap_or("");
+            let action = body.str_of("action").unwrap_or("");
+            if body.str_of("subject").is_none()
+                || !GRANT_TYPES.contains(&grant_type)
+                || !matches!(action, "grant" | "revoke")
+                || body.i64_of("ts").is_none()
+            {
+                return Response::error(
+                    400,
+                    "subject, grant_type (participation|contribution), action (grant|revoke), ts required",
+                );
+            }
+            if let Some(db) = state.db.as_mut() {
+                let (prev, hash) = state.consent.next_for(&body);
+                let grant_type = grant_type.to_string();
+                if let Err(e) = db.execute(
+                    "INSERT INTO ledger.consent_ledger (grant_type, payload, prev_hash, row_hash) VALUES ($1, $2, $3, $4)",
+                    &[&grant_type, &body.dump(), &prev, &hash],
+                ) {
+                    return store_error(db, "consent store", e);
+                }
+            }
+            let (index, hash) = state.consent.append(body);
+            Response::json(
+                201,
+                &json::obj(vec![("index", json::n(index as i64)), ("hash", json::s(&hash))]),
+            )
+        }
         ("GET", "/v1/verify") => Response::json(
             200,
             &json::obj(vec![
                 ("attestation_ok", json::b(state.attestation.verify())),
                 ("settlement_ok", json::b(state.settlement.verify())),
+                ("consent_ok", json::b(state.consent.verify())),
                 ("attestation_len", json::n(state.attestation.entries.len() as i64)),
                 ("settlement_len", json::n(state.settlement.entries.len() as i64)),
+                ("consent_len", json::n(state.consent.entries.len() as i64)),
             ]),
         ),
         _ => {
@@ -385,6 +446,32 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 return Response::json(
                     200,
                     &json::obj(vec![("entries", json::arr(entries))]),
+                );
+            }
+            if let ("GET", Some(subject)) =
+                (req.method.as_str(), path.strip_prefix("/v1/consents/subject/"))
+            {
+                let history: Vec<json::Json> = state
+                    .consent
+                    .entries
+                    .iter()
+                    .filter(|e| e.payload.str_of("subject") == Some(subject))
+                    .map(|e| e.payload.clone())
+                    .collect();
+                return Response::json(
+                    200,
+                    &json::obj(vec![
+                        ("subject", json::s(subject)),
+                        (
+                            "participation",
+                            json::s(consent_state(&state.consent, subject, "participation")),
+                        ),
+                        (
+                            "contribution",
+                            json::s(consent_state(&state.consent, subject, "contribution")),
+                        ),
+                        ("history", json::arr(history)),
+                    ]),
                 );
             }
             if let ("GET", Some(match_id)) =
@@ -426,13 +513,14 @@ fn handle(state: &mut State, req: &Request) -> Response {
 
 fn main() -> std::io::Result<()> {
     let mut db = open_db();
-    let (attestation, settlement, instructions) = match db.as_mut() {
+    let (attestation, settlement, consent, instructions) = match db.as_mut() {
         Some(client) => (
             load_chain(client, "ledger.attestation_ledger"),
             load_chain(client, "ledger.settlement_ledger"),
+            load_chain(client, "ledger.consent_ledger"),
             load_instructions(client),
         ),
-        None => (Chain::default(), Chain::default(), Vec::new()),
+        None => (Chain::default(), Chain::default(), Chain::default(), Vec::new()),
     };
     serve_app(
         ServiceInfo {
@@ -442,6 +530,7 @@ fn main() -> std::io::Result<()> {
         State {
             attestation,
             settlement,
+            consent,
             instructions,
             db,
         },
@@ -486,6 +575,30 @@ mod tests {
     }
 
     #[test]
+    fn consent_fold_is_newest_wins_per_subject_and_type() {
+        let mut chain = Chain::default();
+        let entry = |subject: &str, grant_type: &str, action: &str| {
+            json::obj(vec![
+                ("subject", json::s(subject)),
+                ("grant_type", json::s(grant_type)),
+                ("action", json::s(action)),
+                ("ts", json::n(1)),
+            ])
+        };
+        assert_eq!(consent_state(&chain, "s1", "participation"), "none");
+        chain.append(entry("s1", "participation", "grant"));
+        chain.append(entry("s1", "contribution", "grant"));
+        chain.append(entry("s2", "participation", "grant"));
+        chain.append(entry("s1", "participation", "revoke"));
+        assert_eq!(consent_state(&chain, "s1", "participation"), "revoked");
+        assert_eq!(consent_state(&chain, "s1", "contribution"), "granted");
+        assert_eq!(consent_state(&chain, "s2", "participation"), "granted");
+        chain.append(entry("s1", "participation", "grant"));
+        assert_eq!(consent_state(&chain, "s1", "participation"), "granted");
+        assert!(chain.verify());
+    }
+
+    #[test]
     fn splits_round_trip_through_canonical_dump() {
         // Guards the persistence format: load_instructions parses what
         // splits_dump wrote, preserving party order and amounts.
@@ -515,6 +628,7 @@ mod tests {
         let mut state = State {
             attestation: Chain::default(),
             settlement: Chain::default(),
+            consent: Chain::default(),
             instructions: Vec::new(),
             db: None,
         };

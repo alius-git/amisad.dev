@@ -3,7 +3,9 @@
 // AmisAd POC buyer-client: the headless buyer playing Maya. s001.fulfillment:
 // submit (auto-close match as one JSON line) | wait <handle> | run.
 // s002.fitting: shortlist (manual dress need -> handle + shortlist) |
-// book <handle> <offer_id> <slot_id> | notifications <handle>. The need JSON
+// book <handle> <offer_id> <slot_id> | notifications <handle>.
+// s003.silence: open <dress|decanter> (needs that stay open until a fitting
+// offer appears) | pause | withdraw | resume | consents. The need JSON
 // deliberately contains no identity fields - the token authenticates, the
 // need describes.
 
@@ -63,9 +65,104 @@ fn dress_need_json() -> json::Json {
     ])
 }
 
+/// s003.silence open need 1: an auto-close dress need no seeded offer fits
+/// yet - it stays open until a seller publishes a fitting offer.
+fn open_dress_need_json() -> json::Json {
+    json::obj(vec![
+        ("category", json::s("dresses")),
+        ("budget_cents", json::n(20000)),
+        ("region", json::s("region-a")),
+        ("deadline_days", json::n(3)),
+        ("auto_close", json::b(true)),
+        (
+            "attributes",
+            json::arr(vec![
+                json::s("midi"),
+                json::s("sleeves"),
+                json::s("warm-fabric"),
+            ]),
+        ),
+        (
+            "context",
+            json::s("Midi dress with sleeves in a warm-weather fabric, ready this week"),
+        ),
+    ])
+}
+
+/// s003.silence open need 2: stays open for the whole scenario (nothing
+/// published ever fits it), so aggregation still has one contributing need
+/// until withdrawal ends contribution.
+fn open_decanter_need_json() -> json::Json {
+    json::obj(vec![
+        ("category", json::s("housewares")),
+        ("budget_cents", json::n(9000)),
+        ("region", json::s("region-a")),
+        ("deadline_days", json::n(21)),
+        ("auto_close", json::b(true)),
+        (
+            "context",
+            json::s("Crystal decanter for an anniversary, modest budget"),
+        ),
+    ])
+}
+
 fn fail(message: &str) -> ! {
     eprintln!("buyer-client: {message}");
     exit(1)
+}
+
+fn issue_token() -> String {
+    let token_body = json::obj(vec![
+        ("actor", json::s("maya")),
+        ("class", json::s("person")),
+    ])
+    .dump();
+    match request(
+        "POST",
+        &format!("{}/v1/tokens", identity_url()),
+        Some(&token_body),
+    ) {
+        Ok((201, text)) => match json::parse(&text)
+            .ok()
+            .and_then(|j| j.str_of("token").map(|t| t.to_string()))
+        {
+            Some(t) => t,
+            None => fail("token response unreadable"),
+        },
+        Ok((status, body)) => fail(&format!("token request failed ({status}): {body}")),
+        Err(e) => fail(&format!("identity unreachable: {e}")),
+    }
+}
+
+fn consent(grant_type: &str, action: &str) {
+    let body = json::obj(vec![
+        ("token", json::s(&issue_token())),
+        ("grant_type", json::s(grant_type)),
+        ("action", json::s(action)),
+    ])
+    .dump();
+    match request(
+        "POST",
+        &format!("{}/v1/consents", coordinator_url()),
+        Some(&body),
+    ) {
+        Ok((201, text)) => println!("{}", text.trim()),
+        Ok((status, body)) => fail(&format!("consent {action} failed ({status}): {body}")),
+        Err(e) => fail(&format!("coordinator unreachable: {e}")),
+    }
+}
+
+fn consents() {
+    let body = json::obj(vec![("token", json::s(&issue_token()))]).dump();
+    match request(
+        "POST",
+        &format!("{}/v1/consents/state", coordinator_url()),
+        Some(&body),
+    ) {
+        Ok((200, text)) => println!("{}", text.trim()),
+        Ok((status, body)) => fail(&format!("consent state failed ({status}): {body}")),
+        Err(e) => fail(&format!("coordinator unreachable: {e}")),
+    }
 }
 
 fn submit() -> json::Json {
@@ -73,25 +170,7 @@ fn submit() -> json::Json {
 }
 
 fn submit_need(need: &json::Json) -> json::Json {
-    let token_body = json::obj(vec![
-        ("actor", json::s("maya")),
-        ("class", json::s("person")),
-    ])
-    .dump();
-    let token = match request(
-        "POST",
-        &format!("{}/v1/tokens", identity_url()),
-        Some(&token_body),
-    ) {
-        Ok((201, text)) => match json::parse(&text).ok().and_then(|j| {
-            j.str_of("token").map(|t| t.to_string())
-        }) {
-            Some(t) => t,
-            None => fail("token response unreadable"),
-        },
-        Ok((status, body)) => fail(&format!("token request failed ({status}): {body}")),
-        Err(e) => fail(&format!("identity unreachable: {e}")),
-    };
+    let token = issue_token();
 
     // The need travels as an opaque envelope; only the sealed environment
     // opens it. (Envelope encryption is a noted POC deviation.)
@@ -200,8 +279,27 @@ fn main() {
             Some(handle) => notifications(handle),
             None => fail("usage: buyer-client notifications <handle>"),
         },
+        Some("open") => match args.get(2).map(|s| s.as_str()) {
+            Some("dress") => {
+                submit_need(&open_dress_need_json());
+            }
+            Some("decanter") => {
+                submit_need(&open_decanter_need_json());
+            }
+            _ => fail("usage: buyer-client open <dress|decanter>"),
+        },
+        // s003.silence consent controls. Pause stops matching; withdraw also
+        // ends aggregate contribution; resume re-grants both (and the
+        // coordinator immediately re-serves the open needs).
+        Some("pause") => consent("participation", "revoke"),
+        Some("withdraw") => consent("contribution", "revoke"),
+        Some("resume") => {
+            consent("contribution", "grant");
+            consent("participation", "grant");
+        }
+        Some("consents") => consents(),
         _ => fail(
-            "usage: buyer-client submit | wait <handle> | run | shortlist | book <handle> <offer_id> <slot_id> | notifications <handle>",
+            "usage: buyer-client submit | wait <handle> | run | shortlist | book <handle> <offer_id> <slot_id> | notifications <handle> | open <dress|decanter> | pause | withdraw | resume | consents",
         ),
     }
 }
@@ -220,6 +318,21 @@ mod tests {
         assert_eq!(need.i64_of("budget_cents"), Some(12000));
         assert_eq!(need.bool_of("auto_close"), Some(true));
         assert!(need.str_of("context").is_some());
+    }
+
+    #[test]
+    fn open_needs_are_auto_close_and_identity_free() {
+        for need in [open_dress_need_json(), open_decanter_need_json()] {
+            assert_eq!(need.bool_of("auto_close"), Some(true));
+            let text = need.dump();
+            for marker in ["maya", "identity", "subscriber", "token", "phone"] {
+                assert!(!text.contains(marker), "open need leaked marker: {marker}");
+            }
+        }
+        // The decanter budget must stay below every seeded housewares offer,
+        // or the need would match at submit time instead of staying open.
+        let budget = open_decanter_need_json().i64_of("budget_cents").unwrap();
+        assert!(budget < 11000, "decanter budget {budget} can match a seeded offer");
     }
 
     #[test]

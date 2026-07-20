@@ -9,4 +9,4 @@
 # orchestration, so the entry below is the latest implemented scenario, for
 # cycle monitoring only.
 sequences:
-- workload.guest.ubuntu.server.24.amisad-vm-core.s002.fitting
+- workload.guest.ubuntu.server.24.amisad-vm-core.s003.silence

@@ -14,7 +14,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `contracts/` | OpenAPI specs per service — real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest — + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
-| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001.fulfillment and s002.fitting paths |
+| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001.fulfillment, s002.fitting, and s003.silence paths |
 | `components/apps/buyer-flutter/` | Flutter buyer app (Android side-loaded) |
 | `components/apps/web-spa/` | React + TS + Vite shell, 7 role-scoped module routes |
 | `components/lib/amisad-common/` | Shared config/health plumbing crate |
@@ -22,7 +22,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-vm-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment, s002.fitting |
+| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-vm-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment, s002.fitting, s003.silence |
 | `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 | `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
@@ -54,7 +54,7 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **Sequences deploy then verify `/health` only** (scenarios s003–s010,
+- **Sequences deploy then verify `/health` only** (scenarios s004–s010,
   parked under `test/gui-parked/`). Each parked skeleton still targets the
   k8s tier; the rework needed to activate one is the checklist in
   [test.md](test.md). The real steps are enumerated as TODO blocks pointing
@@ -108,8 +108,11 @@ them:
 - **Envelope opacity instead of encryption.** Upstream services carry the
   envelope as an opaque string and never parse it (checkable in code and by
   the egress assert); actual envelope crypto is TODO.
-- **Polling instead of NATS events.** Order status flows by HTTP polling;
-  the JetStream wiring lands with the event-driven scenarios (s003+).
+- **Direct HTTP events, not NATS yet.** Order status flows by polling;
+  s003.silence's offer-published event is a direct fire-and-forget HTTP
+  notify from seller-svc to the coordinator (a detached thread, so the two
+  single-threaded services cannot deadlock). The JetStream wiring stays a
+  later step.
 - **Logical ephemeral environments.** `slice-runtime` is a persistent edge
   process; each request runs one attested created→attested→executed→destroyed
   environment whose state drops at response time.
@@ -131,6 +134,30 @@ auto path via `amisad-common`), creates the seller order with an
 exactly two notifications (`shortlist`, `booking-confirmed`) on its per-handle
 log — the buyer's only surface. Elena advancing the order to fulfilled settles
 the split as in s001.
+
+## s003.silence implementation notes
+
+s003.silence makes consent the third hash-chained ledger and the fabric's
+execution-time gate. A need with no fitting offer now stays **open** on the
+coordinator; publishing an offer fires an offer-published event that re-runs
+matching over the open needs — and the consent check inside that cycle is
+what makes revocation *silent*: `buyer-client pause` appends a participation
+revocation (keyed by a pseudonymous subject hash, never a name), after which
+a perfectly fitting new offer produces no environment, no match, and no
+notification, while the pre-revocation order still settles normally.
+`withdraw` ends aggregate contribution (insights-svc's minimal aggregation
+cycle counts only consent-contributing open needs — counts, never content);
+`resume` re-grants and the coordinator immediately re-serves the open needs.
+The TVP asserts zero attestation-ledger growth across the paused window, the
+full grant → revoke → re-grant history on the verifying consent chain, and
+its rows in PostgreSQL.
+
+s003-specific deviations, deliberate: the coordinator's open needs are
+in-memory (a pod restart drops them while the consent chain persists);
+bookings still ride the handle as bearer and are not consent-gated (the
+booking step's consent check is future work); and the subject pseudonym is an
+unsalted hash of the verified actor with a world-readable per-subject consent
+history — pseudonymous, not anonymous.
 
 ---
 

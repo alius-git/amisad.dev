@@ -39,6 +39,7 @@ New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $Scenarios = @(
     'workload.guest.ubuntu.server.24.amisad-vm-core.s001.fulfillment'
     'workload.guest.ubuntu.server.24.amisad-vm-core.s002.fitting'
+    'workload.guest.ubuntu.server.24.amisad-vm-core.s003.silence'
 )
 
 function Stop-LabConsole {

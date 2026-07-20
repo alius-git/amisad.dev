@@ -32,8 +32,8 @@ re-arm below for a fresh walkthrough.
 ## Driving the demo
 
 NodePorts on `amisad-vm-core`: coordinator `30080`, ledger `30081`, resource
-`30082`, seller `30083`, identity `30084`. The same APIs answer from the host
-or LAN at `http://<vm-ip>:<nodeport>`.
+`30082`, seller `30083`, identity `30084`, insights `30085`. The same APIs
+answer from the host or LAN at `http://<vm-ip>:<nodeport>`.
 
 **Re-arm (only after a VM restart).** A reboot of `amisad-vm-core` loses the
 in-memory state (coordinator routing, identity tokens, the registered edge) —
@@ -96,6 +96,41 @@ curl -s http://$NODE_IP:30083/v1/orders/match/<match_id>        # Elena's board:
 curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<match_id>","state":"provisioning"}'
 curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<match_id>","state":"fulfilled"}'   # -> settled
 target/release/buyer-client notifications <handle>    # exactly two: shortlist, booking-confirmed
+```
+
+**s003.silence** — the kill switch: pause participation and the network goes
+silent for you; commitments made before still complete; resuming brings your
+open needs back to life. `buyer-client` runs as the admin; every step is
+observable via curl. Fresh snapshot required: after an automated run,
+`linen-wrap-09` is already in the durable catalog, so `open dress` would
+match immediately instead of staying open — restore the `amisad-vm-core`
+snapshot first (as with s002's zero-state checks):
+
+```bash
+# Signup consents + one in-flight order + two open needs (nothing fits them):
+target/release/buyer-client resume                    # records the signup grants
+curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
+target/release/buyer-client submit                    # in-flight order (do NOT advance yet)
+target/release/buyer-client open dress                # stays open - no fitting offer
+target/release/buyer-client open decanter             # stays open
+curl -s -X POST http://$NODE_IP:30085/v1/aggregation/cycle   # contributions: 2
+
+# Pause, then watch a PERFECT offer produce... nothing:
+target/release/buyer-client pause                     # revocation on the consent ledger
+curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"linen-wrap-09","tenant":"brisa-outlet","title":"Linen wrap dress","category":"dresses","region":"region-a","price_cents":13000,"deliver_by_days":2,"auto_close":true,"attributes":["midi","sleeves","warm-fabric"]}'
+curl -s http://$NODE_IP:30080/v1/notifications/<dress_handle>   # [] - silence
+curl -s http://$NODE_IP:30083/v1/orders                         # still just the in-flight order
+
+# The pre-revocation commitment is honored (as elena):
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'   # -> settled
+
+# Withdraw entirely, then resume - the open needs are served immediately:
+target/release/buyer-client withdraw
+curl -s -X POST http://$NODE_IP:30085/v1/aggregation/cycle   # contributions: 0
+target/release/buyer-client resume                           # "rematched":1 - the dress matches now
+target/release/buyer-client consents                         # full grant-revoke-regrant history
+curl -s http://$NODE_IP:30081/v1/verify                      # all three chains verify
 ```
 
 **Mobile (manual demo):** build and side-load the buyer app against the VM's

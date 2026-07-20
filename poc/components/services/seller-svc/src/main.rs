@@ -103,6 +103,31 @@ fn load_store(db: &mut Client) -> (Vec<json::Json>, Vec<Order>) {
 fn ledger_url() -> String {
     std::env::var("LEDGER_URL").unwrap_or_else(|_| String::from("http://ledger-svc:8080"))
 }
+fn coordinator_url() -> String {
+    std::env::var("COORDINATOR_URL")
+        .unwrap_or_else(|_| String::from("http://fabric-coordinator:8080"))
+}
+
+/// Offer-published event to the fabric (s003: a new offer may fit an open
+/// need). Detached thread on purpose: this single-threaded server must NOT
+/// block on the coordinator, whose matching cycle calls back into our
+/// catalog - a synchronous notify would deadlock the pair. (Direct HTTP
+/// event; NATS JetStream remains the target transport - poc/README.md.)
+fn notify_offer_published(offer: String) {
+    std::thread::spawn(move || {
+        match request(
+            "POST",
+            &format!("{}/v1/offers/published", coordinator_url()),
+            Some(&offer),
+        ) {
+            Ok((status, body)) if status >= 300 => {
+                eprintln!("offer-published event returned {status}: {body}");
+            }
+            Err(e) => eprintln!("offer-published event failed: {e}"),
+            Ok(_) => {}
+        }
+    });
+}
 
 /// The only legal explicit advances. Fulfilled -> settled happens internally
 /// on settlement confirmation, never by request.
@@ -171,6 +196,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 }
             }
             // Upsert in memory too, matching the database's primary key.
+            let offer_text = body.dump();
             match state
                 .offers
                 .iter_mut()
@@ -179,6 +205,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(existing) => *existing = body,
                 None => state.offers.push(body),
             }
+            notify_offer_published(offer_text);
             Response::json(201, &json::obj(vec![("offer_id", json::s(&offer_id))]))
         }
         ("POST", "/v1/orders") => {

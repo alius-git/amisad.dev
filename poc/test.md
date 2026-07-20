@@ -109,15 +109,16 @@ is enforced by the database itself. `deploy.sh` passes `DATABASE_URL` (node
 IP:5432) to ledger-svc and seller-svc via the `databaseUrl` helm value; writes
 go to PostgreSQL first, and pods reload state on start. s001 asserts the rows
 landed and that a `kubectl rollout restart` reloads verifying chains and the
-settled order; s002 asserts the booked appointment row. Empty `databaseUrl`
-(the chart default) keeps a service in-memory — which is how `cargo test` and
+settled order; s002 asserts the booked appointment row; s003 asserts the
+consent chain's six grant/revoke/re-grant rows. Empty `databaseUrl` (the
+chart default) keeps a service in-memory — which is how `cargo test` and
 skeleton services run.
 
 ## Adding a scenario
 
 1. Implement the guest run script under `poc/test/ubuntu.server.24/`
    (`ubuntu.server.24.amisad-vm-core.sNNN.<word>.sh`) and the sequence under
-   `poc/test/gui/`. Start from the s001/s002 pair: chain to
+   `poc/test/gui/`. Start from the s001–s003 set: chain to
    `...amisad-vm-core.deploy`, `requiresSnapshot`/`loadDiskSnapshot`
    `amisad-vm-core`, `username: amisad-vm-core-admin`,
    `hostname: amisad-vm-core`, then `sshWaitReady` + `sshFetchAndExecute` the
