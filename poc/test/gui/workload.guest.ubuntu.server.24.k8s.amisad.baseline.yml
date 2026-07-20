@@ -16,11 +16,10 @@ baseline:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
 variables:
-  # Per-VM guest username (see usernames.md): amisad.k8s is the infrastructure
-  # base of the amisad.core (vm-core) lineage, so it runs as yamisad-core. A
-  # scenario's top-level username cascades down and wins when this runs as its
-  # baseline.
-  username: yamisad-core
+  # In a scenario chain the top-level's per-scenario username (yamisad-sNNN)
+  # cascades down and wins (see usernames.md). This value applies only when the
+  # baseline is run standalone; yamisad-build is seeded keystroke-safe.
+  username: yamisad-build
 
 steps:
   - action: retry

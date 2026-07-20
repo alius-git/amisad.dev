@@ -18,8 +18,10 @@ baseline:
 requiresSnapshot:
   id: "amisad.k8s"
 variables:
-  # Per-VM guest username (see usernames.md): the core VM is yamisad-core.
-  username: yamisad-core
+  # In a scenario chain the top-level's per-scenario username (yamisad-sNNN)
+  # cascades down and wins (see usernames.md). This value applies only when the
+  # baseline is run standalone; yamisad-build is seeded keystroke-safe.
+  username: yamisad-build
   # Stash-service VM the binaries are pulled from (yuruna-stash-service).
   stashHost: "192.168.7.222"
 

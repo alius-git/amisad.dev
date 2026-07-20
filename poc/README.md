@@ -22,9 +22,10 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: `k8s.amisad` and `build.amisad` baselines + s001.fulfillment |
+| `test/gui/` | Active Yuruna sequences: build/k8s/core baselines, the build-VM compile, and s001.fulfillment |
 | `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
+| `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
 
 ## Building
 
@@ -60,93 +61,22 @@ sources.
   that scenario traverses. The real steps are enumerated as TODO blocks
   pointing at [../plan/scenarios.md](../plan/scenarios.md).
 
-## Running scenarios under Yuruna (common setup)
+## Running it
 
-One-time lab setup on the operator machine; every scenario sequence reuses it.
+- **Test automation** (clean machine → build → every implemented scenario,
+  fully cold, per-scenario users/VMs): [test.md](test.md).
+- **Demo by hand** (prebuild once, then drive the deployed cluster manually,
+  including the mobile app): [demo.md](demo.md).
+- **Guest usernames** (one per scenario + the build VM, and why):
+  [usernames.md](usernames.md).
 
-1. **Get the framework.** Use the OS one-liner from the Yuruna repo's
-   `install/README.md` (Remote one-liners) — it installs dependencies and
-   clones the framework to `~/git/yuruna` (`%USERPROFILE%\git\yuruna` on
-   Windows).
-
-2. **Point Yuruna at AmisAd.** From the `yuruna` folder:
-
-   ```powershell
-   Copy-Item test/test.config.yml.template test/test.config.yml
-   ```
-
-   Edit `test/test.config.yml`:
-   - `repositories.projectUrl`: `https://github.com/alius-git/amisad.dev.git` —
-     the runner clones this into `project/` every cycle and discovers the
-     sequences under `poc/test/gui/` automatically.
-   - `repositories.GH_TOKEN`: a GitHub PAT with read access to the repo.
-     This is the **host** side of PAT access (the runner's own clone).
-   - `guestSequence`: trim to `- guest.ubuntu.server.24` — the only guest
-     the AmisAd sequences target.
-
-3. **Guest PAT (authentication vault).** Guests never see `GH_TOKEN`; the
-   s001.fulfillment sequence renders the PAT from Yuruna's authentication vault
-   via `${ext:authentication.GetPassword(amisad-pat)}` in a `sensitive: true`
-   step, so it reaches the guest's git credential store without ever
-   appearing in logs or OCR captures. One-time setup, from the `yuruna`
-   folder in `pwsh`:
-
-   ```powershell
-   Import-Module ./test/extension/authentication/default.psm1
-   Set-UserVaultKey -LogicalUser amisad-pat -VaultKey amisad-pat  # operator-owned: never auto-generated
-   Set-Password -Username amisad-pat -NewPassword '<the PAT>'
-   ```
-
-   Reusing the `GH_TOKEN` PAT is fine; read-only scope recommended. The
-   vault is a local, gitignored file.
-
-4. **Validate, then run.**
-
-   ```powershell
-   test/Test-Config.ps1
-   pwsh test/Invoke-TestRunner.ps1
-   ```
-
-   Watch progress at `http://localhost:8080/status/`.
-
-**Baselines are chained, not run by hand.** Every sequence declares its
-prerequisites; the runner walks the chain cold once, then warm-paths from
-disk snapshots (`requiresSnapshot`):
-
-```
-BUILD lineage (amisad.build VM, user yamisad-build):
-  start.guest.ubuntu.server.24
-    -> amisad.build   (rustup 1.83, bazelisk, git)  -- compiles binaries,
-                                                       uploads to the stash
-
-CORE lineage (amisad.core VM = vm-core, user yamisad-core):
-  start.guest.ubuntu.server.24
-    -> amisad.k8s     (Kubernetes + PostgreSQL + NATS)
-    -> amisad.core    (python3; downloads binaries from the stash, deploys
-                       the 10 services)  -- runs s001.fulfillment, s002.fitting, ...
-```
-
-The two lineages are independent VMs with an ordering dependency (build must
-upload before core downloads), driven as two ordered `Test-Sequence` runs by
-`poc/build/launch-phase1.ps1` — the single-cycle runner can't drive both. Each
-cold path takes well over an hour; warm cycles restore the snapshots.
-
-**One guest OS username per VM.** The top-of-chain `username` variable cascades
-down to `start.guest.ubuntu.server.24`, so each VM provisions under its own
-account and vault entry — `yamisad-build` for the build VM, `yamisad-core` for
-vm-core. This decouples the first-login forced-password rotation (two VMs from
-the same image under the *same* username fight over one vault entry). The full
-username map is in [usernames.md](usernames.md).
-
-**Repo delivery: lab iteration mode vs production path.** In lab iteration
-mode (current), the guest obtains the repo as a tarball from the host status
-server (`/yuruna-repo/project-poc.tar.gz`, regenerated from `amisad.dev`
-HEAD by `poc/build/serve-local.ps1` after every commit) — the same channel
-fetch-and-execute uses; the guest script does the fetch. The production path
-(kept for later) clones GitHub with the vault PAT from step 3 rendered via
-`${ext:authentication.GetPassword(amisad-pat)}` in a `sensitive: true` step;
-restore it by re-adding the credential-store and git-clone steps to the
-scenario sequence.
+The build and runtime roles are separate VMs connected through the stash
+service (`yuruna-stash-service`), which keeps a durable record of each uploaded
+artifact: `amisad.build` compiles the workspace and uploads the binaries
+tarball (label `amisad-poc` / `amisad-binaries.tgz`); each scenario VM
+downloads it (`GET /api/stashes?username=amisad-poc&filename=amisad-binaries`),
+builds thin distroless images, deploys the ten services, and runs the scenario.
+`slice-runtime` and `buyer-client` run as bare prebuilt binaries.
 
 ## s001.fulfillment implementation notes
 
@@ -155,11 +85,9 @@ submits Maya's gift need as an opaque envelope; the coordinator verifies the
 token, gets a jurisdiction-checked placement, and dispatches envelope + offers
 to `slice-runtime`; the environment matches, attests its full lifecycle,
 emits the settlement instruction, and destroys itself; seller fulfillment
-confirms the four-way split on the hash-chained ledger. It runs across two VMs:
-the `amisad.build` VM compiles the release binaries and uploads them to the
-stash service; the `amisad.core` VM downloads them, builds thin images, deploys
-the ten services, then runs the happy path and asserts the full Target
-Verification Point. See "Split build and runtime VMs" below.
+confirms the four-way split on the hash-chained ledger. It runs across two VMs
+(build + scenario, connected through the stash service — see "Running it"
+above), asserting the full Target Verification Point at the end.
 
 Deviations from the target design, deliberate and to be retired in later
 scenarios — the wire contracts (`contracts/openapi/`) are unchanged by all of
@@ -177,67 +105,8 @@ them:
   process; each request runs one attested created→attested→executed→destroyed
   environment whose state drops at response time.
 - **Single-VM degraded mode.** With `edgeHost` unset, the scenario runs
-  slice-runtime on the core VM and says so; setting `edgeHost` (ssh target)
+  slice-runtime on the scenario VM and says so; setting `edgeHost` (ssh target)
   runs it on a real edge VM per the design topology.
-
-### Split build and runtime VMs
-
-The build and runtime roles are separate VMs, connected through the stash
-service (`yuruna-stash-service`), which keeps a durable record of each uploaded
-artifact for later investigation:
-
-- **`amisad.build`** (user `yamisad-build`) — Rust toolchain only. Runs
-  `cargo build --release --workspace` and `scp`s the binaries tarball to the
-  stash (label `amisad-poc` / `amisad-binaries.tgz`). No Kubernetes.
-- **`amisad.core`** (user `yamisad-core`, = vm-core) — minimal Ubuntu + the
-  `amisad.k8s` runtime stack + `python3`. Finds the artifact via
-  `GET /api/stashes?username=amisad-poc&filename=amisad-binaries`, downloads it,
-  builds the thin distroless images, deploys the ten services (snapshot
-  `amisad.core`), then runs the scenario. `slice-runtime` and `buyer-client`
-  run as bare prebuilt binaries.
-
-With the [common setup](#running-scenarios-under-yuruna-common-setup) done, run
-both VMs in order from an **elevated** PowerShell:
-
-```powershell
-poc\build\serve-local.ps1                 # publish HEAD to the status server
-pwsh poc\build\launch-phase1.ps1 -NoConfigGate
-```
-
-`launch-phase1.ps1` runs `Test-Sequence` twice: (1) `...build.amisad.compile`
-(build + upload), then — only if it exits 0 — (2)
-`...core.amisad.s001.fulfillment` (download + deploy + run). Green means
-`s001.fulfillment HAPPY PATH PASSED`; the run leaves `amisad.build` and a live
-`amisad.core` for inspection.
-
-### Running the demo by hand
-
-A passing run leaves everything deployed in the VM. NodePorts:
-coordinator `30080`, ledger `30081`, resource `30082`, seller `30083`,
-identity `30084`.
-
-**Console / ssh (headless demo):**
-
-```bash
-cd ~/amisad.dev/poc
-export COORDINATOR_URL=http://localhost:30080 IDENTITY_URL=http://localhost:30084
-target/release/buyer-client submit          # prints handle + match as JSON
-curl -X POST http://localhost:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'
-curl -X POST http://localhost:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'
-target/release/buyer-client wait <handle>   # -> status: delivered
-```
-
-**Mobile (manual demo):** build and side-load the buyer app against the VM's
-LAN address, state a need on the needs screen, and refresh its status while
-advancing the order as above:
-
-```bash
-cd components/apps/buyer-flutter
-flutter build apk --debug \
-  --dart-define=COORDINATOR_URL=http://<vm-ip>:30080 \
-  --dart-define=IDENTITY_URL=http://<vm-ip>:30084
-adb install build/app/outputs/flutter-apk/app-debug.apk
-```
 
 ---
 

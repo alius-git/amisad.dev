@@ -1,16 +1,18 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s001.fulfillment (Intent-Driven Edge Match and Automated
-# Fulfillment) run against the deployed amisad.core cluster: restore amisad.core,
-# start slice-runtime, seed Elena's offers, drive Maya's auto-close happy path,
-# and assert the FULL Target Verification Point. Grouped onto vm-core with the
-# other core scenarios; the run leaves the VM live as amisad.core. Operator
-# setup and edgeHost semantics: poc/README.md "Running scenarios under Yuruna".
+# Fulfillment): cold-build the core stack (its chain rebuilds amisad.k8s and
+# amisad.core under THIS scenario's user via the username cascade), start
+# slice-runtime, seed Elena's offers, drive Maya's auto-close happy path, and
+# assert the FULL Target Verification Point. Ends by renaming the VM to
+# amisad.s001.fulfillment and leaving it LIVE. Per-scenario users/VMs:
+# poc/usernames.md; automation model: poc/test.md; edgeHost: poc/demo.md.
 
 # Perf-log identity. Bump revision on step add/remove.
 # GUID carried over from the pre-split build.amisad.s001.fulfillment for perf continuity.
+# Rev 3: per-scenario user (yamisad-s001) + final save/load to amisad.s001.fulfillment.
 sequenceGuid: 4222bb02-7d1f-4c8e-8a4b-3f9e58d71b22
-sequenceRevision: 2
+sequenceRevision: 3
 
 description: "AmisAd s001.fulfillment: run Maya's auto-close happy path on the deployed amisad.core cluster, assert full TVP."
 baseline:
@@ -19,8 +21,9 @@ baseline:
 requiresSnapshot:
   id: "amisad.core"
 variables:
-  # Per-VM guest username (see usernames.md): the core VM is yamisad-core.
-  username: yamisad-core
+  # Per-SCENARIO guest username (see usernames.md). Cascades down the whole
+  # baseline chain, so the k8s/core tiers are provisioned under this user too.
+  username: yamisad-s001
   edgeHost: ""
 
 steps:
@@ -59,3 +62,15 @@ steps:
   - action: saveSystemDiagnostic
     id: "amisad.s001.fulfillment"
     description: "Capture diagnostics after the s001.fulfillment run"
+
+  # Rename the passed VM to its per-scenario name and leave it live. The rename
+  # also CONSUMES the amisad.core intermediate, so the next scenario's cold
+  # chain can mint fresh amisad.k8s/amisad.core without name collisions.
+  # saveDiskSnapshot stops+checkpoints+renames; loadDiskSnapshot restarts.
+  - action: saveDiskSnapshot
+    id: "amisad.s001.fulfillment"
+    description: "Checkpoint + rename the passed VM to amisad.s001.fulfillment"
+
+  - action: loadDiskSnapshot
+    id: "amisad.s001.fulfillment"
+    description: "Restart so the scenario VM is left live as amisad.s001.fulfillment"

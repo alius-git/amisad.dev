@@ -17,7 +17,7 @@ baseline:
 requiresSnapshot:
   id: "amisad.k8s"
 variables:
-  username: yamisad
+  username: yamisad-s002
 
 steps:
   - action: loadDiskSnapshot
