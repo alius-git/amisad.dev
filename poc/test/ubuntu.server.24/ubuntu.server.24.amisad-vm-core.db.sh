@@ -67,4 +67,4 @@ if ! sudo grep -q amisad-pods "$HBA"; then
 fi
 sudo systemctl restart postgresql
 sudo -u postgres pg_isready
-echo "AmisAd database ready (role ${APP_ROLE}, pod access enabled)"
+echo "AmisAd database ready (role amisad, pod access enabled)"
