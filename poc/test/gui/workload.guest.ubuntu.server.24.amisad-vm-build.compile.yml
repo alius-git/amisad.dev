@@ -1,30 +1,30 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - amisad-vm-build compile run: restore the build snapshot, build
+# AmisAd POC - amisad-build compile run: restore the build snapshot, build
 # every release binary over SSH, and upload the tarball to the stash service
-# for the amisad-vm-core deploy to download. Runs once per test run; every
+# for the amisad-core deploy to download. Runs once per test run; every
 # scenario consumes the same artifact (poc/test.md).
 
 # Perf-log identity. Bump revision on step add/remove.
-# Rev 2: amisad-vm-* convention; SSH-driven (no OCR login).
+# Rev 2: amisad-* convention; SSH-driven (no OCR login).
 sequenceGuid: 4233cc03-7d1f-4c8e-8a4b-3f9e58d71b33
 sequenceRevision: 2
 
-description: "AmisAd amisad-vm-build: cargo build --release over SSH, upload binaries tarball to the stash service."
+description: "AmisAd amisad-build: cargo build --release over SSH, upload binaries tarball to the stash service."
 baseline:
   ubuntu.server.24:
-    - workload.guest.ubuntu.server.24.amisad-vm-build.baseline
+    - workload.guest.ubuntu.server.24.amisad-build.baseline
 requiresSnapshot:
-  id: "amisad-vm-build"
+  id: "amisad-build"
 variables:
-  username: amisad-vm-build-admin
-  hostname: amisad-vm-build
+  username: amisad-build-admin
+  hostname: amisad-build
   # Stash-service VM the binaries are dropped into (yuruna-stash-service).
   stashHost: "192.168.7.222"
 
 steps:
   - action: loadDiskSnapshot
-    id: "amisad-vm-build"
+    id: "amisad-build"
     description: "Restore the AmisAd build snapshot"
 
   - action: sshWaitReady
@@ -32,6 +32,6 @@ steps:
     description: "SSH up after the restore"
 
   - action: sshFetchAndExecute
-    command: "STASH_HOST='${stashHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-build.compile.sh"
+    command: "STASH_HOST='${stashHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh"
     timeoutSeconds: 3600
     description: "cargo build --release + upload binaries to the stash service"

@@ -2,11 +2,11 @@
 #
 # The POC's test automation is driven by poc/build/run-tests.ps1 (see
 # poc/test.md): from a clean machine it builds the design topology
-# (amisad-vm-build -> stash upload; amisad-vm-edge-a/b; amisad-vm-core with
+# (amisad-build -> stash upload; amisad-edge-a/b; amisad-core with
 # k8s + services + demo users), then runs each implemented scenario in order
-# against amisad-vm-core over SSH, each one restoring the amisad-vm-core
+# against amisad-core over SSH, each one restoring the amisad-core
 # snapshot as its state reset. The single-cycle runner cannot express that
 # orchestration, so the entry below is the latest implemented scenario, for
 # cycle monitoring only.
 sequences:
-- workload.guest.ubuntu.server.24.amisad-vm-core.s004.failover
+- workload.guest.ubuntu.server.24.amisad-core.s004.failover

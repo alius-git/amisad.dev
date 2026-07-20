@@ -14,14 +14,14 @@ poc\build\serve-local.ps1
 pwsh poc\build\run-tests.ps1 -NoConfigGate
 ```
 
-A green run leaves the demo environment **live**: `amisad-vm-core` (the ten
-services, NodePorts exposed) and both edge VMs (`amisad-vm-edge-a`/`-b`,
+A green run leaves the demo environment **live**: `amisad-core` (the ten
+services, NodePorts exposed) and both edge VMs (`amisad-edge-a`/`-b`,
 running `slice-runtime` with their region identity from the last scenario).
-`amisad-vm-build` is kept on disk stopped.
+`amisad-build` is kept on disk stopped.
 
-Console logins on `amisad-vm-core` ([usernames.md](usernames.md)):
+Console logins on `amisad-core` ([usernames.md](usernames.md)):
 - **demo personas** (non-admin): `maya`, `elena`, `tom`, `priya`
-- **administrator**: `amisad-vm-core-admin`
+- **administrator**: `amisad-core-admin`
 
 Passwords are in the host vault,
 `c:\git\yuruna\test\status\extension\authentication\vault.yml`.
@@ -31,14 +31,14 @@ re-arm below for a fresh walkthrough.
 
 ## Driving the demo
 
-NodePorts on `amisad-vm-core`: coordinator `30080`, ledger `30081`, resource
+NodePorts on `amisad-core`: coordinator `30080`, ledger `30081`, resource
 `30082`, seller `30083`, identity `30084`, insights `30085`, platform `30086`.
 The same APIs answer from the host or LAN at `http://<vm-ip>:<nodeport>`.
 
-**Re-arm (only after a VM restart).** A reboot of `amisad-vm-core` loses the
+**Re-arm (only after a VM restart).** A reboot of `amisad-core` loses the
 in-memory state (coordinator routing, identity tokens, the registered edge) —
 but the ledgers, offers, and orders come back from PostgreSQL, chains intact. Run the
-command steps below as **`amisad-vm-core-admin`** — the repo and
+command steps below as **`amisad-core-admin`** — the repo and
 `target/release/` binaries live under its home, which the non-admin personas
 cannot traverse; maya/elena/tom/priya are the demo *narrative* logins, and the
 plain `curl` steps also work from any user or from the host via the NodePorts:
@@ -50,10 +50,10 @@ export COORDINATOR_URL=http://$NODE_IP:30080 IDENTITY_URL=http://$NODE_IP:30084
 ```
 
 Then either re-run a scenario script end to end
-(`ubuntu.server.24.amisad-vm-core.s001.fulfillment.sh` restarts slice-runtime
+(`ubuntu.server.24.amisad-core.s001.fulfillment.sh` restarts slice-runtime
 on the edge, registers it, and seeds offers), or register the edge + seed by
 hand using the curls below. Note the scenario scripts assert against a fresh
-database (the automation restores the `amisad-vm-core` snapshot before each
+database (the automation restores the `amisad-core` snapshot before each
 one) — with durable orders on the board, s002's "zero commitments" check will
 fail on a reused database; restore the snapshot for a clean walkthrough.
 
@@ -103,7 +103,7 @@ silent for you; commitments made before still complete; resuming brings your
 open needs back to life. `buyer-client` runs as the admin; every step is
 observable via curl. Fresh snapshot required: after an automated run,
 `linen-wrap-09` is already in the durable catalog, so `open dress` would
-match immediately instead of staying open — restore the `amisad-vm-core`
+match immediately instead of staying open — restore the `amisad-core`
 snapshot first (as with s002's zero-state checks):
 
 ```bash
@@ -138,7 +138,7 @@ match to the compliant region although region-b is roomier, two injected
 isolation faults abort safely and retry clean, and the systemic pattern
 becomes a cross-party case. Fresh snapshot recommended (attestation counts
 assume a clean ledger). Both edges run `slice-runtime`; their IPs are in the
-status server's `/log/handoff/amisad-vm-edge-*.ip.txt` files:
+status server's `/log/handoff/amisad-edge-*.ip.txt` files:
 
 ```bash
 # Tom: two regions with capacity, region-a sovereign (policy is the ONLY thing

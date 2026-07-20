@@ -1,31 +1,31 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s002.fitting (Considered Purchase, Constraint Fidelity, and
-# In-Person Booking) against the design topology: restore amisad-vm-core (the
+# In-Person Booking) against the design topology: restore amisad-core (the
 # per-scenario state reset - s001's orders are gone), then over SSH start
-# slice-runtime on amisad-vm-edge-a, seed the dress catalog, drive Maya's
+# slice-runtime on amisad-edge-a, seed the dress catalog, drive Maya's
 # MANUAL-policy need (shortlist -> explicit booking), and assert the FULL
-# Target Verification Point. Entirely SSH-driven; the VM stays amisad-vm-core.
+# Target Verification Point. Entirely SSH-driven; the VM stays amisad-core.
 
 # Perf-log identity. Bump revision on step add/remove.
-# Rev 2: design-topology model - runs on amisad-vm-core with the real edge;
+# Rev 2: design-topology model - runs on amisad-core with the real edge;
 # SSH-driven; per-scenario VM rename retired (snapshot restore = state reset).
 sequenceGuid: 4255ee05-8f3a-4c17-9d2b-6e4a7c90d155
 sequenceRevision: 2
 
-description: "AmisAd s002.fitting: restore amisad-vm-core, run the manual shortlist + Thursday booking with slice-runtime on amisad-vm-edge-a, assert full TVP."
+description: "AmisAd s002.fitting: restore amisad-core, run the manual shortlist + Thursday booking with slice-runtime on amisad-edge-a, assert full TVP."
 baseline:
   ubuntu.server.24:
-    - workload.guest.ubuntu.server.24.amisad-vm-core.deploy
+    - workload.guest.ubuntu.server.24.amisad-core.deploy
 requiresSnapshot:
-  id: "amisad-vm-core"
+  id: "amisad-core"
 variables:
-  username: amisad-vm-core-admin
-  hostname: amisad-vm-core
+  username: amisad-core-admin
+  hostname: amisad-core
 
 steps:
   - action: loadDiskSnapshot
-    id: "amisad-vm-core"
+    id: "amisad-core"
     description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
 
   - action: sshWaitReady
@@ -33,9 +33,9 @@ steps:
     description: "SSH up after the restore"
 
   - action: sshFetchAndExecute
-    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-core.s002.fitting.sh"
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s002.fitting.sh"
     timeoutSeconds: 1800
-    description: "Run s002.fitting shortlist + booking (edge on amisad-vm-edge-a), assert full TVP"
+    description: "Run s002.fitting shortlist + booking (edge on amisad-edge-a), assert full TVP"
 
   - action: saveSystemDiagnostic
     id: "amisad.s002.fitting"

@@ -13,16 +13,16 @@
 # implemented scenario against it:
 #   [0] remove every amisad lab VM (old and new naming) + leftover test-* VMs
 #       AND their storage dirs; ensure the core->edge demo keypair exists
-#   [1] amisad-vm-build: compile + upload binaries to the stash, then stop it
-#   [2] amisad-vm-edge-a and amisad-vm-edge-b: provision + snapshot (each chain
+#   [1] amisad-build: compile + upload binaries to the stash, then stop it
+#   [2] amisad-edge-a and amisad-edge-b: provision + snapshot (each chain
 #       runs solo - first-login OCR is only reliable with no other lab VM up)
-#   [3] amisad-vm-core: k8s + deploy + demo users, snapshot amisad-vm-core
+#   [3] amisad-core: k8s + deploy + demo users, snapshot amisad-core
 #   [4] start BOTH edges and wait for their IP reports (s004 needs region B
 #       live; earlier scenarios just don't use it)
-#   [5] each scenario in order: restore amisad-vm-core (the per-scenario state
+#   [5] each scenario in order: restore amisad-core (the per-scenario state
 #       reset) and drive it over SSH - concurrent edge VMs cannot disturb SSH
 #       stages. On fail the run stops and everything is left up for debugging.
-# Green leaves amisad-vm-core + both edges live as the demo environment.
+# Green leaves amisad-core + both edges live as the demo environment.
 # Must run ELEVATED (Hyper-V). Stage logs land under -LogDir.
 #requires -RunAsAdministrator
 param(
@@ -37,10 +37,10 @@ New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 # Ordered scenario registry: append here as scenarios are implemented (test.md).
 $Scenarios = @(
-    'workload.guest.ubuntu.server.24.amisad-vm-core.s001.fulfillment'
-    'workload.guest.ubuntu.server.24.amisad-vm-core.s002.fitting'
-    'workload.guest.ubuntu.server.24.amisad-vm-core.s003.silence'
-    'workload.guest.ubuntu.server.24.amisad-vm-core.s004.failover'
+    'workload.guest.ubuntu.server.24.amisad-core.s001.fulfillment'
+    'workload.guest.ubuntu.server.24.amisad-core.s002.fitting'
+    'workload.guest.ubuntu.server.24.amisad-core.s003.silence'
+    'workload.guest.ubuntu.server.24.amisad-core.s004.failover'
 )
 
 function Stop-LabConsole {
@@ -136,11 +136,11 @@ if (Test-Path $runnerPidFile) {
 }
 
 # --- [0] clean start: a test run assumes and enforces "no pre-built VMs" ---
-# Sweep registered lab VMs (current amisad-vm-* and legacy amisad.* names) AND
+# Sweep registered lab VMs (current amisad-* and legacy amisad.* names) AND
 # the known names, covering storage dirs stranded by a prior run.
-$topologyVms = @('amisad-vm-build', 'amisad-vm-edge-a', 'amisad-vm-edge-b', 'amisad-vm-core', 'amisad-vm-core-k8s')
+$topologyVms = @('amisad-build', 'amisad-edge-a', 'amisad-edge-b', 'amisad-core', 'amisad-core-k8s')
 $labVms = @(Hyper-V\Get-VM |
-    Where-Object { $_.Name -like 'amisad-vm-*' -or $_.Name -like 'amisad.*' -or $_.Name -like 'test-*' } |
+    Where-Object { $_.Name -like 'amisad-*' -or $_.Name -like 'amisad.*' -or $_.Name -like 'test-*' } |
     ForEach-Object Name)
 $labVms += $topologyVms
 foreach ($vmName in ($labVms | Sort-Object -Unique)) { Remove-LabVM -Name $vmName }
@@ -159,16 +159,16 @@ if (-not (Test-Path $demoKey)) {
 }
 
 # --- [1] build once: compile + upload binaries to the stash ---
-if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-vm-build.compile') -ne 0) {
+if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile') -ne 0) {
     Write-Error "Build stage failed; no binaries in the stash - stopping."
     exit 1
 }
-Hyper-V\Stop-VM -Name 'amisad-vm-build' -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
-Remove-InstallMedia -Name 'amisad-vm-build' -SnapshotId 'amisad-vm-build'
-Write-Host "amisad-vm-build stopped (kept on disk)."
+Hyper-V\Stop-VM -Name 'amisad-build' -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
+Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build'
+Write-Host "amisad-build stopped (kept on disk)."
 
 # --- [2] edge VMs: provision + snapshot, one at a time (chains end stopped) ---
-foreach ($edge in 'amisad-vm-edge-a', 'amisad-vm-edge-b') {
+foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
     if ((Invoke-Stage -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline") -ne 0) {
         Write-Error "$edge provisioning failed - stopping."
         exit 1
@@ -177,22 +177,22 @@ foreach ($edge in 'amisad-vm-edge-a', 'amisad-vm-edge-b') {
 }
 
 # --- [3] vm-core: k8s + deploy + demo users (cold chain, solo) ---
-if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-vm-core.deploy') -ne 0) {
-    Write-Error "amisad-vm-core deploy failed - stopping."
+if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy') -ne 0) {
+    Write-Error "amisad-core deploy failed - stopping."
     exit 1
 }
-Remove-InstallMedia -Name 'amisad-vm-core' -SnapshotId 'amisad-vm-core'
+Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core'
 
 # --- [4] start BOTH region edges and wait for their IP reports ---
 # s004.failover needs the region-B edge live (jurisdiction-restricted
 # allocation must have a roomier non-compliant region to exclude); earlier
 # scenarios simply don't use it. Both stay live in the demo environment.
-Write-Host "Starting amisad-vm-edge-a + amisad-vm-edge-b."
+Write-Host "Starting amisad-edge-a + amisad-edge-b."
 # The log-upload sink writes under YURUNA_LOG_DIR when overridden; resolve the
 # same way the server does, and anchor freshness to THIS start (a stale file
 # from a prior run/boot must not count).
 $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test\status\log' }
-$edges = 'amisad-vm-edge-a', 'amisad-vm-edge-b'
+$edges = 'amisad-edge-a', 'amisad-edge-b'
 # Start both first (they boot in parallel), then wait on both IP reports -
 # a serial start would add a full edge boot to the stage for nothing.
 $edgeState = @{}
@@ -230,7 +230,7 @@ foreach ($edge in $edges) {
     }
 }
 
-# --- [5] scenarios, in order, each restoring amisad-vm-core over SSH ---
+# --- [5] scenarios, in order, each restoring amisad-core over SSH ---
 foreach ($s in $Scenarios) {
     $name = ($s -split '\.')[-2..-1] -join '.'
     if ((Invoke-Stage -Name $name -Sequence $s) -ne 0) {
@@ -239,7 +239,7 @@ foreach ($s in $Scenarios) {
     }
 }
 
-Write-Host "ALL SCENARIOS PASSED. Demo environment live: amisad-vm-core + amisad-vm-edge-a + amisad-vm-edge-b."
+Write-Host "ALL SCENARIOS PASSED. Demo environment live: amisad-core + amisad-edge-a + amisad-edge-b."
 Write-Host "--- final VM inventory ---"
 (Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Host
 exit 0

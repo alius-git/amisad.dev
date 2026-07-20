@@ -31,10 +31,10 @@ the demo by hand instead, see [demo.md](demo.md).
    Set-UserVaultKey -LogicalUser amisad-pat -VaultKey amisad-pat
    Set-Password -Username amisad-pat -NewPassword '<the PAT>'
    # One keystroke-safe (alphanumeric) password per username — see usernames.md:
-   Set-Password -Username amisad-vm-build-admin  -NewPassword '<alnum>'
-   Set-Password -Username amisad-vm-core-admin   -NewPassword '<alnum>'
-   Set-Password -Username amisad-vm-edge-a-admin -NewPassword '<alnum>'
-   Set-Password -Username amisad-vm-edge-b-admin -NewPassword '<alnum>'
+   Set-Password -Username amisad-build-admin  -NewPassword '<alnum>'
+   Set-Password -Username amisad-core-admin   -NewPassword '<alnum>'
+   Set-Password -Username amisad-edge-a-admin -NewPassword '<alnum>'
+   Set-Password -Username amisad-edge-b-admin -NewPassword '<alnum>'
    Set-Password -Username maya  -NewPassword '<alnum>'
    Set-Password -Username elena -NewPassword '<alnum>'
    Set-Password -Username tom   -NewPassword '<alnum>'
@@ -50,28 +50,28 @@ the demo by hand instead, see [demo.md](demo.md).
 
 The driver builds the design topology
 ([plan/design/01-overview.md](../plan/design/01-overview.md)) and runs every
-scenario against the same `amisad-vm-core` — each scenario's opening restore of
-the `amisad-vm-core` snapshot **is** its state reset, so scenarios stay
+scenario against the same `amisad-core` — each scenario's opening restore of
+the `amisad-core` snapshot **is** its state reset, so scenarios stay
 independent without per-scenario VMs. Hostnames are set with the framework's
 `hostname` variable; each VM's admin is `<hostname>-admin`
 ([usernames.md](usernames.md)).
 
 ```
-[1] amisad-vm-build   start.guest -> build tools -> snapshot; compile run
+[1] amisad-build   start.guest -> build tools -> snapshot; compile run
                       uploads amisad-binaries.tgz to the stash service; VM
                       stopped afterwards.
-[2] amisad-vm-edge-a  start.guest -> demo key + IP reporter -> snapshot.
-    amisad-vm-edge-b  (provisioned one at a time: first-login OCR is only
+[2] amisad-edge-a  start.guest -> demo key + IP reporter -> snapshot.
+    amisad-edge-b  (provisioned one at a time: first-login OCR is only
                       reliable with no other lab VM running)
-[3] amisad-vm-core    start.guest -> k8s + PostgreSQL + NATS (snapshot
-                      amisad-vm-core-k8s) -> binaries from the stash, deploy
+[3] amisad-core    start.guest -> k8s + PostgreSQL + NATS (snapshot
+                      amisad-core-k8s) -> binaries from the stash, deploy
                       10 services (ledger+seller on PostgreSQL), add
-                      maya/elena/tom/priya -> snapshot amisad-vm-core.
+                      maya/elena/tom/priya -> snapshot amisad-core.
 [4] both edges started; each reports its IP to the status server.
-[5] scenarios in order, each: restore amisad-vm-core -> drive over SSH
+[5] scenarios in order, each: restore amisad-core -> drive over SSH
     (sshWaitReady + sshFetchAndExecute; no OCR, so live edge VMs cannot
-    disturb it) -> full TVP asserts. slice-runtime runs on amisad-vm-edge-a
-    (s004 also on amisad-vm-edge-b, with attested region identity).
+    disturb it) -> full TVP asserts. slice-runtime runs on amisad-edge-a
+    (s004 also on amisad-edge-b, with attested region identity).
 ```
 
 After `start.guest`'s one OCR-driven first login per VM, everything runs over
@@ -89,7 +89,7 @@ pwsh poc\build\run-tests.ps1 -NoConfigGate
 `run-tests.ps1` removes every amisad lab VM and leftover `test-*` VM
 (enforcing the clean start), generates the core→edge demo keypair if missing,
 builds the topology, then runs each scenario from its registry in order. Green
-ends with `ALL SCENARIOS PASSED`, leaving `amisad-vm-core` and both edge VMs
+ends with `ALL SCENARIOS PASSED`, leaving `amisad-core` and both edge VMs
 live as the demo environment. Stage logs land under `%TEMP%\amisad-tests\`;
 watch live progress at `http://localhost:8080/status/`. Expect ~15 min for the
 build, ~15 min per edge, ~20 min for vm-core, and a few minutes per scenario.
@@ -121,11 +121,11 @@ skeleton services run.
 ## Adding a scenario
 
 1. Implement the guest run script under `poc/test/ubuntu.server.24/`
-   (`ubuntu.server.24.amisad-vm-core.sNNN.<word>.sh`) and the sequence under
+   (`ubuntu.server.24.amisad-core.sNNN.<word>.sh`) and the sequence under
    `poc/test/gui/`. Start from the s001–s004 set: chain to
-   `...amisad-vm-core.deploy`, `requiresSnapshot`/`loadDiskSnapshot`
-   `amisad-vm-core`, `username: amisad-vm-core-admin`,
-   `hostname: amisad-vm-core`, then `sshWaitReady` + `sshFetchAndExecute` the
+   `...amisad-core.deploy`, `requiresSnapshot`/`loadDiskSnapshot`
+   `amisad-core`, `username: amisad-core-admin`,
+   `hostname: amisad-core`, then `sshWaitReady` + `sshFetchAndExecute` the
    script + `saveSystemDiagnostic`. (The parked skeletons under
    `poc/test/gui-parked/` predate this model — rework, don't copy: their
    `amisad.k8s` restore and skeleton deploy step must not survive.)

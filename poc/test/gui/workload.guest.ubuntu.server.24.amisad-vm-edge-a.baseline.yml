@@ -1,23 +1,23 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - vm-edge-a (region A slice VM): a fresh Ubuntu Server (hostname
-# amisad-vm-edge-a, admin amisad-vm-edge-a-admin) prepared for the stateless
+# amisad-edge-a, admin amisad-edge-a-admin) prepared for the stateless
 # slice runtime: the core->edge demo public key in the admin's authorized_keys
 # and a boot-time IP reporter (posts <hostname>.ip.txt to the host status
-# server) so amisad-vm-core can locate this edge. Snapshotted as
-# "amisad-vm-edge-a"; slice-runtime itself is delivered per scenario run.
+# server) so amisad-core can locate this edge. Snapshotted as
+# "amisad-edge-a"; slice-runtime itself is delivered per scenario run.
 
 # Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 4266ff06-2b4c-4d58-8e1a-9c3b5d70e266
 sequenceRevision: 1
 
-description: "Ubuntu Server: provision amisad-vm-edge-a (admin amisad-vm-edge-a-admin), install the demo key + IP reporter over SSH, snapshot amisad-vm-edge-a."
+description: "Ubuntu Server: provision amisad-edge-a (admin amisad-edge-a-admin), install the demo key + IP reporter over SSH, snapshot amisad-edge-a."
 baseline:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
 variables:
-  username: amisad-vm-edge-a-admin
-  hostname: amisad-vm-edge-a
+  username: amisad-edge-a-admin
+  hostname: amisad-edge-a
 
 steps:
   - action: sshWaitReady
@@ -25,10 +25,10 @@ steps:
     description: "SSH up after the start.guest reboot"
 
   - action: sshFetchAndExecute
-    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-edge.setup.sh"
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-edge.setup.sh"
     timeoutSeconds: 600
     description: "Edge setup: demo key into authorized_keys + boot-time IP reporter"
 
   - action: saveDiskSnapshot
-    id: "amisad-vm-edge-a"
+    id: "amisad-edge-a"
     description: "Snapshot the region-A slice VM"

@@ -1,7 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - s004.failover run on amisad-vm-core: sovereign slice
+# AmisAd POC - s004.failover run on amisad-core: sovereign slice
 # allocation, isolation fault, attested failover. Both edges run
 # slice-runtime with their region identity; Tom's policy pins the restricted
 # jurisdiction to region-a although region-b is roomier; two injected
@@ -41,7 +41,7 @@ for port in 30080 30081 30082 30083 30084 30085 30086; do
         sleep 5
     done
     curl -sf "http://${NODE_IP}:${port}/health" >/dev/null || {
-        echo "NodePort ${port} never answered - stale amisad-vm-core snapshot? The deploy chain must be re-run (run-tests.ps1 rebuilds it)." >&2
+        echo "NodePort ${port} never answered - stale amisad-core snapshot? The deploy chain must be re-run (run-tests.ps1 rebuilds it)." >&2
         exit 8
     }
 done
@@ -76,8 +76,8 @@ start_slice() { # <edge-hostname> <region>
         || { echo "slice-runtime start on ${edge} failed" >&2; exit 7; }
     echo "$ip"
 }
-EDGE_A_IP=$(start_slice amisad-vm-edge-a region-a | tail -n 1)
-EDGE_B_IP=$(start_slice amisad-vm-edge-b region-b | tail -n 1)
+EDGE_A_IP=$(start_slice amisad-edge-a region-a | tail -n 1)
+EDGE_B_IP=$(start_slice amisad-edge-b region-b | tail -n 1)
 SLICE_A="http://${EDGE_A_IP}:8080"
 SLICE_B="http://${EDGE_B_IP}:8080"
 for ep in "$SLICE_A" "$SLICE_B"; do

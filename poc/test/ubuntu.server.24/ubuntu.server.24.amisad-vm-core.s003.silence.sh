@@ -1,7 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - s003.silence run on amisad-vm-core: consent revocation and the
+# AmisAd POC - s003.silence run on amisad-core: consent revocation and the
 # right to silence. Seed one in-flight order and two open needs, pause
 # participation (consent ledger revocation), prove a perfectly fitting new
 # offer produces NOTHING (no environment, no match, no notification), settle
@@ -40,12 +40,12 @@ for port in 30080 30081 30082 30083 30084 30085 30086; do
         sleep 5
     done
     curl -sf "http://${NODE_IP}:${port}/health" >/dev/null || {
-        echo "NodePort ${port} never answered - stale amisad-vm-core snapshot? The deploy chain must be re-run (run-tests.ps1 rebuilds it)." >&2
+        echo "NodePort ${port} never answered - stale amisad-core snapshot? The deploy chain must be re-run (run-tests.ps1 rebuilds it)." >&2
         exit 8
     }
 done
 
-echo "== slice-runtime (edge amisad-vm-edge-a) =="
+echo "== slice-runtime (edge amisad-edge-a) =="
 if [ -r /etc/yuruna/host.env ]; then
     # shellcheck disable=SC1091
     . /etc/yuruna/host.env
@@ -53,8 +53,8 @@ fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
 if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_HOST_IP:-}" ]; then
     EDGE_IP=$(wget --no-proxy -qO- \
-        "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/log/handoff/amisad-vm-edge-a.ip.txt" 2>/dev/null || true)
-    if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-vm-edge-a-admin@${EDGE_IP}"; fi
+        "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/log/handoff/amisad-edge-a.ip.txt" 2>/dev/null || true)
+    if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-edge-a-admin@${EDGE_IP}"; fi
 fi
 if [ -n "${EDGE_HOST:-}" ]; then
     echo "edge: ${EDGE_HOST}"

@@ -1,9 +1,9 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - edge VM setup (shared by amisad-vm-edge-a/b): authorize the
+# AmisAd POC - edge VM setup (shared by amisad-edge-a/b): authorize the
 # core->edge demo key for the admin user, and install a boot-time IP reporter
-# that posts <hostname>.ip.txt to the host status server so amisad-vm-core can
+# that posts <hostname>.ip.txt to the host status server so amisad-core can
 # locate this edge. The slice runtime itself is delivered per scenario run -
 # the edge VM stays stateless.
 set -euo pipefail

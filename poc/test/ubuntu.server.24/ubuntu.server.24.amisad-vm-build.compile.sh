@@ -1,8 +1,8 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - amisad-vm-build compile step: build every release binary and
-# upload the tarball to the stash service, for amisad-vm-core to download and
+# AmisAd POC - amisad-build compile step: build every release binary and
+# upload the tarball to the stash service, for amisad-core to download and
 # deploy. This VM has the Rust toolchain but no Kubernetes; it produces
 # artifacts, it does not run them. STASH_HOST (default 192.168.7.222): the
 # stash-service VM the binaries are dropped into.
@@ -70,7 +70,7 @@ BINS="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connec
 tar czf /tmp/amisad-binaries.tgz -C target/release $BINS
 ls -l /tmp/amisad-binaries.tgz
 # The stash sink caps each file at 100 MB and truncates SILENTLY (exits 0), which
-# would surface only as a corrupt gunzip on amisad-vm-core. Fail loud here instead.
+# would surface only as a corrupt gunzip on amisad-core. Fail loud here instead.
 SZ=$(stat -c%s /tmp/amisad-binaries.tgz)
 if [ "$SZ" -ge 104857600 ]; then
     echo "binaries tarball ${SZ}B exceeds the stash 100MB per-file cap; strip binaries or split." >&2
@@ -79,7 +79,7 @@ fi
 
 echo "== upload binaries to the stash service =="
 # The stash records the upload (username=amisad-poc, filename=amisad-binaries.tgz)
-# for later investigation; amisad-vm-core locates it by that label. scp only (the
+# for later investigation; amisad-core locates it by that label. scp only (the
 # stash SSH server accepts the drop); no key needed - it is a write-only sink.
 STASH_HOST="${STASH_HOST:-192.168.7.222}"
 scp -O -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
@@ -87,4 +87,4 @@ scp -O -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     /tmp/amisad-binaries.tgz "amisad-poc@${STASH_HOST}:/amisad/amisad-binaries.tgz"
 echo "uploaded amisad-binaries.tgz to stash ${STASH_HOST} (label amisad-poc)"
 
-echo "amisad-vm-build COMPILE+UPLOAD PASSED"
+echo "amisad-build COMPILE+UPLOAD PASSED"

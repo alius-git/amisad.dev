@@ -21,17 +21,17 @@ Set-Password -Username <name> -NewPassword '<alphanumeric>'
 
 | VM / hostname | Design node | Administrator | Function |
 |---------------|-------------|---------------|----------|
-| `amisad-vm-build` | build box (lab infra) | `amisad-vm-build-admin` | Rust toolchain only; compiles the workspace and uploads the binaries tarball to the stash service. Stopped after the build stage. |
-| `amisad-vm-core` | **vm-core** | `amisad-vm-core-admin` | Kubernetes + PostgreSQL + NATS + the ten deployed services. Scenarios run here over SSH; each restores the `amisad-vm-core` snapshot as its state reset. |
-| `amisad-vm-edge-a` | **vm-edge-a** (region A) | `amisad-vm-edge-a-admin` | Stateless slice VM; `slice-runtime` is delivered per scenario run over SSH from vm-core. Live during scenarios/demos. |
-| `amisad-vm-edge-b` | **vm-edge-b** (region B) | `amisad-vm-edge-b-admin` | Same, region B; live during scenarios/demos since `s004.failover` (the sovereignty scenario needs a roomier non-compliant region to exclude). |
+| `amisad-build` | build box (lab infra) | `amisad-build-admin` | Rust toolchain only; compiles the workspace and uploads the binaries tarball to the stash service. Stopped after the build stage. |
+| `amisad-core` | **vm-core** | `amisad-core-admin` | Kubernetes + PostgreSQL + NATS + the ten deployed services. Scenarios run here over SSH; each restores the `amisad-core` snapshot as its state reset. |
+| `amisad-edge-a` | **vm-edge-a** (region A) | `amisad-edge-a-admin` | Stateless slice VM; `slice-runtime` is delivered per scenario run over SSH from vm-core. Live during scenarios/demos. |
+| `amisad-edge-b` | **vm-edge-b** (region B) | `amisad-edge-b-admin` | Same, region B; live during scenarios/demos since `s004.failover` (the sovereignty scenario needs a roomier non-compliant region to exclude). |
 
-The intermediate snapshot `amisad-vm-core-k8s` is transient (consumed by the
+The intermediate snapshot `amisad-core-k8s` is transient (consumed by the
 deploy tier's rename). Admins get passwordless sudo and the harness SSH key at
 provisioning; after `start.guest`'s one OCR-driven first login, everything runs
 over SSH.
 
-## Demo users (non-administrators, on `amisad-vm-core`)
+## Demo users (non-administrators, on `amisad-core`)
 
 | Username | Persona | Purpose |
 |----------|---------|---------|
@@ -48,7 +48,7 @@ in sudoers.
 
 | Account | Where | Purpose |
 |---------|-------|---------|
-| `amisad` | PostgreSQL role on `amisad-vm-core` | App role for ledger-svc and seller-svc (`DATABASE_URL`). INSERT+SELECT only on ledger tables — append-only is database-enforced. Fixed lab password `amisadpoc2026` (inside a URL, so alphanumeric); not vault-managed, provisioned by the db step. |
+| `amisad` | PostgreSQL role on `amisad-core` | App role for ledger-svc and seller-svc (`DATABASE_URL`). INSERT+SELECT only on ledger tables — append-only is database-enforced. Fixed lab password `amisadpoc2026` (inside a URL, so alphanumeric); not vault-managed, provisioned by the db step. |
 | `amisad_audit_ro` | PostgreSQL role (NOLOGIN) | Read-only ledger access reserved for audit-svc; independence is architectural. |
 
 ## Core→edge access

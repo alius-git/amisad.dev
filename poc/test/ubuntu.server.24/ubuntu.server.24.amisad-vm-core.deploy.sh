@@ -1,11 +1,11 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - amisad-vm-core deploy step: download the prebuilt binaries from the
-# stash service (produced by amisad-vm-build), build thin distroless images from
+# AmisAd POC - amisad-core deploy step: download the prebuilt binaries from the
+# stash service (produced by amisad-build), build thin distroless images from
 # them, and deploy the ten services to the in-VM Kubernetes cluster. This VM has
 # the runtime stack (Docker+containerd+kubeadm K8s+Helm+PostgreSQL+NATS from the
-# amisad-vm-core-k8s baseline) plus python3 - but NO Rust toolchain and no source build.
+# amisad-core-k8s baseline) plus python3 - but NO Rust toolchain and no source build.
 # STASH_HOST (default 192.168.7.222): the stash-service VM to pull binaries from.
 set -euo pipefail
 
@@ -38,7 +38,7 @@ cd "$POC"
 echo "== download prebuilt binaries from the stash service =="
 # --noproxy '*': the stash IP is not in the guest no_proxy list, so an HTTP GET
 # would otherwise be sent through squid. Locate the artifact by the constant
-# label amisad-vm-build uploaded under (username amisad-poc, filename amisad-binaries);
+# label amisad-build uploaded under (username amisad-poc, filename amisad-binaries);
 # /api/stashes returns newest-first, so limit=1 is the latest build.
 STASH_HOST="${STASH_HOST:-192.168.7.222}"
 STASH="http://${STASH_HOST}"
@@ -52,7 +52,7 @@ PERMALINK=$(curl -fsS --noproxy '*' \
     "${STASH}/api/stashes?username=amisad-poc&filename=amisad-binaries&limit=1" \
     | grep -o '"permalink":"[^"]*"' | head -n1 | cut -d'"' -f4 || true)
 if [ -z "$PERMALINK" ]; then
-    echo "no stash artifact found for label amisad-poc/amisad-binaries - did amisad-vm-build run first?" >&2
+    echo "no stash artifact found for label amisad-poc/amisad-binaries - did amisad-build run first?" >&2
     exit 3
 fi
 DOWNLOAD="${STASH}${PERMALINK/#\/s\//\/download\/}"
@@ -103,4 +103,4 @@ for svc in "${!NP[@]}"; do
         "{\"spec\":{\"type\":\"NodePort\",\"ports\":[{\"port\":8080,\"targetPort\":8080,\"nodePort\":${NP[$svc]}}]}}"
 done
 
-echo "amisad-vm-core DEPLOY PASSED"
+echo "amisad-core DEPLOY PASSED"

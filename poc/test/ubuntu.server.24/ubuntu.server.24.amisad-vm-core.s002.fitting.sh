@@ -1,7 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - s002.fitting run against the deployed amisad-vm-core cluster:
+# AmisAd POC - s002.fitting run against the deployed amisad-core cluster:
 # start slice-runtime, seed Elena's dresses (one dusty blue) + a second seller's
 # out-of-range/past-deadline offers + fitting slots, drive Maya's MANUAL-policy
 # dress need, and assert the FULL Target Verification Point: shortlist honors
@@ -17,7 +17,7 @@ cd "$POC"
 
 echo "== wait for the deployed services to recover (post-restore boot) =="
 sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
-# amisad-vm-core cold-boots from its snapshot; kubectl does not retry a refused
+# amisad-core cold-boots from its snapshot; kubectl does not retry a refused
 # TCP dial, so poll a raw endpoint before waiting on the deployments.
 for _ in $(seq 1 60); do
     if kubectl get --raw='/readyz' >/dev/null 2>&1; then break; fi
@@ -42,13 +42,13 @@ for port in 30080 30081 30082 30083 30084 30085 30086; do
         sleep 5
     done
     curl -sf "http://${NODE_IP}:${port}/health" >/dev/null || {
-        echo "NodePort ${port} never answered - stale amisad-vm-core snapshot? The deploy chain must be re-run (run-tests.ps1 rebuilds it)." >&2
+        echo "NodePort ${port} never answered - stale amisad-core snapshot? The deploy chain must be re-run (run-tests.ps1 rebuilds it)." >&2
         exit 8
     }
 done
 SELLER="http://${NODE_IP}:30083"
 
-echo "== slice-runtime (edge amisad-vm-edge-a) =="
+echo "== slice-runtime (edge amisad-edge-a) =="
 # Resolve the edge from its boot-time IP report on the status server; an
 # explicit EDGE_HOST env wins; unresolvable falls back to this VM.
 if [ -r /etc/yuruna/host.env ]; then
@@ -58,8 +58,8 @@ fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
 if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_HOST_IP:-}" ]; then
     EDGE_IP=$(wget --no-proxy -qO- \
-        "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/log/handoff/amisad-vm-edge-a.ip.txt" 2>/dev/null || true)
-    if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-vm-edge-a-admin@${EDGE_IP}"; fi
+        "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/log/handoff/amisad-edge-a.ip.txt" 2>/dev/null || true)
+    if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-edge-a-admin@${EDGE_IP}"; fi
 fi
 if [ -n "${EDGE_HOST:-}" ]; then
     echo "edge: ${EDGE_HOST}"

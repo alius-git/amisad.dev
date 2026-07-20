@@ -200,7 +200,7 @@ Decisions (locked — do not re-ask):
 - Point repositories.projectUrl at the LOCAL repo (C:\git\alius-git\amisad.dev).
 - Guest source: adapt the scenario-001 sequence so the guest obtains the repo from the freshest host-served copy (investigate how fetch-and-execute serves project files and use that path or a host-reachable URL) instead of cloning GitHub. Keep the credential-store steps working; the PAT stays exercised host-side via GH_TOKEN.
 - Git policy: commit locally to main as fixes land (runner clones committed state); NO pushes to GitHub.
-- Edge topology: single-VM degraded mode (edgeHost stays empty).
+- Edge topology: single VM degraded mode (edgeHost stays empty).
 
 Iteration playbook:
 
@@ -265,10 +265,10 @@ Now that both s001 and s002 succeed, the next goal is:
 
 - Use a new Yuruna framework parameter "hostname" to set the hostname for guest VMs needed for the scenario demos.
 - Build guest VMs for the demos as per the "Deployment topology" in plan/design/01-overview.md
-- Have the VMs with the initial administrator username set to [hostname]-admin. For example, the guest VM "amisad-vm-core" would have its administrator username set to "amisad-vm-core-admin".
+- Have the VMs with the initial administrator username set to [hostname]-admin. For example, the guest VM "amisad-core" would have its administrator username set to "amisad-core-admin".
 - Add the users needed for demos to each guest VM as non-administrators (sudo adduser new_username)
 - Adapt documentation for s001 and s002 accordingly.
-- Test the entire end-to-end scenario with the in-memory approach, and then improve using a real PostgreSQL installation in vm-core.
+- Test the entire end-to-end scenario with the in-memory approach, and then improve using a real PostgreSQL installation in amisad-core.
 - All end-to-end test should start from a clean machine. Delete previous
 
 Ask any question before starting implementation.

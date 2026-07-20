@@ -1,26 +1,26 @@
 # yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - build VM baseline: a fresh Ubuntu Server (hostname
-# amisad-vm-build, admin amisad-vm-build-admin) plus the build toolchains only
+# amisad-build, admin amisad-build-admin) plus the build toolchains only
 # (rustup + pinned stable Rust, bazelisk, git, python3), snapshotted as
-# "amisad-vm-build". This VM compiles binaries and nothing else. Only
+# "amisad-build". This VM compiles binaries and nothing else. Only
 # start.guest uses OCR (first-login rotation); everything after runs over SSH.
 
 # Perf-log identity. Bump revision on step add/remove.
-# Rev 3: amisad-vm-* convention (hostname parameter + <hostname>-admin user);
+# Rev 3: amisad-* convention (hostname parameter + <hostname>-admin user);
 # post-provision steps moved from OCR login to SSH.
 sequenceGuid: 4211aa01-5c0e-4b7d-9f3a-2e8d47c60a11
 sequenceRevision: 3
 
-description: "Ubuntu Server: provision amisad-vm-build (admin amisad-vm-build-admin), install Rust + bazelisk + git build tools over SSH, snapshot amisad-vm-build."
+description: "Ubuntu Server: provision amisad-build (admin amisad-build-admin), install Rust + bazelisk + git build tools over SSH, snapshot amisad-build."
 baseline:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
 variables:
   # Per-VM admin (see usernames.md); hostname set via the framework's new
   # hostname parameter. Both cascade down to start.guest provisioning.
-  username: amisad-vm-build-admin
-  hostname: amisad-vm-build
+  username: amisad-build-admin
+  hostname: amisad-build
 
 steps:
   - action: sshWaitReady
@@ -28,10 +28,10 @@ steps:
     description: "SSH up after the start.guest reboot"
 
   - action: sshFetchAndExecute
-    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-build.tools.sh"
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh"
     timeoutSeconds: 1800
     description: "Install build tools (rustup, bazelisk, git, python3)"
 
   - action: saveDiskSnapshot
-    id: "amisad-vm-build"
+    id: "amisad-build"
     description: "Snapshot the AmisAd build VM"
