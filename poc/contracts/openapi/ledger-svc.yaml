@@ -68,6 +68,23 @@ paths:
         "200": { description: "value_cents, confirmed, entries, total_cents" }
   /v1/verify:
     get:
-      summary: "Recompute both hash chains"
+      summary: "Recompute all three hash chains"
       responses:
-        "200": { description: "attestation_ok, settlement_ok, lengths" }
+        "200": { description: "attestation_ok, settlement_ok, consent_ok, lengths" }
+  /v1/consents:
+    post:
+      summary: "Append a consent entry to the hash-chained consent ledger (body: subject, grant_type participation|contribution, action grant|revoke, ts)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "index, hash" }
+  /v1/consents/subject/{subject}:
+    get:
+      summary: "Newest-wins consent state per grant type + full immutable history for one pseudonymous subject"
+      parameters:
+        - { name: subject, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "subject, participation, contribution, history" }

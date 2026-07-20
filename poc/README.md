@@ -22,7 +22,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-vm-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment, s002.fitting, s003.silence |
+| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-vm-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment, s002.fitting, s003.silence, s004.failover |
 | `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 | `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
@@ -54,7 +54,7 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **Sequences deploy then verify `/health` only** (scenarios s004–s010,
+- **Sequences deploy then verify `/health` only** (scenarios s005–s010,
   parked under `test/gui-parked/`). Each parked skeleton still targets the
   k8s tier; the rework needed to activate one is the checklist in
   [test.md](test.md). The real steps are enumerated as TODO blocks pointing
@@ -67,7 +67,7 @@ sources.
   as the state reset): [test.md](test.md).
 - **Demo by hand** (prebuild once, then drive the deployed topology manually,
   including the mobile app): [demo.md](demo.md).
-- **Hostnames + usernames** (per-VM `<hostname>-admin` + the `maya`/`elena`
+- **Hostnames + usernames** (per-VM `<hostname>-admin` + the maya/elena/tom/priya
   demo personas, and why): [usernames.md](usernames.md).
 
 The lab builds the design topology
@@ -78,7 +78,7 @@ the stash service (`yuruna-stash-service`, durable per-upload record);
 ten services; `amisad-vm-edge-a`/`-b` are the stateless region slice VMs
 (`slice-runtime` delivered per scenario run over SSH). Scenarios run against
 `amisad-vm-core`, each restoring its snapshot as the state reset. Hostnames,
-per-VM `<hostname>-admin` accounts, and the `maya`/`elena` demo users are in
+per-VM `<hostname>-admin` accounts, and the demo users (maya, elena, tom, priya) are in
 [usernames.md](usernames.md).
 
 ## s001.fulfillment implementation notes
@@ -151,6 +151,23 @@ cycle counts only consent-contributing open needs — counts, never content);
 The TVP asserts zero attestation-ledger growth across the paused window, the
 full grant → revoke → re-grant history on the verifying consent chain, and
 its rows in PostgreSQL.
+
+## s004.failover implementation notes
+
+s004.failover proves the fabric fails *safe*. Both edges now run
+`slice-runtime` with an attested **region identity**; resource-svc's default
+placement is capacity-greedy across regions, and Tom's jurisdiction policy is
+what pins the restricted jurisdiction to its compliant region — the roomier
+region-b is excluded at allocation time (both facts positively asserted). The
+harness arms two consecutive **isolation faults**: each armed environment
+self-terminates BEFORE the envelope is opened (created → attested → aborted
+→ destroyed, fault reason attested, no match record, nothing need-derived in
+the abort trail), the abort telemetry raises incidents in Tom's queue, and
+the coordinator's automatic retry (three attempts, same compliant placement)
+completes the match with exactly one settlement — hosting revenue for the
+completed environment only. Tom escalates the systemic pattern to Priya:
+platform-svc's first real surface, a cross-party incident case linking both
+aborted lifecycles by environment id only.
 
 s003-specific deviations, deliberate: the coordinator's open needs are
 in-memory (a pod restart drops them while the consent chain persists);

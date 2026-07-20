@@ -17,12 +17,12 @@
 #   [2] amisad-vm-edge-a and amisad-vm-edge-b: provision + snapshot (each chain
 #       runs solo - first-login OCR is only reliable with no other lab VM up)
 #   [3] amisad-vm-core: k8s + deploy + demo users, snapshot amisad-vm-core
-#   [4] start amisad-vm-edge-a and wait for its IP report (edge-b stays off
-#       until s004/s009 need region B)
+#   [4] start BOTH edges and wait for their IP reports (s004 needs region B
+#       live; earlier scenarios just don't use it)
 #   [5] each scenario in order: restore amisad-vm-core (the per-scenario state
 #       reset) and drive it over SSH - concurrent edge VMs cannot disturb SSH
 #       stages. On fail the run stops and everything is left up for debugging.
-# Green leaves amisad-vm-core + amisad-vm-edge-a live as the demo environment.
+# Green leaves amisad-vm-core + both edges live as the demo environment.
 # Must run ELEVATED (Hyper-V). Stage logs land under -LogDir.
 #requires -RunAsAdministrator
 param(
@@ -40,6 +40,7 @@ $Scenarios = @(
     'workload.guest.ubuntu.server.24.amisad-vm-core.s001.fulfillment'
     'workload.guest.ubuntu.server.24.amisad-vm-core.s002.fitting'
     'workload.guest.ubuntu.server.24.amisad-vm-core.s003.silence'
+    'workload.guest.ubuntu.server.24.amisad-vm-core.s004.failover'
 )
 
 function Stop-LabConsole {
@@ -182,40 +183,51 @@ if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.ami
 }
 Remove-InstallMedia -Name 'amisad-vm-core' -SnapshotId 'amisad-vm-core'
 
-# --- [4] start the region-A edge and wait for its IP report ---
-Write-Host "Starting amisad-vm-edge-a (edge-b stays off until s004/s009)."
+# --- [4] start BOTH region edges and wait for their IP reports ---
+# s004.failover needs the region-B edge live (jurisdiction-restricted
+# allocation must have a roomier non-compliant region to exclude); earlier
+# scenarios simply don't use it. Both stay live in the demo environment.
+Write-Host "Starting amisad-vm-edge-a + amisad-vm-edge-b."
 # The log-upload sink writes under YURUNA_LOG_DIR when overridden; resolve the
 # same way the server does, and anchor freshness to THIS start (a stale file
 # from a prior run/boot must not count).
 $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test\status\log' }
-$edgeIpFile = Join-Path $logRoot 'handoff\amisad-vm-edge-a.ip.txt'
-Remove-Item -LiteralPath $edgeIpFile -Force -ErrorAction SilentlyContinue
-$edgeStart = Get-Date
-# Loud + retried: a silent Start-VM failure previously left the edge Off and
-# pushed the scenarios into the degraded fallback with no evidence why.
-$edgeStarted = $false
-foreach ($attempt in 1..3) {
-    try {
-        Hyper-V\Start-VM -Name 'amisad-vm-edge-a' -ErrorAction Stop
-        $edgeStarted = $true
-        break
-    } catch {
-        Write-Host "Start-VM amisad-vm-edge-a attempt ${attempt}/3 failed: $($_.Exception.Message)"
-        Start-Sleep -Seconds 10
-    }
-}
-$edgeReady = $false
-if ($edgeStarted) {
-    $edgeDeadline = (Get-Date).AddMinutes(6)
-    while ((Get-Date) -lt $edgeDeadline) {
-        if ((Test-Path $edgeIpFile) -and ((Get-Item $edgeIpFile).LastWriteTime -gt $edgeStart)) {
-            $edgeReady = $true; break
+$edges = 'amisad-vm-edge-a', 'amisad-vm-edge-b'
+# Start both first (they boot in parallel), then wait on both IP reports -
+# a serial start would add a full edge boot to the stage for nothing.
+$edgeState = @{}
+foreach ($edge in $edges) {
+    $edgeIpFile = Join-Path $logRoot "handoff\$edge.ip.txt"
+    Remove-Item -LiteralPath $edgeIpFile -Force -ErrorAction SilentlyContinue
+    $edgeState[$edge] = @{ IpFile = $edgeIpFile; Start = (Get-Date); Started = $false }
+    # Loud + retried: a silent Start-VM failure previously left the edge Off and
+    # pushed the scenarios into the degraded fallback with no evidence why.
+    foreach ($attempt in 1..3) {
+        try {
+            Hyper-V\Start-VM -Name $edge -ErrorAction Stop
+            $edgeState[$edge].Started = $true
+            break
+        } catch {
+            Write-Host "Start-VM $edge attempt ${attempt}/3 failed: $($_.Exception.Message)"
+            Start-Sleep -Seconds 10
         }
-        Start-Sleep -Seconds 10
     }
 }
-if (-not $edgeReady) {
-    Write-Warning "amisad-vm-edge-a IP report not seen; scenarios will use the single-VM degraded fallback."
+$edgeDeadline = (Get-Date).AddMinutes(8)
+foreach ($edge in $edges) {
+    $edgeReady = $false
+    if ($edgeState[$edge].Started) {
+        while ((Get-Date) -lt $edgeDeadline) {
+            if ((Test-Path $edgeState[$edge].IpFile) -and
+                ((Get-Item $edgeState[$edge].IpFile).LastWriteTime -gt $edgeState[$edge].Start)) {
+                $edgeReady = $true; break
+            }
+            Start-Sleep -Seconds 10
+        }
+    }
+    if (-not $edgeReady) {
+        Write-Warning "$edge IP report not seen; dependent scenarios will fall back or fail loudly."
+    }
 }
 
 # --- [5] scenarios, in order, each restoring amisad-vm-core over SSH ---
@@ -227,7 +239,7 @@ foreach ($s in $Scenarios) {
     }
 }
 
-Write-Host "ALL SCENARIOS PASSED. Demo environment live: amisad-vm-core + amisad-vm-edge-a."
+Write-Host "ALL SCENARIOS PASSED. Demo environment live: amisad-vm-core + amisad-vm-edge-a + amisad-vm-edge-b."
 Write-Host "--- final VM inventory ---"
 (Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Host
 exit 0

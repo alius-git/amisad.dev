@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: platform-svc
-  description: "Marketplace stewardship: registry, settlement oversight, zero-knowledge support desk (AmisAd POC skeleton contract: health and version only)"
+  description: "Marketplace stewardship: cross-party incident cases (s004.failover surface); registry and settlement oversight land with later scenarios"
   version: 0.1.0
 paths:
   /health:
@@ -31,4 +31,26 @@ paths:
                 type: object
                 properties:
                   service: { type: string }
-                  version: { type: string }
+                  version: { type: string }  /v1/incidents:
+    post:
+      summary: "Open a cross-party incident case linking environment lifecycles (body: summary, from, environment_ids[])"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "case_id" }
+        "400": { description: "Missing/invalid fields (environment_ids must be a non-empty array of strings)" }
+    get:
+      summary: "List incident cases"
+      responses:
+        "200": { description: "cases: [...]" }
+  /v1/incidents/{case_id}:
+    get:
+      summary: "One incident case with its linked environment ids"
+      parameters:
+        - { name: case_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "The case" }
+        "404": { description: "Unknown case" }

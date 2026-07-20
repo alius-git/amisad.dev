@@ -4,13 +4,20 @@
 // POST /v1/environments runs one lifecycle (created -> attested -> executed
 // -> destroyed) written to the attestation ledger and mirrored to resource
 // telemetry; the envelope is opened ONLY here, and everything that leaves is
-// in the egress log, so zero-leak is checkable. Deviations: poc/README.md.
+// in the egress log, so zero-leak is checkable. s004.failover: the harness
+// can arm isolation faults (POST /v1/faults) - an armed environment
+// self-terminates right after attestation, BEFORE the envelope is opened
+// (created -> attested -> aborted -> destroyed, fault reason attested, no
+// match record, nothing need-derived leaves). Deviations: poc/README.md.
 
 use amisad_common::{json, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
+use std::io::Read;
+use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct State {
     egress: Vec<String>,
+    armed_faults: i64,
 }
 
 fn ledger_url() -> String {
@@ -19,12 +26,37 @@ fn ledger_url() -> String {
 fn resource_url() -> String {
     std::env::var("RESOURCE_URL").unwrap_or_else(|_| String::from("http://resource-svc:8080"))
 }
+/// The slice's own region identity (set at process start by the operator that
+/// placed it); rides in every attestation so out-of-region allocation is
+/// assertable from the ledger alone.
+fn region() -> String {
+    std::env::var("REGION").unwrap_or_default()
+}
 
 fn now_nanos() -> u128 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map(|d| d.as_nanos())
         .unwrap_or(0)
+}
+
+/// Process-local secret mixed into environment ids. Without it the id is a
+/// weakly-salted commitment to the need plaintext: ids are published on
+/// operator surfaces (incidents, cases, the attestation ledger), and a
+/// guessed envelope plus a coarse timestamp could be brute-force-CONFIRMED
+/// against sha256(envelope|nanos). The nonce never leaves the process.
+fn process_nonce() -> &'static str {
+    static NONCE: OnceLock<String> = OnceLock::new();
+    NONCE.get_or_init(|| {
+        let mut buf = [0u8; 32];
+        match std::fs::File::open("/dev/urandom").and_then(|mut f| f.read_exact(&mut buf)) {
+            Ok(()) => sha256::hex_digest(&buf),
+            // Non-Linux fallback (host-side tests): weaker, still per-process.
+            Err(_) => sha256::hex_digest(
+                format!("{}|{}", now_nanos(), std::process::id()).as_bytes(),
+            ),
+        }
+    })
 }
 
 /// Attribute constraints (s002.fitting): every required attribute must be on
@@ -123,21 +155,43 @@ fn post_out(state: &mut State, kind: &str, url: &str, body: &json::Json) {
 }
 
 fn attest(state: &mut State, environment_id: &str, jurisdiction: &str, lifecycle: &str) {
-    let payload = json::obj(vec![
+    attest_with(state, environment_id, jurisdiction, lifecycle, None)
+}
+
+/// The abort path attests its fault reason; every entry carries the slice's
+/// region so sovereignty is assertable from the ledger.
+fn attest_with(
+    state: &mut State,
+    environment_id: &str,
+    jurisdiction: &str,
+    lifecycle: &str,
+    fault: Option<&str>,
+) {
+    let mut pairs = vec![
         ("environment_id", json::s(environment_id)),
         ("lifecycle", json::s(lifecycle)),
         ("jurisdiction", json::s(jurisdiction)),
-    ]);
+        ("region", json::s(&region())),
+    ];
+    if let Some(reason) = fault {
+        pairs.push(("fault", json::s(reason)));
+    }
+    let payload = json::obj(pairs);
     post_out(
         state,
         "attestation",
         &format!("{}/v1/attestations", ledger_url()),
         &payload,
     );
-    let telemetry = json::obj(vec![
+    let mut telemetry_pairs = vec![
         ("environment_id", json::s(environment_id)),
         ("event", json::s(lifecycle)),
-    ]);
+        ("region", json::s(&region())),
+    ];
+    if let Some(reason) = fault {
+        telemetry_pairs.push(("fault", json::s(reason)));
+    }
+    let telemetry = json::obj(telemetry_pairs);
     post_out(
         state,
         "telemetry",
@@ -161,16 +215,37 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let empty = Vec::new();
             let offers = body.get("offers").and_then(|o| o.as_arr()).unwrap_or(&empty).clone();
 
-            let environment_id =
-                sha256::hex_digest(format!("{envelope}|{}", now_nanos()).as_bytes());
+            let environment_id = sha256::hex_digest(
+                format!("{envelope}|{}|{}", now_nanos(), process_nonce()).as_bytes(),
+            );
             attest(state, &environment_id, &jurisdiction, "created");
             attest(state, &environment_id, &jurisdiction, "attested");
+
+            // Armed isolation fault (s004.failover): self-terminate BEFORE
+            // the envelope is opened - partial state is destroyed with the
+            // environment, the abort and its reason are attested, and no
+            // match record exists to emit.
+            if state.armed_faults > 0 {
+                state.armed_faults -= 1;
+                attest_with(state, &environment_id, &jurisdiction, "aborted", Some("isolation"));
+                attest(state, &environment_id, &jurisdiction, "destroyed");
+                return Response::json(
+                    503,
+                    &json::obj(vec![
+                        ("status", json::s("aborted")),
+                        ("environment_id", json::s(&environment_id)),
+                        ("fault", json::s("isolation")),
+                    ]),
+                );
+            }
 
             // The envelope is opened only inside this environment.
             let need = match json::parse(&envelope) {
                 Ok(n) => n,
                 Err(e) => {
-                    attest(state, &environment_id, &jurisdiction, "aborted");
+                    // A fault reason on every abort keeps the incident schema
+                    // uniform for the operator queue.
+                    attest_with(state, &environment_id, &jurisdiction, "aborted", Some("bad-envelope"));
                     attest(state, &environment_id, &jurisdiction, "destroyed");
                     return Response::error(400, &format!("bad envelope: {e}"));
                 }
@@ -293,6 +368,26 @@ fn handle(state: &mut State, req: &Request) -> Response {
             // Environment state (need, offers) drops here with the locals.
             Response::json(201, &match_record)
         }
+        ("POST", "/v1/faults") => {
+            // Harness-only fault injection: arm the next N environments to
+            // abort with an isolation fault.
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            if body.str_of("mode") != Some("isolation") {
+                return Response::error(400, "mode 'isolation' required");
+            }
+            if body.get("count").is_some() && body.i64_of("count").is_none() {
+                return Response::error(400, "count must be an integer");
+            }
+            let count = body.i64_of("count").unwrap_or(1);
+            if !(0..=16).contains(&count) {
+                return Response::error(400, "count must be 0..=16");
+            }
+            state.armed_faults = count;
+            Response::json(200, &json::obj(vec![("armed", json::n(count))]))
+        }
         ("GET", "/v1/egress") => {
             let entries: Vec<json::Json> =
                 state.egress.iter().map(|e| json::s(e)).collect();
@@ -308,7 +403,10 @@ fn main() -> std::io::Result<()> {
             name: "slice-runtime",
             version: env!("CARGO_PKG_VERSION"),
         },
-        State { egress: Vec::new() },
+        State {
+            egress: Vec::new(),
+            armed_faults: 0,
+        },
         handle,
     )
 }
@@ -406,5 +504,53 @@ mod tests {
         // extended checks are vacuous and the base constraints still decide.
         let n = need();
         assert!(qualifies(&n, &offer(11000, "housewares", "region-a", 10, true)));
+    }
+
+    #[test]
+    fn armed_environment_aborts_without_opening_the_envelope() {
+        // Offline: the attest/telemetry posts fail fast (unresolvable hosts)
+        // and post_out only logs - the abort semantics are what's under test.
+        let mut state = State {
+            egress: Vec::new(),
+            armed_faults: 1,
+        };
+        let response = handle(
+            &mut state,
+            &Request {
+                method: "POST".to_string(),
+                path: "/v1/environments".to_string(),
+                body: "{\"jurisdiction\":\"region-a\",\"envelope\":\"{\\\"category\\\":\\\"housewares\\\"}\",\"offers\":[]}".to_string(),
+            },
+        );
+        assert_eq!(response.status, 503);
+        let body = json::parse(&response.body).unwrap();
+        assert_eq!(body.str_of("status"), Some("aborted"));
+        assert_eq!(body.str_of("fault"), Some("isolation"));
+        assert!(body.str_of("environment_id").is_some());
+        assert_eq!(state.armed_faults, 0, "the fault must be consumed");
+        // Nothing need-derived leaves: the envelope was never opened, so no
+        // match/shortlist record exists and the egress log holds only the
+        // attestation/telemetry entries.
+        let egress = state.egress.join("\n");
+        assert!(!egress.contains("match-record"));
+        assert!(!egress.contains("housewares"));
+    }
+
+    #[test]
+    fn fault_arming_validates_mode_and_count() {
+        let mut state = State {
+            egress: Vec::new(),
+            armed_faults: 0,
+        };
+        let req = |body: &str| Request {
+            method: "POST".to_string(),
+            path: "/v1/faults".to_string(),
+            body: body.to_string(),
+        };
+        assert_eq!(handle(&mut state, &req("{\"mode\":\"chaos\"}")).status, 400);
+        assert_eq!(handle(&mut state, &req("{\"mode\":\"isolation\",\"count\":99}")).status, 400);
+        let ok = handle(&mut state, &req("{\"mode\":\"isolation\",\"count\":2}"));
+        assert_eq!(ok.status, 200);
+        assert_eq!(state.armed_faults, 2);
     }
 }

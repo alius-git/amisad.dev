@@ -15,12 +15,12 @@ pwsh poc\build\run-tests.ps1 -NoConfigGate
 ```
 
 A green run leaves the demo environment **live**: `amisad-vm-core` (the ten
-services, NodePorts exposed) and `amisad-vm-edge-a` (the region-A slice VM,
-running `slice-runtime` from the last scenario). `amisad-vm-build` and
-`amisad-vm-edge-b` are kept on disk stopped.
+services, NodePorts exposed) and both edge VMs (`amisad-vm-edge-a`/`-b`,
+running `slice-runtime` with their region identity from the last scenario).
+`amisad-vm-build` is kept on disk stopped.
 
 Console logins on `amisad-vm-core` ([usernames.md](usernames.md)):
-- **demo personas** (non-admin): `maya`, `elena`
+- **demo personas** (non-admin): `maya`, `elena`, `tom`, `priya`
 - **administrator**: `amisad-vm-core-admin`
 
 Passwords are in the host vault,
@@ -32,16 +32,16 @@ re-arm below for a fresh walkthrough.
 ## Driving the demo
 
 NodePorts on `amisad-vm-core`: coordinator `30080`, ledger `30081`, resource
-`30082`, seller `30083`, identity `30084`, insights `30085`. The same APIs
-answer from the host or LAN at `http://<vm-ip>:<nodeport>`.
+`30082`, seller `30083`, identity `30084`, insights `30085`, platform `30086`.
+The same APIs answer from the host or LAN at `http://<vm-ip>:<nodeport>`.
 
 **Re-arm (only after a VM restart).** A reboot of `amisad-vm-core` loses the
 in-memory state (coordinator routing, identity tokens, the registered edge) —
 but the ledgers, offers, and orders come back from PostgreSQL, chains intact. Run the
 command steps below as **`amisad-vm-core-admin`** — the repo and
 `target/release/` binaries live under its home, which the non-admin personas
-cannot traverse; `maya`/`elena` are the demo *narrative* logins, and the plain
-`curl` steps also work from any user or from the host via the NodePorts:
+cannot traverse; maya/elena/tom/priya are the demo *narrative* logins, and the
+plain `curl` steps also work from any user or from the host via the NodePorts:
 
 ```bash
 cd ~/amisad.dev/poc
@@ -131,6 +131,38 @@ curl -s -X POST http://$NODE_IP:30085/v1/aggregation/cycle   # contributions: 0
 target/release/buyer-client resume                           # "rematched":1 - the dress matches now
 target/release/buyer-client consents                         # full grant-revoke-regrant history
 curl -s http://$NODE_IP:30081/v1/verify                      # all three chains verify
+```
+
+**s004.failover** — you play Tom (and then Priya): sovereignty pins the
+match to the compliant region although region-b is roomier, two injected
+isolation faults abort safely and retry clean, and the systemic pattern
+becomes a cross-party case. Fresh snapshot recommended (attestation counts
+assume a clean ledger). Both edges run `slice-runtime`; their IPs are in the
+status server's `/log/handoff/amisad-vm-edge-*.ip.txt` files:
+
+```bash
+# Tom: two regions with capacity, region-a sovereign (policy is the ONLY thing
+# excluding the roomier region-b - check the unrestricted placement first):
+curl -sf -X POST http://$NODE_IP:30082/v1/edges -d '{"region":"region-a","endpoint":"http://<edge-a-ip>:8080","capacity":2}'
+curl -sf -X POST http://$NODE_IP:30082/v1/edges -d '{"region":"region-b","endpoint":"http://<edge-b-ip>:8080","capacity":10}'
+curl -s -X POST http://$NODE_IP:30082/v1/placements -d '{"jurisdiction":"anywhere"}'   # -> region-b (roomier)
+curl -sf -X POST http://$NODE_IP:30082/v1/policies -d '{"jurisdiction":"region-a","regions":["region-a"]}'
+curl -s -X POST http://$NODE_IP:30082/v1/placements -d '{"jurisdiction":"region-a"}'   # -> region-a (sovereign)
+
+# Harness hat on: arm two isolation faults on the compliant slice, then match:
+curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
+curl -sf -X POST http://<edge-a-ip>:8080/v1/faults -d '{"mode":"isolation","count":2}'
+target/release/buyer-client submit            # abort, abort, then the clean match
+
+# Tom's queue and the evidence trail:
+curl -s http://$NODE_IP:30082/v1/incidents                          # two isolation incidents
+curl -s http://$NODE_IP:30081/v1/attestations/env/<aborted_env_id>  # created-attested-aborted-destroyed
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'   # one settlement
+
+# Tom -> Priya: the systemic pattern becomes a cross-party case:
+curl -s -X POST http://$NODE_IP:30086/v1/incidents -d '{"summary":"systemic isolation faults in region-a","from":"resource-ops","environment_ids":["<env1>","<env2>"]}'
+curl -s http://$NODE_IP:30086/v1/incidents/<case_id>                # links both aborted lifecycles
 ```
 
 **Mobile (manual demo):** build and side-load the buyer app against the VM's

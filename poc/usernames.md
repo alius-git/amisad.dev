@@ -24,7 +24,7 @@ Set-Password -Username <name> -NewPassword '<alphanumeric>'
 | `amisad-vm-build` | build box (lab infra) | `amisad-vm-build-admin` | Rust toolchain only; compiles the workspace and uploads the binaries tarball to the stash service. Stopped after the build stage. |
 | `amisad-vm-core` | **vm-core** | `amisad-vm-core-admin` | Kubernetes + PostgreSQL + NATS + the ten deployed services. Scenarios run here over SSH; each restores the `amisad-vm-core` snapshot as its state reset. |
 | `amisad-vm-edge-a` | **vm-edge-a** (region A) | `amisad-vm-edge-a-admin` | Stateless slice VM; `slice-runtime` is delivered per scenario run over SSH from vm-core. Live during scenarios/demos. |
-| `amisad-vm-edge-b` | **vm-edge-b** (region B) | `amisad-vm-edge-b-admin` | Same, region B; provisioned per the topology but left stopped until `s004.failover` / `s009.suppression` need it. |
+| `amisad-vm-edge-b` | **vm-edge-b** (region B) | `amisad-vm-edge-b-admin` | Same, region B; live during scenarios/demos since `s004.failover` (the sovereignty scenario needs a roomier non-compliant region to exclude). |
 
 The intermediate snapshot `amisad-vm-core-k8s` is transient (consumed by the
 deploy tier's rename). Admins get passwordless sudo and the harness SSH key at
@@ -37,8 +37,10 @@ over SSH.
 |----------|---------|---------|
 | `maya` | Maya, the buyer | Console/SSH login persona for the demo narrative; API (`curl`) steps work from her account. `buyer-client` itself runs from the admin account (the binaries live under the admin's 0750 home). |
 | `elena` | Elena, the seller | Console/SSH login persona for the seller narrative; the order-board `curl` steps work from her account. |
+| `tom` | Tom, the carrier/resource operator | s004.failover narrative: allocation policy, incident queue, escalation; the resource-svc `curl` steps work from his account. |
+| `priya` | Priya, the platform operator | s004.failover narrative: receives the cross-party incident case; the platform-svc `curl` steps work from her account. |
 
-Both are created by the vm-core deploy chain (`adduser --disabled-password`,
+All four are created by the vm-core deploy chain (`adduser --disabled-password`,
 then a vault-rendered `chpasswd` in a `sensitive: true` step) and are **not**
 in sudoers.
 

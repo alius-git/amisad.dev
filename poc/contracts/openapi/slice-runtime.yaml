@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: slice-runtime
-  description: "Sealed match environment on the edge: one full attested lifecycle per request, with a complete egress log (s001.fulfillment + s002.fitting surface)"
+  description: "Sealed match environment on the edge: one full attested lifecycle per request (region identity attested), with a complete egress log and harness fault injection (s001.fulfillment + s002.fitting + s004.failover surface)"
   version: 0.2.0
 paths:
   /health:
@@ -26,6 +26,17 @@ paths:
         "201": { description: "Match record (match_id, environment_id, offer, need_context) or shortlist (environment_id, shortlist, need_context) for manual policy" }
         "400": { description: "Bad envelope (aborted + destroyed attested)" }
         "404": { description: "No fitting offer for an auto-close need (executed + destroyed attested)" }
+        "503": { description: "Armed isolation fault: aborted BEFORE the envelope is opened (aborted + destroyed attested with fault reason); body: status, environment_id, fault" }
+  /v1/faults:
+    post:
+      summary: "Harness-only: arm the next N environments to abort with an isolation fault (body: mode='isolation', count 0..=16)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "armed: N" }
   /v1/egress:
     get:
       summary: "Everything that ever left an environment on this runtime - the zero-leak assertion surface"

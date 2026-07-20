@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: fabric-coordinator
-  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope (s001.fulfillment + s002.fitting surface)"
+  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope. Consent-gated execution, open needs, matching cycles, and automatic abort retry (s001-s004 surface)"
   version: 0.2.0
 paths:
   /health:
@@ -23,7 +23,8 @@ paths:
           application/json:
             schema: { type: object }
       responses:
-        "201": { description: "Match (handle, match_id, environment_id, offer) or shortlist (handle, environment_id, shortlist) for manual policy" }
+        "201": { description: "Match (handle, match_id, environment_id, offer), shortlist (handle, environment_id, shortlist) for manual policy, or open (handle, status='open') when nothing fits yet" }
+        "403": { description: "Participation consent revoked - no environment is created" }
         "401": { description: "Unverified actor" }
         "404": { description: "No fitting offer" }
         "503": { description: "No placement / dependency unavailable" }
@@ -57,3 +58,33 @@ paths:
       responses:
         "200": { description: "handle, status" }
         "404": { description: "Unknown handle" }
+  /v1/consents:
+    post:
+      summary: "Record a consent action for the verified subject and, on a participation grant, re-serve open needs (body: token, grant_type participation|contribution, action grant|revoke)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "subject, grant_type, action, ts, hash, rematched" }
+  /v1/consents/state:
+    post:
+      summary: "Current consent state + immutable history for the verified subject (body: token)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "subject, participation, contribution, history" }
+  /v1/offers/published:
+    post:
+      summary: "Offer-published event (from seller-svc): run a consent-gated matching cycle over the open needs"
+      responses:
+        "200": { description: "rematched: N" }
+  /v1/needs/contributions:
+    get:
+      summary: "Count of open needs whose subject grants aggregate contribution (counts only; no identity, no content)"
+      responses:
+        "200": { description: "contributions: N" }

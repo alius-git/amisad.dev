@@ -180,20 +180,44 @@ fn attempt_match(
         ("offers", offers),
     ])
     .dump();
-    let match_record = match request(
-        "POST",
-        &format!("{endpoint}/v1/environments"),
-        Some(&dispatch),
-    ) {
-        Ok((201, text)) => match json::parse(&text) {
-            Ok(m) => m,
-            Err(e) => return Err(Response::error(502, &format!("bad match record: {e}"))),
-        },
-        Ok((404, _)) => return Ok(None),
-        Ok((status, body)) => {
-            return Err(Response::error(502, &format!("environment ({status}): {body}")))
+    // An aborted environment (isolation fault, s004.failover) retries
+    // AUTOMATICALLY: a fresh environment in the same compliant placement, up
+    // to three attempts total. Fail-safe is the environment's job; recovery
+    // is the fabric's.
+    let mut match_record = None;
+    for attempt in 1..=3 {
+        match request(
+            "POST",
+            &format!("{endpoint}/v1/environments"),
+            Some(&dispatch),
+        ) {
+            Ok((201, text)) => match json::parse(&text) {
+                Ok(m) => {
+                    match_record = Some(m);
+                    break;
+                }
+                Err(e) => return Err(Response::error(502, &format!("bad match record: {e}"))),
+            },
+            Ok((404, _)) => return Ok(None),
+            Ok((503, body))
+                if json::parse(&body)
+                    .ok()
+                    .and_then(|b| b.str_of("status").map(|s| s == "aborted"))
+                    .unwrap_or(false) =>
+            {
+                if attempt < 3 {
+                    eprintln!("environment aborted (attempt {attempt}); retrying in the same placement");
+                }
+            }
+            Ok((status, body)) => {
+                return Err(Response::error(502, &format!("environment ({status}): {body}")))
+            }
+            Err(e) => return Err(Response::error(503, &format!("slice unavailable: {e}"))),
         }
-        Err(e) => return Err(Response::error(503, &format!("slice unavailable: {e}"))),
+    }
+    let match_record = match match_record {
+        Some(m) => m,
+        None => return Err(Response::error(502, "environment aborted repeatedly")),
     };
 
     // 4a. Manual policy: the environment returned a shortlist, not a match.

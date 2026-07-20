@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: resource-svc
-  description: "Carrier control plane: edge registration, jurisdiction-checked placement, slice telemetry (s001.fulfillment surface)"
+  description: "Carrier control plane: edge registration with capacity, capacity-greedy placement under jurisdiction policies, slice telemetry, operator incident queue (s001.fulfillment + s004.failover surface)"
   version: 0.1.0
 paths:
   /health:
@@ -16,7 +16,7 @@ paths:
         "200": { description: "Service name and version" }
   /v1/edges:
     post:
-      summary: "Register or replace an edge slice endpoint (body: region, endpoint)"
+      summary: "Register or replace an edge slice endpoint (body: region, endpoint, capacity?)"
       requestBody:
         required: true
         content:
@@ -27,10 +27,20 @@ paths:
     get:
       summary: "List registered edges"
       responses:
-        "200": { description: "edges: [{region, endpoint}]" }
+        "200": { description: "edges: [{region, endpoint, capacity}]" }
+  /v1/policies:
+    post:
+      summary: "Set a jurisdiction policy: allocation for this jurisdiction is restricted to the listed regions (body: jurisdiction, regions[])"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Policy stored" }
   /v1/placements:
     post:
-      summary: "Request a placement; jurisdiction is enforced at allocation time (body: jurisdiction)"
+      summary: "Request a placement (body: jurisdiction). Default is capacity-greedy across ALL regions; a jurisdiction policy restricts to its compliant regions at allocation time."
       requestBody:
         required: true
         content:
@@ -38,7 +48,7 @@ paths:
             schema: { type: object }
       responses:
         "200": { description: "Placement (region, endpoint)" }
-        "409": { description: "No edge capacity in jurisdiction" }
+        "409": { description: "No compliant edge with capacity for jurisdiction" }
   /v1/telemetry:
     post:
       summary: "Record slice lifecycle telemetry (body: environment_id, event)"
@@ -53,3 +63,8 @@ paths:
       summary: "List telemetry entries"
       responses:
         "200": { description: "entries: [...]" }
+  /v1/incidents:
+    get:
+      summary: "Operator incident queue: every aborted-slice telemetry entry (environment_id, event, region, fault)"
+      responses:
+        "200": { description: "incidents: [...]" }

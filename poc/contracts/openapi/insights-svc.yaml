@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: insights-svc
-  description: "Threshold-protected aggregate demand insights and outlooks (AmisAd POC skeleton contract: health and version only)"
+  description: "Threshold-protected aggregate demand insights: consent-gated aggregation cycles, counts only (s003.silence minimal surface; full pipeline lands with s009)"
   version: 0.1.0
 paths:
   /health:
@@ -32,3 +32,13 @@ paths:
                 properties:
                   service: { type: string }
                   version: { type: string }
+  /v1/aggregation/cycle:
+    post:
+      summary: "Run one aggregation cycle: pull the consent-contributing open-need COUNT from the fabric (s003.silence minimal slice)"
+      responses:
+        "201": { description: "cycle, contributions" }
+  /v1/aggregates:
+    get:
+      summary: "Aggregation cycle history (counts only; no identity, no content)"
+      responses:
+        "200": { description: "cycles, latest_contributions, history" }

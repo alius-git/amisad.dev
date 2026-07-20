@@ -2,10 +2,11 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - vm-core demo users: add the non-administrator persona accounts
-# (maya, elena) and install the core->edge demo SSH keypair for the admin so
-# scenario scripts can scp/ssh slice-runtime to the edge VMs. Passwords are set
-# by a separate sensitive sshExec sequence step (vault-rendered, masked), never
-# passed to this script. Runs as the admin (passwordless sudo).
+# (maya, elena buyers/sellers; tom, priya operators - s004.failover) and
+# install the core->edge demo SSH keypair for the admin so scenario scripts
+# can scp/ssh slice-runtime to the edge VMs. Passwords are set by a separate
+# sensitive sshExec sequence step (vault-rendered, masked), never passed to
+# this script. Runs as the admin (passwordless sudo).
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -21,8 +22,8 @@ if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
 fi
 BASE="http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}"
 
-echo "== non-admin demo users (maya, elena) =="
-for u in maya elena; do
+echo "== non-admin demo users (maya, elena, tom, priya) =="
+for u in maya elena tom priya; do
     if ! id -u "$u" >/dev/null 2>&1; then
         sudo adduser --disabled-password --gecos "" "$u"
     fi

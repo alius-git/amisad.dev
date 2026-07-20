@@ -37,6 +37,8 @@ the demo by hand instead, see [demo.md](demo.md).
    Set-Password -Username amisad-vm-edge-b-admin -NewPassword '<alnum>'
    Set-Password -Username maya  -NewPassword '<alnum>'
    Set-Password -Username elena -NewPassword '<alnum>'
+   Set-Password -Username tom   -NewPassword '<alnum>'
+   Set-Password -Username priya -NewPassword '<alnum>'
    ```
 
    The vault is a local, gitignored file. Seed every new username before its
@@ -64,11 +66,12 @@ independent without per-scenario VMs. Hostnames are set with the framework's
 [3] amisad-vm-core    start.guest -> k8s + PostgreSQL + NATS (snapshot
                       amisad-vm-core-k8s) -> binaries from the stash, deploy
                       10 services (ledger+seller on PostgreSQL), add
-                      maya/elena -> snapshot amisad-vm-core.
-[4] edge-a started; it reports its IP to the status server.
+                      maya/elena/tom/priya -> snapshot amisad-vm-core.
+[4] both edges started; each reports its IP to the status server.
 [5] scenarios in order, each: restore amisad-vm-core -> drive over SSH
     (sshWaitReady + sshFetchAndExecute; no OCR, so live edge VMs cannot
-    disturb it) -> full TVP asserts. slice-runtime runs on amisad-vm-edge-a.
+    disturb it) -> full TVP asserts. slice-runtime runs on amisad-vm-edge-a
+    (s004 also on amisad-vm-edge-b, with attested region identity).
 ```
 
 After `start.guest`'s one OCR-driven first login per VM, everything runs over
@@ -86,7 +89,7 @@ pwsh poc\build\run-tests.ps1 -NoConfigGate
 `run-tests.ps1` removes every amisad lab VM and leftover `test-*` VM
 (enforcing the clean start), generates the core→edge demo keypair if missing,
 builds the topology, then runs each scenario from its registry in order. Green
-ends with `ALL SCENARIOS PASSED`, leaving `amisad-vm-core` + `amisad-vm-edge-a`
+ends with `ALL SCENARIOS PASSED`, leaving `amisad-vm-core` and both edge VMs
 live as the demo environment. Stage logs land under `%TEMP%\amisad-tests\`;
 watch live progress at `http://localhost:8080/status/`. Expect ~15 min for the
 build, ~15 min per edge, ~20 min for vm-core, and a few minutes per scenario.
@@ -110,7 +113,8 @@ IP:5432) to ledger-svc and seller-svc via the `databaseUrl` helm value; writes
 go to PostgreSQL first, and pods reload state on start. s001 asserts the rows
 landed and that a `kubectl rollout restart` reloads verifying chains and the
 settled order; s002 asserts the booked appointment row; s003 asserts the
-consent chain's six grant/revoke/re-grant rows. Empty `databaseUrl` (the
+consent chain's six grant/revoke/re-grant rows; s004 asserts all twelve
+attestation rows (two aborted + one completed environment). Empty `databaseUrl` (the
 chart default) keeps a service in-memory — which is how `cargo test` and
 skeleton services run.
 
@@ -118,7 +122,7 @@ skeleton services run.
 
 1. Implement the guest run script under `poc/test/ubuntu.server.24/`
    (`ubuntu.server.24.amisad-vm-core.sNNN.<word>.sh`) and the sequence under
-   `poc/test/gui/`. Start from the s001–s003 set: chain to
+   `poc/test/gui/`. Start from the s001–s004 set: chain to
    `...amisad-vm-core.deploy`, `requiresSnapshot`/`loadDiskSnapshot`
    `amisad-vm-core`, `username: amisad-vm-core-admin`,
    `hostname: amisad-vm-core`, then `sshWaitReady` + `sshFetchAndExecute` the
@@ -127,8 +131,8 @@ skeleton services run.
    `amisad.k8s` restore and skeleton deploy step must not survive.)
 2. Append the sequence name to the `$Scenarios` registry in
    `poc/build/run-tests.ps1`.
-3. If the scenario needs region B, start `amisad-vm-edge-b` in the driver
-   (mirroring the edge-a start) — its VM is already provisioned.
+3. Both edges are started by the driver and stay live; resolve either from
+   its status-server IP report (see the s004 script).
 4. Update [usernames.md](usernames.md) and this file if the pattern changes.
 
 ---
