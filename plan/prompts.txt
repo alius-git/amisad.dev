@@ -69,147 +69,88 @@ End the `scenarios.md` file with a brief verification matrix ensuring that every
 
 ==== Design - Part 1
 
-Act as the Principal Systems Architect for AmisAd. Based on the planning files
-(plan/applications.md, plan/personas.md, plan/scenarios.md), create the design for a
-proof-of-concept (POC) set of applications that can later grow into the full
-cloud-hosted and mobile ecosystem.
+Act as the Principal Systems Architect for AmisAd. Based on the planning files (plan/applications.md, plan/personas.md, plan/scenarios.md), create the design for a proof-of-concept (POC) set of applications that can later grow into the full cloud-hosted and mobile ecosystem.
 
-POC environment: everything runs in local virtual machines, plus test mobile devices
-side-loading the POC mobile app. VM provisioning, deployment, and end-to-end
-verification are driven by the Yuruna framework, executing the sequences in
-plan/scenarios.md against synthetic data.
+POC environment: everything runs in local virtual machines, plus test mobile devices side-loading the POC mobile app. VM provisioning, deployment, and end-to-end verification are driven by the Yuruna framework, executing the sequences in plan/scenarios.md against synthetic data.
 
-Deliverables: a master plan/design.md, plus Mermaid diagrams under plan/design/ —
-one overall POC architecture diagram and one per application (for the format, see
-[https://github.com/alissonsol/yuruna/tree/main/docs/design](https://github.com/alissonsol/yuruna/tree/main/docs/design)). Before writing, ask
-only the design questions the principles below do not already settle.
+Deliverables: a master plan/design.md, plus Mermaid diagrams under plan/design/ — one overall POC architecture diagram and one per application (for the format, see [https://github.com/alissonsol/yuruna/tree/main/docs/design](https://github.com/alissonsol/yuruna/tree/main/docs/design)). Before writing, ask only the design questions the principles below do not already settle.
 
 Design principles:
 
-* Server-side applications run in K8s clusters and stay cloud-agnostic: no managed
-cloud services; every dependency must run in-cluster.
-* PostgreSQL is the only database. Implement the ledgers (consent, settlement,
-attestation) as append-only, hash-chained tables — no blockchain.
-* Telco-local "slice VMs" stay light and stateless: matches run in ephemeral,
-confidential-computing environments. Where POC hardware lacks TEE support,
-simulate attestation behind the same interface, so production hardware is a
-drop-in replacement.
-* Simulate what the lab lacks (SIM-anchored identity, carrier slice control,
-payments) but preserve production contracts: every mock implements the real
-interface, and swapping it must not change any caller.
-* POC scope is scenario-driven: include exactly the applications and foundations
-needed to execute SCENARIO-001 through SCENARIO-010 end to end; stub nothing a
-scenario asserts against.
-* AmisAd/buyer is a mobile, offline-first app (side-loaded); all other user-facing
-applications are web apps served from the cluster.
-* Minimize the technology count: one primary backend language/framework (propose
-it), versioned OpenAPI-documented REST between applications, and one lightweight
-in-cluster message broker for the event-driven flows.
-* Authentication is OIDC-style tokens from a mock identity service standing in for
-Identity & Verification; secrets live in cluster secret storage.
-* Non-goals for the POC: performance and scale, real payments, real creative
-production, and production security hardening beyond what the scenarios verify.
+- Server-side applications run in K8s clusters and stay cloud-agnostic: no managed cloud services; every dependency must run in-cluster.
+- PostgreSQL is the only database. Implement the ledgers (consent, settlement, attestation) as append-only, hash-chained tables — no blockchain.
+- Telco-local "slice VMs" stay light and stateless: matches run in ephemeral, confidential-computing environments. Where POC hardware lacks TEE support, simulate attestation behind the same interface, so production hardware is a drop-in replacement.
+- Simulate what the lab lacks (SIM-anchored identity, carrier slice control, payments) but preserve production contracts: every mock implements the real interface, and swapping it must not change any caller.
+- POC scope is scenario-driven: include exactly the applications and foundations needed to execute SCENARIO-001 through SCENARIO-010 end to end; stub nothing a scenario asserts against.
+- AmisAd/buyer is a mobile, offline-first app (side-loaded); all other user-facing applications are web apps served from the cluster.
+- Minimize the technology count: one primary backend language/framework (propose it), versioned OpenAPI-documented REST between applications, and one lightweight in-cluster message broker for the event-driven flows.
+- Authentication is OIDC-style tokens from a mock identity service standing in for Identity & Verification; secrets live in cluster secret storage.
+- Non-goals for the POC: performance and scale, real payments, real creative production, and production security hardening beyond what the scenarios verify.
 
 ==== Design - Part 2
 
-Act as the Principal Systems Architect for AmisAd. Create Mermaid sequence diagrams
-for all ten verification scenarios in plan/scenarios.md — one file per scenario under
-plan/design/ (seq-001.md … seq-010.md), each following the existing design-doc
-conventions ("One sentence:" header, links back to 00-index.md and scenarios.md).
+Act as the Principal Systems Architect for AmisAd. Create Mermaid sequence diagrams for all ten verification scenarios in plan/scenarios.md — one file per scenario under plan/design/ (seq-001.md … seq-010.md), each following the existing design-doc conventions ("One sentence:" header, links back to 00-index.md and scenarios.md).
 
 Integration:
 
-* Add the ten files to the document table in plan/design/00-index.md.
-* Link the set from plan/design.md §9 (Diagrams).
-* Verify README.md still links to plan/design.md; fix it if it does not.
+- Add the ten files to the document table in plan/design/00-index.md.
+- Link the set from plan/design.md §9 (Diagrams).
+- Verify README.md still links to plan/design.md; fix it if it does not.
 
 Diagram principles:
 
-* GitHub-first Mermaid: plain sequenceDiagram syntax only — participant/actor
-declarations, solid and dashed arrows, alt/opt/loop/par blocks, and Notes.
-Avoid box grouping, create/destroy, critical/break, themes, custom config,
-and HTML beyond , so GitHub.com rendering is never at risk.
-* Participants are the POC components from plan/design.md (buyer app,
-fabric-coordinator, slice-runtime, seller-svc, ledger-svc, identity-mock, …)
-with personas declared as actors. Use identical participant names across all
-ten diagrams; cap each diagram at 8 participants, folding minor components
-into their nearest neighbor rather than exceeding the cap.
-* Fidelity to scenarios.md: messages follow the scenario's numbered steps in
-order — one message or small group per step; render fault injections,
-refusals, and tamper checks (scenarios 004, 006, 007, 010) as alt blocks;
-open each diagram with a Note stating the seeded preconditions and close
-with a Note stating the Target Verification Point Yuruna asserts.
-* Keep each diagram readable: roughly 20 messages; if a scenario needs more,
-group steps rather than drop them.
+- GitHub-first Mermaid: plain sequenceDiagram syntax only — participant/actor declarations, solid and dashed arrows, alt/opt/loop/par blocks, and Notes. Avoid box grouping, create/destroy, critical/break, themes, custom config, and HTML beyond <br />, so GitHub.com rendering is never at risk.
+- Participants are the POC components from plan/design.md (buyer app, fabric-coordinator, slice-runtime, seller-svc, ledger-svc, identity-mock, …) with personas declared as actors. Use identical participant names across all ten diagrams; cap each diagram at 8 participants, folding minor components into their nearest neighbor rather than exceeding the cap.
+- Fidelity to scenarios.md: messages follow the scenario's numbered steps in order — one message or small group per step; render fault injections, refusals, and tamper checks (scenarios 004, 006, 007, 010) as alt blocks; open each diagram with a Note stating the seeded preconditions and close with a Note stating the Target Verification Point Yuruna asserts.
+- Keep each diagram readable: roughly 20 messages; if a scenario needs more, group steps rather than drop them.
 
 ==== Code skeletons
 
-Act as the Principal Systems Architect for AmisAd. Based on the amisad.com content
-(brand assets) and the amisad.dev plan/ documents (applications, scenarios, design),
-create the POC code skeletons under poc/, mirroring the yuruna-project layout so the
-Yuruna runner can discover and drive them.
+Act as the Principal Systems Architect for AmisAd. Based on the amisad.com content (brand assets) and the amisad.dev plan/ documents (applications, scenarios, design), create the POC code skeletons under poc/, mirroring the yuruna-project layout so the Yuruna runner can discover and drive them.
 
-Layout (yuruna-project convention; update design.md §6 to match, and note the change
-in README.md if it describes the layout):
-poc/
-MODULE.bazel  .bazelversion  BUILD.bazel    # Bazel root, bzlmod, pinned via bazelisk
-build/                                      # doctor + helper scripts (PowerShell)
-contracts/                                  # OpenAPI + event schemas (kept from design)
-components/
-services//                          # 10 Rust services: seller-svc, resource-svc,
-#  ads-svc, insights-svc, platform-svc, audit-svc,
-#  connect-svc, fabric-coordinator, identity-mock,
-#  ledger-svc
-edge/slice-runtime/                       # Rust slice runtime
-apps/buyer-flutter/                       # Flutter placeholder app
-apps/web-spa/                             # React+TS+Vite shell, 6 role-module routes
-art/                                      # brand assets copied from amisad.com:
-#  icon.svg, icon-64.png, palette tokens
-#  (#2B3A67 navy, #E2725B terracotta), README
-config/localhost/{resources,components,workloads}.yml   # three-phase deploy skeletons
-workloads///                   # minimal Helm chart per service
-db/                                         # schema.sql + seed skeletons per scenario
-test/
-gui/                                      # 10 sequence YAMLs, seq per SCENARIO-001..010,
-#  plus one k3s+PostgreSQL+NATS baseline sequence
-ubuntu.server.24/                         # guest scripts the sequences fetch-and-execute
+Layout (yuruna-project convention; update design.md §6 to match, and note the change in README.md if it describes the layout):
+  poc/
+    MODULE.bazel  .bazelversion  BUILD.bazel    # Bazel root, bzlmod, pinned via bazelisk
+    build/                                      # doctor + helper scripts (PowerShell)
+    contracts/                                  # OpenAPI + event schemas (kept from design)
+    components/
+      services/<name>/                          # 10 Rust services: seller-svc, resource-svc,
+                                                #  ads-svc, insights-svc, platform-svc, audit-svc,
+                                                #  connect-svc, fabric-coordinator, identity-mock,
+                                                #  ledger-svc
+      edge/slice-runtime/                       # Rust slice runtime
+      apps/buyer-flutter/                       # Flutter placeholder app
+      apps/web-spa/                             # React+TS+Vite shell, 6 role-module routes
+      art/                                      # brand assets copied from amisad.com:
+                                                #  icon.svg, icon-64.png, palette tokens
+                                                #  (#2B3A67 navy, #E2725B terracotta), README
+    config/localhost/{resources,components,workloads}.yml   # three-phase deploy skeletons
+    workloads/<group>/<name>/                   # minimal Helm chart per service
+    db/                                         # schema.sql + seed skeletons per scenario
+    test/
+      gui/                                      # 10 sequence YAMLs, seq per SCENARIO-001..010,
+                                                #  plus one k3s+PostgreSQL+NATS baseline sequence
+      ubuntu.server.24/                         # guest scripts the sequences fetch-and-execute
 
 Build rules:
 
-* Bazel is the single entry point: `bazel build //...` must succeed on the first try
-on a machine with bazelisk, rustup, Node, and the Flutter SDK installed (all three
-toolchains are REQUIRED — build/doctor.ps1 checks versions and fails fast with a
-clear message before any build starts).
-* Rust: rules_rust with a pinned toolchain and crate_universe lockfile; one library +
-binary target per service; a shared crate for common config/health plumbing.
-* Flutter and web-spa: Bazel targets that wrap the flutter/Vite CLIs (genrule or
-sh_binary) — Bazel orchestrates, the native toolchains do the work.
-* Container images are built by a script target (build/images.ps1), not part of the
-`bazel build //...` gate — Docker may be absent on dev machines.
+- Bazel is the single entry point: `bazel build //...` must succeed on the first try on a machine with bazelisk, rustup, Node, and the Flutter SDK installed (all three toolchains are REQUIRED — build/doctor.ps1 checks versions and fails fast with a clear message before any build starts).
+- Rust: rules_rust with a pinned toolchain and crate_universe lockfile; one library + binary target per service; a shared crate for common config/health plumbing.
+- Flutter and web-spa: Bazel targets that wrap the flutter/Vite CLIs (genrule or sh_binary) — Bazel orchestrates, the native toolchains do the work.
+- Container images are built by a script target (build/images.ps1), not part of the `bazel build //...` gate — Docker may be absent on dev machines.
 
 Skeleton depth — deployable, not just compilable:
 
-* Each Rust service: GET /health and GET /version, config from environment variables,
-multi-stage Dockerfile, and a minimal Helm chart under workloads/ that deploys it
-with a liveness probe on /health.
-* buyer-flutter and web-spa: placeholder screens using the art/ brand assets; the SPA
-shell routes to six empty role modules (seller, resource, ads, insights, platform,
-audit, connect share the shell per design).
-* contracts/: one OpenAPI stub per service declaring only /health and /version now.
+- Each Rust service: GET /health and GET /version, config from environment variables, multi-stage Dockerfile, and a minimal Helm chart under workloads/ that deploys it with a liveness probe on /health.
+- buyer-flutter and web-spa: placeholder screens using the art/ brand assets; the SPA shell routes to six empty role modules (seller, resource, ads, insights, platform, audit, connect share the shell per design).
+- contracts/: one OpenAPI stub per service declaring only /health and /version now.
 
 Test skeletons:
 
-* Each test/gui/ sequence must validate against yuruna/test/schemas/sequence.schema.yml:
-unique sequenceGuid, sequenceRevision 1, description naming its SCENARIO, baseline
-chain to the k3s+PostgreSQL+NATS baseline sequence, and steps that fetch-and-execute
-guest scripts which currently deploy the skeletons, curl /health, and end with a
-TODO block enumerating the scenario's real steps from plan/scenarios.md.
-* Guest scripts: bash, set -euo pipefail, one per sequence plus shared bring-up,
-modeled on the yuruna-project text-to-sql example.
+- Each test/gui/ sequence must validate against yuruna/test/schemas/sequence.schema.yml: unique sequenceGuid, sequenceRevision 1, description naming its SCENARIO, baseline chain to the k3s+PostgreSQL+NATS baseline sequence, and steps that fetch-and-execute guest scripts which currently deploy the skeletons, curl /health, and end with a TODO block enumerating the scenario's real steps from plan/scenarios.md.
+- Guest scripts: bash, set -euo pipefail, one per sequence plus shared bring-up, modeled on the yuruna-project text-to-sql example.
 
-Done when: build/doctor.ps1 passes; `bazel build //...` is green; every Helm chart
-passes `helm lint`; every sequence YAML validates against the schema; design.md §6
-reflects this layout; nothing references paths that do not exist.
+Done when: build/doctor.ps1 passes; `bazel build //...` is green; every Helm chart passes `helm lint`; every sequence YAML validates against the schema; design.md §6 reflects this layout; nothing references paths that do not exist.
 
 ==== Coding - Scenario-001
 
@@ -221,116 +162,59 @@ seq-001.md (message flow), plan/design.md (contracts and foundations).
 
 1. Code — fill in what SCENARIO-001 traverses, nothing more:
 
-* fabric-coordinator: accept an encrypted need envelope, get a placement from
-resource-svc, dispatch envelope + qualifying offers to slice-runtime on the
-edge VM, relay match results and pseudonymous order status.
-* resource-svc: minimal allocation API (register edge endpoints per region,
-answer placement requests, record slice lifecycle telemetry).
-* slice-runtime: per-match ephemeral environment — evaluate constraints against
-offers, honor both auto-close policies, emit match record + settlement
-instruction, write created→attested→executed→destroyed to the attestation
-ledger, destroy itself; keep an egress log proving no need/identity leaves.
-* seller-svc: catalog with standing auto-close deals; order state machine
-matched→committed→provisioning→fulfilled→settled with events on NATS.
-* ledger-svc: real hash-chained appends (attestation + settlement four-way
-split), read APIs, and chain-head verification.
-* identity-mock: tokens for the buyer and seller actors in this flow.
-* buyer-client (new Rust CLI in components/apps/): submit Maya's gift need with
-auto-close, wait for the match, follow status to Delivered — the automated
-buyer driver.
-* buyer-flutter: wire the needs-list screen to the same APIs (submit a need,
-see match and order status) for manual demo; UI automation stays out of scope.
-* db/seed/scenario-001.sql: Elena's catalog + standing deal, Maya's consent.
-* cargo tests: ledger hash-chaining, constraint matching, auto-close policy,
-order state transitions. `bazel build //...` and `cargo test --workspace`
-stay green.
+- fabric-coordinator: accept an encrypted need envelope, get a placement from resource-svc, dispatch envelope + qualifying offers to slice-runtime on the edge VM, relay match results and pseudonymous order status.
+- resource-svc: minimal allocation API (register edge endpoints per region, answer placement requests, record slice lifecycle telemetry).
+- slice-runtime: per-match ephemeral environment — evaluate constraints against offers, honor both auto-close policies, emit match record + settlement\ instruction, write created→attested→executed→destroyed to the attestation ledger, destroy itself; keep an egress log proving no need/identity leaves.
+- seller-svc: catalog with standing auto-close deals; order state machine matched→committed→provisioning→fulfilled→settled with events on NATS.
+- ledger-svc: real hash-chained appends (attestation + settlement four-way split), read APIs, and chain-head verification.
+- identity-mock: tokens for the buyer and seller actors in this flow.
+- buyer-client (new Rust CLI in components/apps/): submit Maya's gift need with auto-close, wait for the match, follow status to Delivered — the automated buyer driver.
+- buyer-flutter: wire the needs-list screen to the same APIs (submit a need, see match and order status) for manual demo; UI automation stays out of scope.
+- db/seed/scenario-001.sql: Elena's catalog + standing deal, Maya's consent.
+- cargo tests: ledger hash-chaining, constraint matching, auto-close policy, order state transitions. `bazel build //...` and `cargo test --workspace` stay green.
 
-2. Baseline sequence "build VM" (test/gui/...build.amisad.baseline.yml):
-Chain from the existing k8s.amisad baseline (Kubernetes + PostgreSQL + NATS);
-add the build requirements — rustup + stable toolchain, bazelisk, git — via a
-new guest script; saveDiskSnapshot id "build.amisad".
-3. Sequence build-scenario-001 (test/gui/...build.amisad.scenario-001.yml):
-requiresSnapshot build.amisad, then:
+2. Baseline sequence "build VM" (test/gui/...build.amisad.baseline.yml): Chain from the existing k8s.amisad baseline (Kubernetes + PostgreSQL + NATS); add the build requirements — rustup + stable toolchain, bazelisk, git — via a new guest script; saveDiskSnapshot id "build.amisad".
 
-* Clone amisad.dev over HTTPS using a PAT supplied as a sequence variable the
-operator sets from the host environment; mark every step touching it
-sensitive: true so it never appears in logs or OCR captures.
-* Build (bazel build //...) and run cargo test --workspace inside the VM.
-* Deploy the services; bring up slice-runtime on a SECOND VM (the edge node,
-per the design topology) and register it with resource-svc. Investigate
-Yuruna's multi-guest/pool support first; if one sequence cannot orchestrate
-two guests, drive the edge VM from the build VM over SSH (sshExec) at its
-lab-network address, and document that choice in the sequence header.
-* Run buyer-client for the happy path, then assert the FULL Target
-Verification Point from plan/scenarios.md: settlement splits sum exactly to
-match value; buyer Delivered and seller Settled reference one match ID;
-attestation chain complete for the environment; egress log holds zero
-need/identity payloads.
+3. Sequence build-scenario-001 (test/gui/...build.amisad.scenario-001.yml): requiresSnapshot build.amisad, then:
 
-Done when: both sequences validate against yuruna's sequence schema (42-prefixed
-GUIDs); bazel build and cargo test pass; the scenario-001 sequence runs the
-happy path unattended and every TVP assert holds; seq-001.md and scenarios.md
-are updated only if implementation forced a contract deviation (note it, don't
-silently drift).
+- Clone amisad.dev over HTTPS using a PAT supplied as a sequence variable the operator sets from the host environment; mark every step touching it sensitive: true so it never appears in logs or OCR captures.
+- Build (bazel build //...) and run cargo test --workspace inside the VM.
+- Deploy the services; bring up slice-runtime on a SECOND VM (the edge node, per the design topology) and register it with resource-svc. Investigate Yuruna's multi-guest/pool support first; if one sequence cannot orchestrate two guests, drive the edge VM from the build VM over SSH (sshExec) at its lab-network address, and document that choice in the sequence header.
+- Run buyer-client for the happy path, then assert the FULL Target Verification Point from plan/scenarios.md: settlement splits sum exactly to match value; buyer Delivered and seller Settled reference one match ID; attestation chain complete for the environment; egress log holds zero need/identity payloads.
+
+Done when: both sequences validate against yuruna's sequence schema (42-prefixed GUIDs); bazel build and cargo test pass; the scenario-001 sequence runs the happy path unattended and every TVP assert holds; seq-001.md and scenarios.md are updated only if implementation forced a contract deviation (note it, don't silently drift).
 
 ==== Debug - Scenario-001
 
-Act as the unattended lab operator for AmisAd. Goal: SCENARIO-001 passing
-end-to-end under Yuruna on this machine, iterating until green. I am away
-~6 hours and expect to return to a working sample. Follow poc/README.md
-"Running scenarios under Yuruna"; adapt as reality requires.
+Act as the unattended lab operator for AmisAd. Goal: SCENARIO-001 passing end-to-end under Yuruna on this machine, iterating until green. I am away ~6 hours and expect to return to a working sample. Follow poc/README.md "Running scenarios under Yuruna"; adapt as reality requires.
 
 Environment:
 
-* Windows Hyper-V host with prior successful Yuruna runs.
-* Framework: c:\git\yuruna (do NOT modify framework code; editing
-test/test.config.yml and the runtime auth files under test/status/ is fine).
-* Project: C:\git\alius-git\amisad.dev (change freely).
-* GitHub PAT: ask user if not already in test.config.yml repositories.GH_TOKEN.
-Store copy in the auth vault (amisad-pat).
-NEVER write it into any file under amisad.dev, any commit, log, or report.
+- Windows Hyper-V host with prior successful Yuruna runs.
+- Framework: c:\git\yuruna (do NOT modify framework code; editing test/test.config.yml and the runtime auth files under test/status/ is fine).
+- Project: C:\git\alius-git\amisad.dev (change freely).
+- GitHub PAT: ask user if not already in test.config.yml repositories.GH_TOKEN. Store copy in the auth vault (amisad-pat). NEVER write it into any file under amisad.dev, any commit, log, or report.
 
 Decisions (locked — do not re-ask):
 
-* Point repositories.projectUrl at the LOCAL repo (C:\git\alius-git\amisad.dev).
-* Guest source: adapt the scenario-001 sequence so the guest obtains the repo
-from the freshest host-served copy (investigate how fetch-and-execute serves
-project files and use that path or a host-reachable URL) instead of cloning
-GitHub. Keep the credential-store steps working; the PAT stays exercised
-host-side via GH_TOKEN.
-* Git policy: commit locally to main as fixes land (runner clones committed
-state); NO pushes to GitHub.
-* Edge topology: single-VM degraded mode (edgeHost stays empty).
+- Point repositories.projectUrl at the LOCAL repo (C:\git\alius-git\amisad.dev).
+- Guest source: adapt the scenario-001 sequence so the guest obtains the repo from the freshest host-served copy (investigate how fetch-and-execute serves project files and use that path or a host-reachable URL) instead of cloning GitHub. Keep the credential-store steps working; the PAT stays exercised host-side via GH_TOKEN.
+- Git policy: commit locally to main as fixes land (runner clones committed state); NO pushes to GitHub.
+- Edge topology: single-VM degraded mode (edgeHost stays empty).
 
 Iteration playbook:
 
-* Shorten the loop before the first cycle: trim guestSequence to
-guest.ubuntu.server.24; park every poc/test/gui sequence except the
-build.amisad pair (move the scenario-002..010 skeletons and the old
-k8s.amisad set to poc/test/gui-parked/ in a local commit); consider
-shouldStopOnFailure: true and a short cycleDelaySeconds while iterating.
-* You may install host-side toolchains (rustup, etc. via winget) to run
-cargo test locally and catch compile errors in minutes instead of
-burning a VM cycle per fix. Expect the first cargo/bazel run to surface
-small fixes in the new Rust code — that is normal; fix, commit, rerun.
-* Diagnose from http://localhost:8080/status/, the cycle logs, and
-test/status/log diagnostics. The first cold chain
-(start.guest -> k8s.amisad -> build.amisad -> scenario-001) takes 1h+;
-start it early and do other verification while it runs.
-* Success: the cycle log shows all TVP asserts and
-"SCENARIO-001 HAPPY PATH PASSED", and a second cycle warm-paths from the
-build.amisad snapshot.
+- Shorten the loop before the first cycle: trim guestSequence to guest.ubuntu.server.24; park every poc/test/gui sequence except the build.amisad pair (move the scenario-002..010 skeletons and the old k8s.amisad set to poc/test/gui-parked/ in a local commit); consider shouldStopOnFailure: true and a short cycleDelaySeconds while iterating.
+- You may install host-side toolchains (rustup, etc. via winget) to run cargo test locally and catch compile errors in minutes instead of burning a VM cycle per fix. Expect the first cargo/bazel run to surface small fixes in the new Rust code — that is normal; fix, commit, rerun.
+- Diagnose from http://localhost:8080/status/, the cycle logs, and test/status/log diagnostics. The first cold chain (start.guest -> k8s.amisad -> build.amisad -> scenario-001) takes 1h+; start it early and do other verification while it runs.
+- Success: the cycle log shows all TVP asserts and "SCENARIO-001 HAPPY PATH PASSED", and a second cycle warm-paths from the build.amisad snapshot.
 
-Stop conditions and wrap-up (also on ~6h elapsed or an unavoidable operator
-decision): stop the test runner, leave the last VM and snapshots intact for
-inspection and demo, write poc/STATUS-scenario-001.md (result, every change
-made with commit hashes, config changes made to test.config.yml, exact next
-step if not green) and summarize in chat. Never block waiting on me:
-prefer the reversible choice, record it in the report.
+Stop conditions and wrap-up (also on ~6h elapsed or an unavoidable operator decision): stop the test runner, leave the last VM and snapshots intact for inspection and demo, write poc/STATUS-scenario-001.md (result, every change made with commit hashes, config changes made to test.config.yml, exact next step if not green) and summarize in chat. Never block waiting on me: prefer the reversible choice, record it in the report.
 
 ==== Artifact renaming
 
 -- Part 1
+
 Stop all amisad VMs, delete those, and cleanup the VM files (Remove-OrphanedVMFiles.ps1).
 
 Go through the scenarios.md file first and rename each scenario according to this pattern, finding the best word (scenario-001 => s001.fulfillment, where "fulfillment" is just an example, find the best word).
