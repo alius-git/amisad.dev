@@ -89,6 +89,17 @@ function Remove-LabVM {
     }
 }
 
+function Remove-InstallMedia {
+    param([string]$Name)
+    # The provisioning DVDs (install ISO + the per-VM seed.iso in the transient
+    # test- storage dir) are only needed for autoinstall. A renamed VM keeps
+    # ABSOLUTE references into that dir; later provisioning cycles overwrite it
+    # with files ACL'd to the newer VM, and starting the older VM then fails
+    # with 0x80070005. Strip the media once the chain is done (VM must be Off).
+    Hyper-V\Get-VMDvdDrive -VMName $Name -ErrorAction SilentlyContinue |
+        Hyper-V\Remove-VMDvdDrive -ErrorAction SilentlyContinue
+}
+
 # Headless keystroke/OCR reliability for the cold provisioning chains: attach
 # the opt-in virtual display the way the runner's cycle path does (no-op unless
 # YURUNA_VIRTUAL_DISPLAY is truthy - see poc/test.md).
@@ -137,6 +148,7 @@ if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisa
     exit 1
 }
 Hyper-V\Stop-VM -Name 'amisad-vm-build' -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
+Remove-InstallMedia -Name 'amisad-vm-build'
 Write-Host "amisad-vm-build stopped (kept on disk)."
 
 # --- [2] edge VMs: provision + snapshot, one at a time (chains end stopped) ---
@@ -145,6 +157,7 @@ foreach ($edge in 'amisad-vm-edge-a', 'amisad-vm-edge-b') {
         Write-Error "$edge provisioning failed - stopping."
         exit 1
     }
+    Remove-InstallMedia -Name $edge
 }
 
 # --- [3] vm-core: k8s + deploy + demo users (cold chain, solo) ---
@@ -152,6 +165,7 @@ if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.ami
     Write-Error "amisad-vm-core deploy failed - stopping."
     exit 1
 }
+Remove-InstallMedia -Name 'amisad-vm-core'
 
 # --- [4] start the region-A edge and wait for its IP report ---
 Write-Host "Starting amisad-vm-edge-a (edge-b stays off until s004/s009)."
