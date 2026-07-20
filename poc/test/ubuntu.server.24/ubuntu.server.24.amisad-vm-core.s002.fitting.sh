@@ -31,6 +31,15 @@ done
 NODE_IP=$(hostname -I | awk '{print $1}')
 LEDGER="http://${NODE_IP}:30081"
 RESOURCE="http://${NODE_IP}:30082"
+
+echo "== wait for the NodePort services to actually answer (post-restore) =="
+# The restored objects still carry available=True from before the snapshot, so
+# the kubectl waits above can pass before pods and kube-proxy are really up.
+for _ in $(seq 1 60); do
+    if curl -sf "http://${NODE_IP}:30080/health" >/dev/null 2>&1; then break; fi
+    sleep 5
+done
+curl -sf "http://${NODE_IP}:30080/health" >/dev/null
 SELLER="http://${NODE_IP}:30083"
 
 echo "== slice-runtime (edge amisad-vm-edge-a) =="
@@ -66,6 +75,10 @@ else
     sleep 1
     SLICE_EP="http://${NODE_IP}:8090"
 fi
+for _ in $(seq 1 15); do
+    if curl -sf "${SLICE_EP}/health" >/dev/null 2>&1; then break; fi
+    sleep 2
+done
 curl -sf "${SLICE_EP}/health" >/dev/null
 curl -sf -X POST "${RESOURCE}/v1/edges" \
     -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"

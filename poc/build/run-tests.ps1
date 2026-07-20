@@ -162,14 +162,28 @@ $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $Yu
 $edgeIpFile = Join-Path $logRoot 'handoff\amisad-vm-edge-a.ip.txt'
 Remove-Item -LiteralPath $edgeIpFile -Force -ErrorAction SilentlyContinue
 $edgeStart = Get-Date
-Hyper-V\Start-VM -Name 'amisad-vm-edge-a' -ErrorAction SilentlyContinue
-$edgeDeadline = (Get-Date).AddMinutes(6)
-$edgeReady = $false
-while ((Get-Date) -lt $edgeDeadline) {
-    if ((Test-Path $edgeIpFile) -and ((Get-Item $edgeIpFile).LastWriteTime -gt $edgeStart)) {
-        $edgeReady = $true; break
+# Loud + retried: a silent Start-VM failure previously left the edge Off and
+# pushed the scenarios into the degraded fallback with no evidence why.
+$edgeStarted = $false
+foreach ($attempt in 1..3) {
+    try {
+        Hyper-V\Start-VM -Name 'amisad-vm-edge-a' -ErrorAction Stop
+        $edgeStarted = $true
+        break
+    } catch {
+        Write-Host "Start-VM amisad-vm-edge-a attempt ${attempt}/3 failed: $($_.Exception.Message)"
+        Start-Sleep -Seconds 10
     }
-    Start-Sleep -Seconds 10
+}
+$edgeReady = $false
+if ($edgeStarted) {
+    $edgeDeadline = (Get-Date).AddMinutes(6)
+    while ((Get-Date) -lt $edgeDeadline) {
+        if ((Test-Path $edgeIpFile) -and ((Get-Item $edgeIpFile).LastWriteTime -gt $edgeStart)) {
+            $edgeReady = $true; break
+        }
+        Start-Sleep -Seconds 10
+    }
 }
 if (-not $edgeReady) {
     Write-Warning "amisad-vm-edge-a IP report not seen; scenarios will use the single-VM degraded fallback."
