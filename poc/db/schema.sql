@@ -17,34 +17,50 @@ CREATE SCHEMA IF NOT EXISTS identity;
 CREATE SCHEMA IF NOT EXISTS ledger;
 
 -- Hash-chained ledger families (consent, settlement, attestation).
--- Skeleton: shape only; constraints and derivations land with the scenarios.
+-- payload is the CANONICAL service JSON as text, and hashes are sha256 hex
+-- text: row_hash = sha256(prev_hash || payload). jsonb would normalize key
+-- order and silently break chain verification on reload. Ids are text because
+-- POC match/environment ids are sha256 hex digests, not uuids.
+-- UNIQUE (prev_hash): each head is consumed exactly once, so a would-be
+-- fork (two writers, or a retry after an ambiguous connection error) is a
+-- hard insert failure instead of a silently non-verifying chain.
 CREATE TABLE IF NOT EXISTS ledger.consent_ledger (
     id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     grant_type  text        NOT NULL, -- participation | mandate | disclosure
-    payload     jsonb       NOT NULL,
-    prev_hash   bytea       NOT NULL,
-    row_hash    bytea       NOT NULL,
+    payload     text        NOT NULL,
+    prev_hash   text        NOT NULL UNIQUE,
+    row_hash    text        NOT NULL,
     created_at  timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS ledger.settlement_ledger (
     id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    match_id    uuid        NOT NULL,
+    match_id    text        NOT NULL,
     entry_type  text        NOT NULL, -- split | adjustment
-    payload     jsonb       NOT NULL,
-    prev_hash   bytea       NOT NULL,
-    row_hash    bytea       NOT NULL,
+    payload     text        NOT NULL,
+    prev_hash   text        NOT NULL UNIQUE,
+    row_hash    text        NOT NULL,
     created_at  timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS ledger.attestation_ledger (
     id             bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    environment_id uuid        NOT NULL,
+    environment_id text        NOT NULL,
     lifecycle      text        NOT NULL, -- created | attested | executed | aborted | destroyed
-    payload        jsonb       NOT NULL,
-    prev_hash      bytea       NOT NULL,
-    row_hash       bytea       NOT NULL,
+    payload        text        NOT NULL,
+    prev_hash      text        NOT NULL UNIQUE,
+    row_hash       text        NOT NULL,
     created_at     timestamptz NOT NULL DEFAULT now()
+);
+
+-- Pending/confirmed settlement instructions (ledger-svc working state; the
+-- immutable record of confirmed splits is settlement_ledger above).
+CREATE TABLE IF NOT EXISTS ledger.settlement_instructions (
+    match_id    text PRIMARY KEY,
+    value_cents bigint      NOT NULL CHECK (value_cents >= 0),
+    splits      text        NOT NULL, -- canonical JSON [{party, amount_cents}]
+    confirmed   boolean     NOT NULL DEFAULT false,
+    created_at  timestamptz NOT NULL DEFAULT now()
 );
 
 -- Read-only role for audit-svc: independence is architectural.
@@ -68,6 +84,9 @@ CREATE TABLE IF NOT EXISTS seller.offers (
     price_cents     bigint      NOT NULL CHECK (price_cents >= 0),
     deliver_by_days integer,
     auto_close      boolean     NOT NULL DEFAULT false,
+    -- Full offer JSON as posted (canonical text): carries the s002.fitting
+    -- attributes and fitting_slots until those grow relational tables.
+    document        text        NOT NULL DEFAULT '{}',
     created_at      timestamptz NOT NULL DEFAULT now()
 );
 
@@ -80,6 +99,9 @@ CREATE TABLE IF NOT EXISTS seller.orders (
     need_context text        NOT NULL DEFAULT '',
     state        text        NOT NULL DEFAULT 'committed'
         CHECK (state IN ('committed', 'provisioning', 'fulfilled', 'settled')),
+    -- In-person booking (s002.fitting): appointment slot, empty when none.
+    slot_id      text        NOT NULL DEFAULT '',
+    slot_day     text        NOT NULL DEFAULT '',
     created_at   timestamptz NOT NULL DEFAULT now(),
     updated_at   timestamptz NOT NULL DEFAULT now()
 );

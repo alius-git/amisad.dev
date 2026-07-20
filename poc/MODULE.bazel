@@ -1,8 +1,8 @@
 """AmisAd POC Bazel module.
 
-Rust builds through rules_rust with a pinned toolchain. There are deliberately
-no third-party crates yet, so crate_universe is not wired; add it together
-with the first external dependency (see poc/README.md).
+Rust builds through rules_rust with a pinned toolchain. Third-party crates
+resolve through crate_universe from the committed Cargo.lock - wired together
+with the first external dependency (postgres), as poc/README.md planned.
 """
 
 module(
@@ -20,3 +20,26 @@ rust.toolchain(
 use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")
+
+crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//:Cargo.lock",
+    manifests = [
+        "//:Cargo.toml",
+        "//components/lib/amisad-common:Cargo.toml",
+        "//components/services/ads-svc:Cargo.toml",
+        "//components/services/audit-svc:Cargo.toml",
+        "//components/services/connect-svc:Cargo.toml",
+        "//components/services/fabric-coordinator:Cargo.toml",
+        "//components/services/identity-mock:Cargo.toml",
+        "//components/services/insights-svc:Cargo.toml",
+        "//components/services/ledger-svc:Cargo.toml",
+        "//components/services/platform-svc:Cargo.toml",
+        "//components/services/resource-svc:Cargo.toml",
+        "//components/services/seller-svc:Cargo.toml",
+        "//components/edge/slice-runtime:Cargo.toml",
+        "//components/apps/buyer-client:Cargo.toml",
+    ],
+)
+use_repo(crate, "crates")

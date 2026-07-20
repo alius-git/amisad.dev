@@ -7,3 +7,5 @@ rust_library(
     edition = "2021",
     visibility = ["//visibility:public"],
 )
+
+exports_files(["Cargo.toml"])

@@ -7,6 +7,10 @@ metadata:
     app: {{ .Chart.Name }}
 spec:
   replicas: {{ .Values.replicas }}
+  # Single-writer store: never let an old and a new pod overlap, or two
+  # in-memory chain heads could fork the persisted ledger.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
@@ -24,6 +28,16 @@ spec:
           env:
             - name: PORT
               value: {{ .Values.port | quote }}
+            {{- if .Values.databaseUrl }}
+            # NODE_IP resolves at pod start (snapshot restores can change the
+            # node address); databaseUrl may reference it as $(NODE_IP).
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DATABASE_URL
+              value: {{ .Values.databaseUrl | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health

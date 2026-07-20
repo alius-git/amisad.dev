@@ -2,7 +2,12 @@
 name = "ledger-svc"
 version = "0.1.0"
 edition = "2021"
+# Lab toolchain pin (build VM + MODULE.bazel); keeps dependency resolution honest.
+rust-version = "1.83"
 description = "Append-only hash-chained consent, settlement, and attestation ledgers (AmisAd POC skeleton)"
 
 [dependencies]
 amisad-common = { path = "../../lib/amisad-common" }
+# First external dependency (poc/README.md: wired together with crate_universe):
+# PostgreSQL client for the durable ledger/catalog stores (DATABASE_URL-gated).
+postgres = "0.19"

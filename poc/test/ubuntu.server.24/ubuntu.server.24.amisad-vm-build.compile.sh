@@ -41,15 +41,23 @@ curl -fsS --noproxy '*' --connect-timeout 20 "http://${STASH_HOST}/healthz" >/de
     exit 3
 }
 
-echo "== build (bazel gate; cargo fallback on registry TLS trust) =="
+echo "== build (bazel gate; cargo fallback ONLY on registry TLS trust) =="
 # The lab caching proxy intercepts HTTPS with a CA absent from Bazel's bundled
-# JVM truststore (PKIX on bcr.bazel.build); fall back to cargo so the gate runs
-# where the registry is reachable. Same rationale as the original single-VM flow.
+# JVM truststore (PKIX on bcr.bazel.build/crates.io); only THAT failure may
+# fall back to cargo. Any other bazel failure (bad MODULE.bazel, lock out of
+# sync, MSRV) must fail loudly - the crate_universe wiring is part of what
+# this gate verifies.
+BAZEL_LOG=/tmp/bazel-gate.log
+: > "$BAZEL_LOG"
 if sudo apt-get install -y ca-certificates-java >/dev/null 2>&1 && \
-   bazel --host_jvm_args=-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts build //...; then
+   bazel --host_jvm_args=-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts build //... >"$BAZEL_LOG" 2>&1; then
     echo "bazel gate: PASS"
-else
+elif grep -qE 'PKIX|trustAnchors|SSLHandshake' "$BAZEL_LOG"; then
     echo "WARNING: bazel gate skipped (registry TLS trust); using cargo build"
+else
+    echo "bazel gate FAILED for a non-TLS reason; last 40 lines:" >&2
+    tail -40 "$BAZEL_LOG" >&2
+    exit 5
 fi
 
 echo "== test + release build (produces all 12 binaries) =="

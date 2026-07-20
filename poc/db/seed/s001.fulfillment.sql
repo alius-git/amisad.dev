@@ -1,10 +1,10 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
 -- AmisAd POC - s001.fulfillment seed: Elena's catalog with standing auto-close
--- deals in region-a. NOTE: the live sequence seeds these via the seller-svc
--- API today, because the services keep in-memory state pending the
--- PostgreSQL wiring (deviation noted in poc/README.md). This file is the
--- same seed against db/schema.sql; the API seeding retires when PG lands.
+-- deals in region-a. NOTE: the live sequence seeds via the seller-svc API,
+-- which now WRITES THROUGH to PostgreSQL (offers persist with their full
+-- document JSON) - API seeding stays canonical. This file remains the
+-- relational sketch of the same seed for direct-SQL use.
 
 INSERT INTO seller.offers
     (offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close)

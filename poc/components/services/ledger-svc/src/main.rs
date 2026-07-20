@@ -1,12 +1,16 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd POC ledger-svc: append-only hash-chained attestation and settlement
-// ledgers with read APIs and chain verification. In-memory for s001.fulfillment;
-// the PostgreSQL wiring behind the same API is a noted deviation (poc/README).
+// ledgers with read APIs and chain verification. With DATABASE_URL set, every
+// append persists to PostgreSQL FIRST (write-through) and the chains reload on
+// start, so the ledgers survive pod restarts; without it the store is
+// in-memory (tests, skeleton mode). Payloads persist as canonical TEXT - jsonb
+// normalization would silently break the hash chain on reload.
 // Chain rule: row_hash = sha256(prev_hash_hex + canonical_payload_json),
 // genesis prev = 64 zeros. History is never edited; balances are derived.
 
 use amisad_common::{json, serve_app, sha256, Request, Response, ServiceInfo};
+use postgres::{Client, NoTls};
 
 const GENESIS: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -29,9 +33,16 @@ impl Chain {
             .unwrap_or_else(|| GENESIS.to_string())
     }
 
-    fn append(&mut self, payload: json::Json) -> (usize, String) {
+    /// The (prev, hash) the NEXT append will use - computed without mutating,
+    /// so the durable write can happen before the in-memory apply.
+    fn next_for(&self, payload: &json::Json) -> (String, String) {
         let prev = self.head();
         let hash = sha256::hex_digest(format!("{prev}{}", payload.dump()).as_bytes());
+        (prev, hash)
+    }
+
+    fn append(&mut self, payload: json::Json) -> (usize, String) {
+        let (prev, hash) = self.next_for(&payload);
         self.entries.push(Entry {
             payload,
             prev,
@@ -82,6 +93,111 @@ struct State {
     attestation: Chain,
     settlement: Chain,
     instructions: Vec<Instruction>,
+    db: Option<Client>,
+}
+
+/// DATABASE_URL unset/empty -> in-memory. Set but unreachable -> exit(1);
+/// kubernetes restarts the pod until PostgreSQL accepts connections.
+fn open_db() -> Option<Client> {
+    let url = match std::env::var("DATABASE_URL") {
+        Ok(u) if !u.is_empty() => u,
+        _ => return None,
+    };
+    match Client::connect(&url, NoTls) {
+        Ok(c) => Some(c),
+        Err(e) => {
+            eprintln!("ledger-svc: DATABASE_URL set but connection failed: {e}");
+            std::process::exit(1);
+        }
+    }
+}
+
+/// A dead connection means every future write 503s while /health stays green
+/// (probes never touch the store) - exit instead and let kubernetes restart
+/// the pod, which rehydrates from the database. SQL-level errors (constraint
+/// violations etc.) keep the connection alive and surface as 503.
+fn store_error(db: &Client, what: &str, e: postgres::Error) -> Response {
+    if db.is_closed() {
+        eprintln!("ledger-svc: {what}: connection lost ({e}); exiting to reload");
+        std::process::exit(1);
+    }
+    Response::error(503, &format!("{what} unavailable: {e}"))
+}
+
+fn load_chain(db: &mut Client, table: &str) -> Chain {
+    let query = format!("SELECT payload, prev_hash, row_hash FROM {table} ORDER BY id");
+    let rows = db.query(query.as_str(), &[]).unwrap_or_else(|e| {
+        eprintln!("ledger-svc: loading {table} failed: {e}");
+        std::process::exit(1);
+    });
+    let mut chain = Chain::default();
+    for row in rows {
+        let payload_text: String = row.get(0);
+        let payload = json::parse(&payload_text).unwrap_or_else(|e| {
+            eprintln!("ledger-svc: WARNING {table} row payload unparseable ({e}): {payload_text}");
+            json::Json::Null
+        });
+        chain.entries.push(Entry {
+            payload,
+            prev: row.get(1),
+            hash: row.get(2),
+        });
+    }
+    // A non-verifying chain still serves: /v1/verify is how tampering surfaces.
+    if !chain.verify() {
+        eprintln!("ledger-svc: WARNING {table} does not verify (see /v1/verify)");
+    }
+    chain
+}
+
+fn load_instructions(db: &mut Client) -> Vec<Instruction> {
+    let rows = db
+        .query(
+            "SELECT match_id, value_cents, splits, confirmed FROM ledger.settlement_instructions",
+            &[],
+        )
+        .unwrap_or_else(|e| {
+            eprintln!("ledger-svc: loading settlement_instructions failed: {e}");
+            std::process::exit(1);
+        });
+    rows.iter()
+        .map(|row| {
+            let splits_text: String = row.get(2);
+            let splits = json::parse(&splits_text)
+                .ok()
+                .and_then(|j| j.as_arr().cloned())
+                .unwrap_or_default()
+                .iter()
+                .map(|s| {
+                    (
+                        s.str_of("party").unwrap_or("").to_string(),
+                        s.i64_of("amount_cents").unwrap_or(0),
+                    )
+                })
+                .collect();
+            Instruction {
+                match_id: row.get(0),
+                value_cents: row.get(1),
+                splits,
+                confirmed: row.get(3),
+            }
+        })
+        .collect()
+}
+
+fn splits_dump(splits: &[(String, i64)]) -> String {
+    json::arr(
+        splits
+            .iter()
+            .map(|(party, amount)| {
+                json::obj(vec![
+                    ("party", json::s(party)),
+                    ("amount_cents", json::n(*amount)),
+                ])
+            })
+            .collect(),
+    )
+    .dump()
 }
 
 const PARTIES: [&str; 4] = ["seller_cents", "network_cents", "platform_cents", "ads_cents"];
@@ -127,6 +243,17 @@ fn handle(state: &mut State, req: &Request) -> Response {
             if body.str_of("environment_id").is_none() || body.str_of("lifecycle").is_none() {
                 return Response::error(400, "environment_id and lifecycle required");
             }
+            if let Some(db) = state.db.as_mut() {
+                let (prev, hash) = state.attestation.next_for(&body);
+                let env_id = body.str_of("environment_id").unwrap_or("").to_string();
+                let lifecycle = body.str_of("lifecycle").unwrap_or("").to_string();
+                if let Err(e) = db.execute(
+                    "INSERT INTO ledger.attestation_ledger (environment_id, lifecycle, payload, prev_hash, row_hash) VALUES ($1, $2, $3, $4, $5)",
+                    &[&env_id, &lifecycle, &body.dump(), &prev, &hash],
+                ) {
+                    return store_error(db, "attestation store", e);
+                }
+            }
             let (index, hash) = state.attestation.append(body);
             Response::json(
                 201,
@@ -156,6 +283,14 @@ fn handle(state: &mut State, req: &Request) -> Response {
             {
                 return Response::error(409, "instruction exists for match_id");
             }
+            if let Some(db) = state.db.as_mut() {
+                if let Err(e) = db.execute(
+                    "INSERT INTO ledger.settlement_instructions (match_id, value_cents, splits, confirmed) VALUES ($1, $2, $3, false)",
+                    &[&instruction.match_id, &instruction.value_cents, &splits_dump(&instruction.splits)],
+                ) {
+                    return store_error(db, "instruction store", e);
+                }
+            }
             let match_id = instruction.match_id.clone();
             state.instructions.push(instruction);
             Response::json(
@@ -172,25 +307,51 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(e) => return Response::error(400, &e),
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
-            let instruction = match state
-                .instructions
-                .iter_mut()
-                .find(|i| i.match_id == match_id)
-            {
+            let index = match state.instructions.iter().position(|i| i.match_id == match_id) {
                 Some(i) => i,
                 None => return Response::error(404, "no instruction for match_id"),
             };
-            if instruction.confirmed {
+            if state.instructions[index].confirmed {
                 return Response::error(409, "already confirmed");
             }
-            instruction.confirmed = true;
-            let splits = instruction.splits.clone();
+            // Precompute the whole chain extension, persist it as ONE
+            // transaction (confirmed flag + all splits), and only then apply
+            // to memory - a mid-confirm failure leaves nothing half-settled.
+            let splits = state.instructions[index].splits.clone();
+            let mut prepared = Vec::new();
+            let mut prev = state.settlement.head();
             for (party, amount) in &splits {
-                state.settlement.append(json::obj(vec![
+                let payload = json::obj(vec![
                     ("match_id", json::s(&match_id)),
                     ("party", json::s(party)),
                     ("amount_cents", json::n(*amount)),
-                ]));
+                ]);
+                let hash = sha256::hex_digest(format!("{prev}{}", payload.dump()).as_bytes());
+                prepared.push((payload, prev.clone(), hash.clone()));
+                prev = hash;
+            }
+            if let Some(db) = state.db.as_mut() {
+                let persisted = (|| {
+                    let mut tx = db.transaction()?;
+                    tx.execute(
+                        "UPDATE ledger.settlement_instructions SET confirmed = true WHERE match_id = $1",
+                        &[&match_id],
+                    )?;
+                    for (payload, entry_prev, entry_hash) in &prepared {
+                        tx.execute(
+                            "INSERT INTO ledger.settlement_ledger (match_id, entry_type, payload, prev_hash, row_hash) VALUES ($1, 'split', $2, $3, $4)",
+                            &[&match_id, &payload.dump(), entry_prev, entry_hash],
+                        )?;
+                    }
+                    tx.commit()
+                })();
+                if let Err(e) = persisted {
+                    return store_error(db, "settlement store", e);
+                }
+            }
+            state.instructions[index].confirmed = true;
+            for (payload, _, _) in prepared {
+                state.settlement.append(payload);
             }
             Response::json(
                 201,
@@ -264,15 +425,25 @@ fn handle(state: &mut State, req: &Request) -> Response {
 }
 
 fn main() -> std::io::Result<()> {
+    let mut db = open_db();
+    let (attestation, settlement, instructions) = match db.as_mut() {
+        Some(client) => (
+            load_chain(client, "ledger.attestation_ledger"),
+            load_chain(client, "ledger.settlement_ledger"),
+            load_instructions(client),
+        ),
+        None => (Chain::default(), Chain::default(), Vec::new()),
+    };
     serve_app(
         ServiceInfo {
             name: "ledger-svc",
             version: env!("CARGO_PKG_VERSION"),
         },
         State {
-            attestation: Chain::default(),
-            settlement: Chain::default(),
-            instructions: Vec::new(),
+            attestation,
+            settlement,
+            instructions,
+            db,
         },
         handle,
     )
@@ -315,11 +486,37 @@ mod tests {
     }
 
     #[test]
+    fn splits_round_trip_through_canonical_dump() {
+        // Guards the persistence format: load_instructions parses what
+        // splits_dump wrote, preserving party order and amounts.
+        let splits = vec![
+            ("seller".to_string(), 10800i64),
+            ("network".to_string(), 600),
+            ("platform".to_string(), 600),
+            ("ads".to_string(), 0),
+        ];
+        let parsed = json::parse(&splits_dump(&splits)).unwrap();
+        let back: Vec<(String, i64)> = parsed
+            .as_arr()
+            .unwrap()
+            .iter()
+            .map(|s| {
+                (
+                    s.str_of("party").unwrap().to_string(),
+                    s.i64_of("amount_cents").unwrap(),
+                )
+            })
+            .collect();
+        assert_eq!(back, splits);
+    }
+
+    #[test]
     fn confirm_appends_entries_summing_to_value() {
         let mut state = State {
             attestation: Chain::default(),
             settlement: Chain::default(),
             instructions: Vec::new(),
+            db: None,
         };
         let inst = json::parse(
             "{\"match_id\":\"m1\",\"value_cents\":12000,\"splits\":{\"seller_cents\":10800,\"network_cents\":600,\"platform_cents\":600,\"ads_cents\":0}}",

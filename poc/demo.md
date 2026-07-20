@@ -35,8 +35,9 @@ NodePorts on `amisad-vm-core`: coordinator `30080`, ledger `30081`, resource
 `30082`, seller `30083`, identity `30084`. The same APIs answer from the host
 or LAN at `http://<vm-ip>:<nodeport>`.
 
-**Re-arm (only after a VM restart).** A reboot of `amisad-vm-core` brings the
-services back empty (in-memory state) and without a registered edge. Run the
+**Re-arm (only after a VM restart).** A reboot of `amisad-vm-core` loses the
+in-memory state (coordinator routing, identity tokens, the registered edge) —
+but the ledgers, offers, and orders come back from PostgreSQL, chains intact. Run the
 command steps below as **`amisad-vm-core-admin`** — the repo and
 `target/release/` binaries live under its home, which the non-admin personas
 cannot traverse; `maya`/`elena` are the demo *narrative* logins, and the plain
@@ -51,7 +52,10 @@ export COORDINATOR_URL=http://$NODE_IP:30080 IDENTITY_URL=http://$NODE_IP:30084
 Then either re-run a scenario script end to end
 (`ubuntu.server.24.amisad-vm-core.s001.fulfillment.sh` restarts slice-runtime
 on the edge, registers it, and seeds offers), or register the edge + seed by
-hand using the curls below.
+hand using the curls below. Note the scenario scripts assert against a fresh
+database (the automation restores the `amisad-vm-core` snapshot before each
+one) — with durable orders on the board, s002's "zero commitments" check will
+fail on a reused database; restore the snapshot for a clean walkthrough.
 
 **s001.fulfillment** — Maya's need auto-closes against Elena's standing offer,
 Elena ships, Maya sees delivery:
@@ -64,6 +68,12 @@ curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","sta
 curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'
 target/release/buyer-client wait <handle>   # -> status: delivered
 ```
+
+The settlement is now a durable record: `curl -s http://$NODE_IP:30081/v1/verify`
+shows both hash chains verifying, and the same rows are on disk —
+`sudo -u postgres psql -d amisad -c "TABLE ledger.settlement_ledger"` (as the
+admin). They survive pod restarts and VM reboots; the app role cannot UPDATE or
+DELETE ledger rows.
 
 **s002.fitting** — you play Maya: a manual-policy dress need returns a
 shortlist (note the dusty blue and out-of-range dresses are absent), nothing

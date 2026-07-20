@@ -42,6 +42,13 @@ Both are created by the vm-core deploy chain (`adduser --disabled-password`,
 then a vault-rendered `chpasswd` in a `sensitive: true` step) and are **not**
 in sudoers.
 
+## Service accounts (not login users)
+
+| Account | Where | Purpose |
+|---------|-------|---------|
+| `amisad` | PostgreSQL role on `amisad-vm-core` | App role for ledger-svc and seller-svc (`DATABASE_URL`). INSERT+SELECT only on ledger tables — append-only is database-enforced. Fixed lab password `amisadpoc2026` (inside a URL, so alphanumeric); not vault-managed, provisioned by the db step. |
+| `amisad_audit_ro` | PostgreSQL role (NOLOGIN) | Read-only ledger access reserved for audit-svc; independence is architectural. |
+
 ## Core→edge access
 
 Scenario scripts on vm-core reach the edge VMs with a dedicated **demo

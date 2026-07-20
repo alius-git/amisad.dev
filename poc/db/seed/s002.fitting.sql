@@ -2,10 +2,10 @@
 -- Copyright (c) 2026 by Alisson Sol et al.
 -- AmisAd POC - s002.fitting seed: Elena's dress catalog (one dusty blue), a
 -- second seller's out-of-range/past-deadline dresses, and fitting slots.
--- NOTE: the live sequence seeds these via the seller-svc API today (in-memory
--- state pending the PostgreSQL wiring - deviation noted in poc/README.md);
--- attributes and fitting slots ride in the offer JSON and land in relational
--- form when the schema grows offer_attributes/fitting_slots tables.
+-- NOTE: the live sequence seeds via the seller-svc API, which now WRITES
+-- THROUGH to PostgreSQL; attributes and fitting slots ride in the persisted
+-- offer document (seller.offers.document) and land in relational form when
+-- the schema grows offer_attributes/fitting_slots tables.
 
 INSERT INTO seller.offers
     (offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close)

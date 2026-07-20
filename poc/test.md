@@ -63,7 +63,8 @@ independent without per-scenario VMs. Hostnames are set with the framework's
                       reliable with no other lab VM running)
 [3] amisad-vm-core    start.guest -> k8s + PostgreSQL + NATS (snapshot
                       amisad-vm-core-k8s) -> binaries from the stash, deploy
-                      10 services, add maya/elena -> snapshot amisad-vm-core.
+                      10 services (ledger+seller on PostgreSQL), add
+                      maya/elena -> snapshot amisad-vm-core.
 [4] edge-a started; it reports its IP to the status server.
 [5] scenarios in order, each: restore amisad-vm-core -> drive over SSH
     (sshWaitReady + sshFetchAndExecute; no OCR, so live edge VMs cannot
@@ -99,6 +100,18 @@ otherwise keep an active console/RDP session on the host during provisioning.
 tarball of `amisad.dev` HEAD from the host status server — rerun
 `poc\build\serve-local.ps1` after every commit. The production path (kept for
 later) git-clones with the vault PAT in a `sensitive: true` step.
+
+**Durable stores.** The db step provisions the `amisad` database with the app
+role `amisad` (fixed lab password `amisadpoc2026` — it rides inside a URL, so
+alphanumeric on purpose), opens `listen_addresses`/pg_hba to the pod and node
+networks, and grants the role INSERT+SELECT only on ledger tables: append-only
+is enforced by the database itself. `deploy.sh` passes `DATABASE_URL` (node
+IP:5432) to ledger-svc and seller-svc via the `databaseUrl` helm value; writes
+go to PostgreSQL first, and pods reload state on start. s001 asserts the rows
+landed and that a `kubectl rollout restart` reloads verifying chains and the
+settled order; s002 asserts the booked appointment row. Empty `databaseUrl`
+(the chart default) keeps a service in-memory — which is how `cargo test` and
+skeleton services run.
 
 ## Adding a scenario
 

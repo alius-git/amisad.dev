@@ -560,6 +560,9 @@ pub mod json {
                                     return Err(String::from("missing low surrogate"));
                                 }
                                 let low = self.hex4()?;
+                                if !(0xdc00..0xe000).contains(&low) {
+                                    return Err(String::from("invalid low surrogate"));
+                                }
                                 0x10000 + ((first - 0xd800) << 10) + (low - 0xdc00)
                             } else {
                                 first
@@ -592,9 +595,12 @@ pub mod json {
                 self.pos += 1;
             }
             let text: String = self.chars[start..self.pos].iter().collect();
-            text.parse::<f64>()
-                .map(Json::Num)
-                .map_err(|_| format!("bad number '{text}'"))
+            // Rust float parsing saturates overflow to infinity; dump() would
+            // then emit non-JSON ("inf") that poisons persisted payloads.
+            match text.parse::<f64>() {
+                Ok(v) if v.is_finite() => Ok(Json::Num(v)),
+                _ => Err(format!("bad number '{text}'")),
+            }
         }
     }
 }
@@ -639,5 +645,18 @@ mod tests {
         assert_eq!(parsed, value);
         let unicode = json::parse("\"\\u0041\\u00e9\"").expect("unicode");
         assert_eq!(unicode.as_str(), Some("Aé"));
+    }
+
+    #[test]
+    fn json_rejects_unrepresentable_input() {
+        // Overflowing numbers would dump as "inf" (not JSON) and poison
+        // persisted hash-chained payloads on reload.
+        assert!(json::parse("{\"x\":1e309}").is_err());
+        assert!(json::parse("1e309").is_err());
+        // A high surrogate must pair with a low surrogate (debug builds
+        // previously panicked on subtraction underflow here).
+        assert!(json::parse("\"\\ud800\\u0041\"").is_err());
+        let paired = json::parse("\"\\ud83d\\ude00\"").expect("surrogate pair");
+        assert_eq!(paired.as_str(), Some("😀"));
     }
 }

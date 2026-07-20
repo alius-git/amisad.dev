@@ -111,8 +111,14 @@ fn auto_closable(need: &json::Json, offer: &json::Json) -> bool {
 fn post_out(state: &mut State, kind: &str, url: &str, body: &json::Json) {
     let text = body.dump();
     state.egress.push(format!("{kind}:{text}"));
-    if let Err(e) = request("POST", url, Some(&text)) {
-        eprintln!("egress {kind} to {url} failed: {e}");
+    match request("POST", url, Some(&text)) {
+        Err(e) => eprintln!("egress {kind} to {url} failed: {e}"),
+        // The ledger 503s when its durable store is down; silence here would
+        // drop attestations/instructions without a trace.
+        Ok((status, resp)) if status >= 300 => {
+            eprintln!("egress {kind} to {url} returned {status}: {resp}");
+        }
+        Ok(_) => {}
     }
 }
 

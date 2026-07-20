@@ -5,4 +5,5 @@
 exports_files([
     ".bazelversion",
     "Cargo.toml",
+    "Cargo.lock",
 ])

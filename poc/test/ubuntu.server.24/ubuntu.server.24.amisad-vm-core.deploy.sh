@@ -66,6 +66,12 @@ ls -l target/release/
 echo "== build thin images + deploy 10 services =="
 sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
 SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
+# Durable stores: ledger-svc and seller-svc reach the host PostgreSQL via the
+# node IP, resolved by the POD at start ($(NODE_IP) is kubernetes env
+# expansion from the downward API, NOT shell) - a snapshot restore with a new
+# DHCP lease would make a deploy-time IP stale. Role/password: db step.
+DATABASE_URL='postgres://amisad:amisadpoc2026@$(NODE_IP):5432/amisad'
+NODE_IP=$(hostname -I | awk '{print $1}')
 # docker.io is unreachable in this lab: distroless base from gcr.io, thin images
 # from the prebuilt binaries, imported straight into the cluster's containerd
 # (no registry), charts pinned pullPolicy=Never.
@@ -78,16 +84,19 @@ for svc in $SERVICES; do
     docker build -t "amisad/${svc}:poc" "$ctx"
     docker save "amisad/${svc}:poc" | sudo ctr -n k8s.io images import -
     rm -rf "$ctx"
+    EXTRA=()
+    case "$svc" in
+        ledger-svc|seller-svc) EXTRA=(--set-string "databaseUrl=${DATABASE_URL}") ;;
+    esac
     helm upgrade --install "$svc" "workloads/services/${svc}" \
         --namespace amisad --create-namespace \
-        --set "image=amisad/${svc}:poc" --set "pullPolicy=Never"
+        --set "image=amisad/${svc}:poc" --set "pullPolicy=Never" "${EXTRA[@]}"
 done
 for svc in $SERVICES; do
     kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=600s
 done
 
 echo "== expose NodePorts for host/edge access =="
-NODE_IP=$(hostname -I | awk '{print $1}')
 declare -A NP=( [fabric-coordinator]=30080 [ledger-svc]=30081 [resource-svc]=30082 [seller-svc]=30083 [identity-mock]=30084 )
 for svc in "${!NP[@]}"; do
     kubectl -n amisad patch svc "$svc" -p \

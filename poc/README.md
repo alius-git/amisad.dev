@@ -41,12 +41,12 @@ sources.
 
 ## Deliberate skeleton choices
 
-- **No third-party crates yet.** The services serve their routes — including
-  the implemented scenarios' full `/v1` surface — with a std-only responder in
-  `amisad-common`, so builds need no crate fetches and no committed lockfile.
-  Wire **crate_universe** in `MODULE.bazel` together with the first external
-  dependency (Actix replaces the responder when the surface outgrows it —
-  plan/design.md §1).
+- **One third-party crate: `postgres`.** The services serve their routes with
+  the std-only responder in `amisad-common`; the first external dependency is
+  the PostgreSQL client for the durable ledger/catalog stores, wired through
+  **crate_universe** in `MODULE.bazel` with the committed `Cargo.lock` —
+  exactly the growth path this bullet used to plan. (Actix replaces the
+  responder when the surface outgrows it — plan/design.md §1.)
 - **App builds are `bazel run` wrappers.** Flutter and Vite have no mature
   Bazel rules, and their toolchains fight sandboxing (Gradle/pub/npm caches).
   `sh_binary` wrappers keep Bazel as the single entry point without lying
@@ -97,9 +97,14 @@ Deviations from the target design, deliberate and to be retired in later
 scenarios — the wire contracts (`contracts/openapi/`) are unchanged by all of
 them:
 
-- **In-memory state, not PostgreSQL.** ledger-svc, seller-svc, resource-svc,
-  and identity-mock keep state in process behind the real APIs;
-  `db/schema.sql` already holds the target tables.
+- **PostgreSQL for the ledgers and the seller; in-memory for the rest.**
+  ledger-svc and seller-svc write through to the vm-core PostgreSQL
+  (`DATABASE_URL` from the helm values; `db/schema.sql`) and reload on start —
+  chains, orders, and offers survive pod restarts, and the app role has no
+  UPDATE/DELETE on ledger tables, so append-only is database-enforced.
+  Without `DATABASE_URL` the same binaries run in-memory (that is how
+  `cargo test` stays hermetic). resource-svc and identity-mock keep in-process
+  state behind the real APIs.
 - **Envelope opacity instead of encryption.** Upstream services carry the
   envelope as an opaque string and never parse it (checkable in code and by
   the egress assert); actual envelope crypto is TODO.

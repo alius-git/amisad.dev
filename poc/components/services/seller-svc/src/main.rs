@@ -4,9 +4,12 @@
 // order state machine (committed -> provisioning -> fulfilled; a closed match
 // creates the order already committed). Advancing to fulfilled confirms
 // settlement on the ledger. Order records structurally contain no buyer
-// identity - there is no such field.
+// identity - there is no such field. With DATABASE_URL set, offers and orders
+// write through to PostgreSQL first and reload on start (catalog and order
+// board survive pod restarts); without it the store is in-memory.
 
 use amisad_common::{json, request, serve_app, Request, Response, ServiceInfo};
+use postgres::{Client, NoTls};
 
 struct Order {
     match_id: String,
@@ -23,6 +26,78 @@ struct Order {
 struct State {
     offers: Vec<json::Json>,
     orders: Vec<Order>,
+    db: Option<Client>,
+}
+
+/// DATABASE_URL unset/empty -> in-memory. Set but unreachable -> exit(1);
+/// kubernetes restarts the pod until PostgreSQL accepts connections.
+fn open_db() -> Option<Client> {
+    let url = match std::env::var("DATABASE_URL") {
+        Ok(u) if !u.is_empty() => u,
+        _ => return None,
+    };
+    match Client::connect(&url, NoTls) {
+        Ok(c) => Some(c),
+        Err(e) => {
+            eprintln!("seller-svc: DATABASE_URL set but connection failed: {e}");
+            std::process::exit(1);
+        }
+    }
+}
+
+/// A dead connection means every future write 503s while /health stays green
+/// (probes never touch the store) - exit instead and let kubernetes restart
+/// the pod, which rehydrates from the database. SQL-level errors (constraint
+/// violations etc.) keep the connection alive and surface as 503.
+fn store_error(db: &Client, what: &str, e: postgres::Error) -> Response {
+    if db.is_closed() {
+        eprintln!("seller-svc: {what}: connection lost ({e}); exiting to reload");
+        std::process::exit(1);
+    }
+    Response::error(503, &format!("{what} unavailable: {e}"))
+}
+
+fn load_store(db: &mut Client) -> (Vec<json::Json>, Vec<Order>) {
+    let offers = db
+        .query("SELECT document FROM seller.offers ORDER BY created_at, offer_id", &[])
+        .unwrap_or_else(|e| {
+            eprintln!("seller-svc: loading offers failed: {e}");
+            std::process::exit(1);
+        })
+        .iter()
+        .filter_map(|row| {
+            let doc: String = row.get(0);
+            match json::parse(&doc) {
+                Ok(o) if o.str_of("offer_id").is_some() => Some(o),
+                // e.g. a direct-SQL seed that skipped the document column.
+                _ => {
+                    eprintln!("seller-svc: WARNING skipping offer with unusable document: {doc}");
+                    None
+                }
+            }
+        })
+        .collect();
+    let orders = db
+        .query(
+            "SELECT match_id, offer_id, tenant, need_context, state, slot_id, slot_day FROM seller.orders ORDER BY created_at, match_id",
+            &[],
+        )
+        .unwrap_or_else(|e| {
+            eprintln!("seller-svc: loading orders failed: {e}");
+            std::process::exit(1);
+        })
+        .iter()
+        .map(|row| Order {
+            match_id: row.get(0),
+            offer_id: row.get(1),
+            tenant: row.get(2),
+            need_context: row.get(3),
+            state: row.get(4),
+            slot_id: row.get(5),
+            slot_day: row.get(6),
+        })
+        .collect();
+    (offers, orders)
 }
 
 fn ledger_url() -> String {
@@ -75,7 +150,35 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 return Response::error(400, "price_cents required");
             }
             let offer_id = body.str_of("offer_id").unwrap().to_string();
-            state.offers.push(body);
+            if let Some(db) = state.db.as_mut() {
+                if let Err(e) = db.execute(
+                    "INSERT INTO seller.offers (offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close, document) \
+                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \
+                     ON CONFLICT (offer_id) DO UPDATE SET tenant = $2, title = $3, category = $4, region = $5, price_cents = $6, deliver_by_days = $7, auto_close = $8, document = $9",
+                    &[
+                        &offer_id,
+                        &body.str_of("tenant").unwrap_or(""),
+                        &body.str_of("title").unwrap_or(""),
+                        &body.str_of("category").unwrap_or(""),
+                        &body.str_of("region").unwrap_or(""),
+                        &body.i64_of("price_cents").unwrap_or(0),
+                        &body.i64_of("deliver_by_days").and_then(|d| i32::try_from(d).ok()),
+                        &body.bool_of("auto_close").unwrap_or(false),
+                        &body.dump(),
+                    ],
+                ) {
+                    return store_error(db, "catalog store", e);
+                }
+            }
+            // Upsert in memory too, matching the database's primary key.
+            match state
+                .offers
+                .iter_mut()
+                .find(|o| o.str_of("offer_id") == Some(&offer_id))
+            {
+                Some(existing) => *existing = body,
+                None => state.offers.push(body),
+            }
             Response::json(201, &json::obj(vec![("offer_id", json::s(&offer_id))]))
         }
         ("POST", "/v1/orders") => {
@@ -94,6 +197,15 @@ fn handle(state: &mut State, req: &Request) -> Response {
             if state.orders.iter().any(|o| o.match_id == match_id) {
                 return Response::error(409, "order exists for match_id");
             }
+            // Validated here so both storage modes agree; the database FK
+            // would otherwise misreport this client error as a 503 outage.
+            if !state
+                .offers
+                .iter()
+                .any(|o| o.str_of("offer_id") == Some(offer_id.as_str()))
+            {
+                return Response::error(400, "unknown offer_id");
+            }
             let order = Order {
                 match_id: match_id.clone(),
                 offer_id,
@@ -103,6 +215,23 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 slot_id: body.str_of("slot_id").unwrap_or("").to_string(),
                 slot_day: body.str_of("slot_day").unwrap_or("").to_string(),
             };
+            if let Some(db) = state.db.as_mut() {
+                if let Err(e) = db.execute(
+                    "INSERT INTO seller.orders (match_id, offer_id, tenant, need_context, state, slot_id, slot_day) \
+                     VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                    &[
+                        &order.match_id,
+                        &order.offer_id,
+                        &order.tenant,
+                        &order.need_context,
+                        &order.state,
+                        &order.slot_id,
+                        &order.slot_day,
+                    ],
+                ) {
+                    return store_error(db, "order store", e);
+                }
+            }
             state.orders.push(order);
             Response::json(
                 201,
@@ -131,17 +260,21 @@ fn handle(state: &mut State, req: &Request) -> Response {
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let requested = body.str_of("state").unwrap_or("").to_string();
-            let order = match state.orders.iter_mut().find(|o| o.match_id == match_id) {
-                Some(o) => o,
+            let index = match state.orders.iter().position(|o| o.match_id == match_id) {
+                Some(i) => i,
                 None => return Response::error(404, "no order for match_id"),
             };
-            if !next_state(&order.state, &requested) {
+            if !next_state(&state.orders[index].state, &requested) {
                 return Response::error(
                     409,
-                    &format!("illegal transition {} -> {requested}", order.state),
+                    &format!("illegal transition {} -> {requested}", state.orders[index].state),
                 );
             }
-            order.state = requested.clone();
+            // Resolve the FINAL state first, then persist it as one write and
+            // apply to memory last - so a store failure (503, memory
+            // untouched) is always retryable, and a crash never leaves the
+            // database mid-transition.
+            let mut final_state = requested.clone();
             if requested == "fulfilled" {
                 let confirm_body =
                     json::obj(vec![("match_id", json::s(&match_id))]).dump();
@@ -150,18 +283,33 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     &format!("{}/v1/settlements/confirm", ledger_url()),
                     Some(&confirm_body),
                 ) {
-                    Ok((201, _)) => order.state = String::from("settled"),
+                    Ok((201, _)) => final_state = String::from("settled"),
+                    // A previous attempt already confirmed (crash or 503
+                    // between confirm and persist): converge to settled
+                    // instead of wedging at fulfilled.
+                    Ok((409, body)) if body.contains("already confirmed") => {
+                        final_state = String::from("settled");
+                    }
                     Ok((status, body)) => {
                         eprintln!("settlement confirm returned {status}: {body}");
                     }
                     Err(e) => eprintln!("settlement confirm failed: {e}"),
                 }
             }
+            if let Some(db) = state.db.as_mut() {
+                if let Err(e) = db.execute(
+                    "UPDATE seller.orders SET state = $1, updated_at = now() WHERE match_id = $2",
+                    &[&final_state, &match_id],
+                ) {
+                    return store_error(db, "order store", e);
+                }
+            }
+            state.orders[index].state = final_state;
             Response::json(
                 200,
                 &json::obj(vec![
                     ("match_id", json::s(&match_id)),
-                    ("state", json::s(&order.state)),
+                    ("state", json::s(&state.orders[index].state)),
                 ]),
             )
         }
@@ -191,15 +339,17 @@ fn handle(state: &mut State, req: &Request) -> Response {
 }
 
 fn main() -> std::io::Result<()> {
+    let mut db = open_db();
+    let (offers, orders) = match db.as_mut() {
+        Some(client) => load_store(client),
+        None => (Vec::new(), Vec::new()),
+    };
     serve_app(
         ServiceInfo {
             name: "seller-svc",
             version: env!("CARGO_PKG_VERSION"),
         },
-        State {
-            offers: Vec::new(),
-            orders: Vec::new(),
-        },
+        State { offers, orders, db },
         handle,
     )
 }

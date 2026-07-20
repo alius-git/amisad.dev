@@ -40,7 +40,7 @@ steps:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-core.db.sh"
     timeoutSeconds: 900
-    description: "AmisAd database bring-up (install PostgreSQL, create amisad DB, load schema.sql)"
+    description: "AmisAd database bring-up (install PostgreSQL, create amisad DB, load schema.sql, app role + pod access)"
 
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-core.nats.sh"

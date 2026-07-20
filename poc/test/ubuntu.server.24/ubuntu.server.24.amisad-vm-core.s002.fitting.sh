@@ -167,4 +167,13 @@ assert [e['kind'] for e in n] == ['shortlist', 'booking-confirmed'], n
 print('ASSERT exactly two notifications OK')
 "
 
+echo "== durable store: booked appointment persisted in PostgreSQL =="
+BOOKED=$(sudo -u postgres psql -d amisad -tAc \
+    "SELECT count(*) FROM seller.orders WHERE slot_id = 'thu-1' AND state = 'settled'")
+if [ "$BOOKED" -lt 1 ]; then
+    echo "no settled thu-1 order in PostgreSQL (got ${BOOKED})" >&2
+    exit 9
+fi
+echo "ASSERT PostgreSQL appointment row OK"
+
 echo "s002.fitting HAPPY PATH PASSED"

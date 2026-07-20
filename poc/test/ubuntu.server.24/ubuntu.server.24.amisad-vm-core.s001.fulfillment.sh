@@ -166,4 +166,39 @@ for marker in ['maya', 'token', 'budget_cents', 'deadline_days', 'subscriber']:
 print('ASSERT zero egress OK')
 "
 
+echo "== durable store: rows in PostgreSQL, state survives a pod restart =="
+ROWS=$(sudo -u postgres psql -d amisad -tAc \
+    "SELECT (SELECT count(*) FROM ledger.settlement_ledger), (SELECT count(*) FROM ledger.attestation_ledger), (SELECT count(*) FROM seller.orders)")
+echo "pg rows (settlement|attestation|orders): ${ROWS}"
+python3 -c "
+s, a, o = [int(x) for x in '${ROWS}'.split('|')]
+assert s >= 4 and a >= 4 and o >= 1, (s, a, o)
+print('ASSERT PostgreSQL write-through OK')
+"
+# The reload proof: fresh pods must rebuild verifying chains and the settled
+# order from the database, not from lost process memory.
+kubectl -n amisad rollout restart deployment/ledger-svc deployment/seller-svc
+kubectl -n amisad rollout status deployment/ledger-svc --timeout=180s
+kubectl -n amisad rollout status deployment/seller-svc --timeout=180s
+for _ in $(seq 1 60); do
+    if curl -sf "http://${NODE_IP}:30081/health" >/dev/null 2>&1 && \
+       curl -sf "http://${NODE_IP}:30083/health" >/dev/null 2>&1; then break; fi
+    sleep 2
+done
+curl -sf "http://${NODE_IP}:30081/health" >/dev/null || { echo "ledger-svc never came back after restart" >&2; exit 8; }
+curl -sf "http://${NODE_IP}:30083/health" >/dev/null || { echo "seller-svc never came back after restart" >&2; exit 8; }
+curl -sf "${LEDGER}/v1/verify" | python3 -c "
+import sys, json
+v = json.load(sys.stdin)
+assert v['attestation_ok'] and v['settlement_ok'], v
+assert v['settlement_len'] >= 4 and v['attestation_len'] >= 4, v
+print('ASSERT ledgers reloaded after restart OK')
+"
+curl -sf "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}" | python3 -c "
+import sys, json
+o = json.load(sys.stdin)
+assert o['state'] == 'settled', o
+print('ASSERT order survived restart OK')
+"
+
 echo "s001.fulfillment HAPPY PATH PASSED"

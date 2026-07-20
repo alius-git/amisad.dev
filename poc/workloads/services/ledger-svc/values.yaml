@@ -3,3 +3,5 @@ image: localhost:5000/amisad/ledger-svc:latest
 port: 8080
 replicas: 1
 pullPolicy: IfNotPresent
+# Set to a postgres:// URL to use the durable store; empty = in-memory.
+databaseUrl: ""
