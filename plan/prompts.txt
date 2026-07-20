@@ -276,3 +276,7 @@ Ask any question before starting implementation.
 ==== Coding - Scenario-003
 
 Proceed with the implementation of S003, following the established approach for VM setup defined in the "Deployment topology" and having the administrator add new users. Create the test sequence and execute it on clean VMs, validating all scenarios implemented so far in sequence (S001, S002, and S003). Finally, update poc/demo.md with comprehensive yet concise instructions. Please ask any clarifying questions before starting implementation.
+
+==== Coding - Scenario-004+
+
+Proceed with the implementation of S004, following the established approach for VM setup defined in the "Deployment topology" and having the administrator add new users. Create the test sequence and execute it on clean VMs, validating all scenarios implemented so far in sequence (S001 to S004). Finally, update poc/demo.md with comprehensive yet concise instructions. Please ask any clarifying questions before starting implementation.
