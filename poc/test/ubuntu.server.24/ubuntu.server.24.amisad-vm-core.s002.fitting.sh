@@ -35,11 +35,14 @@ RESOURCE="http://${NODE_IP}:30082"
 echo "== wait for the NodePort services to actually answer (post-restore) =="
 # The restored objects still carry available=True from before the snapshot, so
 # the kubectl waits above can pass before pods and kube-proxy are really up.
-for _ in $(seq 1 60); do
-    if curl -sf "http://${NODE_IP}:30080/health" >/dev/null 2>&1; then break; fi
-    sleep 5
+# Every exposed NodePort must answer - each service recovers independently.
+for port in 30080 30081 30082 30083 30084; do
+    for _ in $(seq 1 60); do
+        if curl -sf "http://${NODE_IP}:${port}/health" >/dev/null 2>&1; then break; fi
+        sleep 5
+    done
+    curl -sf "http://${NODE_IP}:${port}/health" >/dev/null
 done
-curl -sf "http://${NODE_IP}:30080/health" >/dev/null
 SELLER="http://${NODE_IP}:30083"
 
 echo "== slice-runtime (edge amisad-vm-edge-a) =="
