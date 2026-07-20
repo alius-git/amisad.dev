@@ -131,14 +131,19 @@ foreach ($s in $Scenarios) {
     # also collide with this chain's saveDiskSnapshot renames. Clear them.
     Remove-LabVM -Name 'amisad.k8s'
     Remove-LabVM -Name 'amisad.core'
+    # Stop the previous scenario's VM BEFORE this chain starts: first login is
+    # only reliable when the provisioning VM is the sole lab VM running
+    # (observed across every pass/fail: a concurrently running lab VM breaks
+    # the GUI keystroke path). It stays on disk; the LAST scenario's VM is
+    # still left live at the end, and a failed scenario's VM stays live.
+    if ($previousVm) {
+        Write-Host "Stopping previous scenario VM $previousVm (kept on disk) before the next chain."
+        Hyper-V\Stop-VM -Name $previousVm -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
     $name = ($s.FinalVm -replace '^amisad\.', '')
     if ((Invoke-Stage -Name $name -Sequence $s.Sequence) -ne 0) {
         Write-Error "Scenario $($s.FinalVm) FAILED - stopping the run; its VM is left as-is for debugging."
         exit 1
-    }
-    if ($previousVm) {
-        Write-Output "Stopping previous scenario VM $previousVm (kept on disk)."
-        Hyper-V\Stop-VM -Name $previousVm -Force -Confirm:$false -ErrorAction SilentlyContinue
     }
     $previousVm = $s.FinalVm
 }
