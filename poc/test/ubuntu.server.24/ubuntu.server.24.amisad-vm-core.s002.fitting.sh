@@ -1,7 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - s002.fitting run against the deployed amisad.core cluster:
+# AmisAd POC - s002.fitting run against the deployed amisad-vm-core cluster:
 # start slice-runtime, seed Elena's dresses (one dusty blue) + a second seller's
 # out-of-range/past-deadline offers + fitting slots, drive Maya's MANUAL-policy
 # dress need, and assert the FULL Target Verification Point: shortlist honors
@@ -17,7 +17,7 @@ cd "$POC"
 
 echo "== wait for the deployed services to recover (post-restore boot) =="
 sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
-# amisad.core cold-boots from its snapshot; kubectl does not retry a refused
+# amisad-vm-core cold-boots from its snapshot; kubectl does not retry a refused
 # TCP dial, so poll a raw endpoint before waiting on the deployments.
 for _ in $(seq 1 60); do
     if kubectl get --raw='/readyz' >/dev/null 2>&1; then break; fi
@@ -33,13 +33,39 @@ LEDGER="http://${NODE_IP}:30081"
 RESOURCE="http://${NODE_IP}:30082"
 SELLER="http://${NODE_IP}:30083"
 
-echo "== slice-runtime (single-VM degraded mode) =="
-# pkill by process NAME: this script's own text contains "slice-runtime".
-pkill -x slice-runtime 2>/dev/null || true
-PORT=8090 LEDGER_URL="$LEDGER" RESOURCE_URL="$RESOURCE" \
-    nohup target/release/slice-runtime >/tmp/slice-runtime.log 2>&1 &
-sleep 1
-SLICE_EP="http://${NODE_IP}:8090"
+echo "== slice-runtime (edge amisad-vm-edge-a) =="
+# Resolve the edge from its boot-time IP report on the status server; an
+# explicit EDGE_HOST env wins; unresolvable falls back to this VM.
+if [ -r /etc/yuruna/host.env ]; then
+    # shellcheck disable=SC1091
+    . /etc/yuruna/host.env
+fi
+SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
+if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_HOST_IP:-}" ]; then
+    EDGE_IP=$(wget --no-proxy -qO- \
+        "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/log/handoff/amisad-vm-edge-a.ip.txt" 2>/dev/null || true)
+    if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-vm-edge-a-admin@${EDGE_IP}"; fi
+fi
+if [ -n "${EDGE_HOST:-}" ]; then
+    echo "edge: ${EDGE_HOST}"
+    # Kill any running slice-runtime BEFORE the scp: overwriting an executing
+    # binary fails with ETXTBSY (the edge stays up across scenarios - s001's
+    # instance is still running when s002 delivers its copy).
+    ssh "${SSH_OPTS[@]}" "$EDGE_HOST" "pkill -x slice-runtime 2>/dev/null || true"
+    scp "${SSH_OPTS[@]}" target/release/slice-runtime "${EDGE_HOST}:/tmp/slice-runtime"
+    ssh "${SSH_OPTS[@]}" "$EDGE_HOST" \
+        "PORT=8080 LEDGER_URL=$LEDGER RESOURCE_URL=$RESOURCE nohup /tmp/slice-runtime >/tmp/slice-runtime.log 2>&1 & sleep 1; echo edge-started"
+    EDGE_IP=$(ssh "${SSH_OPTS[@]}" "$EDGE_HOST" "hostname -I | awk '{print \$1}'")
+    SLICE_EP="http://${EDGE_IP}:8080"
+else
+    echo "edge unresolved - slice-runtime on this VM (single-VM degraded fallback)"
+    # pkill by process NAME: this script's own text contains "slice-runtime".
+    pkill -x slice-runtime 2>/dev/null || true
+    PORT=8090 LEDGER_URL="$LEDGER" RESOURCE_URL="$RESOURCE" \
+        nohup target/release/slice-runtime >/tmp/slice-runtime.log 2>&1 &
+    sleep 1
+    SLICE_EP="http://${NODE_IP}:8090"
+fi
 curl -sf "${SLICE_EP}/health" >/dev/null
 curl -sf -X POST "${RESOURCE}/v1/edges" \
     -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"

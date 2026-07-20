@@ -1,7 +1,8 @@
 # AmisAd POC — running the demo by hand
 
-How to get a deployed AmisAd cluster ("prebuild", via the Yuruna framework) and
-then drive the demo manually. Full test automation lives in [test.md](test.md).
+How to get the deployed AmisAd topology ("prebuild", via the Yuruna framework)
+and then drive the demo manually. Full test automation lives in
+[test.md](test.md).
 
 ## Prebuild
 
@@ -13,38 +14,44 @@ poc\build\serve-local.ps1
 pwsh poc\build\run-tests.ps1 -NoConfigGate
 ```
 
-A green run leaves the latest scenario's VM **live** (currently
-`amisad.s002.fitting`) with the ten services deployed and NodePorts exposed —
-that VM is the demo box. Earlier scenario VMs (e.g. `amisad.s001.fulfillment`)
-are kept on disk stopped; start one in Hyper-V Manager to demo it instead.
+A green run leaves the demo environment **live**: `amisad-vm-core` (the ten
+services, NodePorts exposed) and `amisad-vm-edge-a` (the region-A slice VM,
+running `slice-runtime` from the last scenario). `amisad-vm-build` and
+`amisad-vm-edge-b` are kept on disk stopped.
 
-To log into the VM console: user `yamisad-sNNN` (per scenario —
-[usernames.md](usernames.md)); the current password is in the host vault,
+Console logins on `amisad-vm-core` ([usernames.md](usernames.md)):
+- **demo personas** (non-admin): `maya`, `elena`
+- **administrator**: `amisad-vm-core-admin`
+
+Passwords are in the host vault,
 `c:\git\yuruna\test\status\extension\authentication\vault.yml`.
+
+The last scenario's state is still live after a run — you can inspect it, or
+re-arm below for a fresh walkthrough.
 
 ## Driving the demo
 
-NodePorts on the scenario VM: coordinator `30080`, ledger `30081`, resource
-`30082`, seller `30083`, identity `30084`.
+NodePorts on `amisad-vm-core`: coordinator `30080`, ledger `30081`, resource
+`30082`, seller `30083`, identity `30084`. The same APIs answer from the host
+or LAN at `http://<vm-ip>:<nodeport>`.
 
-**Re-arm after boot.** The scenario run ends with a snapshot + restart, which
-cold-boots the VM: the deployed services come back on their own, but their
-in-memory state (registered edge, seeded offers) and the `slice-runtime`
-process do not. Re-arm once per boot, then seed the scenario you want to drive:
+**Re-arm (only after a VM restart).** A reboot of `amisad-vm-core` brings the
+services back empty (in-memory state) and without a registered edge. Run the
+command steps below as **`amisad-vm-core-admin`** — the repo and
+`target/release/` binaries live under its home, which the non-admin personas
+cannot traverse; `maya`/`elena` are the demo *narrative* logins, and the plain
+`curl` steps also work from any user or from the host via the NodePorts:
 
 ```bash
 cd ~/amisad.dev/poc
 NODE_IP=$(hostname -I | awk '{print $1}')
-PORT=8090 LEDGER_URL=http://$NODE_IP:30081 RESOURCE_URL=http://$NODE_IP:30082 \
-    nohup target/release/slice-runtime >/tmp/slice-runtime.log 2>&1 &
-sleep 1
-curl -sf -X POST http://$NODE_IP:30082/v1/edges \
-    -d "{\"region\":\"region-a\",\"endpoint\":\"http://$NODE_IP:8090\"}"
 export COORDINATOR_URL=http://$NODE_IP:30080 IDENTITY_URL=http://$NODE_IP:30084
 ```
 
-(`slice-runtime` runs here in the single-VM degraded mode; point the sequence's
-`edgeHost` variable at a separate edge VM for the two-VM topology.)
+Then either re-run a scenario script end to end
+(`ubuntu.server.24.amisad-vm-core.s001.fulfillment.sh` restarts slice-runtime
+on the edge, registers it, and seeds offers), or register the edge + seed by
+hand using the curls below.
 
 **s001.fulfillment** — Maya's need auto-closes against Elena's standing offer,
 Elena ships, Maya sees delivery:
@@ -52,8 +59,8 @@ Elena ships, Maya sees delivery:
 ```bash
 curl -sf -X POST http://$NODE_IP:30083/v1/offers \
     -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
-target/release/buyer-client submit          # prints handle + match as JSON
-curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'
+target/release/buyer-client submit          # as maya: prints handle + match as JSON
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'   # as elena
 curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'
 target/release/buyer-client wait <handle>   # -> status: delivered
 ```
@@ -80,8 +87,6 @@ curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<match_id>
 curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<match_id>","state":"fulfilled"}'   # -> settled
 target/release/buyer-client notifications <handle>    # exactly two: shortlist, booking-confirmed
 ```
-
-The same APIs answer from the host or LAN at `http://<vm-ip>:<nodeport>`.
 
 **Mobile (manual demo):** build and side-load the buyer app against the VM's
 LAN address, state a need on the needs screen, and refresh its status while

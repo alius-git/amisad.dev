@@ -1,12 +1,12 @@
 # Yuruna cycle plan for the AmisAd POC.
 #
 # The POC's test automation is driven by poc/build/run-tests.ps1 (see
-# poc/test.md): from a clean machine it builds once (amisad.build uploads the
-# binaries to the stash service), then runs each implemented scenario in order,
-# fully cold, each chain under its own per-scenario user (poc/usernames.md) and
-# ending in its own live VM (amisad.sNNN.<word>). The single-cycle runner
-# cannot express that ordering (it merges same-guest top-levels onto one VM),
-# so the entry below is the latest implemented scenario, for cycle monitoring
-# only (its cold chain covers the same build-artifact + deploy path).
+# poc/test.md): from a clean machine it builds the design topology
+# (amisad-vm-build -> stash upload; amisad-vm-edge-a/b; amisad-vm-core with
+# k8s + services + demo users), then runs each implemented scenario in order
+# against amisad-vm-core over SSH, each one restoring the amisad-vm-core
+# snapshot as its state reset. The single-cycle runner cannot express that
+# orchestration, so the entry below is the latest implemented scenario, for
+# cycle monitoring only.
 sequences:
-- workload.guest.ubuntu.server.24.core.amisad.s002.fitting
+- workload.guest.ubuntu.server.24.amisad-vm-core.s002.fitting

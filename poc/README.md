@@ -22,7 +22,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: build/k8s/core baselines, the build-VM compile, s001.fulfillment, s002.fitting |
+| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-vm-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment, s002.fitting |
 | `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 | `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
@@ -62,20 +62,24 @@ sources.
 
 ## Running it
 
-- **Test automation** (clean machine → build → every implemented scenario,
-  fully cold, per-scenario users/VMs): [test.md](test.md).
-- **Demo by hand** (prebuild once, then drive the deployed cluster manually,
+- **Test automation** (clean machine → build the design topology → every
+  implemented scenario against `amisad-vm-core`, each restoring its snapshot
+  as the state reset): [test.md](test.md).
+- **Demo by hand** (prebuild once, then drive the deployed topology manually,
   including the mobile app): [demo.md](demo.md).
-- **Guest usernames** (one per scenario + the build VM, and why):
-  [usernames.md](usernames.md).
+- **Hostnames + usernames** (per-VM `<hostname>-admin` + the `maya`/`elena`
+  demo personas, and why): [usernames.md](usernames.md).
 
-The build and runtime roles are separate VMs connected through the stash
-service (`yuruna-stash-service`), which keeps a durable record of each uploaded
-artifact: `amisad.build` compiles the workspace and uploads the binaries
-tarball (label `amisad-poc` / `amisad-binaries.tgz`); each scenario VM
-downloads it (`GET /api/stashes?username=amisad-poc&filename=amisad-binaries`),
-builds thin distroless images, deploys the ten services, and runs the scenario.
-`slice-runtime` and `buyer-client` run as bare prebuilt binaries.
+The lab builds the design topology
+([plan/design/01-overview.md](../plan/design/01-overview.md)):
+`amisad-vm-build` compiles the workspace and uploads the binaries tarball to
+the stash service (`yuruna-stash-service`, durable per-upload record);
+`amisad-vm-core` downloads it, builds thin distroless images, and deploys the
+ten services; `amisad-vm-edge-a`/`-b` are the stateless region slice VMs
+(`slice-runtime` delivered per scenario run over SSH). Scenarios run against
+`amisad-vm-core`, each restoring its snapshot as the state reset. Hostnames,
+per-VM `<hostname>-admin` accounts, and the `maya`/`elena` demo users are in
+[usernames.md](usernames.md).
 
 ## s001.fulfillment implementation notes
 
@@ -84,9 +88,10 @@ submits Maya's gift need as an opaque envelope; the coordinator verifies the
 token, gets a jurisdiction-checked placement, and dispatches envelope + offers
 to `slice-runtime`; the environment matches, attests its full lifecycle,
 emits the settlement instruction, and destroys itself; seller fulfillment
-confirms the four-way split on the hash-chained ledger. It runs across two VMs
-(build + scenario, connected through the stash service — see "Running it"
-above), asserting the full Target Verification Point at the end.
+confirms the four-way split on the hash-chained ledger. It spans the topology
+(amisad-vm-build → stash → amisad-vm-core, with slice-runtime on
+amisad-vm-edge-a — see "Running it" above), asserting the full Target
+Verification Point at the end.
 
 Deviations from the target design, deliberate and to be retired in later
 scenarios — the wire contracts (`contracts/openapi/`) are unchanged by all of
@@ -103,9 +108,10 @@ them:
 - **Logical ephemeral environments.** `slice-runtime` is a persistent edge
   process; each request runs one attested created→attested→executed→destroyed
   environment whose state drops at response time.
-- **Single-VM degraded mode.** With `edgeHost` unset, the scenario runs
-  slice-runtime on the scenario VM and says so; setting `edgeHost` (ssh target)
-  runs it on a real edge VM per the design topology.
+- **Real edge, degraded fallback.** slice-runtime runs on `amisad-vm-edge-a`
+  per the design topology (resolved via its status-server IP report); if the
+  edge is unreachable the scenario falls back to running it on vm-core and
+  says so.
 
 ## s002.fitting implementation notes
 

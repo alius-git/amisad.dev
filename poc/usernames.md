@@ -1,42 +1,55 @@
-# AmisAd POC — guest VM usernames
+# AmisAd POC — guest VM hostnames and usernames
 
-Guest usernames are **per scenario** (plus one for the build VM). The username
-is set as `variables.username` on the scenario's top-level sequence and
-cascades down its entire baseline chain (start.guest → amisad.k8s →
-amisad.core → scenario), so every VM tier of a scenario's chain — including the
-first baseline VM — is provisioned under that scenario's own user and password.
+Guest VMs follow the design topology ([plan/design/01-overview.md](../plan/design/01-overview.md)).
+Each VM's **hostname** is set with the Yuruna `hostname` sequence variable
+(cascades down the chain to provisioning, like `username`), and its initial
+**administrator** account is `<hostname>-admin`. Demo persona accounts are
+added as **non-administrators** (`adduser`, no sudo) on the VM that hosts
+their scenarios.
 
-**Why per-scenario.** A Yuruna disk snapshot bakes in exactly one guest
-account, and the base Ubuntu image forces a password rotation on first login —
-so two chains sharing a username (or a checkpoint) fight over one auth-vault
-entry. Per-scenario users make every scenario chain fully independent: no
-scenario depends on a checkpoint VM left by another, and each run is
-reproducible from a clean machine (see [test.md](test.md)).
-
-**Vault seeding (required once per new username).** Auto-generated vault
-passwords can contain characters (`@`, `^`, …) the GUI keystroke path mistypes,
-which fails first login. Before a username's first cold run, seed it
-keystroke-safe (letters+digits only), from `c:\git\yuruna` in pwsh:
+**Vault seeding (required once per username).** Auto-generated vault passwords
+can contain characters (`@`, `^`, …) the GUI keystroke path mistypes at first
+login. Seed every username keystroke-safe (letters+digits) before its first
+cold run, from `c:\git\yuruna` in `pwsh`:
 
 ```powershell
 Import-Module ./test/extension/authentication/default.psm1
 Set-Password -Username <name> -NewPassword '<alphanumeric>'
 ```
 
-## Usernames
+## VMs and administrators
 
-| Username | Owner | Function |
-|----------|-------|----------|
-| `yamisad-build` | `amisad.build` VM | Rust toolchain only; compiles the workspace and uploads the binaries tarball to the stash service. One build per test run; every scenario downloads the same artifact. |
-| `yamisad-s001` | s001.fulfillment chain → `amisad.s001.fulfillment` VM | Intent-driven edge match + automated fulfillment. |
-| `yamisad-s002` | s002.fitting chain → `amisad.s002.fitting` VM | Considered purchase, constraint fidelity, in-person booking. |
-| `yamisad-s003` … `yamisad-s010` | s003.silence … s010.certification chains | One per scenario, same pattern, as each is implemented. |
+| VM / hostname | Design node | Administrator | Function |
+|---------------|-------------|---------------|----------|
+| `amisad-vm-build` | build box (lab infra) | `amisad-vm-build-admin` | Rust toolchain only; compiles the workspace and uploads the binaries tarball to the stash service. Stopped after the build stage. |
+| `amisad-vm-core` | **vm-core** | `amisad-vm-core-admin` | Kubernetes + PostgreSQL + NATS + the ten deployed services. Scenarios run here over SSH; each restores the `amisad-vm-core` snapshot as its state reset. |
+| `amisad-vm-edge-a` | **vm-edge-a** (region A) | `amisad-vm-edge-a-admin` | Stateless slice VM; `slice-runtime` is delivered per scenario run over SSH from vm-core. Live during scenarios/demos. |
+| `amisad-vm-edge-b` | **vm-edge-b** (region B) | `amisad-vm-edge-b-admin` | Same, region B; provisioned per the topology but left stopped until `s004.failover` / `s009.suppression` need it. |
 
-Intermediate chain tiers (`amisad.k8s`, `amisad.core`) are transient: each
-scenario's chain mints them under its own user and consumes them via the
-snapshot renames, ending in the scenario's named VM. If a scenario's topology
-later adds VMs (e.g. the design's edge VMs), they take the owning scenario's
-username with a suffix (`yamisad-s004-edge-b`).
+The intermediate snapshot `amisad-vm-core-k8s` is transient (consumed by the
+deploy tier's rename). Admins get passwordless sudo and the harness SSH key at
+provisioning; after `start.guest`'s one OCR-driven first login, everything runs
+over SSH.
+
+## Demo users (non-administrators, on `amisad-vm-core`)
+
+| Username | Persona | Purpose |
+|----------|---------|---------|
+| `maya` | Maya, the buyer | Console/SSH login persona for the demo narrative; API (`curl`) steps work from her account. `buyer-client` itself runs from the admin account (the binaries live under the admin's 0750 home). |
+| `elena` | Elena, the seller | Console/SSH login persona for the seller narrative; the order-board `curl` steps work from her account. |
+
+Both are created by the vm-core deploy chain (`adduser --disabled-password`,
+then a vault-rendered `chpasswd` in a `sensitive: true` step) and are **not**
+in sudoers.
+
+## Core→edge access
+
+Scenario scripts on vm-core reach the edge VMs with a dedicated **demo
+keypair** (`amisad-demo-key`), generated host-side by `run-tests.ps1` under
+`test/status/handoff/` and fetched by the guests from the status server. The
+edges' boot-time IP reporter posts `<hostname>.ip.txt` there too, which is how
+vm-core resolves them without DNS. Lab deviation, deliberate: the handoff dir
+is readable on the trusted lab LAN.
 
 ---
 

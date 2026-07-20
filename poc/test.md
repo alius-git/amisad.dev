@@ -1,8 +1,8 @@
 # AmisAd POC — test automation
 
-Full automation from a **clean machine** (no pre-built VMs): build once, then
-run each implemented scenario in order, each fully cold under its own user.
-For running the demo by hand instead, see [demo.md](demo.md).
+Full automation from a **clean machine** (no pre-built VMs): build the design
+topology, then run each implemented scenario in order against it. For running
+the demo by hand instead, see [demo.md](demo.md).
 
 ## One-time setup
 
@@ -31,42 +31,47 @@ For running the demo by hand instead, see [demo.md](demo.md).
    Set-UserVaultKey -LogicalUser amisad-pat -VaultKey amisad-pat
    Set-Password -Username amisad-pat -NewPassword '<the PAT>'
    # One keystroke-safe (alphanumeric) password per username — see usernames.md:
-   Set-Password -Username yamisad-build -NewPassword '<alnum>'
-   Set-Password -Username yamisad-s001  -NewPassword '<alnum>'
-   Set-Password -Username yamisad-s002  -NewPassword '<alnum>'
+   Set-Password -Username amisad-vm-build-admin  -NewPassword '<alnum>'
+   Set-Password -Username amisad-vm-core-admin   -NewPassword '<alnum>'
+   Set-Password -Username amisad-vm-edge-a-admin -NewPassword '<alnum>'
+   Set-Password -Username amisad-vm-edge-b-admin -NewPassword '<alnum>'
+   Set-Password -Username maya  -NewPassword '<alnum>'
+   Set-Password -Username elena -NewPassword '<alnum>'
    ```
 
-   The vault is a local, gitignored file. Seed each `yamisad-sNNN` before its
-   scenario's first run ([usernames.md](usernames.md) explains why).
+   The vault is a local, gitignored file. Seed every new username before its
+   first cold run ([usernames.md](usernames.md) explains why).
 
 4. **Validate.** `test/Test-Config.ps1` from the `yuruna` folder.
 
 ## The automation model
 
-Every scenario is **independent and reproducible**: no scenario depends on a
-checkpoint VM left by another. Each scenario's `username` cascades down its
-whole baseline chain, so all its VM tiers are provisioned under that scenario's
-own user and password — which is exactly why chains cannot share checkpoints.
+The driver builds the design topology
+([plan/design/01-overview.md](../plan/design/01-overview.md)) and runs every
+scenario against the same `amisad-vm-core` — each scenario's opening restore of
+the `amisad-vm-core` snapshot **is** its state reset, so scenarios stay
+independent without per-scenario VMs. Hostnames are set with the framework's
+`hostname` variable; each VM's admin is `<hostname>-admin`
+([usernames.md](usernames.md)).
 
 ```
-[1] build, once per run (user yamisad-build):
-    start.guest -> amisad.build (rustup, bazelisk)
-      compiles the workspace, uploads amisad-binaries.tgz to the stash
-      service (durable, per-upload record), then the VM is stopped.
-
-[2] each scenario, in order, fully cold (user yamisad-sNNN):
-    start.guest -> amisad.k8s (Kubernetes + PostgreSQL + NATS)
-                -> amisad.core (python3; downloads binaries from the stash,
-                                deploys the 10 services)
-                -> scenario run + TVP asserts
-                -> VM renamed amisad.sNNN.<word>, left LIVE
-    The intermediate names are consumed by the renames, so the next
-    scenario's chain mints them fresh without collisions.
+[1] amisad-vm-build   start.guest -> build tools -> snapshot; compile run
+                      uploads amisad-binaries.tgz to the stash service; VM
+                      stopped afterwards.
+[2] amisad-vm-edge-a  start.guest -> demo key + IP reporter -> snapshot.
+    amisad-vm-edge-b  (provisioned one at a time: first-login OCR is only
+                      reliable with no other lab VM running)
+[3] amisad-vm-core    start.guest -> k8s + PostgreSQL + NATS (snapshot
+                      amisad-vm-core-k8s) -> binaries from the stash, deploy
+                      10 services, add maya/elena -> snapshot amisad-vm-core.
+[4] edge-a started; it reports its IP to the status server.
+[5] scenarios in order, each: restore amisad-vm-core -> drive over SSH
+    (sshWaitReady + sshFetchAndExecute; no OCR, so live edge VMs cannot
+    disturb it) -> full TVP asserts. slice-runtime runs on amisad-vm-edge-a.
 ```
 
-VM lifecycle: when a scenario passes, the **previous** scenario's VM is stopped
-(kept on disk for inspection) and the new one stays live; when a scenario
-fails, the run stops and its VM is left running for debugging.
+After `start.guest`'s one OCR-driven first login per VM, everything runs over
+SSH with the harness key and passwordless sudo.
 
 ## Run
 
@@ -77,18 +82,18 @@ poc\build\serve-local.ps1              # lab mode: publish HEAD to the status se
 pwsh poc\build\run-tests.ps1 -NoConfigGate
 ```
 
-`run-tests.ps1` removes every `amisad.*` and leftover `test-*` VM (enforcing
-the clean start), runs the build stage, then each scenario from its registry in
-order. Green ends with `ALL SCENARIOS PASSED`. Stage logs land under
-`%TEMP%\amisad-tests\`; watch live progress at `http://localhost:8080/status/`.
-Expect roughly 15 min for the build plus ~20 min per scenario, all cold.
+`run-tests.ps1` removes every amisad lab VM and leftover `test-*` VM
+(enforcing the clean start), generates the core→edge demo keypair if missing,
+builds the topology, then runs each scenario from its registry in order. Green
+ends with `ALL SCENARIOS PASSED`, leaving `amisad-vm-core` + `amisad-vm-edge-a`
+live as the demo environment. Stage logs land under `%TEMP%\amisad-tests\`;
+watch live progress at `http://localhost:8080/status/`. Expect ~15 min for the
+build, ~15 min per edge, ~20 min for vm-core, and a few minutes per scenario.
 
-**Headless runs.** GUI keystroke injection at first login is only reliable
-while a display is painting. For unattended runs, opt into the framework's
-virtual display once (`[Environment]::SetEnvironmentVariable(
-'YURUNA_VIRTUAL_DISPLAY','1','User')` — the driver then attaches it at run
-start, as the runner's cycle path does); otherwise keep an active console/RDP
-session on the host during the run.
+**Headless runs.** First-login GUI keystrokes are only reliable while a display
+is painting. For unattended runs, opt into the framework's virtual display once
+(`[Environment]::SetEnvironmentVariable('YURUNA_VIRTUAL_DISPLAY','1','User')`);
+otherwise keep an active console/RDP session on the host during provisioning.
 
 **Repo delivery.** In lab iteration mode (current), guests fetch the repo as a
 tarball of `amisad.dev` HEAD from the host status server — rerun
@@ -98,20 +103,18 @@ later) git-clones with the vault PAT in a `sensitive: true` step.
 ## Adding a scenario
 
 1. Implement the guest run script under `poc/test/ubuntu.server.24/`
-   (`ubuntu.server.24.workload.core.amisad.sNNN.<word>.sh`) and the sequence
-   under `poc/test/gui/`. Start from the parked skeleton in
-   `poc/test/gui-parked/` but rework it for the core tier — compare the s001
-   pair: rename the file `...k8s.amisad.sNNN...` → `...core.amisad.sNNN...`,
-   chain to `...core.amisad.baseline`, change `requiresSnapshot.id` and the
-   first `loadDiskSnapshot` from `amisad.k8s` to `amisad.core` (a leftover
-   `amisad.k8s` restore SUCCEEDS silently and rolls back the deployed
-   cluster), drop the skeleton deploy step (the core baseline already
-   deploys), point the run step at the new script, set
-   `username: yamisad-sNNN`, and end with `saveDiskSnapshot` +
-   `loadDiskSnapshot` of `amisad.sNNN.<word>`. Delete the parked original.
-2. Seed `yamisad-sNNN` keystroke-safe in the vault (setup step 3).
-3. Append the sequence + final VM name to the `$Scenarios` registry in
+   (`ubuntu.server.24.amisad-vm-core.sNNN.<word>.sh`) and the sequence under
+   `poc/test/gui/`. Start from the s001/s002 pair: chain to
+   `...amisad-vm-core.deploy`, `requiresSnapshot`/`loadDiskSnapshot`
+   `amisad-vm-core`, `username: amisad-vm-core-admin`,
+   `hostname: amisad-vm-core`, then `sshWaitReady` + `sshFetchAndExecute` the
+   script + `saveSystemDiagnostic`. (The parked skeletons under
+   `poc/test/gui-parked/` predate this model — rework, don't copy: their
+   `amisad.k8s` restore and skeleton deploy step must not survive.)
+2. Append the sequence name to the `$Scenarios` registry in
    `poc/build/run-tests.ps1`.
+3. If the scenario needs region B, start `amisad-vm-edge-b` in the driver
+   (mirroring the edge-a start) — its VM is already provisioned.
 4. Update [usernames.md](usernames.md) and this file if the pattern changes.
 
 ---

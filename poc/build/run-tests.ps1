@@ -8,16 +8,21 @@
 .PROJECTURI https://amisad.com
 #>
 
-# AmisAd POC test automation driver (see poc/test.md). From a clean machine:
-#   [0] remove every amisad.* VM and leftover test-* VM (fresh, reproducible run)
-#   [1] build stage once: amisad.build compiles + uploads binaries to the stash,
-#       then the build VM is stopped (a second live console steals GUI keystroke
-#       focus during the next VM's first login)
-#   [2] each scenario in order, fully cold: its chain provisions every tier under
-#       the scenario's own user (poc/usernames.md), downloads the binaries from
-#       the stash, deploys, runs, and leaves a live VM named amisad.sNNN.<word>.
-#       On pass the PREVIOUS scenario's VM is stopped (kept on disk); the latest
-#       stays live. On fail the run stops and the VM is left live for debugging.
+# AmisAd POC test automation driver (see poc/test.md). From a clean machine it
+# builds the design topology (plan/design/01-overview.md) and runs every
+# implemented scenario against it:
+#   [0] remove every amisad lab VM (old and new naming) + leftover test-* VMs
+#       AND their storage dirs; ensure the core->edge demo keypair exists
+#   [1] amisad-vm-build: compile + upload binaries to the stash, then stop it
+#   [2] amisad-vm-edge-a and amisad-vm-edge-b: provision + snapshot (each chain
+#       runs solo - first-login OCR is only reliable with no other lab VM up)
+#   [3] amisad-vm-core: k8s + deploy + demo users, snapshot amisad-vm-core
+#   [4] start amisad-vm-edge-a and wait for its IP report (edge-b stays off
+#       until s004/s009 need region B)
+#   [5] each scenario in order: restore amisad-vm-core (the per-scenario state
+#       reset) and drive it over SSH - concurrent edge VMs cannot disturb SSH
+#       stages. On fail the run stops and everything is left up for debugging.
+# Green leaves amisad-vm-core + amisad-vm-edge-a live as the demo environment.
 # Must run ELEVATED (Hyper-V). Stage logs land under -LogDir.
 #requires -RunAsAdministrator
 param(
@@ -32,15 +37,15 @@ New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 # Ordered scenario registry: append here as scenarios are implemented (test.md).
 $Scenarios = @(
-    @{ Sequence = 'workload.guest.ubuntu.server.24.core.amisad.s001.fulfillment'; FinalVm = 'amisad.s001.fulfillment' }
-    @{ Sequence = 'workload.guest.ubuntu.server.24.core.amisad.s002.fitting'; FinalVm = 'amisad.s002.fitting' }
+    'workload.guest.ubuntu.server.24.amisad-vm-core.s001.fulfillment'
+    'workload.guest.ubuntu.server.24.amisad-vm-core.s002.fitting'
 )
 
 function Stop-LabConsole {
     # Only LAB consoles: a live vmconnect can steal GUI keystroke focus during a
     # VM's first login, but operator consoles to unrelated VMs must be left alone.
     Get-Process vmconnect -ErrorAction SilentlyContinue |
-        Where-Object { $_.MainWindowTitle -match 'amisad\.|test-' } |
+        Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
         Stop-Process -Force -ErrorAction SilentlyContinue
 }
 
@@ -84,13 +89,9 @@ function Remove-LabVM {
     }
 }
 
-# Headless keystroke/OCR reliability: the runner's cycle path attaches the
-# opt-in virtual display (usbmmidd) via Initialize-HostDisplay, but
-# Test-Sequence does not - and without a painting display, GUI keystroke
-# injection at first login silently mistypes (observed: 'Login incorrect'
-# with a correct vault password whenever DWM is not painting). Attach it here
-# the same way the runner does; the framework no-ops unless
-# YURUNA_VIRTUAL_DISPLAY is truthy (see poc/test.md).
+# Headless keystroke/OCR reliability for the cold provisioning chains: attach
+# the opt-in virtual display the way the runner's cycle path does (no-op unless
+# YURUNA_VIRTUAL_DISPLAY is truthy - see poc/test.md).
 Import-Module (Join-Path $YurunaRoot 'test\modules\Test.HostCondition.psm1') -Force -DisableNameChecking -ErrorAction SilentlyContinue
 if (Get-Command Initialize-HostDisplay -ErrorAction SilentlyContinue) {
     Initialize-HostDisplay -HostType 'host.windows.hyper-v'
@@ -108,47 +109,82 @@ if (Test-Path $runnerPidFile) {
 }
 
 # --- [0] clean start: a test run assumes and enforces "no pre-built VMs" ---
-# Sweep registered lab VMs AND the known lab names (covers storage dirs stranded
-# by a prior run whose VM is already unregistered).
-$labVms = @(Hyper-V\Get-VM | Where-Object { $_.Name -like 'amisad.*' -or $_.Name -like 'test-*' } | ForEach-Object Name)
-$labVms += @('amisad.build', 'amisad.k8s', 'amisad.core') + @($Scenarios | ForEach-Object { $_.FinalVm })
+# Sweep registered lab VMs (current amisad-vm-* and legacy amisad.* names) AND
+# the known names, covering storage dirs stranded by a prior run.
+$topologyVms = @('amisad-vm-build', 'amisad-vm-edge-a', 'amisad-vm-edge-b', 'amisad-vm-core', 'amisad-vm-core-k8s')
+$labVms = @(Hyper-V\Get-VM |
+    Where-Object { $_.Name -like 'amisad-vm-*' -or $_.Name -like 'amisad.*' -or $_.Name -like 'test-*' } |
+    ForEach-Object Name)
+$labVms += $topologyVms
 foreach ($vmName in ($labVms | Sort-Object -Unique)) { Remove-LabVM -Name $vmName }
 Stop-LabConsole
 
+# Core->edge demo keypair, served to guests from the status server's handoff
+# dir (lab-trusted LAN; see poc/usernames.md). Generated once per host.
+$handoff = Join-Path $YurunaRoot 'test\status\handoff'
+New-Item -ItemType Directory -Force -Path $handoff | Out-Null
+$demoKey = Join-Path $handoff 'amisad-demo-key'
+if (-not (Test-Path $demoKey)) {
+    Write-Host "Generating the core->edge demo keypair."
+    # -N '' (a true empty argument): under pwsh 7's Standard native passing,
+    # -N '""' would create a key ENCRYPTED with the literal passphrase "".
+    ssh-keygen -t ed25519 -N '' -C 'amisad-demo' -f $demoKey | Out-Host
+}
+
 # --- [1] build once: compile + upload binaries to the stash ---
-if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.build.amisad.compile') -ne 0) {
+if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-vm-build.compile') -ne 0) {
     Write-Error "Build stage failed; no binaries in the stash - stopping."
     exit 1
 }
-Hyper-V\Stop-VM -Name 'amisad.build' -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
-Write-Output "amisad.build stopped (kept on disk)."
+Hyper-V\Stop-VM -Name 'amisad-vm-build' -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
+Write-Host "amisad-vm-build stopped (kept on disk)."
 
-# --- [2] scenarios, in order, each fully cold under its own user ---
-$previousVm = $null
-foreach ($s in $Scenarios) {
-    # A partial prior failure can strand an intermediate tier; a stranded
-    # amisad.k8s/amisad.core carries the WRONG user for this scenario and would
-    # also collide with this chain's saveDiskSnapshot renames. Clear them.
-    Remove-LabVM -Name 'amisad.k8s'
-    Remove-LabVM -Name 'amisad.core'
-    # Stop the previous scenario's VM BEFORE this chain starts: first login is
-    # only reliable when the provisioning VM is the sole lab VM running
-    # (observed across every pass/fail: a concurrently running lab VM breaks
-    # the GUI keystroke path). It stays on disk; the LAST scenario's VM is
-    # still left live at the end, and a failed scenario's VM stays live.
-    if ($previousVm) {
-        Write-Host "Stopping previous scenario VM $previousVm (kept on disk) before the next chain."
-        Hyper-V\Stop-VM -Name $previousVm -Force -Confirm:$false -ErrorAction SilentlyContinue
-    }
-    $name = ($s.FinalVm -replace '^amisad\.', '')
-    if ((Invoke-Stage -Name $name -Sequence $s.Sequence) -ne 0) {
-        Write-Error "Scenario $($s.FinalVm) FAILED - stopping the run; its VM is left as-is for debugging."
+# --- [2] edge VMs: provision + snapshot, one at a time (chains end stopped) ---
+foreach ($edge in 'amisad-vm-edge-a', 'amisad-vm-edge-b') {
+    if ((Invoke-Stage -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline") -ne 0) {
+        Write-Error "$edge provisioning failed - stopping."
         exit 1
     }
-    $previousVm = $s.FinalVm
 }
 
-Write-Output "ALL SCENARIOS PASSED. Latest scenario VM left live: $previousVm"
-Write-Output "--- final VM inventory ---"
-(Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Output
+# --- [3] vm-core: k8s + deploy + demo users (cold chain, solo) ---
+if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-vm-core.deploy') -ne 0) {
+    Write-Error "amisad-vm-core deploy failed - stopping."
+    exit 1
+}
+
+# --- [4] start the region-A edge and wait for its IP report ---
+Write-Host "Starting amisad-vm-edge-a (edge-b stays off until s004/s009)."
+# The log-upload sink writes under YURUNA_LOG_DIR when overridden; resolve the
+# same way the server does, and anchor freshness to THIS start (a stale file
+# from a prior run/boot must not count).
+$logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test\status\log' }
+$edgeIpFile = Join-Path $logRoot 'handoff\amisad-vm-edge-a.ip.txt'
+Remove-Item -LiteralPath $edgeIpFile -Force -ErrorAction SilentlyContinue
+$edgeStart = Get-Date
+Hyper-V\Start-VM -Name 'amisad-vm-edge-a' -ErrorAction SilentlyContinue
+$edgeDeadline = (Get-Date).AddMinutes(6)
+$edgeReady = $false
+while ((Get-Date) -lt $edgeDeadline) {
+    if ((Test-Path $edgeIpFile) -and ((Get-Item $edgeIpFile).LastWriteTime -gt $edgeStart)) {
+        $edgeReady = $true; break
+    }
+    Start-Sleep -Seconds 10
+}
+if (-not $edgeReady) {
+    Write-Warning "amisad-vm-edge-a IP report not seen; scenarios will use the single-VM degraded fallback."
+}
+
+# --- [5] scenarios, in order, each restoring amisad-vm-core over SSH ---
+foreach ($s in $Scenarios) {
+    $name = ($s -split '\.')[-2..-1] -join '.'
+    if ((Invoke-Stage -Name $name -Sequence $s) -ne 0) {
+        Write-Error "Scenario $s FAILED - stopping the run; VMs are left as-is for debugging."
+        exit 1
+    }
+}
+
+Write-Host "ALL SCENARIOS PASSED. Demo environment live: amisad-vm-core + amisad-vm-edge-a."
+Write-Host "--- final VM inventory ---"
+(Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Host
 exit 0

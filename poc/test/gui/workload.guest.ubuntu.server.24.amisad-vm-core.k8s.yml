@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - vm-core infrastructure tier: Ubuntu Server (hostname
+# amisad-vm-core, admin amisad-vm-core-admin) + Kubernetes + PostgreSQL + NATS,
+# snapshotted as the intermediate "amisad-vm-core-k8s" (consumed by the deploy
+# tier's rename to amisad-vm-core). Only start.guest uses OCR; everything after
+# runs over SSH.
+
+# Perf-log identity. Bump revision on step add/remove.
+# Rev 3: amisad-vm-* convention (hostname parameter + <hostname>-admin user);
+# post-provision steps moved from OCR login/typing to SSH.
+sequenceGuid: 42098986-ed31-41e5-ac09-1e50119cc209
+sequenceRevision: 3
+
+description: "Ubuntu Server: provision amisad-vm-core (admin amisad-vm-core-admin), install Kubernetes + PostgreSQL + NATS over SSH, snapshot amisad-vm-core-k8s."
+baseline:
+  ubuntu.server.24:
+    - start.guest.ubuntu.server.24
+variables:
+  # Per-VM admin (see usernames.md); the hostname is the design node name and
+  # is baked at provision time for the whole vm-core lineage.
+  username: amisad-vm-core-admin
+  hostname: amisad-vm-core
+
+steps:
+  - action: sshWaitReady
+    timeoutSeconds: 300
+    description: "SSH up after the start.guest reboot"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh guest/ubuntu.server.24/ubuntu.server.24.k8s.sh"
+    timeoutSeconds: 1800
+    description: "ubuntu.server.24.k8s.sh (install Kubernetes)"
+
+  - action: sshExec
+    command: "kubectl wait --for=condition=Ready nodes --all --timeout=300s"
+    timeoutSeconds: 360
+    description: "Wait for the node to be Ready"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-core.db.sh"
+    timeoutSeconds: 900
+    description: "AmisAd database bring-up (install PostgreSQL, create amisad DB, load schema.sql)"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-core.nats.sh"
+    timeoutSeconds: 600
+    description: "Install NATS JetStream as a host systemd service"
+
+  - action: saveDiskSnapshot
+    id: "amisad-vm-core-k8s"
+    description: "Snapshot the vm-core infrastructure tier"

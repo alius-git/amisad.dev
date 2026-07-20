@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - vm-core deploy tier: restore the amisad-vm-core-k8s
+# infrastructure snapshot, download the prebuilt binaries from the stash
+# service (uploaded by amisad-vm-build), deploy the ten services, add the
+# non-admin demo users (maya, elena) with vault-managed passwords plus the
+# core->edge demo SSH key, then snapshot as "amisad-vm-core". Every scenario
+# restores this snapshot - that restore IS the per-scenario state reset.
+
+# Perf-log identity. Bump revision on step add/remove.
+# Rev 2: amisad-vm-* convention; SSH-driven; demo users step added.
+sequenceGuid: 4244dd04-5c0e-4b7d-9f3a-2e8d47c60a44
+sequenceRevision: 2
+
+description: "AmisAd amisad-vm-core: restore amisad-vm-core-k8s, download binaries from the stash, deploy 10 services, add maya/elena + demo key, snapshot amisad-vm-core."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.amisad-vm-core.k8s
+requiresSnapshot:
+  id: "amisad-vm-core-k8s"
+variables:
+  username: amisad-vm-core-admin
+  hostname: amisad-vm-core
+  # Stash-service VM the binaries are pulled from (yuruna-stash-service).
+  stashHost: "192.168.7.222"
+
+steps:
+  - action: loadDiskSnapshot
+    id: "amisad-vm-core-k8s"
+    description: "Restore the vm-core infrastructure tier"
+
+  - action: sshWaitReady
+    timeoutSeconds: 300
+    description: "SSH up after the restore"
+
+  - action: sshFetchAndExecute
+    command: "STASH_HOST='${stashHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-core.deploy.sh"
+    timeoutSeconds: 3600
+    description: "Add python3, download binaries from the stash, build images, deploy 10 services"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-vm-core.users.sh"
+    timeoutSeconds: 300
+    description: "Add non-admin demo users (maya, elena) + install the core->edge demo SSH key"
+
+  # Passwords via sshExec, the ssh action with sensitive masking in its
+  # handler (sshFetchAndExecute ignores 'sensitive'; vault plaintext must not
+  # ride an unmasked command line).
+  - action: sshExec
+    command: "printf 'maya:%s\\nelena:%s\\n' '${ext:authentication.GetPassword(maya)}' '${ext:authentication.GetPassword(elena)}' | sudo chpasswd"
+    timeoutSeconds: 120
+    sensitive: true
+    description: "Set the demo users' vault-managed passwords"
+
+  - action: saveDiskSnapshot
+    id: "amisad-vm-core"
+    description: "Snapshot the deployed AmisAd vm-core"
