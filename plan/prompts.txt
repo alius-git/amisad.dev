@@ -255,11 +255,11 @@ Test automation steps should work and assume that the test will build from a cle
 
 Ask any questions ahead of implementation of the doc and any possible automation changes.
 
--- Part 5
+==== Coding - Scenario-002
 
 Commit and push, and automate s002. Ask any questions before implementation. Test from cold start.
 
--- Part 6
+-- Follow-up
 
 Now that both s001 and s002 succeed, the next goal is:
 
@@ -272,3 +272,7 @@ Now that both s001 and s002 succeed, the next goal is:
 - All end-to-end test should start from a clean machine. Delete previous
 
 Ask any question before starting implementation.
+
+==== Coding - Scenario-003
+
+Proceed with the implementation of S003, following the established approach for VM setup defined in the "Deployment topology" and having the administrator add new users. Create the test sequence and execute it on clean VMs, validating all scenarios implemented so far in sequence (S001, S002, and S003). Finally, update poc/demo.md with comprehensive yet concise instructions. Please ask any clarifying questions before starting implementation.
