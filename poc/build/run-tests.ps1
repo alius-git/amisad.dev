@@ -84,6 +84,18 @@ function Remove-LabVM {
     }
 }
 
+# Headless keystroke/OCR reliability: the runner's cycle path attaches the
+# opt-in virtual display (usbmmidd) via Initialize-HostDisplay, but
+# Test-Sequence does not - and without a painting display, GUI keystroke
+# injection at first login silently mistypes (observed: 'Login incorrect'
+# with a correct vault password whenever DWM is not painting). Attach it here
+# the same way the runner does; the framework no-ops unless
+# YURUNA_VIRTUAL_DISPLAY is truthy (see poc/test.md).
+Import-Module (Join-Path $YurunaRoot 'test\modules\Test.HostCondition.psm1') -Force -DisableNameChecking -ErrorAction SilentlyContinue
+if (Get-Command Initialize-HostDisplay -ErrorAction SilentlyContinue) {
+    Initialize-HostDisplay -HostType 'host.windows.hyper-v'
+}
+
 # Refuse to sweep VMs out from under an active Yuruna runner.
 $runnerPidFile = Join-Path $YurunaRoot 'test\status\runtime\runner.pid'
 if (Test-Path $runnerPidFile) {

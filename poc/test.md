@@ -81,7 +81,14 @@ pwsh poc\build\run-tests.ps1 -NoConfigGate
 the clean start), runs the build stage, then each scenario from its registry in
 order. Green ends with `ALL SCENARIOS PASSED`. Stage logs land under
 `%TEMP%\amisad-tests\`; watch live progress at `http://localhost:8080/status/`.
-Expect roughly 25 min for the build plus about an hour per scenario, all cold.
+Expect roughly 15 min for the build plus ~20 min per scenario, all cold.
+
+**Headless runs.** GUI keystroke injection at first login is only reliable
+while a display is painting. For unattended runs, opt into the framework's
+virtual display once (`[Environment]::SetEnvironmentVariable(
+'YURUNA_VIRTUAL_DISPLAY','1','User')` — the driver then attaches it at run
+start, as the runner's cycle path does); otherwise keep an active console/RDP
+session on the host during the run.
 
 **Repo delivery.** In lab iteration mode (current), guests fetch the repo as a
 tarball of `amisad.dev` HEAD from the host status server — rerun
