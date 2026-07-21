@@ -97,7 +97,7 @@ for svc in $SERVICES; do
 done
 
 echo "== expose NodePorts for host/edge access =="
-declare -A NP=( [fabric-coordinator]=30080 [ledger-svc]=30081 [resource-svc]=30082 [seller-svc]=30083 [identity-mock]=30084 [insights-svc]=30085 [platform-svc]=30086 )
+declare -A NP=( [fabric-coordinator]=30080 [ledger-svc]=30081 [resource-svc]=30082 [seller-svc]=30083 [identity-mock]=30084 [insights-svc]=30085 [platform-svc]=30086 [ads-svc]=30087 [connect-svc]=30088 )
 for svc in "${!NP[@]}"; do
     kubectl -n amisad patch svc "$svc" -p \
         "{\"spec\":{\"type\":\"NodePort\",\"ports\":[{\"port\":8080,\"targetPort\":8080,\"nodePort\":${NP[$svc]}}]}}"

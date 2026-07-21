@@ -14,7 +14,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `contracts/` | OpenAPI specs per service — real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest — + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
-| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001.fulfillment, s002.fitting, and s003.silence paths |
+| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001–s007 buyer, delegate, and campaign paths |
 | `components/apps/buyer-flutter/` | Flutter buyer app (Android side-loaded) |
 | `components/apps/web-spa/` | React + TS + Vite shell, 7 role-scoped module routes |
 | `components/lib/amisad-common/` | Shared config/health plumbing crate |
@@ -22,7 +22,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment, s002.fitting, s003.silence, s004.failover |
+| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment … s007.inventory |
 | `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 | `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
@@ -54,7 +54,7 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **Sequences deploy then verify `/health` only** (scenarios s005–s010,
+- **Sequences deploy then verify `/health` only** (scenarios s008–s010,
   parked under `test/gui-parked/`). Each parked skeleton still targets the
   k8s tier; the rework needed to activate one is the checklist in
   [test.md](test.md). The real steps are enumerated as TODO blocks pointing
@@ -175,6 +175,54 @@ completes the match with exactly one settlement — hosting revenue for the
 completed environment only. Tom escalates the systemic pattern to Priya:
 platform-svc's first real surface, a cross-party incident case linking both
 aborted lifecycles by environment id only.
+
+## s005.attribution implementation notes
+
+s005.attribution turns ads-svc real and proves attribution survives without
+tracking. Marcel creates a campaign and a creative brief; Kai produces an
+approved asset; Marcel activates it. The coordinator fetches active campaigns
+for the region and passes them INTO the sealed environment, where slice-runtime
+boosts a qualifying offer with the creative (logged in the environment
+ingress log) - the creative is rendered inside the environment, never outside.
+On accept, the booking settles a 5-way split: seller/network/platform from the
+offer price as before, plus agency + creator credit funded by the campaign's
+per-match commitment ON TOP of the price (seller revenue unchanged). ads-svc
+records the attribution, decrements the budget by the commitment (not
+impressions), and serves aggregate-only agency/creator dashboards. The TVP
+asserts non-zero agency+creator credit referencing campaign+asset ids,
+dashboard/ledger consistency, the creative in ingress, and zero buyer signal
+on the campaign side.
+
+## s006.mandate implementation notes
+
+s006.mandate adds delegated authority. Maya grants Pat a scoped mandate
+(category, per-item cap, expiry) recorded on the consent ledger as a third
+grant type ('mandate') and held in the coordinator for scope. Pat's delegate
+workspace shows Maya as principal. An in-scope, under-cap need closes on Pat's
+authority with dual attribution (actor Pat, principal Maya, mandate ref) on
+Maya's activity trail; an over-cap match is HELD - the closing exists only
+after Maya's recorded approval; an out-of-scope category is refused at
+submission (scope is fabric-enforceable, so it is checked before any
+environment - zero environments, zero ledger entries); and revocation clears
+the delegate workspace and fails every subsequent delegated attempt
+immediately. Booking is generalized to accept a plain accept (no fitting
+slot).
+
+## s007.inventory implementation notes
+
+s007.inventory turns connect-svc real and makes external truth govern
+matching. Alex registers as a partner (sandbox only) and certifies a
+connector; Elena grants scoped credentials (catalog, inventory, orders) capped
+to exactly that scope. The connector syncs the ERP catalog into Elena's tenant
+and an inventory delta that zeroes the last unit of an item - a zeroed offer
+leaves the matchable catalog (seller-svc per-offer stock), so a buyer need
+matches only the in-stock alternative even though the zeroed item was cheaper.
+Order-lifecycle events mirror to the ERP idempotently (a replayed delivery is
+a no-op); an out-of-scope call is refused on credential scope and logged with
+nothing returned; and revocation kills the credentials while Elena's catalog
+stays intact. No buyer identity or need content crosses the integration
+surface. The seller->connect order webhook is a detached best-effort thread,
+like the offer-published event.
 
 ---
 

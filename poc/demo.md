@@ -165,6 +165,61 @@ curl -s -X POST http://$NODE_IP:30086/v1/incidents -d '{"summary":"systemic isol
 curl -s http://$NODE_IP:30086/v1/incidents/<case_id>                # links both aborted lifecycles
 ```
 
+**s005.attribution** — Marcel (agency) and Kai (creator) run the ad economy;
+Maya's need matches Elena's offer boosted with Kai's creative, and attribution
+splits between agency and creator without any buyer tracking. Fresh snapshot
+recommended (settlement/attribution totals assume a clean ledger):
+
+```bash
+curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
+# Marcel: campaign + brief; Kai: asset; Marcel: activate (capture the ids):
+CAMP=$(curl -sf -X POST http://$NODE_IP:30087/v1/campaigns -d '{"tenant":"elena-atelier","region":"region-a","category":"housewares","ad_cents_per_match":2000,"budget_cents":10000}')
+curl -sf -X POST http://$NODE_IP:30087/v1/briefs -d '{"campaign_id":"<campaign_id>"}'
+curl -sf http://$NODE_IP:30087/v1/briefs                              # Kai's demand queue
+ASSET=$(curl -sf -X POST http://$NODE_IP:30087/v1/assets -d '{"campaign_id":"<campaign_id>","creator":"kai","creative":"summer-hero-01"}')
+curl -sf -X POST http://$NODE_IP:30087/v1/campaigns/activate -d '{"campaign_id":"<campaign_id>","asset_id":"<asset_id>"}'
+# Maya: her need's shortlist carries the creative; she accepts (no slot):
+target/release/buyer-client campaign                                  # -> handle + boosted shortlist
+target/release/buyer-client book <handle> serving-set-01             # -> boosted:true
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'
+curl -s http://$NODE_IP:30081/v1/settlements/match/<id>              # agency 1200 + creator 800
+curl -s http://$NODE_IP:30087/v1/attributions                        # aggregate agency/creator totals, no buyer data
+```
+
+**s006.mandate** — Maya delegates household buying to Pat under a scoped
+mandate; in-scope closes on Pat's authority, over-cap routes to Maya, and
+revocation is instant:
+
+```bash
+curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":false}'
+curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"premium-vase-06","tenant":"elena-atelier","title":"Premium crystal vase","category":"housewares","region":"region-a","price_cents":18000,"deliver_by_days":10,"auto_close":false,"attributes":["premium"]}'
+target/release/buyer-client grant-mandate pat housewares 14000        # Maya grants; per-item cap 14000
+target/release/buyer-client workspace pat                             # Pat sees Maya as principal
+target/release/buyer-client delegate-need pat housewares 12000        # under cap -> committed
+target/release/buyer-client activity                                  # dual attribution on Maya's trail
+target/release/buyer-client delegate-need pat housewares 20000 premium  # over cap -> held-for-approval
+target/release/buyer-client approve <handle>                         # Maya approves -> committed
+target/release/buyer-client delegate-need pat dresses 20000          # out of scope -> refused (no environment)
+target/release/buyer-client revoke-mandate pat                       # revoke -> workspace clears, next attempt fails
+```
+
+**s007.inventory** — Alex (integration partner) connects Elena's ERP;
+inventory truth governs matching, order state mirrors to the ERP, and the
+credential scope is a hard ceiling:
+
+```bash
+PID=$(curl -sf -X POST http://$NODE_IP:30088/v1/partners -d '{"name":"alex-erp"}')    # sandbox only
+curl -sf -X POST http://$NODE_IP:30088/v1/partners/certify -d '{"partner_id":"<partner_id>"}'
+CRED=$(curl -sf -X POST http://$NODE_IP:30088/v1/grants -d '{"tenant":"elena-atelier","partner_id":"<partner_id>","scopes":["catalog","inventory","orders"]}')
+curl -sf -X POST http://$NODE_IP:30088/v1/sync/catalog -d '{"credential":"<cred>","offers":[{"offer_id":"erp-lamp-01","tenant":"elena-atelier","title":"ERP table lamp","category":"housewares","region":"region-a","price_cents":8000,"deliver_by_days":5,"auto_close":true},{"offer_id":"erp-clock-02","tenant":"elena-atelier","title":"ERP wall clock","category":"housewares","region":"region-a","price_cents":9000,"deliver_by_days":5,"auto_close":true}]}'
+curl -sf -X POST http://$NODE_IP:30088/v1/sync/inventory -d "{\"credential\":\"<cred>\",\"offer_id\":\"erp-lamp-01\",\"stock\":0,\"delta_ts\":$(date +%s)}"   # zero the cheaper lamp
+target/release/buyer-client submit                                    # matches erp-clock-02 (in stock), not the zeroed lamp
+curl -s http://$NODE_IP:30088/v1/erp/orders/<match_id>               # ERP mirror follows the order state
+curl -s -X POST http://$NODE_IP:30088/v1/query -d '{"credential":"<cred>","resource":"settlement"}'  # 403: out of scope, logged
+curl -s -X POST http://$NODE_IP:30088/v1/grants/revoke -d '{"credential":"<cred>"}'                  # revoke -> next sync 401
+```
+
 **Mobile (manual demo):** build and side-load the buyer app against the VM's
 LAN address, state a need on the needs screen, and refresh its status while
 advancing the order as above:

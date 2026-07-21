@@ -31,7 +31,8 @@ paths:
                 type: object
                 properties:
                   service: { type: string }
-                  version: { type: string }  /v1/incidents:
+                  version: { type: string }
+  /v1/incidents:
     post:
       summary: "Open a cross-party incident case linking environment lifecycles (body: summary, from, environment_ids[])"
       requestBody:

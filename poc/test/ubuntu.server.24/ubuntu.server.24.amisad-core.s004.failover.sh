@@ -35,7 +35,7 @@ SELLER="http://${NODE_IP}:30083"
 PLATFORM="http://${NODE_IP}:30086"
 
 echo "== wait for the NodePort services to actually answer (post-restore) =="
-for port in 30080 30081 30082 30083 30084 30085 30086; do
+for port in 30080 30081 30082 30083 30084 30085 30086 30087 30088; do
     for _ in $(seq 1 60); do
         if curl -sf "http://${NODE_IP}:${port}/health" >/dev/null 2>&1; then break; fi
         sleep 5

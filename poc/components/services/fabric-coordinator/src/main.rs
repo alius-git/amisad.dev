@@ -31,11 +31,39 @@ struct OpenNeed {
     handle: String,
 }
 
+/// A delegated-authority mandate (s006.mandate): Maya (principal) grants Pat
+/// (delegate) closing authority in a scope. Scope lives here; the immutable
+/// grant/revoke history lives on the consent ledger.
+struct Mandate {
+    principal: String, // subject hash
+    delegate: String,  // subject hash
+    category: String,
+    per_item_cents: i64,
+    expiry_ts: i64,
+    revoked: bool,
+}
+
+/// An over-cap match awaiting the principal's approval (s006 step 5): the
+/// offer is chosen but NOTHING commits until Maya approves.
+struct Held {
+    handle: String,
+    principal: String,
+    delegate: String,
+    environment_id: String,
+    offer_id: String,
+    tenant: String,
+    price_cents: i64,
+    need_context: String,
+}
+
 struct State {
     orders: Vec<(String, String)>, // (handle, match_id)
     shortlists: Vec<Shortlist>,
     notifications: Vec<(String, String)>, // (handle, kind), in delivery order
     open_needs: Vec<OpenNeed>,
+    mandates: Vec<Mandate>,
+    held: Vec<Held>,
+    activity: Vec<(String, json::Json)>, // (principal subject, entry) - Maya's trail
 }
 
 fn identity_url() -> String {
@@ -49,6 +77,9 @@ fn seller_url() -> String {
 }
 fn ledger_url() -> String {
     std::env::var("LEDGER_URL").unwrap_or_else(|_| String::from("http://ledger-svc:8080"))
+}
+fn ads_url() -> String {
+    std::env::var("ADS_URL").unwrap_or_else(|_| String::from("http://ads-svc:8080"))
 }
 
 fn handle_for(match_id: &str) -> String {
@@ -173,11 +204,28 @@ fn attempt_match(
         Err(e) => return Err(Response::error(503, &format!("seller unavailable: {e}"))),
     };
 
-    // 3. The envelope and offers travel INTO the environment.
+    // 3. Active campaigns for this region are public and travel in with the
+    // offers (s005.attribution). The coordinator never sees the need category
+    // (sealed), so the environment picks the campaign that fits.
+    let campaigns = match request(
+        "GET",
+        &format!("{}/v1/campaigns/region/{jurisdiction}", ads_url()),
+        None,
+    ) {
+        Ok((200, text)) => json::parse(&text)
+            .ok()
+            .and_then(|c| c.get("campaigns").cloned())
+            .unwrap_or_else(|| json::arr(Vec::new())),
+        // Ads are non-critical: a missing campaign feed just means no boost.
+        _ => json::arr(Vec::new()),
+    };
+
+    // 4. The envelope, offers, and campaigns travel INTO the environment.
     let dispatch = json::obj(vec![
         ("jurisdiction", json::s(jurisdiction)),
         ("envelope", json::s(envelope)),
         ("offers", offers),
+        ("campaigns", campaigns),
     ])
     .dump();
     // An aborted environment (isolation fault, s004.failover) retries
@@ -328,6 +376,97 @@ fn run_cycle(state: &mut State) -> i64 {
         }
     }
     matched
+}
+
+/// Record a consent-ledger entry (s006 mandates ride the same chain as buyer
+/// consents). Returns the entry hash.
+fn record_consent(entry: &json::Json) -> Result<String, Response> {
+    match request(
+        "POST",
+        &format!("{}/v1/consents", ledger_url()),
+        Some(&entry.dump()),
+    ) {
+        Ok((201, text)) => Ok(json::parse(&text)
+            .ok()
+            .and_then(|r| r.str_of("hash").map(|h| h.to_string()))
+            .unwrap_or_default()),
+        Ok((status, body)) => Err(Response::error(502, &format!("consent record ({status}): {body}"))),
+        Err(e) => Err(Response::error(503, &format!("ledger unavailable: {e}"))),
+    }
+}
+
+/// Commit a delegated match: settlement instruction, seller order, dual
+/// attribution on the principal's activity trail. `via` is "delegate" (Pat's
+/// own authority) or "approval" (over-cap, closed by Maya). Returns match_id.
+fn commit_delegated(
+    state: &mut State,
+    principal: &str,
+    delegate: &str,
+    environment_id: &str,
+    offer_id: &str,
+    tenant: &str,
+    price_cents: i64,
+    need_context: &str,
+    via: &str,
+) -> Result<String, Response> {
+    let match_id = booking_match_id(environment_id, offer_id);
+    let (seller, network, platform, ads) = splits_for(price_cents);
+    let instruction = json::obj(vec![
+        ("match_id", json::s(&match_id)),
+        ("value_cents", json::n(price_cents)),
+        (
+            "splits",
+            json::obj(vec![
+                ("seller_cents", json::n(seller)),
+                ("network_cents", json::n(network)),
+                ("platform_cents", json::n(platform)),
+                ("ads_cents", json::n(ads)),
+            ]),
+        ),
+    ])
+    .dump();
+    match request(
+        "POST",
+        &format!("{}/v1/settlements/instructions", ledger_url()),
+        Some(&instruction),
+    ) {
+        Ok((201, _)) => {}
+        Ok((status, body)) => {
+            return Err(Response::error(502, &format!("settlement instruction ({status}): {body}")))
+        }
+        Err(e) => return Err(Response::error(503, &format!("ledger unavailable: {e}"))),
+    }
+    let order_body = json::obj(vec![
+        ("match_id", json::s(&match_id)),
+        ("offer_id", json::s(offer_id)),
+        ("tenant", json::s(tenant)),
+        ("need_context", json::s(need_context)),
+    ])
+    .dump();
+    match request(
+        "POST",
+        &format!("{}/v1/orders", seller_url()),
+        Some(&order_body),
+    ) {
+        Ok((201, _)) => {}
+        Ok((status, body)) => {
+            return Err(Response::error(502, &format!("order create ({status}): {body}")))
+        }
+        Err(e) => return Err(Response::error(502, &format!("order create failed: {e}"))),
+    }
+    // Dual attribution on the principal's trail: actor, principal, mandate ref.
+    state.activity.push((
+        principal.to_string(),
+        json::obj(vec![
+            ("kind", json::s("delegated-match")),
+            ("actor", json::s(delegate)),
+            ("principal", json::s(principal)),
+            ("mandate", json::b(true)),
+            ("via", json::s(via)),
+            ("match_id", json::s(&match_id)),
+        ]),
+    ));
+    Ok(match_id)
 }
 
 fn handle(state: &mut State, req: &Request) -> Response {
@@ -482,6 +621,300 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(e) => Response::error(503, &format!("ledger unavailable: {e}")),
             }
         }
+        // s006.mandate: Maya grants Pat a scoped mandate. Recorded on the
+        // consent ledger (immutable history) and held in memory (scope).
+        ("POST", "/v1/mandates") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let principal = match verify_subject(body.str_of("token").unwrap_or("")) {
+                Ok(s) => s,
+                Err(resp) => return resp,
+            };
+            let delegate_actor = body.str_of("delegate").unwrap_or("");
+            let category = body.str_of("category").unwrap_or("");
+            let per_item_cents = body.i64_of("per_item_cents").unwrap_or(0);
+            let expiry_ts = body.i64_of("expiry_ts").unwrap_or(now_secs() + 90 * 86400);
+            if delegate_actor.is_empty() || category.is_empty() || per_item_cents <= 0 {
+                return Response::error(400, "delegate, category, per_item_cents required");
+            }
+            let delegate = subject_for(delegate_actor, "person");
+            let ts = now_secs();
+            let entry = json::obj(vec![
+                ("subject", json::s(&principal)),
+                ("grant_type", json::s("mandate")),
+                ("action", json::s("grant")),
+                ("delegate", json::s(&delegate)),
+                ("category", json::s(category)),
+                ("per_item_cents", json::n(per_item_cents)),
+                ("expiry_ts", json::n(expiry_ts)),
+                ("ts", json::n(ts)),
+            ]);
+            let hash = match record_consent(&entry) {
+                Ok(h) => h,
+                Err(resp) => return resp,
+            };
+            state.mandates.retain(|m| !(m.principal == principal && m.delegate == delegate));
+            state.mandates.push(Mandate {
+                principal: principal.clone(),
+                delegate: delegate.clone(),
+                category: category.to_string(),
+                per_item_cents,
+                expiry_ts,
+                revoked: false,
+            });
+            Response::json(
+                201,
+                &json::obj(vec![
+                    ("principal", json::s(&principal)),
+                    ("delegate", json::s(&delegate)),
+                    ("category", json::s(category)),
+                    ("per_item_cents", json::n(per_item_cents)),
+                    ("hash", json::s(&hash)),
+                ]),
+            )
+        }
+        ("POST", "/v1/mandates/revoke") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let principal = match verify_subject(body.str_of("token").unwrap_or("")) {
+                Ok(s) => s,
+                Err(resp) => return resp,
+            };
+            let delegate = subject_for(body.str_of("delegate").unwrap_or(""), "person");
+            let entry = json::obj(vec![
+                ("subject", json::s(&principal)),
+                ("grant_type", json::s("mandate")),
+                ("action", json::s("revoke")),
+                ("delegate", json::s(&delegate)),
+                ("ts", json::n(now_secs())),
+            ]);
+            let hash = match record_consent(&entry) {
+                Ok(h) => h,
+                Err(resp) => return resp,
+            };
+            for m in state.mandates.iter_mut() {
+                if m.principal == principal && m.delegate == delegate {
+                    m.revoked = true;
+                }
+            }
+            Response::json(
+                201,
+                &json::obj(vec![("revoked", json::b(true)), ("hash", json::s(&hash))]),
+            )
+        }
+        // Pat's delegate workspace: the principals + scope he can still act
+        // under (empty immediately after revocation).
+        ("POST", "/v1/delegate/workspace") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let delegate = match verify_subject(body.str_of("token").unwrap_or("")) {
+                Ok(s) => s,
+                Err(resp) => return resp,
+            };
+            let now = now_secs();
+            let list: Vec<json::Json> = state
+                .mandates
+                .iter()
+                .filter(|m| m.delegate == delegate && !m.revoked && m.expiry_ts > now)
+                .map(|m| {
+                    json::obj(vec![
+                        ("principal", json::s(&m.principal)),
+                        ("category", json::s(&m.category)),
+                        ("per_item_cents", json::n(m.per_item_cents)),
+                        ("expiry_ts", json::n(m.expiry_ts)),
+                    ])
+                })
+                .collect();
+            Response::json(200, &json::obj(vec![("principals", json::arr(list))]))
+        }
+        // Pat states a delegated need. Scope (declared category) is checked
+        // BEFORE any environment; the per-item cap is checked at match time:
+        // under cap closes on Pat's authority, over cap is HELD for Maya.
+        ("POST", "/v1/delegate/needs") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let delegate = match verify_subject(body.str_of("token").unwrap_or("")) {
+                Ok(s) => s,
+                Err(resp) => return resp,
+            };
+            let principal = subject_for(body.str_of("principal").unwrap_or(""), "person");
+            let category = body.str_of("category").unwrap_or("").to_string();
+            let jurisdiction = body.str_of("jurisdiction").unwrap_or("").to_string();
+            let envelope = match body.str_of("envelope") {
+                Some(e) => e.to_string(),
+                None => return Response::error(400, "envelope required"),
+            };
+            let now = now_secs();
+            let mandate = state
+                .mandates
+                .iter()
+                .find(|m| m.principal == principal && m.delegate == delegate);
+            let (per_item, in_scope) = match mandate {
+                Some(m) if !m.revoked && m.expiry_ts > now => (m.per_item_cents, m.category == category),
+                // No mandate, revoked, or expired: nothing may happen.
+                _ => {
+                    return Response::json(
+                        403,
+                        &json::obj(vec![
+                            ("status", json::s("refused")),
+                            ("reason", json::s("no valid mandate")),
+                        ]),
+                    )
+                }
+            };
+            // Out-of-scope category refuses at submission: zero environments,
+            // zero ledger entries.
+            if !in_scope {
+                return Response::json(
+                    403,
+                    &json::obj(vec![
+                        ("status", json::s("refused")),
+                        ("reason", json::s("out of mandate scope")),
+                    ]),
+                );
+            }
+            // Manual dispatch so nothing auto-commits; the coordinator decides
+            // commit-vs-hold from the matched price.
+            let shortlist = match attempt_match(state, &jurisdiction, &envelope, None) {
+                Ok(Some(r)) => r,
+                Ok(None) => {
+                    return Response::json(
+                        201,
+                        &json::obj(vec![("status", json::s("no-match"))]),
+                    )
+                }
+                Err(resp) => return resp,
+            };
+            // The freshly pushed shortlist is the last one; take its cheapest
+            // qualifying entry.
+            let sl = state.shortlists.last().unwrap();
+            let environment_id = sl.environment_id.clone();
+            let need_context = sl.need_context.clone();
+            let best = sl
+                .entries
+                .iter()
+                .min_by_key(|e| e.i64_of("price_cents").unwrap_or(i64::MAX))
+                .cloned();
+            let _ = shortlist;
+            let offer = match best {
+                Some(o) => o,
+                None => {
+                    return Response::json(
+                        201,
+                        &json::obj(vec![("status", json::s("no-match"))]),
+                    )
+                }
+            };
+            let offer_id = offer.str_of("offer_id").unwrap_or("").to_string();
+            let tenant = offer.str_of("tenant").unwrap_or("").to_string();
+            let price_cents = offer.i64_of("price_cents").unwrap_or(0);
+            if price_cents <= per_item {
+                let match_id = match commit_delegated(
+                    state, &principal, &delegate, &environment_id, &offer_id, &tenant,
+                    price_cents, &need_context, "delegate",
+                ) {
+                    Ok(m) => m,
+                    Err(resp) => return resp,
+                };
+                Response::json(
+                    201,
+                    &json::obj(vec![
+                        ("status", json::s("committed")),
+                        ("match_id", json::s(&match_id)),
+                        ("via", json::s("delegate")),
+                    ]),
+                )
+            } else {
+                // Over cap: match permitted, closing WITHHELD for approval.
+                let handle = handle_for(&format!("{environment_id}|{offer_id}"));
+                state.held.push(Held {
+                    handle: handle.clone(),
+                    principal: principal.clone(),
+                    delegate: delegate.clone(),
+                    environment_id,
+                    offer_id,
+                    tenant,
+                    price_cents,
+                    need_context,
+                });
+                state.activity.push((
+                    principal.clone(),
+                    json::obj(vec![
+                        ("kind", json::s("approval-requested")),
+                        ("actor", json::s(&delegate)),
+                        ("principal", json::s(&principal)),
+                        ("handle", json::s(&handle)),
+                    ]),
+                ));
+                Response::json(
+                    201,
+                    &json::obj(vec![
+                        ("status", json::s("held-for-approval")),
+                        ("handle", json::s(&handle)),
+                    ]),
+                )
+            }
+        }
+        ("POST", "/v1/mandates/approve") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let principal = match verify_subject(body.str_of("token").unwrap_or("")) {
+                Ok(s) => s,
+                Err(resp) => return resp,
+            };
+            let handle = body.str_of("handle").unwrap_or("").to_string();
+            let held_index = state
+                .held
+                .iter()
+                .position(|h| h.handle == handle && h.principal == principal);
+            let held = match held_index {
+                Some(i) => state.held.remove(i),
+                None => return Response::error(404, "no held match for this principal"),
+            };
+            let match_id = match commit_delegated(
+                state, &held.principal, &held.delegate, &held.environment_id,
+                &held.offer_id, &held.tenant, held.price_cents, &held.need_context, "approval",
+            ) {
+                Ok(m) => m,
+                Err(resp) => return resp,
+            };
+            Response::json(
+                201,
+                &json::obj(vec![
+                    ("status", json::s("committed")),
+                    ("match_id", json::s(&match_id)),
+                    ("via", json::s("approval")),
+                ]),
+            )
+        }
+        // Maya's activity trail: every delegated action attributed to her.
+        ("POST", "/v1/activity") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let principal = match verify_subject(body.str_of("token").unwrap_or("")) {
+                Ok(s) => s,
+                Err(resp) => return resp,
+            };
+            let list: Vec<json::Json> = state
+                .activity
+                .iter()
+                .filter(|(p, _)| *p == principal)
+                .map(|(_, e)| e.clone())
+                .collect();
+            Response::json(200, &json::obj(vec![("activity", json::arr(list))]))
+        }
         ("POST", "/v1/offers/published") => {
             // Event from seller-svc (fire-and-forget thread on its side): a
             // new offer may fit an open need - run a matching cycle. The
@@ -511,14 +944,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Ok(b) => b,
                 Err(e) => return Response::error(400, &e),
             };
-            let (handle, offer_id, slot_id) = match (
-                body.str_of("handle"),
-                body.str_of("offer_id"),
-                body.str_of("slot_id"),
-            ) {
-                (Some(h), Some(o), Some(s)) => (h.to_string(), o.to_string(), s.to_string()),
-                _ => return Response::error(400, "handle, offer_id, slot_id required"),
+            let (handle, offer_id) = match (body.str_of("handle"), body.str_of("offer_id")) {
+                (Some(h), Some(o)) => (h.to_string(), o.to_string()),
+                _ => return Response::error(400, "handle, offer_id required"),
             };
+            // slot_id is optional: a fitting need (s002) books an appointment;
+            // a plain accept (s005) commits with no slot.
+            let slot_id = body.str_of("slot_id").unwrap_or("").to_string();
             let index = match state.shortlists.iter().position(|s| s.handle == handle) {
                 Some(i) => i,
                 None => return Response::error(404, "unknown handle"),
@@ -538,41 +970,61 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 };
                 (sl.environment_id.clone(), sl.need_context.clone(), entry)
             };
-            // Fail closed like every other missing field: a slot without a
-            // day is not a bookable slot.
-            let slot_day = entry
-                .get("fitting_slots")
-                .and_then(|s| s.as_arr())
-                .and_then(|slots| {
-                    slots
-                        .iter()
-                        .find(|s| s.str_of("slot_id") == Some(slot_id.as_str()))
-                        .and_then(|s| s.str_of("day").map(|d| d.to_string()))
-                });
-            let slot_day = match slot_day {
-                Some(d) => d,
-                None => return Response::error(404, "slot not offered"),
+            // A requested slot must exist on the offer; no slot requested
+            // means no appointment (fail closed only when one was asked for).
+            let slot_day = if slot_id.is_empty() {
+                String::new()
+            } else {
+                match entry
+                    .get("fitting_slots")
+                    .and_then(|s| s.as_arr())
+                    .and_then(|slots| {
+                        slots
+                            .iter()
+                            .find(|s| s.str_of("slot_id") == Some(slot_id.as_str()))
+                            .and_then(|s| s.str_of("day").map(|d| d.to_string()))
+                    }) {
+                    Some(d) => d,
+                    None => return Response::error(404, "slot not offered"),
+                }
             };
             let tenant = entry.str_of("tenant").unwrap_or("").to_string();
-            let value_cents = entry.i64_of("price_cents").unwrap_or(0);
+            let price_cents = entry.i64_of("price_cents").unwrap_or(0);
             let match_id = booking_match_id(&environment_id, &offer_id);
 
             // The booking IS the commitment: settlement instruction first
             // (fail closed - no instruction, no order), then the seller order
             // with the appointment. Need context only, no identity.
-            let (seller, network, platform, ads) = splits_for(value_cents);
+            // seller/network/platform always come from the offer price.
+            let (seller, network, platform, _ads) = splits_for(price_cents);
+            // s005.attribution: a boosted offer carries campaign credit. The
+            // ad commitment is advertiser money ON TOP of the price (seller
+            // revenue unchanged), split agency/creator, and it decrements the
+            // campaign budget on record.
+            let campaign = entry.get("campaign");
+            let ad_cents = campaign.and_then(|c| c.i64_of("ad_cents")).unwrap_or(0);
+            let value_cents = price_cents + ad_cents;
+            let splits = if ad_cents > 0 {
+                let agency = ad_cents * 60 / 100;
+                json::obj(vec![
+                    ("seller_cents", json::n(seller)),
+                    ("network_cents", json::n(network)),
+                    ("platform_cents", json::n(platform)),
+                    ("agency_cents", json::n(agency)),
+                    ("creator_cents", json::n(ad_cents - agency)),
+                ])
+            } else {
+                json::obj(vec![
+                    ("seller_cents", json::n(seller)),
+                    ("network_cents", json::n(network)),
+                    ("platform_cents", json::n(platform)),
+                    ("ads_cents", json::n(0)),
+                ])
+            };
             let instruction = json::obj(vec![
                 ("match_id", json::s(&match_id)),
                 ("value_cents", json::n(value_cents)),
-                (
-                    "splits",
-                    json::obj(vec![
-                        ("seller_cents", json::n(seller)),
-                        ("network_cents", json::n(network)),
-                        ("platform_cents", json::n(platform)),
-                        ("ads_cents", json::n(ads)),
-                    ]),
-                ),
+                ("splits", splits),
             ])
             .dump();
             match request(
@@ -606,22 +1058,45 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 }
                 Err(e) => return Response::error(502, &format!("order create failed: {e}")),
             }
+            // Record ad attribution and decrement the campaign budget. The
+            // settlement is already durable, so a failed attribution is
+            // logged, not fatal (best-effort like the ledger->ads credit flow).
+            if ad_cents > 0 {
+                if let Some(c) = campaign {
+                    let attribution = json::obj(vec![
+                        ("campaign_id", json::s(c.str_of("campaign_id").unwrap_or(""))),
+                        ("asset_id", json::s(c.str_of("asset_id").unwrap_or(""))),
+                        ("match_id", json::s(&match_id)),
+                    ])
+                    .dump();
+                    match request(
+                        "POST",
+                        &format!("{}/v1/attributions", ads_url()),
+                        Some(&attribution),
+                    ) {
+                        Ok((201, _)) => {}
+                        Ok((status, body)) => eprintln!("attribution ({status}): {body}"),
+                        Err(e) => eprintln!("attribution failed: {e}"),
+                    }
+                }
+            }
             state.shortlists[index].booked = true;
             state.orders.push((handle.clone(), match_id.clone()));
             state
                 .notifications
                 .push((handle.clone(), String::from("booking-confirmed")));
-            Response::json(
-                201,
-                &json::obj(vec![
-                    ("handle", json::s(&handle)),
-                    ("match_id", json::s(&match_id)),
-                    ("offer_id", json::s(&offer_id)),
-                    ("slot_id", json::s(&slot_id)),
-                    ("slot_day", json::s(&slot_day)),
-                    ("state", json::s("committed")),
-                ]),
-            )
+            let mut resp = vec![
+                ("handle", json::s(&handle)),
+                ("match_id", json::s(&match_id)),
+                ("offer_id", json::s(&offer_id)),
+                ("slot_id", json::s(&slot_id)),
+                ("slot_day", json::s(&slot_day)),
+                ("state", json::s("committed")),
+            ];
+            if ad_cents > 0 {
+                resp.push(("boosted", json::b(true)));
+            }
+            Response::json(201, &json::obj(resp))
         }
         _ => {
             if let ("GET", Some(handle)) =
@@ -683,6 +1158,9 @@ fn main() -> std::io::Result<()> {
             shortlists: Vec::new(),
             notifications: Vec::new(),
             open_needs: Vec::new(),
+            mandates: Vec::new(),
+            held: Vec::new(),
+            activity: Vec::new(),
         },
         handle,
     )

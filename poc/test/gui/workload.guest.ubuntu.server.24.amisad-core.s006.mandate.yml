@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - s006.mandate (Delegated Procurement Under a Scoped Mandate)
+# against the design topology: restore amisad-core, start slice-runtime on
+# amisad-edge-a, and run the full delegation lifecycle - Maya grants Pat a
+# scoped mandate (recorded on the consent ledger), Pat closes an in-scope
+# under-cap match on his own authority with dual attribution, an over-cap
+# match is HELD until Maya approves, an out-of-scope need is refused at
+# submission (zero environments, zero ledger entries), and revocation kills
+# delegated authority immediately. Entirely SSH-driven; VM left live.
+
+# Perf-log identity. Bump revision on step add/remove.
+# Rev 2: real implementation on the design topology (skeleton unparked).
+sequenceGuid: 42c436f1-875b-452c-80b5-e8cff1ce93c4
+sequenceRevision: 2
+
+description: "AmisAd s006.mandate: restore amisad-core, run delegated procurement under a scoped mandate (in-scope close, over-cap approval, out-of-scope refusal, revocation), assert full TVP."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.amisad-core.deploy
+requiresSnapshot:
+  id: "amisad-core"
+variables:
+  username: amisad-core-admin
+  hostname: amisad-core
+
+steps:
+  - action: loadDiskSnapshot
+    id: "amisad-core"
+    description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
+
+  - action: sshWaitReady
+    timeoutSeconds: 300
+    description: "SSH up after the restore"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s006.mandate.sh"
+    timeoutSeconds: 1800
+    description: "Run s006.mandate delegated-procurement flow (edge on amisad-edge-a), assert full TVP"
+
+  - action: saveSystemDiagnostic
+    id: "amisad.s006.mandate"
+    description: "Capture diagnostics after the s006.mandate run"

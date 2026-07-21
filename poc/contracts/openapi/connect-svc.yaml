@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: connect-svc
-  description: "Supply-side integration gateway: contracts, sandbox tenants, workload credentials (AmisAd POC skeleton contract: health and version only)"
+  description: "Supply-side integration gateway: partner registration+certification, scoped credentials, catalog/inventory sync, order-event mirroring with idempotent replay, scope-refusal audit, and revocation (s007.inventory surface)"
   version: 0.1.0
 paths:
   /health:
@@ -32,3 +32,102 @@ paths:
                 properties:
                   service: { type: string }
                   version: { type: string }
+  /v1/partners:
+    post:
+      summary: "Register an integration partner (body: name) -> sandbox access"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "partner_id, access=sandbox" }
+  /v1/partners/certify:
+    post:
+      summary: "Certify the sandbox connector (body: partner_id)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "certified" }
+        "404": { description: "unknown partner" }
+  /v1/grants:
+    post:
+      summary: "Seller grants scoped access; credential capped to the granted scopes (body: tenant, partner_id, scopes[])"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "credential, scopes" }
+        "403": { description: "partner not certified" }
+  /v1/grants/revoke:
+    post:
+      summary: "Revoke a grant; the credential dies immediately (body: credential)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "revoked" }
+  /v1/sync/catalog:
+    post:
+      summary: "Sync the ERP catalog into the tenant (scope catalog; body: credential, offers[])"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "synced" }
+        "401": { description: "invalid/revoked" }
+        "403": { description: "out of scope" }
+  /v1/sync/inventory:
+    post:
+      summary: "Apply an inventory delta (scope inventory; body: credential, offer_id, stock, delta_ts)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "offer_id, stock" }
+        "401": { description: "invalid/revoked" }
+        "403": { description: "out of scope" }
+  /v1/orders/events:
+    post:
+      summary: "Order-lifecycle event from seller-svc; mirror to the ERP idempotently (body: match_id, tenant, state)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "mirrored, duplicate" }
+  /v1/webhooks/replay:
+    post:
+      summary: "Replay a delivery; no duplicate effect (body: match_id, state)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "duplicate" }
+  /v1/query:
+    post:
+      summary: "Scoped query; granted scope returns ok, else refused+logged (body: credential, resource)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "ok" }
+        "401": { description: "invalid/revoked" }
+        "403": { description: "out of scope, logged" }
+  # GET /v1/deltas -> inventory deltas; GET /v1/audit -> refused calls; GET /v1/erp/orders/{match_id} -> ERP mirror state

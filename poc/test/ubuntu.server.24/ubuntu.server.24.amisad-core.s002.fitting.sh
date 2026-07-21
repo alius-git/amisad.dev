@@ -36,7 +36,7 @@ echo "== wait for the NodePort services to actually answer (post-restore) =="
 # The restored objects still carry available=True from before the snapshot, so
 # the kubectl waits above can pass before pods and kube-proxy are really up.
 # Every exposed NodePort must answer - each service recovers independently.
-for port in 30080 30081 30082 30083 30084 30085 30086; do
+for port in 30080 30081 30082 30083 30084 30085 30086 30087 30088; do
     for _ in $(seq 1 60); do
         if curl -sf "http://${NODE_IP}:${port}/health" >/dev/null 2>&1; then break; fi
         sleep 5

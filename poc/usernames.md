@@ -38,9 +38,13 @@ over SSH.
 | `maya` | Maya, the buyer | Console/SSH login persona for the demo narrative; API (`curl`) steps work from her account. `buyer-client` itself runs from the admin account (the binaries live under the admin's 0750 home). |
 | `elena` | Elena, the seller | Console/SSH login persona for the seller narrative; the order-board `curl` steps work from her account. |
 | `tom` | Tom, the carrier/resource operator | s004.failover narrative: allocation policy, incident queue, escalation; the resource-svc `curl` steps work from his account. |
-| `priya` | Priya, the platform operator | s004.failover narrative: receives the cross-party incident case; the platform-svc `curl` steps work from her account. |
+| `priya` | Priya, the platform operator | s004.failover + s007 narrative: cross-party incident case; participant registry verification. |
+| `marcel` | Marcel, the ad agency | s005.attribution narrative: campaign, creative brief, attribution report; the ads-svc `curl` steps work from his account. |
+| `kai` | Kai, the creative | s005.attribution narrative: accepts the brief, produces the asset, performance view. |
+| `pat` | Pat, the delegate | s006.mandate narrative: acts under Maya's scoped mandate in the delegate workspace. |
+| `alex` | Alex, the integration partner | s007.inventory narrative: builds/certifies the connector; the connect-svc `curl` steps work from his account. |
 
-All four are created by the vm-core deploy chain (`adduser --disabled-password`,
+All eight are created by the vm-core deploy chain (`adduser --disabled-password`,
 then a vault-rendered `chpasswd` in a `sensitive: true` step) and are **not**
 in sudoers.
 

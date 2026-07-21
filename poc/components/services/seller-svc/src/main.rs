@@ -26,6 +26,10 @@ struct Order {
 struct State {
     offers: Vec<json::Json>,
     orders: Vec<Order>,
+    // s007.inventory: per-offer stock. Absent = not inventory-tracked
+    // (available); 0 = out of stock and NOT matchable. In-memory: the
+    // integration control plane is transient like connect-svc.
+    stock: Vec<(String, i64)>,
     db: Option<Client>,
 }
 
@@ -106,6 +110,31 @@ fn ledger_url() -> String {
 fn coordinator_url() -> String {
     std::env::var("COORDINATOR_URL")
         .unwrap_or_else(|_| String::from("http://fabric-coordinator:8080"))
+}
+fn connect_url() -> String {
+    std::env::var("CONNECT_URL").unwrap_or_else(|_| String::from("http://connect-svc:8080"))
+}
+
+/// Order-lifecycle event to the integration gateway (s007.inventory): every
+/// order state transition is mirrored to the connector's ERP feed. Detached
+/// and best-effort, like the offer-published event - the seller never blocks
+/// on connect.
+fn notify_order_event(match_id: String, tenant: String, state: String) {
+    std::thread::spawn(move || {
+        let body = json::obj(vec![
+            ("match_id", json::s(&match_id)),
+            ("tenant", json::s(&tenant)),
+            ("state", json::s(&state)),
+        ])
+        .dump();
+        match request("POST", &format!("{}/v1/orders/events", connect_url()), Some(&body)) {
+            Ok((status, resp)) if status >= 300 => {
+                eprintln!("order-event to connect returned {status}: {resp}");
+            }
+            Err(e) => eprintln!("order-event to connect failed: {e}"),
+            Ok(_) => {}
+        }
+    });
 }
 
 /// Offer-published event to the fabric (s003: a new offer may fit an open
@@ -259,7 +288,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     return store_error(db, "order store", e);
                 }
             }
+            let tenant = order.tenant.clone();
             state.orders.push(order);
+            notify_order_event(match_id.clone(), tenant, String::from("committed"));
             Response::json(
                 201,
                 &json::obj(vec![
@@ -331,7 +362,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     return store_error(db, "order store", e);
                 }
             }
-            state.orders[index].state = final_state;
+            state.orders[index].state = final_state.clone();
+            let tenant = state.orders[index].tenant.clone();
+            notify_order_event(match_id.clone(), tenant, final_state);
             Response::json(
                 200,
                 &json::obj(vec![
@@ -340,14 +373,46 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ]),
             )
         }
+        // s007.inventory: an external inventory delta sets an offer's stock;
+        // 0 removes it from the matchable catalog within the sync window.
+        ("POST", "/v1/offers/inventory") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let offer_id = match body.str_of("offer_id") {
+                Some(o) => o.to_string(),
+                None => return Response::error(400, "offer_id required"),
+            };
+            let stock = match body.i64_of("stock") {
+                Some(s) if s >= 0 => s,
+                _ => return Response::error(400, "stock (>= 0) required"),
+            };
+            if !state.offers.iter().any(|o| o.str_of("offer_id") == Some(offer_id.as_str())) {
+                return Response::error(404, "unknown offer_id");
+            }
+            state.stock.retain(|(id, _)| *id != offer_id);
+            state.stock.push((offer_id.clone(), stock));
+            Response::json(
+                200,
+                &json::obj(vec![("offer_id", json::s(&offer_id)), ("stock", json::n(stock))]),
+            )
+        }
         _ => {
             if let ("GET", Some(region)) =
                 (req.method.as_str(), path.strip_prefix("/v1/offers/region/"))
             {
+                // An offer whose stock was zeroed (s007) is NOT matchable -
+                // external inventory truth governs matching. Untracked offers
+                // (no stock entry) stay available.
                 let offers: Vec<json::Json> = state
                     .offers
                     .iter()
                     .filter(|o| o.str_of("region") == Some(region))
+                    .filter(|o| {
+                        let id = o.str_of("offer_id").unwrap_or("");
+                        !state.stock.iter().any(|(sid, s)| sid == id && *s == 0)
+                    })
                     .cloned()
                     .collect();
                 return Response::json(200, &json::obj(vec![("offers", json::arr(offers))]));
@@ -376,7 +441,7 @@ fn main() -> std::io::Result<()> {
             name: "seller-svc",
             version: env!("CARGO_PKG_VERSION"),
         },
-        State { offers, orders, db },
+        State { offers, orders, stock: Vec::new(), db },
         handle,
     )
 }

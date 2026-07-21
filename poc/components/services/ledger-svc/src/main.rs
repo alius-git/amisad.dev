@@ -101,7 +101,10 @@ struct State {
     db: Option<Client>,
 }
 
-const GRANT_TYPES: [&str; 2] = ["participation", "contribution"];
+// participation/contribution are the buyer's own consents (s003.silence);
+// mandate is a delegated-authority grant (s006.mandate). All three fold the
+// same grant/revoke way and share the immutable consent chain.
+const GRANT_TYPES: [&str; 3] = ["participation", "contribution", "mandate"];
 
 /// Newest-wins fold of one subject's consent entries for one grant type:
 /// "granted", "revoked", or "none" (no entry - the coordinator decides the
@@ -227,6 +230,11 @@ fn splits_dump(splits: &[(String, i64)]) -> String {
 }
 
 const PARTIES: [&str; 4] = ["seller_cents", "network_cents", "platform_cents", "ads_cents"];
+// s005.attribution: a campaign-boosted match replaces the single "ads" slice
+// with agency + creator credit. The party set is chosen by which keys the
+// instruction carries; every present slice must sum to value_cents.
+const AD_CREDIT_PARTIES: [&str; 5] =
+    ["seller_cents", "network_cents", "platform_cents", "agency_cents", "creator_cents"];
 
 fn parse_instruction(body: &json::Json) -> Result<Instruction, String> {
     let match_id = body
@@ -235,9 +243,14 @@ fn parse_instruction(body: &json::Json) -> Result<Instruction, String> {
         .to_string();
     let value_cents = body.i64_of("value_cents").ok_or("value_cents required")?;
     let splits_obj = body.get("splits").ok_or("splits required")?;
+    let parties: &[&str] = if splits_obj.get("agency_cents").is_some() {
+        &AD_CREDIT_PARTIES
+    } else {
+        &PARTIES
+    };
     let mut splits = Vec::new();
     let mut total = 0i64;
-    for party in PARTIES {
+    for party in parties {
         let amount = splits_obj
             .i64_of(party)
             .ok_or_else(|| format!("splits.{party} required"))?;
@@ -402,7 +415,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             {
                 return Response::error(
                     400,
-                    "subject, grant_type (participation|contribution), action (grant|revoke), ts required",
+                    "subject, grant_type (participation|contribution|mandate), action (grant|revoke), ts required",
                 );
             }
             if let Some(db) = state.db.as_mut() {

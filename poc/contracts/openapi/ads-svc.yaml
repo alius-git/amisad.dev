@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: ads-svc
-  description: "Campaign administration and creative studio marketplace (AmisAd POC skeleton contract: health and version only)"
+  description: "Campaign administration and creative studio marketplace: campaigns, briefs, assets, activation, region campaign feed, and aggregate attribution (s005.attribution surface)"
   version: 0.1.0
 paths:
   /health:
@@ -32,3 +32,73 @@ paths:
                 properties:
                   service: { type: string }
                   version: { type: string }
+  /v1/campaigns:
+    post:
+      summary: "Create a campaign (body: tenant, region, category, ad_cents_per_match, budget_cents)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "campaign_id, state=draft" }
+        "400": { description: "invalid fields" }
+  /v1/campaigns/activate:
+    post:
+      summary: "Place an approved asset; the campaign goes active (body: campaign_id, asset_id)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "campaign_id, state=active" }
+        "409": { description: "no approved asset" }
+  /v1/campaigns/region/{region}:
+    get:
+      parameters:
+        - { name: region, in: path, required: true, schema: { type: string } }
+      summary: "Active campaigns for a region (the fabric fetches these to boost a match)"
+      responses:
+        "200": { description: "campaigns: [...]" }
+  /v1/campaigns/{campaign_id}:
+    get:
+      parameters:
+        - { name: campaign_id, in: path, required: true, schema: { type: string } }
+      summary: "Campaign attribution report (aggregate spend; no buyer data)"
+      responses:
+        "200": { description: "campaign with spent_cents" }
+        "404": { description: "unknown campaign" }
+  /v1/briefs:
+    post:
+      summary: "Issue a creative brief for a campaign (body: campaign_id)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "brief_id" }
+        "404": { description: "unknown campaign" }
+  /v1/assets:
+    post:
+      summary: "Produce an approved asset for a brief (body: campaign_id, creator, creative)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "asset_id, state=approved" }
+  /v1/attributions:
+    post:
+      summary: "Record attribution for a closed boosted match; decrement the budget (body: campaign_id, asset_id, match_id)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "credit record" }
+        "404": { description: "no active campaign" }
+  # GET /v1/briefs -> open briefs (Kai queue); GET /v1/attributions -> aggregate agency/creator totals

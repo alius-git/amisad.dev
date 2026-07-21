@@ -67,3 +67,14 @@ paths:
       responses:
         "200": { description: "match_id, offer_id, tenant, need_context, state; appointment {slot_id, day} when booked" }
         "404": { description: "No order" }
+  /v1/offers/inventory:
+    post:
+      summary: "Set an offer's stock; 0 removes it from the matchable catalog (s007; body: offer_id, stock)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "offer_id, stock" }
+        "404": { description: "unknown offer_id" }

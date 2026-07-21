@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - s007.inventory (Enterprise Integration Onboarding and
+# Inventory-Truth Matching) against the design topology: restore amisad-core,
+# start slice-runtime on amisad-edge-a, and run the integration lifecycle -
+# Alex registers and certifies a connector, Elena grants scoped credentials,
+# the connector syncs the ERP catalog and an inventory delta that zeroes the
+# last unit of an item, a buyer need then matches only the in-stock
+# alternative, order-lifecycle events mirror to the ERP idempotently, an
+# out-of-scope call is refused and logged, and revocation kills the
+# credentials. Entirely SSH-driven; VM left live.
+
+# Perf-log identity. Bump revision on step add/remove.
+# Rev 2: real implementation on the design topology (skeleton unparked).
+sequenceGuid: 421e4385-ea9e-48bf-becf-7ac4e635da8d
+sequenceRevision: 2
+
+description: "AmisAd s007.inventory: restore amisad-core, run enterprise integration onboarding and inventory-truth matching (scoped credentials, delta-driven matching, order webhooks, out-of-scope refusal, revocation), assert full TVP."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.amisad-core.deploy
+requiresSnapshot:
+  id: "amisad-core"
+variables:
+  username: amisad-core-admin
+  hostname: amisad-core
+
+steps:
+  - action: loadDiskSnapshot
+    id: "amisad-core"
+    description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
+
+  - action: sshWaitReady
+    timeoutSeconds: 300
+    description: "SSH up after the restore"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s007.inventory.sh"
+    timeoutSeconds: 1800
+    description: "Run s007.inventory integration lifecycle (edge on amisad-edge-a), assert full TVP"
+
+  - action: saveSystemDiagnostic
+    id: "amisad.s007.inventory"
+    description: "Capture diagnostics after the s007.inventory run"

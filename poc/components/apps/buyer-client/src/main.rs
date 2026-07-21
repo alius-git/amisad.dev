@@ -106,14 +106,36 @@ fn open_decanter_need_json() -> json::Json {
     ])
 }
 
+/// s005.attribution need: a manual summer-collection need in the campaign's
+/// category and region, so the sealed environment can boost Elena's offer
+/// with Kai's creative. No fitting slot - Maya simply accepts.
+fn summer_need_json() -> json::Json {
+    json::obj(vec![
+        ("category", json::s("housewares")),
+        ("budget_cents", json::n(20000)),
+        ("region", json::s("region-a")),
+        ("deadline_days", json::n(14)),
+        ("auto_close", json::b(false)),
+        (
+            "context",
+            json::s("Summer entertaining set for the season"),
+        ),
+    ])
+}
+
 fn fail(message: &str) -> ! {
     eprintln!("buyer-client: {message}");
     exit(1)
 }
 
 fn issue_token() -> String {
+    issue_token_for("maya")
+}
+
+/// Mint a token for a named actor (Maya by default; Pat for delegate mode).
+fn issue_token_for(actor: &str) -> String {
     let token_body = json::obj(vec![
-        ("actor", json::s("maya")),
+        ("actor", json::s(actor)),
         ("class", json::s("person")),
     ])
     .dump();
@@ -165,6 +187,85 @@ fn consents() {
     }
 }
 
+// --- s006.mandate: delegate mode ---------------------------------------
+
+fn post_as(path: &str, body: &json::Json, ok: u16) {
+    match request("POST", &format!("{}{path}", coordinator_url()), Some(&body.dump())) {
+        Ok((s, text)) if s == ok => println!("{}", text.trim()),
+        Ok((status, text)) => fail(&format!("{path} failed ({status}): {text}")),
+        Err(e) => fail(&format!("coordinator unreachable: {e}")),
+    }
+}
+
+fn grant_mandate(delegate: &str, category: &str, per_item_cents: i64) {
+    post_as(
+        "/v1/mandates",
+        &json::obj(vec![
+            ("token", json::s(&issue_token())), // Maya, the principal
+            ("delegate", json::s(delegate)),
+            ("category", json::s(category)),
+            ("per_item_cents", json::n(per_item_cents)),
+        ]),
+        201,
+    );
+}
+
+fn revoke_mandate(delegate: &str) {
+    post_as(
+        "/v1/mandates/revoke",
+        &json::obj(vec![("token", json::s(&issue_token())), ("delegate", json::s(delegate))]),
+        201,
+    );
+}
+
+fn workspace(actor: &str) {
+    post_as(
+        "/v1/delegate/workspace",
+        &json::obj(vec![("token", json::s(&issue_token_for(actor)))]),
+        200,
+    );
+}
+
+/// Pat states a delegated need. attribute (optional) narrows the need to a
+/// premium offer, so the over-cap path can be exercised deterministically.
+fn delegate_need(actor: &str, principal: &str, category: &str, budget_cents: i64, attribute: Option<&str>) {
+    let mut need_pairs = vec![
+        ("category", json::s(category)),
+        ("budget_cents", json::n(budget_cents)),
+        ("region", json::s("region-a")),
+        ("deadline_days", json::n(30)),
+        ("auto_close", json::b(false)),
+        ("context", json::s("Delegated household purchase")),
+    ];
+    if let Some(a) = attribute {
+        need_pairs.push(("attributes", json::arr(vec![json::s(a)])));
+    }
+    let envelope = json::obj(need_pairs).dump();
+    post_as(
+        "/v1/delegate/needs",
+        &json::obj(vec![
+            ("token", json::s(&issue_token_for(actor))),
+            ("principal", json::s(principal)),
+            ("category", json::s(category)),
+            ("jurisdiction", json::s("region-a")),
+            ("envelope", json::s(&envelope)),
+        ]),
+        201,
+    );
+}
+
+fn approve(handle: &str) {
+    post_as(
+        "/v1/mandates/approve",
+        &json::obj(vec![("token", json::s(&issue_token())), ("handle", json::s(handle))]),
+        201,
+    );
+}
+
+fn activity() {
+    post_as("/v1/activity", &json::obj(vec![("token", json::s(&issue_token()))]), 200);
+}
+
 fn submit() -> json::Json {
     submit_need(&need_json())
 }
@@ -197,13 +298,16 @@ fn submit_need(need: &json::Json) -> json::Json {
     }
 }
 
-fn book(handle: &str, offer_id: &str, slot_id: &str) {
-    let body = json::obj(vec![
+fn book(handle: &str, offer_id: &str, slot_id: Option<&str>) {
+    let mut pairs = vec![
         ("handle", json::s(handle)),
         ("offer_id", json::s(offer_id)),
-        ("slot_id", json::s(slot_id)),
-    ])
-    .dump();
+    ];
+    // A fitting booking (s002) names a slot; a plain accept (s005) omits it.
+    if let Some(s) = slot_id {
+        pairs.push(("slot_id", json::s(s)));
+    }
+    let body = json::obj(pairs).dump();
     match request(
         "POST",
         &format!("{}/v1/bookings", coordinator_url()),
@@ -271,10 +375,13 @@ fn main() {
         Some("shortlist") => {
             submit_need(&dress_need_json());
         }
-        Some("book") => match (args.get(2), args.get(3), args.get(4)) {
-            (Some(handle), Some(offer_id), Some(slot_id)) => book(handle, offer_id, slot_id),
-            _ => fail("usage: buyer-client book <handle> <offer_id> <slot_id>"),
+        Some("book") => match (args.get(2), args.get(3)) {
+            (Some(handle), Some(offer_id)) => book(handle, offer_id, args.get(4).map(|s| s.as_str())),
+            _ => fail("usage: buyer-client book <handle> <offer_id> [slot_id]"),
         },
+        Some("campaign") => {
+            submit_need(&summer_need_json());
+        }
         Some("notifications") => match args.get(2) {
             Some(handle) => notifications(handle),
             None => fail("usage: buyer-client notifications <handle>"),
@@ -298,6 +405,35 @@ fn main() {
             consent("participation", "grant");
         }
         Some("consents") => consents(),
+        Some("grant-mandate") => match (args.get(2), args.get(3), args.get(4)) {
+            (Some(delegate), Some(category), Some(cap)) => {
+                grant_mandate(delegate, category, cap.parse().unwrap_or(0))
+            }
+            _ => fail("usage: buyer-client grant-mandate <delegate> <category> <per_item_cents>"),
+        },
+        Some("revoke-mandate") => match args.get(2) {
+            Some(delegate) => revoke_mandate(delegate),
+            None => fail("usage: buyer-client revoke-mandate <delegate>"),
+        },
+        Some("workspace") => match args.get(2) {
+            Some(actor) => workspace(actor),
+            None => fail("usage: buyer-client workspace <actor>"),
+        },
+        Some("delegate-need") => match (args.get(2), args.get(3), args.get(4)) {
+            (Some(actor), Some(category), Some(budget)) => delegate_need(
+                actor,
+                "maya",
+                category,
+                budget.parse().unwrap_or(0),
+                args.get(5).map(|s| s.as_str()),
+            ),
+            _ => fail("usage: buyer-client delegate-need <actor> <category> <budget_cents> [attribute]"),
+        },
+        Some("approve") => match args.get(2) {
+            Some(handle) => approve(handle),
+            None => fail("usage: buyer-client approve <handle>"),
+        },
+        Some("activity") => activity(),
         _ => fail(
             "usage: buyer-client submit | wait <handle> | run | shortlist | book <handle> <offer_id> <slot_id> | notifications <handle> | open <dress|decanter> | pause | withdraw | resume | consents",
         ),

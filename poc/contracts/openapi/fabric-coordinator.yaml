@@ -88,3 +88,67 @@ paths:
       summary: "Count of open needs whose subject grants aggregate contribution (counts only; no identity, no content)"
       responses:
         "200": { description: "contributions: N" }
+  /v1/mandates:
+    post:
+      summary: "Principal grants a delegate a scoped mandate; recorded on the consent ledger (s006; body: token, delegate, category, per_item_cents)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "principal, delegate, scope, hash" }
+  /v1/mandates/revoke:
+    post:
+      summary: "Revoke a mandate (body: token, delegate)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "revoked, hash" }
+  /v1/mandates/approve:
+    post:
+      summary: "Principal approves a held over-cap match (body: token, handle)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "committed via approval" }
+        "404": { description: "no held match" }
+  /v1/delegate/workspace:
+    post:
+      summary: "The delegate's principals + scope (empty after revocation; body: token)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "principals: [...]" }
+  /v1/delegate/needs:
+    post:
+      summary: "A delegated need: scope-checked, under-cap closes, over-cap held (body: token, principal, category, jurisdiction, envelope)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "committed | held-for-approval | no-match" }
+        "403": { description: "no valid mandate | out of scope" }
+  /v1/activity:
+    post:
+      summary: "The principal's activity trail (dual attribution; body: token)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "activity: [...]" }
+  # s005: GET /v1/campaigns/region/{region} is served by ads-svc; the coordinator fetches it and
+  # passes campaigns into the sealed environment. A boosted /v1/bookings settles agency+creator credit.

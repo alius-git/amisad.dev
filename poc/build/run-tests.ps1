@@ -41,6 +41,9 @@ $Scenarios = @(
     'workload.guest.ubuntu.server.24.amisad-core.s002.fitting'
     'workload.guest.ubuntu.server.24.amisad-core.s003.silence'
     'workload.guest.ubuntu.server.24.amisad-core.s004.failover'
+    'workload.guest.ubuntu.server.24.amisad-core.s005.attribution'
+    'workload.guest.ubuntu.server.24.amisad-core.s006.mandate'
+    'workload.guest.ubuntu.server.24.amisad-core.s007.inventory'
 )
 
 function Stop-LabConsole {

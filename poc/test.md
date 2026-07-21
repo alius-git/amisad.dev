@@ -39,6 +39,10 @@ the demo by hand instead, see [demo.md](demo.md).
    Set-Password -Username elena -NewPassword '<alnum>'
    Set-Password -Username tom   -NewPassword '<alnum>'
    Set-Password -Username priya -NewPassword '<alnum>'
+   Set-Password -Username marcel -NewPassword '<alnum>'
+   Set-Password -Username kai    -NewPassword '<alnum>'
+   Set-Password -Username pat    -NewPassword '<alnum>'
+   Set-Password -Username alex   -NewPassword '<alnum>'
    ```
 
    The vault is a local, gitignored file. Seed every new username before its
@@ -66,7 +70,7 @@ independent without per-scenario VMs. Hostnames are set with the framework's
 [3] amisad-core    start.guest -> k8s + PostgreSQL + NATS (snapshot
                       amisad-core-k8s) -> binaries from the stash, deploy
                       10 services (ledger+seller on PostgreSQL), add
-                      maya/elena/tom/priya -> snapshot amisad-core.
+                      maya/elena/tom/priya/marcel/kai/pat/alex -> snapshot amisad-core.
 [4] both edges started; each reports its IP to the status server.
 [5] scenarios in order, each: restore amisad-core -> drive over SSH
     (sshWaitReady + sshFetchAndExecute; no OCR, so live edge VMs cannot
@@ -114,7 +118,8 @@ go to PostgreSQL first, and pods reload state on start. s001 asserts the rows
 landed and that a `kubectl rollout restart` reloads verifying chains and the
 settled order; s002 asserts the booked appointment row; s003 asserts the
 consent chain's six grant/revoke/re-grant rows; s004 asserts all twelve
-attestation rows (two aborted + one completed environment). Empty `databaseUrl` (the
+attestation rows; s005 the boosted 5-way settlement; s006 the mandate
+grant+revoke consent rows; s007 the delta-zeroed offer leaving the catalog. Empty `databaseUrl` (the
 chart default) keeps a service in-memory — which is how `cargo test` and
 skeleton services run.
 

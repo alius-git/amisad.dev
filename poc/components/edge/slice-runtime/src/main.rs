@@ -17,6 +17,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 struct State {
     egress: Vec<String>,
+    ingress: Vec<String>,
     armed_faults: i64,
 }
 
@@ -214,6 +215,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
             };
             let empty = Vec::new();
             let offers = body.get("offers").and_then(|o| o.as_arr()).unwrap_or(&empty).clone();
+            // s005.attribution: campaigns for this region travel INTO the
+            // environment; the creative is rendered here, never outside.
+            let campaigns = body.get("campaigns").and_then(|c| c.as_arr()).unwrap_or(&empty).clone();
 
             let environment_id = sha256::hex_digest(
                 format!("{envelope}|{}|{}", now_nanos(), process_nonce()).as_bytes(),
@@ -261,6 +265,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 // and the coordinator cannot re-check (it never parses the
                 // sealed need).
                 let before = need.i64_of("fitting_before_ordinal");
+                // A campaign for this need's category boosts its offers with
+                // Kai's creative (region already filtered by the coordinator).
+                let campaign = campaigns
+                    .iter()
+                    .find(|c| c.str_of("category") == need.str_of("category"));
                 let entries: Vec<json::Json> = offers
                     .iter()
                     .filter(|offer| qualifies(&need, offer))
@@ -281,13 +290,33 @@ fn handle(state: &mut State, req: &Request) -> Response {
                                     .collect()
                             })
                             .unwrap_or_default();
-                        json::obj(vec![
+                        let mut pairs = vec![
                             ("offer_id", json::s(offer.str_of("offer_id").unwrap_or(""))),
                             ("tenant", json::s(offer.str_of("tenant").unwrap_or(""))),
                             ("title", json::s(offer.str_of("title").unwrap_or(""))),
                             ("price_cents", json::n(offer.i64_of("price_cents").unwrap_or(0))),
                             ("fitting_slots", json::arr(allowed_slots)),
-                        ])
+                        ];
+                        // Boosted presentation: the offer carries the campaign
+                        // creative and the ad credit the booking will settle.
+                        if let Some(c) = campaign {
+                            let creative = c.str_of("creative").unwrap_or("");
+                            state.ingress.push(format!(
+                                "creative:{}:{creative}",
+                                c.str_of("campaign_id").unwrap_or("")
+                            ));
+                            pairs.push((
+                                "campaign",
+                                json::obj(vec![
+                                    ("campaign_id", json::s(c.str_of("campaign_id").unwrap_or(""))),
+                                    ("asset_id", json::s(c.str_of("asset_id").unwrap_or(""))),
+                                    ("creator", json::s(c.str_of("creator").unwrap_or(""))),
+                                    ("creative", json::s(creative)),
+                                    ("ad_cents", json::n(c.i64_of("ad_cents_per_match").unwrap_or(0))),
+                                ]),
+                            ));
+                        }
+                        json::obj(pairs)
                     })
                     .collect();
                 let shortlist = json::obj(vec![
@@ -393,6 +422,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 state.egress.iter().map(|e| json::s(e)).collect();
             Response::json(200, &json::obj(vec![("entries", json::arr(entries))]))
         }
+        // Everything that entered an environment (s005: the campaign
+        // creative). The buyer-signal-free counterpart of the egress log.
+        ("GET", "/v1/ingress") => {
+            let entries: Vec<json::Json> =
+                state.ingress.iter().map(|e| json::s(e)).collect();
+            Response::json(200, &json::obj(vec![("entries", json::arr(entries))]))
+        }
         _ => Response::error(404, "not found"),
     }
 }
@@ -405,6 +441,7 @@ fn main() -> std::io::Result<()> {
         },
         State {
             egress: Vec::new(),
+            ingress: Vec::new(),
             armed_faults: 0,
         },
         handle,
@@ -512,6 +549,7 @@ mod tests {
         // and post_out only logs - the abort semantics are what's under test.
         let mut state = State {
             egress: Vec::new(),
+            ingress: Vec::new(),
             armed_faults: 1,
         };
         let response = handle(
@@ -540,6 +578,7 @@ mod tests {
     fn fault_arming_validates_mode_and_count() {
         let mut state = State {
             egress: Vec::new(),
+            ingress: Vec::new(),
             armed_faults: 0,
         };
         let req = |body: &str| Request {
