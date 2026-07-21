@@ -173,6 +173,13 @@ foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
         Write-Error "$edge provisioning failed - stopping."
         exit 1
     }
+    # The framework provisions every ubuntu guest at a FIXED 12GB. Edges only
+    # run the small slice-runtime binary, and since s004 BOTH edges are live
+    # while amisad-core (12GB) restores - 3 x 12GB exceeds host RAM
+    # (0x800705AA, proven 2026-07-20). Shrink edges before the checkpoint
+    # retake so the restored config is small too.
+    Hyper-V\Set-VM -Name $edge -StaticMemory -MemoryStartupBytes 4GB
+    Write-Host "$edge memory set to 4GB (slice-runtime only)."
     Remove-InstallMedia -Name $edge -SnapshotId $edge
 }
 
