@@ -1,49 +1,72 @@
-# yaml-language-server: $schema=../../../yuruna/test/schemas/test-set.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/orchestration-sequence.schema.yml
 #
 # AmisAd POC end-to-end playbook: a host-side teardown + topology build, then
-# every implemented scenario s001 -> s010 in order. Shaped as a Yuruna test-set
-# manifest (test-set.schema.yml) so its sequences[] drive the run.
+# every implemented scenario s001 -> s010 in order. Shaped as a Yuruna
+# orchestration sequence (orchestration-sequence.schema.yml): Test-Sequence.ps1
+# detects the InvokeTestSequence steps, runs every inner sequence in-process
+# under ONE status.json cycle, and shows one dashboard row per inner sequence
+# (unified naming + pass/fail) instead of a cycle per sequence.
 #
-# Two consumption modes:
-#   - Full end-to-end pass (this file, under test/gui/): a driver
-#     (Test-SequenceSet) runs set-resource.yml on the HOST first - it tears the
-#     lab down (Clear-Project.ps1) then builds the topology and starts both
-#     edges (Set-Resource.ps1) - and then the guest scenarios below. Self-
-#     contained from a cold host.
-#   - Continuous pool testing: COPY this file (or the guest sequences only) to
-#     project/test/test-sets/<name>.yml - the pool planner reads test-sets/ and
-#     iterates sequences[] each cycle. The pool cycle runner has NO host-script
-#     action, so drop set-resource.yml there and keep the demo warm instead
-#     (the scenarios restore the "amisad-core" snapshot and re-deliver
-#     slice-runtime to the edges, so they are order-independent and repeatable).
+# Run it directly:
+#   pwsh test/Test-Sequence.ps1 amisad.end-to-end
 #
-# The guest scenarios need amisad-core + both edges (amisad-edge-a/-b) live. The
-# full pass builds them via set-resource.yml above; in pool mode (no host action)
-# bootstrap once with poc/build/run-tests.ps1 and keep the demo warm.
+# The first step (set-resource.yml) is a HOST action: it tears the lab down
+# (Clear-Project.ps1) then builds the topology and starts both edges
+# (Set-Resource.ps1). The guest scenarios below need amisad-core + both edges
+# (amisad-edge-a/-b) live; the full pass builds them via set-resource.yml.
 # s004 and s010 need both edges; the rest use amisad-edge-a (or the single-VM
 # degraded fallback).
+#
+# Continuous pool testing is a SEPARATE path: the pool planner consumes the
+# test-set manifest format (test-set.schema.yml), not this orchestration
+# sequence. Author a project/test/test-sets/<name>.yml for pool mode; keep the
+# demo warm (the scenarios restore the "amisad-core" snapshot and re-deliver
+# slice-runtime to the edges, so they are order-independent and repeatable).
 
-schemaVersion: 1
 name: amisad.end-to-end
+description: Host-side lab teardown + topology build, then every AmisAd scenario s001 -> s010 in order.
 
-requiredGuests:
-  - guest.ubuntu.server.24
+steps:
+  - action: InvokeTestSequence
+    sequence: set-resource.yml
+    description: "Host: tear down the lab, build + start the AmisAd topology"
 
-sequences:
-  # Host-side teardown + build FIRST (see set-resource.yml): Clear-Project.ps1
-  # removes every lab VM + orphaned files, then Set-Resource.ps1 builds the
-  # stash, both edges, and amisad-core and starts the edges. Runs on the host
-  # with Administrator - not a guest sequence, so a driver (Test-SequenceSet)
-  # invokes it before the sNNN sequences below (the pool cycle runner has no
-  # host-script action, so pool mode drops this entry and stays warm).
-  - set-resource.yml
-  - workload.guest.ubuntu.server.24.amisad-core.s001.fulfillment
-  - workload.guest.ubuntu.server.24.amisad-core.s002.fitting
-  - workload.guest.ubuntu.server.24.amisad-core.s003.silence
-  - workload.guest.ubuntu.server.24.amisad-core.s004.failover
-  - workload.guest.ubuntu.server.24.amisad-core.s005.attribution
-  - workload.guest.ubuntu.server.24.amisad-core.s006.mandate
-  - workload.guest.ubuntu.server.24.amisad-core.s007.inventory
-  - workload.guest.ubuntu.server.24.amisad-core.s008.mediation
-  - workload.guest.ubuntu.server.24.amisad-core.s009.suppression
-  - workload.guest.ubuntu.server.24.amisad-core.s010.certification
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s001.fulfillment
+    description: "Scenario s001.fulfillment: Maya's auto-close happy path, full TVP"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s002.fitting
+    description: "Scenario s002.fitting: manual shortlist + Thursday booking, full TVP"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s003.silence
+    description: "Scenario s003.silence: consent pause/withdraw/resume, honored commitments"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s004.failover
+    description: "Scenario s004.failover: fault-injection over both edges, settlement, incident case"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s005.attribution
+    description: "Scenario s005.attribution: campaign-boosted match, agency+creator attribution"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s006.mandate
+    description: "Scenario s006.mandate: delegated procurement under a scoped mandate"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s007.inventory
+    description: "Scenario s007.inventory: enterprise integration onboarding + inventory-truth matching"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s008.mediation
+    description: "Scenario s008.mediation: zero-knowledge dispute mediation"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s009.suppression
+    description: "Scenario s009.suppression: aggregate insights with anonymity-threshold suppression"
+
+  - action: InvokeTestSequence
+    sequence: workload.guest.ubuntu.server.24.amisad-core.s010.certification
+    description: "Scenario s010.certification: self-seeded corpus, certify + tamper-detect + audit"

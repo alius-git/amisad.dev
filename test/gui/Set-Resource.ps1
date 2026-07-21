@@ -23,10 +23,10 @@
     the end-to-end pass; Clear-Project.ps1 is the teardown half that runs first).
 .DESCRIPTION
     Ports the build stages of poc/build/run-tests.ps1 (everything except the
-    scenario loop, which the amisad.end-to-end.yml manifest drives). Assumes the
-    host is already clean (Clear-Project.ps1 ran) and <RepoRoot>/project is
-    already cloned (Test-SequenceSet clones once, so guest builds run with
-    -NoProjectClone). Stages, in order:
+    scenario loop, which the amisad.end-to-end.yml orchestration sequence drives).
+    Assumes the host is already clean (Clear-Project.ps1 ran) and <RepoRoot>/project
+    is already cloned (Test-Sequence, running the orchestration sequence, clones
+    once, so guest builds run with -NoProjectClone). Stages, in order:
 
       0. Generate the core->edge demo keypair (once per host).
       1. Build once: compile + upload binaries to the stash (amisad-build).
@@ -67,7 +67,8 @@ function Stop-LabConsole {
 function Invoke-Stage {
     # Write-Host (not Write-Output) for progress: the function's OUTPUT stream is
     # its return value, and a polluted return would break the caller's -ne 0 check.
-    # -NoProjectClone: Test-SequenceSet already refreshed <RepoRoot>/project once.
+    # -NoProjectClone: the orchestration run (Test-Sequence) already refreshed
+    # <RepoRoot>/project once before invoking set-resource.
     param([string]$Name, [string]$Sequence)
     Stop-LabConsole
     $out = Join-Path $LogDir "$Name.out.log"

@@ -20,7 +20,9 @@ variables:
   username: amisad-build-admin
   hostname: amisad-build
   # Stash-service VM the binaries are dropped into (yuruna-stash-service).
-  stashHost: "192.168.7.222"
+  # Discovered live at run time (Get-VMIp) instead of a hard-coded literal;
+  # the guest .compile.sh keeps a degraded-mode default if this resolves empty.
+  stashHost: "${ext:stash-service.ResolveHost(yuruna-stash-service)}"
 
 steps:
   - action: loadDiskSnapshot

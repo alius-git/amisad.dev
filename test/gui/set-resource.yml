@@ -3,15 +3,16 @@
 # The first step of a full end-to-end pass: a HOST-side reset that first tears
 # the lab down and then builds the demo topology back up, so the guest scenarios
 # that follow have amisad-core + both edges live. It runs two host scripts in
-# order (Test-SequenceSet's host.scripts contract):
+# order (the `host.scripts` contract an InvokeTestSequence step honors):
 #
 #   1. Clear-Project.ps1 - remove every lab VM + storage, sweep orphaned files.
 #   2. Set-Resource.ps1  - build the stash, both edges, and amisad-core, then
 #                          start the edges and wait for their IP reports.
 #
 # HOST action, not a guest interaction sequence. The Yuruna cycle runner's step
-# actions are all guest-facing (ssh*, input*, snapshot ops, callExtension), so a
-# driver (Test-SequenceSet) invokes this on the host BEFORE any guest sequence.
+# actions are all guest-facing (ssh*, input*, snapshot ops, callExtension), so
+# the orchestration sequence (amisad.end-to-end.yml, run by Test-Sequence.ps1)
+# invokes this via InvokeTestSequence on the host BEFORE any guest sequence.
 # Both scripts need Administrator. This replaces the old clear.project.yml (which
 # only cleared) and supersedes the duplicate build orchestration in
 # poc/build/run-tests.ps1, which will be retired once this path is proven.
