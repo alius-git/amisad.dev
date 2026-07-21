@@ -56,7 +56,8 @@ in sudoers.
 Scenario scripts on vm-core reach the edge VMs with a dedicated **demo
 keypair** (`amisad-demo-key`), generated host-side by `run-tests.ps1` under
 `test/status/handoff/` and fetched by the guests from the status server. The
-edges' boot-time IP reporter posts `<hostname>.ip.txt` there too, which is how
+edges' boot-time IP reporter posts `<hostname>.ip.txt` under the status
+server's `log/handoff/`, which is how
 vm-core resolves them without DNS. Lab deviation, deliberate: the handoff dir
 is readable on the trusted lab LAN.
 

@@ -44,8 +44,8 @@ sources.
 - **One third-party crate: `postgres`.** The services serve their routes with
   the std-only responder in `amisad-common`; the first external dependency is
   the PostgreSQL client for the durable ledger/catalog stores, wired through
-  **crate_universe** in `MODULE.bazel` with the committed `Cargo.lock` —
-  exactly the growth path this bullet used to plan. (Actix replaces the
+  **crate_universe** in `MODULE.bazel` with the committed `Cargo.lock`.
+  (Actix replaces the
   responder when the surface outgrows it — plan/design.md §1.)
 - **App builds are `bazel run` wrappers.** Flutter and Vite have no mature
   Bazel rules, and their toolchains fight sandboxing (Gradle/pub/npm caches).
@@ -152,6 +152,13 @@ The TVP asserts zero attestation-ledger growth across the paused window, the
 full grant → revoke → re-grant history on the verifying consent chain, and
 its rows in PostgreSQL.
 
+s003-specific deviations, deliberate: the coordinator's open needs are
+in-memory (a pod restart drops them while the consent chain persists);
+bookings still ride the handle as bearer and are not consent-gated (the
+booking step's consent check is future work); and the subject pseudonym is an
+unsalted hash of the verified actor with a world-readable per-subject consent
+history — pseudonymous, not anonymous.
+
 ## s004.failover implementation notes
 
 s004.failover proves the fabric fails *safe*. Both edges now run
@@ -168,13 +175,6 @@ completes the match with exactly one settlement — hosting revenue for the
 completed environment only. Tom escalates the systemic pattern to Priya:
 platform-svc's first real surface, a cross-party incident case linking both
 aborted lifecycles by environment id only.
-
-s003-specific deviations, deliberate: the coordinator's open needs are
-in-memory (a pod restart drops them while the consent chain persists);
-bookings still ride the handle as bearer and are not consent-gated (the
-booking step's consent check is future work); and the subject pseudonym is an
-unsalted hash of the verified actor with a world-readable per-subject consent
-history — pseudonymous, not anonymous.
 
 ---
 
