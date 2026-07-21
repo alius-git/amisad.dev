@@ -31,6 +31,9 @@ param(
     [switch]$NoConfigGate
 )
 $ErrorActionPreference = 'Continue'
+# Progress goes to the information stream (displayed via InformationPreference),
+# never the success stream -- Invoke-Stage returns an exit code the caller checks.
+$InformationPreference = 'Continue'
 $ts = Join-Path $YurunaRoot 'test\Test-Sequence.ps1'
 if (-not (Test-Path $ts)) { Write-Error "Test-Sequence.ps1 not found at $ts"; exit 1 }
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
@@ -50,26 +53,31 @@ $Scenarios = @(
 )
 
 function Stop-LabConsole {
+    [CmdletBinding(SupportsShouldProcess)]
+    param()
     # Only LAB consoles: a live vmconnect can steal GUI keystroke focus during a
     # VM's first login, but operator consoles to unrelated VMs must be left alone.
-    Get-Process vmconnect -ErrorAction SilentlyContinue |
-        Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
-        Stop-Process -Force -ErrorAction SilentlyContinue
+    if ($PSCmdlet.ShouldProcess('lab vmconnect consoles', 'Stop process')) {
+        Get-Process vmconnect -ErrorAction SilentlyContinue |
+            Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Invoke-Stage {
-    # Write-Host (not Write-Output) for progress: the function's OUTPUT stream is
-    # its return value, and a polluted return would break the caller's -ne 0 check.
-    param([string]$Name, [string]$Sequence)
+    # Write-Information (not Write-Output) for progress: the function's OUTPUT
+    # stream is its return value, and a polluted return would break the caller's
+    # -ne 0 check.
+    param([string]$Name, [string]$Sequence, [switch]$NoConfigGate)
     Stop-LabConsole
     $out = Join-Path $LogDir "$Name.out.log"
     $err = Join-Path $LogDir "$Name.err.log"
     $stageArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"{0}"' -f $ts), $Sequence)
     if ($NoConfigGate) { $stageArgs += '-NoConfigGate' }
-    Write-Host "===== [$Name] $Sequence  $([DateTime]::Now.ToString('s'))  (log: $out) ====="
+    Write-Information "===== [$Name] $Sequence  $([DateTime]::Now.ToString('s'))  (log: $out) ====="
     $p = Start-Process pwsh -PassThru -WindowStyle Hidden -RedirectStandardOutput $out -RedirectStandardError $err -ArgumentList $stageArgs
     $p.WaitForExit()
-    Write-Host "===== [$Name] exited $($p.ExitCode)  $([DateTime]::Now.ToString('s')) ====="
+    Write-Information "===== [$Name] exited $($p.ExitCode)  $([DateTime]::Now.ToString('s')) ====="
     if ($p.ExitCode -ne 0) {
         Get-Content $out -Tail 25 -ErrorAction SilentlyContinue | Out-Host
         Get-Content $err -Tail 10 -ErrorAction SilentlyContinue | Out-Host
@@ -78,9 +86,11 @@ function Invoke-Stage {
 }
 
 function Remove-LabVM {
+    [CmdletBinding(SupportsShouldProcess)]
     param([string]$Name)
-    if (Hyper-V\Get-VM -Name $Name -ErrorAction SilentlyContinue) {
-        Write-Host "Removing VM $Name"
+    if ((Hyper-V\Get-VM -Name $Name -ErrorAction SilentlyContinue) -and
+        $PSCmdlet.ShouldProcess($Name, 'Remove VM')) {
+        Write-Information "Removing VM $Name"
         Hyper-V\Stop-VM -Name $Name -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
         Hyper-V\Remove-VM -Name $Name -Force -Confirm:$false -ErrorAction SilentlyContinue
     }
@@ -90,20 +100,22 @@ function Remove-LabVM {
     $vhdRoot = (Hyper-V\Get-VMHost -ErrorAction SilentlyContinue).VirtualHardDiskPath
     if ($vhdRoot) {
         $vmDir = Join-Path $vhdRoot $Name
-        if (Test-Path $vmDir) {
-            Write-Host "Removing leftover VM storage $vmDir"
+        if ((Test-Path $vmDir) -and $PSCmdlet.ShouldProcess($vmDir, 'Remove leftover VM storage')) {
+            Write-Information "Removing leftover VM storage $vmDir"
             Remove-Item -LiteralPath $vmDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 }
 
 function Remove-InstallMedia {
+    [CmdletBinding(SupportsShouldProcess)]
     param([string]$Name, [string]$SnapshotId)
     # The provisioning DVDs (install ISO + the per-VM seed.iso in the transient
     # test- storage dir) are only needed for autoinstall. A renamed VM keeps
     # ABSOLUTE references into that dir; later provisioning cycles overwrite it
     # with files ACL'd to the newer VM, and starting the older VM then fails
     # with 0x80070005. Strip the media once the chain is done (VM must be Off).
+    if (-not $PSCmdlet.ShouldProcess($Name, 'Remove install media + retake checkpoint')) { return }
     Hyper-V\Get-VMDvdDrive -VMName $Name -ErrorAction SilentlyContinue |
         Hyper-V\Remove-VMDvdDrive -ErrorAction SilentlyContinue
     # Stripping the CURRENT config is not enough for restore targets: the
@@ -117,7 +129,7 @@ function Remove-InstallMedia {
         if ($cp) {
             Hyper-V\Remove-VMCheckpoint -VMName $Name -Name $SnapshotId -Confirm:$false
             Hyper-V\Checkpoint-VM -Name $Name -SnapshotName $SnapshotId -Confirm:$false
-            Write-Host "Retook checkpoint '$SnapshotId' on $Name without install media."
+            Write-Information "Retook checkpoint '$SnapshotId' on $Name without install media."
         }
     }
 }
@@ -158,24 +170,24 @@ $handoff = Join-Path $YurunaRoot 'test\status\handoff'
 New-Item -ItemType Directory -Force -Path $handoff | Out-Null
 $demoKey = Join-Path $handoff 'amisad-demo-key'
 if (-not (Test-Path $demoKey)) {
-    Write-Host "Generating the core->edge demo keypair."
+    Write-Information "Generating the core->edge demo keypair."
     # -N '' (a true empty argument): under pwsh 7's Standard native passing,
     # -N '""' would create a key ENCRYPTED with the literal passphrase "".
     ssh-keygen -t ed25519 -N '' -C 'amisad-demo' -f $demoKey | Out-Host
 }
 
 # --- [1] build once: compile + upload binaries to the stash ---
-if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile') -ne 0) {
+if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "Build stage failed; no binaries in the stash - stopping."
     exit 1
 }
 Hyper-V\Stop-VM -Name 'amisad-build' -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
 Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build'
-Write-Host "amisad-build stopped (kept on disk)."
+Write-Information "amisad-build stopped (kept on disk)."
 
 # --- [2] edge VMs: provision + snapshot, one at a time (chains end stopped) ---
 foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
-    if ((Invoke-Stage -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline") -ne 0) {
+    if ((Invoke-Stage -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline" -NoConfigGate:$NoConfigGate) -ne 0) {
         Write-Error "$edge provisioning failed - stopping."
         exit 1
     }
@@ -185,12 +197,12 @@ foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
     # (0x800705AA, proven 2026-07-20). Shrink edges before the checkpoint
     # retake so the restored config is small too.
     Hyper-V\Set-VM -Name $edge -StaticMemory -MemoryStartupBytes 4GB
-    Write-Host "$edge memory set to 4GB (slice-runtime only)."
+    Write-Information "$edge memory set to 4GB (slice-runtime only)."
     Remove-InstallMedia -Name $edge -SnapshotId $edge
 }
 
 # --- [3] vm-core: k8s + deploy + demo users (cold chain, solo) ---
-if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy') -ne 0) {
+if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "amisad-core deploy failed - stopping."
     exit 1
 }
@@ -200,7 +212,7 @@ Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core'
 # s004.failover needs the region-B edge live (jurisdiction-restricted
 # allocation must have a roomier non-compliant region to exclude); earlier
 # scenarios simply don't use it. Both stay live in the demo environment.
-Write-Host "Starting amisad-edge-a + amisad-edge-b."
+Write-Information "Starting amisad-edge-a + amisad-edge-b."
 # The log-upload sink writes under YURUNA_LOG_DIR when overridden; resolve the
 # same way the server does, and anchor freshness to THIS start (a stale file
 # from a prior run/boot must not count).
@@ -221,7 +233,7 @@ foreach ($edge in $edges) {
             $edgeState[$edge].Started = $true
             break
         } catch {
-            Write-Host "Start-VM $edge attempt ${attempt}/3 failed: $($_.Exception.Message)"
+            Write-Information "Start-VM $edge attempt ${attempt}/3 failed: $($_.Exception.Message)"
             Start-Sleep -Seconds 10
         }
     }
@@ -246,13 +258,13 @@ foreach ($edge in $edges) {
 # --- [5] scenarios, in order, each restoring amisad-core over SSH ---
 foreach ($s in $Scenarios) {
     $name = ($s -split '\.')[-2..-1] -join '.'
-    if ((Invoke-Stage -Name $name -Sequence $s) -ne 0) {
+    if ((Invoke-Stage -Name $name -Sequence $s -NoConfigGate:$NoConfigGate) -ne 0) {
         Write-Error "Scenario $s FAILED - stopping the run; VMs are left as-is for debugging."
         exit 1
     }
 }
 
-Write-Host "ALL SCENARIOS PASSED. Demo environment live: amisad-core + amisad-edge-a + amisad-edge-b."
-Write-Host "--- final VM inventory ---"
-(Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Host
+Write-Information "ALL SCENARIOS PASSED. Demo environment live: amisad-core + amisad-edge-a + amisad-edge-b."
+Write-Information "--- final VM inventory ---"
+(Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Information
 exit 0

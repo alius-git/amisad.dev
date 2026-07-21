@@ -55,14 +55,19 @@ Set-StrictMode -Version Latest
 $TopologyVms = @('amisad-build', 'amisad-edge-a', 'amisad-edge-b', 'amisad-core', 'amisad-core-k8s')
 
 function Stop-LabConsole {
+    [CmdletBinding(SupportsShouldProcess)]
+    param()
     # Only LAB consoles: a live vmconnect can steal GUI keystroke focus during a
     # VM's first login; operator consoles to unrelated VMs are left alone.
-    Get-Process vmconnect -ErrorAction SilentlyContinue |
-        Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
-        Stop-Process -Force -ErrorAction SilentlyContinue
+    if ($PSCmdlet.ShouldProcess('lab vmconnect consoles', 'Stop process')) {
+        Get-Process vmconnect -ErrorAction SilentlyContinue |
+            Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Remove-LabVM {
+    [CmdletBinding(SupportsShouldProcess)]
     param([string]$Name)
     if (Hyper-V\Get-VM -Name $Name -ErrorAction SilentlyContinue) {
         if ($PSCmdlet.ShouldProcess($Name, 'Remove VM')) {

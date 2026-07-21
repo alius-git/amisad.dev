@@ -51,7 +51,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'docker build failed for slice-runtime' }
     if ($Push) { docker push $tag }
 
-    Write-Host "images OK - 11 images built$(if ($Push) { ' and pushed' })"
+    Write-Information "images OK - 11 images built$(if ($Push) { ' and pushed' })" -InformationAction Continue
 }
 finally {
     Pop-Location

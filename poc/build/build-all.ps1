@@ -36,7 +36,7 @@ try {
     & $bazel run //components/apps/buyer-flutter:build
     if ($LASTEXITCODE -ne 0) { throw "buyer-flutter build failed" }
 
-    Write-Host "build-all OK - Rust workspace, web-spa, and buyer-flutter built"
+    Write-Information "build-all OK - Rust workspace, web-spa, and buyer-flutter built" -InformationAction Continue
 }
 finally {
     Pop-Location

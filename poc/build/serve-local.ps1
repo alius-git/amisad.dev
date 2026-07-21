@@ -24,4 +24,4 @@ $repo = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $out = Join-Path $YurunaRoot 'project-poc.tar.gz'
 git -C $repo archive --format=tar.gz -o $out HEAD
 if ($LASTEXITCODE -ne 0) { throw 'git archive failed' }
-Write-Host "published $(git -C $repo rev-parse --short HEAD) -> $out"
+Write-Information "published $(git -C $repo rev-parse --short HEAD) -> $out" -InformationAction Continue

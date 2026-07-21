@@ -53,32 +53,39 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
+# Progress goes to the information stream (displayed via InformationPreference),
+# never the success stream -- Invoke-Stage returns an exit code the caller checks.
+$InformationPreference = 'Continue'
 $ts = Join-Path $YurunaRoot 'test\Test-Sequence.ps1'
 if (-not (Test-Path $ts)) { Write-Error "Test-Sequence.ps1 not found at $ts"; exit 1 }
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 function Stop-LabConsole {
+    [CmdletBinding(SupportsShouldProcess)]
+    param()
     # A live lab vmconnect steals GUI keystroke focus during a VM's first login.
-    Get-Process vmconnect -ErrorAction SilentlyContinue |
-        Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
-        Stop-Process -Force -ErrorAction SilentlyContinue
+    if ($PSCmdlet.ShouldProcess('lab vmconnect consoles', 'Stop process')) {
+        Get-Process vmconnect -ErrorAction SilentlyContinue |
+            Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+    }
 }
 
 function Invoke-Stage {
-    # Write-Host (not Write-Output) for progress: the function's OUTPUT stream is
-    # its return value, and a polluted return would break the caller's -ne 0 check.
-    # -NoProjectClone: the orchestration run (Test-Sequence) already refreshed
-    # <RepoRoot>/project once before invoking set-resource.
-    param([string]$Name, [string]$Sequence)
+    # Write-Information (not Write-Output) for progress: the function's OUTPUT
+    # stream is its return value, and a polluted return would break the caller's
+    # -ne 0 check. -NoProjectClone: the orchestration run (Test-Sequence) already
+    # refreshed <RepoRoot>/project once before invoking set-resource.
+    param([string]$Name, [string]$Sequence, [switch]$NoConfigGate)
     Stop-LabConsole
     $out = Join-Path $LogDir "$Name.out.log"
     $err = Join-Path $LogDir "$Name.err.log"
     $stageArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"{0}"' -f $ts), $Sequence, '-NoProjectClone')
     if ($NoConfigGate) { $stageArgs += '-NoConfigGate' }
-    Write-Host "===== [$Name] $Sequence  $([DateTime]::Now.ToString('s'))  (log: $out) ====="
+    Write-Information "===== [$Name] $Sequence  $([DateTime]::Now.ToString('s'))  (log: $out) ====="
     $p = Start-Process pwsh -PassThru -WindowStyle Hidden -RedirectStandardOutput $out -RedirectStandardError $err -ArgumentList $stageArgs
     $p.WaitForExit()
-    Write-Host "===== [$Name] exited $($p.ExitCode)  $([DateTime]::Now.ToString('s')) ====="
+    Write-Information "===== [$Name] exited $($p.ExitCode)  $([DateTime]::Now.ToString('s')) ====="
     if ($p.ExitCode -ne 0) {
         Get-Content $out -Tail 25 -ErrorAction SilentlyContinue | Out-Host
         Get-Content $err -Tail 10 -ErrorAction SilentlyContinue | Out-Host
@@ -87,12 +94,14 @@ function Invoke-Stage {
 }
 
 function Remove-InstallMedia {
+    [CmdletBinding(SupportsShouldProcess)]
     param([string]$Name, [string]$SnapshotId)
     # Autoinstall DVDs (install ISO + per-VM seed.iso) are only needed to build.
     # A renamed/restored VM keeps ABSOLUTE refs into that dir; later cycles
     # overwrite it with files ACL'd to a newer VM, so starting the older VM fails
     # with 0x80070005. Strip media, then RETAKE the checkpoint so the restored
     # config is DVD-free too (the checkpoint re-attaches DVDs otherwise).
+    if (-not $PSCmdlet.ShouldProcess($Name, 'Remove install media + retake checkpoint')) { return }
     Hyper-V\Get-VMDvdDrive -VMName $Name -ErrorAction SilentlyContinue |
         Hyper-V\Remove-VMDvdDrive -ErrorAction SilentlyContinue
     if ($SnapshotId) {
@@ -100,7 +109,7 @@ function Remove-InstallMedia {
         if ($cp) {
             Hyper-V\Remove-VMCheckpoint -VMName $Name -Name $SnapshotId -Confirm:$false
             Hyper-V\Checkpoint-VM -Name $Name -SnapshotName $SnapshotId -Confirm:$false
-            Write-Host "Retook checkpoint '$SnapshotId' on $Name without install media."
+            Write-Information "Retook checkpoint '$SnapshotId' on $Name without install media."
         }
     }
 }
@@ -117,23 +126,23 @@ $handoff = Join-Path $YurunaRoot 'test\status\handoff'
 New-Item -ItemType Directory -Force -Path $handoff | Out-Null
 $demoKey = Join-Path $handoff 'amisad-demo-key'
 if (-not (Test-Path $demoKey)) {
-    Write-Host "Generating the core->edge demo keypair."
+    Write-Information "Generating the core->edge demo keypair."
     # -N '' (a true empty argument): -N '""' would encrypt with the literal "".
     ssh-keygen -t ed25519 -N '' -C 'amisad-demo' -f $demoKey | Out-Host
 }
 
 # --- [1] build once: compile + upload binaries to the stash ---
-if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile') -ne 0) {
+if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "Build stage failed; no binaries in the stash - stopping."
     exit 1
 }
 Hyper-V\Stop-VM -Name 'amisad-build' -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
 Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build'
-Write-Host "amisad-build stopped (kept on disk)."
+Write-Information "amisad-build stopped (kept on disk)."
 
 # --- [2] edge VMs: provision + snapshot, one at a time (chains end stopped) ---
 foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
-    if ((Invoke-Stage -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline") -ne 0) {
+    if ((Invoke-Stage -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline" -NoConfigGate:$NoConfigGate) -ne 0) {
         Write-Error "$edge provisioning failed - stopping."
         exit 1
     }
@@ -142,12 +151,12 @@ foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
     # restores - 3 x 12GB exceeds host RAM (0x800705AA). Shrink before the
     # checkpoint retake so the restored config is small too.
     Hyper-V\Set-VM -Name $edge -StaticMemory -MemoryStartupBytes 4GB
-    Write-Host "$edge memory set to 4GB (slice-runtime only)."
+    Write-Information "$edge memory set to 4GB (slice-runtime only)."
     Remove-InstallMedia -Name $edge -SnapshotId $edge
 }
 
 # --- [3] vm-core: k8s + deploy + demo users (cold chain, solo) ---
-if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy') -ne 0) {
+if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "amisad-core deploy failed - stopping."
     exit 1
 }
@@ -157,7 +166,7 @@ Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core'
 # The scenarios resolve amisad-edge-a/-b from these boot-time reports; a stale
 # file from a prior run must not count, so delete first and anchor freshness to
 # THIS start. s004/s010 need region-B live; earlier scenarios just don't use it.
-Write-Host "Starting amisad-edge-a + amisad-edge-b."
+Write-Information "Starting amisad-edge-a + amisad-edge-b."
 $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test\status\log' }
 $edges = 'amisad-edge-a', 'amisad-edge-b'
 $edgeState = @{}
@@ -171,7 +180,7 @@ foreach ($edge in $edges) {
             $edgeState[$edge].Started = $true
             break
         } catch {
-            Write-Host "Start-VM $edge attempt ${attempt}/3 failed: $($_.Exception.Message)"
+            Write-Information "Start-VM $edge attempt ${attempt}/3 failed: $($_.Exception.Message)"
             Start-Sleep -Seconds 10
         }
     }
@@ -193,7 +202,7 @@ foreach ($edge in $edges) {
     }
 }
 
-Write-Host "Warm-up complete. Live: amisad-core + amisad-edge-a + amisad-edge-b."
-Write-Host "--- VM inventory ---"
-(Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Host
+Write-Information "Warm-up complete. Live: amisad-core + amisad-edge-a + amisad-edge-b."
+Write-Information "--- VM inventory ---"
+(Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Information
 exit 0

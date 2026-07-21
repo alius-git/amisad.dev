@@ -33,25 +33,26 @@ function Test-Tool {
         $cmd = Get-Command $c -ErrorAction SilentlyContinue
         if ($cmd) {
             try { $v = (& $c $VersionArgs.Split(' ') 2>&1 | Select-Object -First 1) } catch { $v = 'version check failed' }
-            Write-Host ("  OK       {0,-10} {1}" -f $Name, $v)
+            Write-Information ("  OK       {0,-10} {1}" -f $Name, $v)
             return
         }
     }
     if ($Required) {
-        Write-Host ("  MISSING  {0,-10} REQUIRED - {1}" -f $Name, $Hint)
+        Write-Information ("  MISSING  {0,-10} REQUIRED - {1}" -f $Name, $Hint)
         $script:failures += $Name
     } else {
-        Write-Host ("  missing  {0,-10} optional - {1}" -f $Name, $Hint)
+        Write-Information ("  missing  {0,-10} optional - {1}" -f $Name, $Hint)
     }
 }
 
-Write-Host "AmisAd POC doctor - required toolchains:"
+$InformationPreference = 'Continue'
+Write-Information "AmisAd POC doctor - required toolchains:"
 Test-Tool -Name 'bazel'   -Candidates @('bazelisk', 'bazel') -VersionArgs '--version' -Required $true  -Hint 'install bazelisk (https://github.com/bazelbuild/bazelisk); .bazelversion pins Bazel'
 Test-Tool -Name 'rust'    -Candidates @('cargo')             -VersionArgs '--version' -Required $true  -Hint 'install rustup (https://rustup.rs)'
 Test-Tool -Name 'node'    -Candidates @('node')              -VersionArgs '--version' -Required $true  -Hint 'install Node.js LTS (https://nodejs.org)'
 Test-Tool -Name 'npm'     -Candidates @('npm')               -VersionArgs '--version' -Required $true  -Hint 'ships with Node.js'
 Test-Tool -Name 'flutter' -Candidates @('flutter')           -VersionArgs '--version' -Required $true  -Hint 'install the Flutter SDK (https://flutter.dev)'
-Write-Host 'Optional (needed for images/deploys, not for bazel build):'
+Write-Information 'Optional (needed for images/deploys, not for bazel build):'
 Test-Tool -Name 'docker'  -Candidates @('docker')            -VersionArgs '--version' -Required $false -Hint 'needed by build/images.ps1'
 Test-Tool -Name 'helm'    -Candidates @('helm')              -VersionArgs 'version --short' -Required $false -Hint 'needed to lint/deploy workloads/'
 Test-Tool -Name 'kubectl' -Candidates @('kubectl')           -VersionArgs 'version --client' -Required $false -Hint 'needed for cluster deploys'
@@ -60,4 +61,4 @@ if ($failures.Count -gt 0) {
     Write-Error ("doctor FAILED - missing required toolchains: {0}" -f ($failures -join ', '))
     exit 1
 }
-Write-Host "doctor OK - all required toolchains present"
+Write-Information "doctor OK - all required toolchains present"
