@@ -294,6 +294,10 @@ fn handle(state: &mut State, req: &Request) -> Response {
                             ("offer_id", json::s(offer.str_of("offer_id").unwrap_or(""))),
                             ("tenant", json::s(offer.str_of("tenant").unwrap_or(""))),
                             ("title", json::s(offer.str_of("title").unwrap_or(""))),
+                            // The offer category equals the sealed need category
+                            // (qualifies() requires it) - the coordinator uses
+                            // it to enforce a mandate scope it cannot see.
+                            ("category", json::s(offer.str_of("category").unwrap_or(""))),
                             ("price_cents", json::n(offer.i64_of("price_cents").unwrap_or(0))),
                             ("fitting_slots", json::arr(allowed_slots)),
                         ];

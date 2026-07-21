@@ -13,7 +13,7 @@
 // kill switch); a matching cycle re-serves open needs when a seller
 // publishes an offer or the subject re-grants participation.
 
-use amisad_common::{json, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
+use amisad_common::{ad_split, json, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct Shortlist {
@@ -701,6 +701,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     m.revoked = true;
                 }
             }
+            // Revocation is immediate for pending work too: any over-cap match
+            // held under this mandate can no longer be approved.
+            state
+                .held
+                .retain(|h| !(h.principal == principal && h.delegate == delegate));
             Response::json(
                 201,
                 &json::obj(vec![("revoked", json::b(true)), ("hash", json::s(&hash))]),
@@ -757,8 +762,8 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 .mandates
                 .iter()
                 .find(|m| m.principal == principal && m.delegate == delegate);
-            let (per_item, in_scope) = match mandate {
-                Some(m) if !m.revoked && m.expiry_ts > now => (m.per_item_cents, m.category == category),
+            let (per_item, mandate_category) = match mandate {
+                Some(m) if !m.revoked && m.expiry_ts > now => (m.per_item_cents, m.category.clone()),
                 // No mandate, revoked, or expired: nothing may happen.
                 _ => {
                     return Response::json(
@@ -770,9 +775,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     )
                 }
             };
-            // Out-of-scope category refuses at submission: zero environments,
-            // zero ledger entries.
-            if !in_scope {
+            // Fast path: an honestly-declared out-of-scope category refuses at
+            // submission with zero environments and zero ledger entries. A
+            // dishonest declaration is caught post-match below (the sealed
+            // need's real category is only visible via the matched offer).
+            if mandate_category != category {
                 return Response::json(
                     403,
                     &json::obj(vec![
@@ -816,6 +823,21 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let offer_id = offer.str_of("offer_id").unwrap_or("").to_string();
             let tenant = offer.str_of("tenant").unwrap_or("").to_string();
             let price_cents = offer.i64_of("price_cents").unwrap_or(0);
+            // Defense against a spoofed declaration: the coordinator cannot
+            // read the sealed need, but the matched OFFER's category equals it
+            // (qualifies() enforces need.category == offer.category). Bind the
+            // mandate scope to the real matched category, not the delegate's
+            // out-of-band claim, so an in-scope declaration around an
+            // out-of-scope envelope cannot commit.
+            if offer.str_of("category") != Some(mandate_category.as_str()) {
+                return Response::json(
+                    403,
+                    &json::obj(vec![
+                        ("status", json::s("refused")),
+                        ("reason", json::s("out of mandate scope")),
+                    ]),
+                );
+            }
             if price_cents <= per_item {
                 let match_id = match commit_delegated(
                     state, &principal, &delegate, &environment_id, &offer_id, &tenant,
@@ -1005,13 +1027,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let ad_cents = campaign.and_then(|c| c.i64_of("ad_cents")).unwrap_or(0);
             let value_cents = price_cents + ad_cents;
             let splits = if ad_cents > 0 {
-                let agency = ad_cents * 60 / 100;
+                let (agency, creator) = ad_split(ad_cents);
                 json::obj(vec![
                     ("seller_cents", json::n(seller)),
                     ("network_cents", json::n(network)),
                     ("platform_cents", json::n(platform)),
                     ("agency_cents", json::n(agency)),
-                    ("creator_cents", json::n(ad_cents - agency)),
+                    ("creator_cents", json::n(creator)),
                 ])
             } else {
                 json::obj(vec![

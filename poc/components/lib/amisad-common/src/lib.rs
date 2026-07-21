@@ -209,6 +209,14 @@ pub fn splits_for(value_cents: i64) -> (i64, i64, i64, i64) {
     (seller, network, platform, ads)
 }
 
+/// Ad credit split (s005.attribution): agency 60%, creator the remainder —
+/// sums to ad_cents exactly. Shared so the ledger money (coordinator) and the
+/// attribution dashboard (ads-svc) cannot drift apart, like splits_for.
+pub fn ad_split(ad_cents: i64) -> (i64, i64) {
+    let agency = ad_cents * 60 / 100;
+    (agency, ad_cents - agency)
+}
+
 pub mod sha256 {
     //! SHA-256 (FIPS 180-4), used for the hash-chained ledgers and derived ids.
 

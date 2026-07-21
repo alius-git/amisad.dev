@@ -10,7 +10,7 @@
 // budget by the per-match commitment - never by impressions. Every view is
 // aggregate: no buyer signal ever reaches this service. In-memory (POC).
 
-use amisad_common::{json, serve_app, sha256, Request, Response, ServiceInfo};
+use amisad_common::{ad_split, json, serve_app, sha256, Request, Response, ServiceInfo};
 
 struct Campaign {
     id: String,
@@ -42,13 +42,6 @@ struct State {
     briefs: Vec<Brief>,
     assets: Vec<Asset>,
     attributions: Vec<json::Json>,
-}
-
-/// Agency keeps 60% of the per-match ad credit, the creator 40% - a fixed POC
-/// rule shared with nothing else (settlement records the amounts).
-fn ad_split(ad_cents: i64) -> (i64, i64) {
-    let agency = ad_cents * 60 / 100;
-    (agency, ad_cents - agency)
 }
 
 fn short_id(prefix: &str, seed: &str) -> String {
@@ -208,6 +201,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(i) => (i, state.campaigns[i].ad_cents_per_match),
                 None => return Response::error(404, "no active campaign"),
             };
+            // Pacing is a hard cap here, not just at feed time: never book a
+            // commitment the budget cannot fund.
+            if state.campaigns[index].spent_cents + ad_cents > state.campaigns[index].budget_cents {
+                return Response::error(409, "campaign budget exhausted");
+            }
             let asset_id = body.str_of("asset_id").unwrap_or("").to_string();
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let (agency_cents, creator_cents) = ad_split(ad_cents);

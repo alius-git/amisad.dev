@@ -41,6 +41,42 @@ fn short(prefix: &str, seed: &str) -> String {
     format!("{prefix}-{}", &sha256::hex_digest(seed.as_bytes())[..16])
 }
 
+/// Lifecycle order for the ERP mirror. Events arrive from independent
+/// detached seller threads with no delivery order, so the mirror advances
+/// monotonically: a later-arriving earlier state never overwrites a newer one.
+fn state_rank(s: &str) -> i64 {
+    match s {
+        "committed" => 1,
+        "provisioning" => 2,
+        "fulfilled" => 3,
+        "settled" => 4,
+        _ => 0,
+    }
+}
+
+/// Apply a delivery to the ERP mirror if it is new, advancing state
+/// monotonically. Returns whether it was a duplicate.
+fn apply_delivery(state: &mut State, match_id: &str, order_state: &str) -> bool {
+    let duplicate = state
+        .deliveries
+        .iter()
+        .any(|(m, s)| m == match_id && s == order_state);
+    if !duplicate {
+        state.deliveries.push((match_id.to_string(), order_state.to_string()));
+        let current = state
+            .erp_orders
+            .iter()
+            .find(|(m, _)| m == match_id)
+            .map(|(_, s)| state_rank(s))
+            .unwrap_or(0);
+        if state_rank(order_state) >= current {
+            state.erp_orders.retain(|(m, _)| m != match_id);
+            state.erp_orders.push((match_id.to_string(), order_state.to_string()));
+        }
+    }
+    duplicate
+}
+
 /// Resolve a credential to its grant. Err carries the response to return:
 /// 401 for unknown/revoked, 403 (logged) for an out-of-scope call.
 fn authorize<'a>(
@@ -220,15 +256,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             if match_id.is_empty() || order_state.is_empty() {
                 return Response::error(400, "match_id and state required");
             }
-            let duplicate = state
-                .deliveries
-                .iter()
-                .any(|(m, s)| *m == match_id && *s == order_state);
-            if !duplicate {
-                state.deliveries.push((match_id.clone(), order_state.clone()));
-                state.erp_orders.retain(|(m, _)| *m != match_id);
-                state.erp_orders.push((match_id.clone(), order_state.clone()));
-            }
+            let duplicate = apply_delivery(state, &match_id, &order_state);
             Response::json(200, &json::obj(vec![("mirrored", json::b(true)), ("duplicate", json::b(duplicate))]))
         }
         // The harness replays a delivery: same (match_id, state) must NOT
@@ -240,16 +268,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let order_state = body.str_of("state").unwrap_or("").to_string();
-            let duplicate = state
-                .deliveries
-                .iter()
-                .any(|(m, s)| *m == match_id && *s == order_state);
-            // A replay of a known delivery is a no-op; an unseen one applies.
-            if !duplicate {
-                state.deliveries.push((match_id.clone(), order_state.clone()));
-                state.erp_orders.retain(|(m, _)| *m != match_id);
-                state.erp_orders.push((match_id.clone(), order_state.clone()));
-            }
+            // A replay of a known delivery is a no-op; an unseen one applies
+            // monotonically, exactly like a first delivery.
+            let duplicate = apply_delivery(state, &match_id, &order_state);
             Response::json(200, &json::obj(vec![("duplicate", json::b(duplicate))]))
         }
         // A scoped query. Granted scope returns ok; anything else refuses and
@@ -359,5 +380,10 @@ mod tests {
         let replay = handle(&mut s, &req("POST", "/v1/webhooks/replay", "{\"match_id\":\"m1\",\"state\":\"settled\"}"));
         assert_eq!(json::parse(&replay.body).unwrap().bool_of("duplicate"), Some(true));
         assert_eq!(s.deliveries.len(), 2);
+        // Out-of-order delivery must NOT roll the mirror back: a late
+        // 'provisioning' after 'settled' leaves the mirror at settled.
+        handle(&mut s, &req("POST", "/v1/orders/events", &ev("m1", "provisioning")));
+        let mirror = handle(&mut s, &req("GET", "/v1/erp/orders/m1", ""));
+        assert_eq!(json::parse(&mirror.body).unwrap().str_of("state"), Some("settled"));
     }
 }
