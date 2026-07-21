@@ -9,4 +9,4 @@
 # orchestration, so the entry below is the latest implemented scenario, for
 # cycle monitoring only.
 sequences:
-- workload.guest.ubuntu.server.24.amisad-core.s007.inventory
+- workload.guest.ubuntu.server.24.amisad-core.s010.certification

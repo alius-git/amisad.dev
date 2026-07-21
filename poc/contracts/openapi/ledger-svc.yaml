@@ -88,3 +88,15 @@ paths:
         - { name: subject, in: path, required: true, schema: { type: string } }
       responses:
         "200": { description: "subject, participation, contribution, history" }
+  /v1/settlements/adjust:
+    post:
+      summary: "s008: post compensating entries reversing a confirmed settlement, referencing a support case (body: match_id, case_id); history is not edited"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "adjustment_entries" }
+        "404": { description: "no settlement" }
+  # GET /v1/settlements and GET /v1/consents -> raw chain dumps ({payload, prev, hash}) for independent audit (s010)

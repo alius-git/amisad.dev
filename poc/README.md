@@ -14,7 +14,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `contracts/` | OpenAPI specs per service — real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest — + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
-| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001–s007 buyer, delegate, and campaign paths |
+| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001–s010 buyer, delegate, campaign, and disclosure paths |
 | `components/apps/buyer-flutter/` | Flutter buyer app (Android side-loaded) |
 | `components/apps/web-spa/` | React + TS + Vite shell, 7 role-scoped module routes |
 | `components/lib/amisad-common/` | Shared config/health plumbing crate |
@@ -22,8 +22,8 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment … s007.inventory |
-| `test/gui-parked/` | Skeleton sequences (deploy + `/health` checks), un-parked as each scenario is implemented |
+| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment … s010.certification |
+| `test/gui-parked/` | Empty — every scenario is implemented under `test/gui/` |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 | `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
 
@@ -54,11 +54,10 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **Sequences deploy then verify `/health` only** (scenarios s008–s010,
-  parked under `test/gui-parked/`). Each parked skeleton still targets the
-  k8s tier; the rework needed to activate one is the checklist in
-  [test.md](test.md). The real steps are enumerated as TODO blocks pointing
-  at [../plan/scenarios.md](../plan/scenarios.md).
+- **All ten scenarios (s001–s010) are implemented and asserted end to end**
+  against the design topology; `test/gui-parked/` is now empty. Each scenario
+  restores the `amisad-core` snapshot as its state reset and drives the full
+  Target Verification Point over SSH ([test.md](test.md)).
 
 ## Running it
 
@@ -223,6 +222,48 @@ nothing returned; and revocation kills the credentials while Elena's catalog
 stays intact. No buyer identity or need content crosses the integration
 surface. The seller->connect order webhook is a detached best-effort thread,
 like the offer-published event.
+
+## s008.mediation implementation notes
+
+s008.mediation proves support cannot become surveillance. A support case opens
+in platform-svc carrying operational METADATA only (order state, settlement) -
+no buyer identity ever reaches it. When metadata is not enough, Sam requests a
+scoped, time-boxed disclosure; Maya grants it through the coordinator, which
+records a `disclosure` grant on the consent ledger under her PSEUDONYMOUS
+subject and delivers the artifact to the case with an expiry. The refund posts
+as compensating settlement entries (negatives) referencing the case - history
+is never edited, so the chains still verify and the derived net reflects the
+refund. After the grant expires the artifact access path is gone (410). The
+consent ledger gains its fourth grant type (`disclosure`), and the settlement
+ledger its `adjust` endpoint.
+
+## s009.suppression implementation notes
+
+s009.suppression is the analytics window, and its central assertion is a
+SUPPRESSION. insights-svc records demand/supply per (category, region); any
+aggregate below the anonymity threshold is omitted entirely - absent from
+Dana's workbench, from every published versioned outlook, and from the
+unmet-demand flags (never zeroed, indistinguishable from no data). Dana
+publishes an immutable versioned outlook; Elena's seller demand-outlook view
+and Marcel's ads demand view are thin reads of that same version, so their
+figures are identical by construction. The harness proves the below-threshold
+region appears in no view anywhere downstream.
+
+## s010.certification implementation notes
+
+s010.certification is the capstone: audit-svc independently re-verifies the
+evidence trail across FOUR dimensions - attestation continuity (every
+environment's created -> attested -> executed|aborted -> destroyed lifecycle),
+residency (region satisfies jurisdiction), consent (chain integrity across all
+three grant types), and settlement conservation (splits sum, adjustments are
+compensating entries referencing a case, nothing edited) - trusting no
+self-report from the ledger (it recomputes the sha256 chains from the raw
+dumps). Because each scenario restores a fresh snapshot, s010 self-seeds a
+representative corpus (a completed match + an injected abort, consent
+grant/revoke, a mandate, a disclosure + adjustment) and certifies THAT. It
+localizes a deliberate tamper to the exact modified record, delivers findings
+to Priya in the platform, and its own access log proves it only ever read -
+no writes, no personal-data scope.
 
 ---
 

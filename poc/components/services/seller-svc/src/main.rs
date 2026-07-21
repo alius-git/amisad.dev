@@ -114,6 +114,9 @@ fn coordinator_url() -> String {
 fn connect_url() -> String {
     std::env::var("CONNECT_URL").unwrap_or_else(|_| String::from("http://connect-svc:8080"))
 }
+fn insights_url() -> String {
+    std::env::var("INSIGHTS_URL").unwrap_or_else(|_| String::from("http://insights-svc:8080"))
+}
 
 /// Order-lifecycle event to the integration gateway (s007.inventory): every
 /// order state transition is mirrored to the connector's ERP feed. Detached
@@ -423,6 +426,25 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 return match state.orders.iter().find(|o| o.match_id == match_id) {
                     Some(order) => Response::json(200, &order_json(order)),
                     None => Response::error(404, "no order for match_id"),
+                };
+            }
+            // s009.suppression: Elena's demand-outlook view is a read of the
+            // published insights outlook (identical to Marcel's ads view by
+            // construction).
+            if let ("GET", Some(version)) =
+                (req.method.as_str(), path.strip_prefix("/v1/demand-outlook/"))
+            {
+                return match request(
+                    "GET",
+                    &format!("{}/v1/outlooks/{version}", insights_url()),
+                    None,
+                ) {
+                    Ok((200, text)) => match json::parse(&text) {
+                        Ok(o) => Response::json(200, &o),
+                        Err(e) => Response::error(502, &format!("bad outlook: {e}")),
+                    },
+                    Ok((status, _)) => Response::error(status, "outlook unavailable"),
+                    Err(e) => Response::error(503, &format!("insights unavailable: {e}")),
                 };
             }
             Response::error(404, "not found")

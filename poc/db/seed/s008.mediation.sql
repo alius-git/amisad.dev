@@ -1,5 +1,15 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
--- AmisAd POC - seed skeleton for s008.mediation: Zero-Knowledge Dispute Mediation and Settlement Adjustment
--- Loaded by test fixtures once the scenario is implemented; empty by design.
--- TODO(s008.mediation): seed data for the real steps - see plan/scenarios.md (s008.mediation).
+-- AmisAd POC - s008.mediation seed: Zero-Knowledge Dispute Mediation and
+-- Settlement Adjustment.
+-- NOTE: the live sequence seeds via the APIs. The dispute is operational -
+-- the support case + time-boxed disclosure live in platform-svc, the refund
+-- posts as hash-chained compensating settlement entries. Only Elena's offer
+-- (the disputed order's) is relational:
+
+INSERT INTO seller.offers
+    (offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close)
+VALUES
+    ('serving-set-01', 'elena-atelier', 'Ceramic serving set', 'housewares',
+     'region-a', 11000, 10, true)
+ON CONFLICT (offer_id) DO NOTHING;

@@ -3,7 +3,8 @@
 # Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - vm-core demo users: add the non-administrator persona accounts
 # (maya, elena buyers/sellers; tom, priya operators; marcel, kai ad agency +
-# creator - s005; pat delegate - s006; alex integration partner - s007) and
+# creator - s005; pat delegate - s006; alex integration partner - s007; sam
+# support - s008; dana analyst - s009; ingrid auditor - s010) and
 # install the core->edge demo SSH keypair for the admin so scenario scripts
 # can scp/ssh slice-runtime to the edge VMs. Passwords are set by a separate
 # sensitive sshExec sequence step (vault-rendered, masked), never passed to
@@ -23,8 +24,8 @@ if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
 fi
 BASE="http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}"
 
-echo "== non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex) =="
-for u in maya elena tom priya marcel kai pat alex; do
+echo "== non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex, sam, dana, ingrid) =="
+for u in maya elena tom priya marcel kai pat alex sam dana ingrid; do
     if ! id -u "$u" >/dev/null 2>&1; then
         sudo adduser --disabled-password --gecos "" "$u"
     fi

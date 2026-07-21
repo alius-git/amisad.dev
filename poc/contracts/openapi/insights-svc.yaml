@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: insights-svc
-  description: "Threshold-protected aggregate demand insights: consent-gated aggregation cycles, counts only (s003.silence minimal surface; full pipeline lands with s009)"
+  description: "Threshold-protected aggregate demand insights: consent-gated aggregation cycles (s003.silence); anonymity-threshold suppression, versioned outlooks, workbench, and unmet-demand flags (s009.suppression)"
   version: 0.1.0
 paths:
   /health:
@@ -42,3 +42,42 @@ paths:
       summary: "Aggregation cycle history (counts only; no identity, no content)"
       responses:
         "200": { description: "cycles, latest_contributions, history" }
+  /v1/insights/record:
+    post:
+      summary: "s009: record a unit of demand/supply per cell (body: category, region, kind need|offer)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "recorded" }
+  /v1/workbench:
+    get:
+      summary: "Above-threshold aggregates only; below-threshold cells are suppressed (absent)"
+      responses:
+        "200": { description: "threshold, aggregates" }
+  /v1/outlooks:
+    post:
+      summary: "Publish a versioned, immutable outlook from the above-threshold aggregates (body: version)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "the outlook" }
+        "409": { description: "version exists" }
+  /v1/outlooks/{version}:
+    get:
+      summary: "A published outlook by version (seller and ads views read this)"
+      parameters:
+        - { name: version, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "the outlook" }
+        "404": { description: "no such version" }
+  /v1/unmet-demand:
+    get:
+      summary: "Above-threshold cells where needs outnumber offers, flagged by category+region only"
+      responses:
+        "200": { description: "unmet flags" }

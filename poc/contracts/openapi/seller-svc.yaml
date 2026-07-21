@@ -78,3 +78,11 @@ paths:
       responses:
         "200": { description: "offer_id, stock" }
         "404": { description: "unknown offer_id" }
+  /v1/demand-outlook/{version}:
+    get:
+      summary: "s009: Elena's demand-outlook view (a read of the published insights outlook)"
+      parameters:
+        - { name: version, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "the outlook" }
+        "404": { description: "no such version" }

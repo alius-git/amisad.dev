@@ -12,10 +12,11 @@
 # Rev 2: amisad-* convention; SSH-driven; demo users step added.
 # Rev 3: operator personas tom + priya (s004.failover) in users + chpasswd.
 # Rev 4: s005-s007 personas marcel, kai, pat, alex in users + chpasswd.
+# Rev 5: s008-s010 personas sam, dana, ingrid in users + chpasswd.
 sequenceGuid: 4244dd04-5c0e-4b7d-9f3a-2e8d47c60a44
-sequenceRevision: 4
+sequenceRevision: 5
 
-description: "AmisAd amisad-core: restore amisad-core-k8s, download binaries from the stash, deploy 10 services, add maya/elena/tom/priya/marcel/kai/pat/alex + demo key, snapshot amisad-core."
+description: "AmisAd amisad-core: restore amisad-core-k8s, download binaries from the stash, deploy 10 services, add maya/elena/tom/priya/marcel/kai/pat/alex/sam/dana/ingrid + demo key, snapshot amisad-core."
 baseline:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.k8s
@@ -44,13 +45,13 @@ steps:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.users.sh"
     timeoutSeconds: 300
-    description: "Add non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex) + install the core->edge demo SSH key"
+    description: "Add non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex, sam, dana, ingrid) + install the core->edge demo SSH key"
 
   # Passwords via sshExec, the ssh action with sensitive masking in its
   # handler (sshFetchAndExecute ignores 'sensitive'; vault plaintext must not
   # ride an unmasked command line).
   - action: sshExec
-    command: "printf 'maya:%s\\nelena:%s\\ntom:%s\\npriya:%s\\nmarcel:%s\\nkai:%s\\npat:%s\\nalex:%s\\n' '${ext:authentication.GetPassword(maya)}' '${ext:authentication.GetPassword(elena)}' '${ext:authentication.GetPassword(tom)}' '${ext:authentication.GetPassword(priya)}' '${ext:authentication.GetPassword(marcel)}' '${ext:authentication.GetPassword(kai)}' '${ext:authentication.GetPassword(pat)}' '${ext:authentication.GetPassword(alex)}' | sudo chpasswd"
+    command: "printf 'maya:%s\\nelena:%s\\ntom:%s\\npriya:%s\\nmarcel:%s\\nkai:%s\\npat:%s\\nalex:%s\\nsam:%s\\ndana:%s\\ningrid:%s\\n' '${ext:authentication.GetPassword(maya)}' '${ext:authentication.GetPassword(elena)}' '${ext:authentication.GetPassword(tom)}' '${ext:authentication.GetPassword(priya)}' '${ext:authentication.GetPassword(marcel)}' '${ext:authentication.GetPassword(kai)}' '${ext:authentication.GetPassword(pat)}' '${ext:authentication.GetPassword(alex)}' '${ext:authentication.GetPassword(sam)}' '${ext:authentication.GetPassword(dana)}' '${ext:authentication.GetPassword(ingrid)}' | sudo chpasswd"
     timeoutSeconds: 120
     sensitive: true
     description: "Set the demo users' vault-managed passwords"

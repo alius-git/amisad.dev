@@ -102,9 +102,10 @@ struct State {
 }
 
 // participation/contribution are the buyer's own consents (s003.silence);
-// mandate is a delegated-authority grant (s006.mandate). All three fold the
-// same grant/revoke way and share the immutable consent chain.
-const GRANT_TYPES: [&str; 3] = ["participation", "contribution", "mandate"];
+// mandate is a delegated-authority grant (s006.mandate); disclosure is a
+// scoped, time-boxed support-case grant (s008.mediation). All fold the same
+// grant/revoke way and share the immutable consent chain.
+const GRANT_TYPES: [&str; 4] = ["participation", "contribution", "mandate", "disclosure"];
 
 /// Newest-wins fold of one subject's consent entries for one grant type:
 /// "granted", "revoked", or "none" (no entry - the coordinator decides the
@@ -306,6 +307,23 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ("head", json::s(&state.attestation.head())),
             ]),
         ),
+        // Raw chain dumps ({payload, prev, hash} per entry) so an INDEPENDENT
+        // auditor (s010.certification) can recompute the hash chains itself,
+        // rather than trusting the ledger's own /v1/verify.
+        ("GET", "/v1/settlements") => Response::json(
+            200,
+            &json::obj(vec![
+                ("entries", state.settlement.dump_entries()),
+                ("head", json::s(&state.settlement.head())),
+            ]),
+        ),
+        ("GET", "/v1/consents") => Response::json(
+            200,
+            &json::obj(vec![
+                ("entries", state.consent.dump_entries()),
+                ("head", json::s(&state.consent.head())),
+            ]),
+        ),
         ("POST", "/v1/settlements/instructions") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
@@ -398,6 +416,71 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     ("match_id", json::s(&match_id)),
                     ("entries", json::n(splits.len() as i64)),
                     ("head", json::s(&state.settlement.head())),
+                ]),
+            )
+        }
+        // s008.mediation: post compensating entries that reverse a confirmed
+        // settlement, referencing the support case. History is NEVER edited -
+        // these are new appended entries; the derived net reflects the refund.
+        ("POST", "/v1/settlements/adjust") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let match_id = body.str_of("match_id").unwrap_or("").to_string();
+            let case_id = match body.str_of("case_id") {
+                Some(c) => c.to_string(),
+                None => return Response::error(400, "case_id required"),
+            };
+            let instruction = match state.instructions.iter().find(|i| i.match_id == match_id) {
+                Some(i) if i.confirmed => i,
+                Some(_) => return Response::error(409, "settlement not confirmed"),
+                None => return Response::error(404, "no settlement for match_id"),
+            };
+            // Reverse every split as a negative compensating entry.
+            let reversals: Vec<(String, i64)> = instruction
+                .splits
+                .iter()
+                .map(|(party, amount)| (party.clone(), -amount))
+                .collect();
+            let mut prepared = Vec::new();
+            let mut prev = state.settlement.head();
+            for (party, amount) in &reversals {
+                let payload = json::obj(vec![
+                    ("match_id", json::s(&match_id)),
+                    ("party", json::s(party)),
+                    ("amount_cents", json::n(*amount)),
+                    ("entry_type", json::s("adjustment")),
+                    ("case_id", json::s(&case_id)),
+                ]);
+                let hash = sha256::hex_digest(format!("{prev}{}", payload.dump()).as_bytes());
+                prepared.push((payload, prev.clone(), hash.clone()));
+                prev = hash;
+            }
+            if let Some(db) = state.db.as_mut() {
+                let persisted = (|| {
+                    let mut tx = db.transaction()?;
+                    for (payload, entry_prev, entry_hash) in &prepared {
+                        tx.execute(
+                            "INSERT INTO ledger.settlement_ledger (match_id, entry_type, payload, prev_hash, row_hash) VALUES ($1, 'adjustment', $2, $3, $4)",
+                            &[&match_id, &payload.dump(), entry_prev, entry_hash],
+                        )?;
+                    }
+                    tx.commit()
+                })();
+                if let Err(e) = persisted {
+                    return store_error(db, "settlement store", e);
+                }
+            }
+            for (payload, _, _) in prepared {
+                state.settlement.append(payload);
+            }
+            Response::json(
+                201,
+                &json::obj(vec![
+                    ("match_id", json::s(&match_id)),
+                    ("case_id", json::s(&case_id)),
+                    ("adjustment_entries", json::n(reversals.len() as i64)),
                 ]),
             )
         }

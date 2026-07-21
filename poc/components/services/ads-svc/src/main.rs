@@ -10,7 +10,11 @@
 // budget by the per-match commitment - never by impressions. Every view is
 // aggregate: no buyer signal ever reaches this service. In-memory (POC).
 
-use amisad_common::{ad_split, json, serve_app, sha256, Request, Response, ServiceInfo};
+use amisad_common::{ad_split, json, request, serve_app, sha256, Request, Response, ServiceInfo};
+
+fn insights_url() -> String {
+    std::env::var("INSIGHTS_URL").unwrap_or_else(|_| String::from("http://insights-svc:8080"))
+}
 
 struct Campaign {
     id: String,
@@ -280,6 +284,25 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 return match state.campaigns.iter().find(|c| c.id == id) {
                     Some(c) => Response::json(200, &campaign_json(c)),
                     None => Response::error(404, "unknown campaign"),
+                };
+            }
+            // s009.suppression: Marcel's aggregate demand view is a read of
+            // the published insights outlook (identical to Elena's seller view
+            // by construction).
+            if let ("GET", Some(version)) =
+                (req.method.as_str(), req.path.strip_prefix("/v1/demand-view/"))
+            {
+                return match request(
+                    "GET",
+                    &format!("{}/v1/outlooks/{version}", insights_url()),
+                    None,
+                ) {
+                    Ok((200, text)) => match json::parse(&text) {
+                        Ok(o) => Response::json(200, &o),
+                        Err(e) => Response::error(502, &format!("bad outlook: {e}")),
+                    },
+                    Ok((status, _)) => Response::error(status, "outlook unavailable"),
+                    Err(e) => Response::error(503, &format!("insights unavailable: {e}")),
                 };
             }
             Response::error(404, "not found")

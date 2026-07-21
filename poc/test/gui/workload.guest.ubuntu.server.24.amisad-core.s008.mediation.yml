@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - s008.mediation (Zero-Knowledge Dispute Mediation and Settlement
+# Adjustment) against the design topology: restore amisad-core, start
+# slice-runtime on amisad-edge-a, seed a settled order, open a support case
+# carrying operational metadata only (no buyer identity), run a scoped
+# time-boxed consented disclosure, post a refund as compensating settlement
+# entries referencing the case (history untouched), and prove the disclosure
+# access path is gone after expiry. Entirely SSH-driven; VM left live.
+
+# Perf-log identity. Bump revision on step add/remove.
+# Rev 2: real implementation on the design topology (skeleton unparked).
+sequenceGuid: 42a95e9f-3748-47f8-b8ad-cc9564d81776
+sequenceRevision: 2
+
+description: "AmisAd s008.mediation: restore amisad-core, run zero-knowledge dispute mediation (metadata-only case, scoped time-boxed disclosure, compensating settlement entries), assert full TVP."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.amisad-core.deploy
+requiresSnapshot:
+  id: "amisad-core"
+variables:
+  username: amisad-core-admin
+  hostname: amisad-core
+
+steps:
+  - action: loadDiskSnapshot
+    id: "amisad-core"
+    description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
+
+  - action: sshWaitReady
+    timeoutSeconds: 300
+    description: "SSH up after the restore"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s008.mediation.sh"
+    timeoutSeconds: 1800
+    description: "Run s008.mediation dispute flow (edge on amisad-edge-a), assert full TVP"
+
+  - action: saveSystemDiagnostic
+    id: "amisad.s008.mediation"
+    description: "Capture diagnostics after the s008.mediation run"

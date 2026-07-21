@@ -81,6 +81,9 @@ fn ledger_url() -> String {
 fn ads_url() -> String {
     std::env::var("ADS_URL").unwrap_or_else(|_| String::from("http://ads-svc:8080"))
 }
+fn platform_url() -> String {
+    std::env::var("PLATFORM_URL").unwrap_or_else(|_| String::from("http://platform-svc:8080"))
+}
 
 fn handle_for(match_id: &str) -> String {
     sha256::hex_digest(format!("{match_id}|handle").as_bytes())[..16].to_string()
@@ -916,6 +919,69 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     ("status", json::s("committed")),
                     ("match_id", json::s(&match_id)),
                     ("via", json::s("approval")),
+                ]),
+            )
+        }
+        // s008.mediation: Maya grants a scoped, time-boxed disclosure for a
+        // support case. The consent ledger records the grant under her
+        // PSEUDONYMOUS subject (her identity never reaches the case); the
+        // artifact is delivered to the platform case, expiring after ttl.
+        ("POST", "/v1/disclosures") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(e) => return Response::error(400, &e),
+            };
+            let subject = match verify_subject(body.str_of("token").unwrap_or("")) {
+                Ok(s) => s,
+                Err(resp) => return resp,
+            };
+            let case_id = body.str_of("case_id").unwrap_or("").to_string();
+            let artifact = body.str_of("artifact").unwrap_or("").to_string();
+            let ttl = body.i64_of("ttl_secs").unwrap_or(2).clamp(1, 3600);
+            if case_id.is_empty() || artifact.is_empty() {
+                return Response::error(400, "case_id and artifact required");
+            }
+            let ts = now_secs();
+            let expiry_ts = ts + ttl;
+            // Consent ledger: the immutable grant, scoped to the case, with
+            // its expiry. Scope never exceeds this one case.
+            let entry = json::obj(vec![
+                ("subject", json::s(&subject)),
+                ("grant_type", json::s("disclosure")),
+                ("action", json::s("grant")),
+                ("scope", json::s(&case_id)),
+                ("expiry_ts", json::n(expiry_ts)),
+                ("ts", json::n(ts)),
+            ]);
+            let hash = match record_consent(&entry) {
+                Ok(h) => h,
+                Err(resp) => return resp,
+            };
+            // Deliver the artifact to the case (read-only, time-boxed).
+            let deliver = json::obj(vec![
+                ("case_id", json::s(&case_id)),
+                ("artifact", json::s(&artifact)),
+                ("expiry_ts", json::n(expiry_ts)),
+            ])
+            .dump();
+            match request(
+                "POST",
+                &format!("{}/v1/support/cases/disclosure/grant", platform_url()),
+                Some(&deliver),
+            ) {
+                Ok((200, _)) => {}
+                Ok((status, body)) => {
+                    return Response::error(502, &format!("disclosure delivery ({status}): {body}"))
+                }
+                Err(e) => return Response::error(503, &format!("platform unavailable: {e}")),
+            }
+            Response::json(
+                201,
+                &json::obj(vec![
+                    ("case_id", json::s(&case_id)),
+                    ("scope", json::s(&case_id)),
+                    ("expiry_ts", json::n(expiry_ts)),
+                    ("hash", json::s(&hash)),
                 ]),
             )
         }

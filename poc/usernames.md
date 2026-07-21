@@ -43,8 +43,11 @@ over SSH.
 | `kai` | Kai, the creative | s005.attribution narrative: accepts the brief, produces the asset, performance view. |
 | `pat` | Pat, the delegate | s006.mandate narrative: acts under Maya's scoped mandate in the delegate workspace. |
 | `alex` | Alex, the integration partner | s007.inventory narrative: builds/certifies the connector; the connect-svc `curl` steps work from his account. |
+| `sam` | Sam, the support agent | s008.mediation narrative: works the support case from metadata; requests the scoped disclosure. |
+| `dana` | Dana, the demand analyst | s009.suppression narrative: reads the insights workbench, publishes the demand outlook. |
+| `ingrid` | Ingrid, the trust auditor | s010.certification narrative: runs the independent certification in audit-svc. |
 
-All eight are created by the vm-core deploy chain (`adduser --disabled-password`,
+All eleven are created by the vm-core deploy chain (`adduser --disabled-password`,
 then a vault-rendered `chpasswd` in a `sensitive: true` step) and are **not**
 in sudoers.
 

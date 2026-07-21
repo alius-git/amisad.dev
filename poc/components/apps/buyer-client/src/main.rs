@@ -266,6 +266,22 @@ fn activity() {
     post_as("/v1/activity", &json::obj(vec![("token", json::s(&issue_token()))]), 200);
 }
 
+/// s008.mediation: Maya grants a scoped, time-boxed disclosure for a support
+/// case. Her identity stays out of the case; only the pseudonymous consent
+/// grant records it.
+fn disclose(case_id: &str, artifact: &str, ttl_secs: i64) {
+    post_as(
+        "/v1/disclosures",
+        &json::obj(vec![
+            ("token", json::s(&issue_token())),
+            ("case_id", json::s(case_id)),
+            ("artifact", json::s(artifact)),
+            ("ttl_secs", json::n(ttl_secs)),
+        ]),
+        201,
+    );
+}
+
 fn submit() -> json::Json {
     submit_need(&need_json())
 }
@@ -434,6 +450,12 @@ fn main() {
             None => fail("usage: buyer-client approve <handle>"),
         },
         Some("activity") => activity(),
+        Some("disclose") => match (args.get(2), args.get(3)) {
+            (Some(case_id), Some(artifact)) => {
+                disclose(case_id, artifact, args.get(4).and_then(|s| s.parse().ok()).unwrap_or(2))
+            }
+            _ => fail("usage: buyer-client disclose <case_id> <artifact> [ttl_secs]"),
+        },
         _ => fail(
             "usage: buyer-client submit | wait <handle> | run | shortlist | book <handle> <offer_id> <slot_id> | notifications <handle> | open <dress|decanter> | pause | withdraw | resume | consents",
         ),

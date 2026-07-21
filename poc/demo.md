@@ -32,8 +32,9 @@ re-arm below for a fresh walkthrough.
 ## Driving the demo
 
 NodePorts on `amisad-core`: coordinator `30080`, ledger `30081`, resource
-`30082`, seller `30083`, identity `30084`, insights `30085`, platform `30086`.
-The same APIs answer from the host or LAN at `http://<vm-ip>:<nodeport>`.
+`30082`, seller `30083`, identity `30084`, insights `30085`, platform `30086`,
+ads `30087`, connect `30088`, audit `30089`. The same APIs answer from the host
+or LAN at `http://<vm-ip>:<nodeport>`.
 
 **Re-arm (only after a VM restart).** A reboot of `amisad-core` loses the
 in-memory state (coordinator routing, identity tokens, the registered edge) —
@@ -218,6 +219,52 @@ target/release/buyer-client submit                                    # matches 
 curl -s http://$NODE_IP:30088/v1/erp/orders/<match_id>               # ERP mirror follows the order state
 curl -s -X POST http://$NODE_IP:30088/v1/query -d '{"credential":"<cred>","resource":"settlement"}'  # 403: out of scope, logged
 curl -s -X POST http://$NODE_IP:30088/v1/grants/revoke -d '{"credential":"<cred>"}'                  # revoke -> next sync 401
+```
+
+**s008.mediation** — a delivery dispute resolved without ever learning who
+Maya is: a metadata-only case, a scoped time-boxed disclosure, a refund as
+compensating ledger entries, and access that vanishes at expiry. Fresh
+snapshot recommended:
+
+```bash
+# A settled order to dispute (as in s001):
+curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
+target/release/buyer-client submit                                   # capture <match_id>
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'
+curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'
+# Maya reports non-delivery -> a case opens with metadata only (no identity):
+curl -s -X POST http://$NODE_IP:30086/v1/support/cases -d '{"match_id":"<id>","metadata":{"order_state":"settled"}}'   # capture <case_id>
+curl -s -X POST http://$NODE_IP:30086/v1/support/cases/disclosure/request -d '{"case_id":"<case_id>"}'
+target/release/buyer-client disclose <case_id> delivery-photo-ref-77 4   # Maya grants, 4s TTL
+curl -s http://$NODE_IP:30086/v1/support/cases/<case_id>/disclosure     # artifact readable now
+curl -s -X POST http://$NODE_IP:30081/v1/settlements/adjust -d '{"match_id":"<id>","case_id":"<case_id>"}'   # refund: compensating entries
+curl -s http://$NODE_IP:30081/v1/settlements/match/<id>                 # original untouched, net 0
+sleep 5; curl -s -o /dev/null -w '%{http_code}\n' http://$NODE_IP:30086/v1/support/cases/<case_id>/disclosure   # 410: expired
+```
+
+**s009.suppression** — Dana publishes demand aggregates that suppress anything
+below the anonymity threshold; Elena and Marcel read identical figures:
+
+```bash
+for i in 1 2 3 4 5 6; do curl -s -X POST http://$NODE_IP:30085/v1/insights/record -d '{"category":"housewares","region":"region-a","kind":"need"}'; done  # above threshold
+curl -s -X POST http://$NODE_IP:30085/v1/insights/record -d '{"category":"housewares","region":"region-b","kind":"need"}'  # below threshold
+curl -s http://$NODE_IP:30085/v1/workbench                            # region-a shown; region-b suppressed (absent)
+curl -s -X POST http://$NODE_IP:30085/v1/outlooks -d '{"version":"2026-Q3"}'
+curl -s http://$NODE_IP:30083/v1/demand-outlook/2026-Q3              # Elena's view
+curl -s http://$NODE_IP:30087/v1/demand-view/2026-Q3                # Marcel's view (identical)
+curl -s http://$NODE_IP:30085/v1/unmet-demand                        # gap flagged: category + region only
+```
+
+**s010.certification** — Ingrid independently certifies the evidence trail and
+catches a tamper. This needs a corpus, so run the s010 script (it self-seeds a
+completed match, an abort, consent, a mandate, and a disclosure+adjustment):
+
+```bash
+sudo project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh   # or, after it seeds:
+curl -s -X POST http://$NODE_IP:30089/v1/certify                     # four dimensions, zero violations
+curl -s http://$NODE_IP:30081/v1/attestations                        # fetch, tamper one payload, then:
+curl -s -X POST http://$NODE_IP:30089/v1/certify/tamper --data-binary @tampered.json   # detected + localized
+curl -s http://$NODE_IP:30089/v1/access-log                          # all GET: read-only, no personal data
 ```
 
 **Mobile (manual demo):** build and side-load the buyer app against the VM's

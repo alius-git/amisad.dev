@@ -102,3 +102,11 @@ paths:
         "201": { description: "credit record" }
         "404": { description: "no active campaign" }
   # GET /v1/briefs -> open briefs (Kai queue); GET /v1/attributions -> aggregate agency/creator totals
+  /v1/demand-view/{version}:
+    get:
+      summary: "s009: Marcel's aggregate demand view (a read of the published insights outlook)"
+      parameters:
+        - { name: version, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: "the outlook" }
+        "404": { description: "no such version" }

@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+#
+# AmisAd POC - s010.certification (Independent Certification of the Full
+# Evidence Trail) against the design topology: restore amisad-core, start
+# slice-runtime on amisad-edge-a (region identity for residency), self-seed a
+# representative corpus exercising all four audit dimensions (a completed
+# match + an injected abort, consent grant/revoke, a mandate, a disclosure
+# grant + settlement adjustment), then have Ingrid's audit-svc independently
+# certify attestation continuity, residency, consent, and settlement
+# conservation, localize a deliberate tamper, and prove read-only access.
+# Entirely SSH-driven; VM left live.
+
+# Perf-log identity. Bump revision on step add/remove.
+# Rev 2: real implementation on the design topology (skeleton unparked).
+sequenceGuid: 429faede-b8b2-447e-97dd-882a44e9b8d4
+sequenceRevision: 2
+
+description: "AmisAd s010.certification: restore amisad-core, self-seed a four-dimension evidence corpus, independently certify it, detect a tamper, and prove read-only audit access."
+baseline:
+  ubuntu.server.24:
+    - workload.guest.ubuntu.server.24.amisad-core.deploy
+requiresSnapshot:
+  id: "amisad-core"
+variables:
+  username: amisad-core-admin
+  hostname: amisad-core
+
+steps:
+  - action: loadDiskSnapshot
+    id: "amisad-core"
+    description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
+
+  - action: sshWaitReady
+    timeoutSeconds: 300
+    description: "SSH up after the restore"
+
+  - action: sshFetchAndExecute
+    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh"
+    timeoutSeconds: 1800
+    description: "Run s010.certification over a self-seeded corpus (edge on amisad-edge-a), assert full TVP"
+
+  - action: saveSystemDiagnostic
+    id: "amisad.s010.certification"
+    description: "Capture diagnostics after the s010.certification run"

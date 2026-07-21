@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: platform-svc
-  description: "Marketplace stewardship: cross-party incident cases (s004.failover surface); registry and settlement oversight land with later scenarios"
+  description: "Marketplace stewardship: cross-party incident cases (s004.failover); the support desk with metadata-only cases and scoped time-boxed disclosures (s008.mediation)"
   version: 0.1.0
 paths:
   /health:
@@ -55,3 +55,44 @@ paths:
       responses:
         "200": { description: "The case" }
         "404": { description: "Unknown case" }
+  /v1/support/cases:
+    post:
+      summary: "s008: open a support case carrying operational metadata only (body: match_id, metadata)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "case_id" }
+  /v1/support/cases/disclosure/request:
+    post:
+      summary: "Sam requests a scoped disclosure (body: case_id)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "stage" }
+  /v1/support/cases/disclosure/grant:
+    post:
+      summary: "Deliver the artifact to the case, time-boxed (body: case_id, artifact, expiry_ts)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "stage" }
+  /v1/support/cases/resolve:
+    post:
+      summary: "Resolve the case (body: case_id)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "stage" }
+  # GET /v1/support/cases/{id} -> the metadata-only case; GET /v1/support/cases/{id}/disclosure -> the artifact, 410 after expiry

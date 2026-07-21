@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: audit-svc
-  description: "Independent verification of ledgers, attestation chains, residency, and consent (AmisAd POC skeleton contract: health and version only)"
+  description: "Independent certification of the full evidence trail across four dimensions, tamper localization, and a read-only access log (s010.certification)"
   version: 0.1.0
 paths:
   /health:
@@ -32,3 +32,28 @@ paths:
                 properties:
                   service: { type: string }
                   version: { type: string }
+  /v1/certify:
+    post:
+      summary: "s010: independently certify attestation, residency, consent, and settlement over the ledger chains"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "per-dimension findings, certified" }
+  /v1/certify/tamper:
+    post:
+      summary: "Detect and localize a tampered attestation record (body: entries[])"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "200": { description: "detected, tampered_index" }
+  /v1/access-log:
+    get:
+      summary: "The auditor's own access log (all GET: read-only, no personal-data scope)"
+      responses:
+        "200": { description: "access[]" }
