@@ -1,0 +1,26 @@
+# clear.project.yml - canonical project-clear wrapper.
+#
+# The first step of a full end-to-end pass: a HOST-side clear that stops every
+# running "amisad*" VM and sweeps orphaned VM files, so the run starts from a
+# known-clean host. It is a thin wrapper over this project's
+# test/Clear-Project.ps1.
+#
+# HOST action, not a guest interaction sequence. The Yuruna cycle runner's step
+# actions are all guest-facing (ssh*, input*, snapshot ops, callExtension), so
+# this wrapper is invoked by the driver on the host BEFORE any guest sequence -
+# it needs Administrator and does not run inside a VM. Future projects
+# establish the same convention by shipping their own test/Clear-Project.ps1
+# and a copy of this wrapper pointing at it.
+#
+# Because it stops the amisad VMs (including the edges), this is a COLD-start
+# clear: pair it with a topology rebuild (poc/build/run-tests.ps1), not with a
+# warm continuous pool cycle that depends on the demo staying live.
+
+name: clear.project
+description: Stop all amisad* VMs and sweep orphaned VM files (host-side, pre-run).
+
+host:
+  # Resolved relative to this file's folder (test/). Runs elevated.
+  script: Clear-Project.ps1
+  elevated: true
+  arguments: []
