@@ -498,7 +498,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             {
                 return Response::error(
                     400,
-                    "subject, grant_type (participation|contribution|mandate), action (grant|revoke), ts required",
+                    "subject, grant_type (participation|contribution|mandate|disclosure), action (grant|revoke), ts required",
                 );
             }
             if let Some(db) = state.db.as_mut() {

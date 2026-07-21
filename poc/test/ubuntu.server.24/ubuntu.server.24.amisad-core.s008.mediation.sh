@@ -108,7 +108,9 @@ print('ASSERT case carries metadata only, no buyer identity OK')
 
 echo "== Sam requests, Maya grants a scoped time-boxed disclosure =="
 curl -sf -X POST "${PLATFORM}/v1/support/cases/disclosure/request" -d "{\"case_id\":\"${CASE_ID}\"}"
-target/release/buyer-client disclose "${CASE_ID}" "delivery-photo-ref-77" 4 | python3 -c "
+# TTL 10s: a generous window for the immediate read below, but well under the
+# post-refund sleep that proves expiry - even on a heavily loaded box.
+target/release/buyer-client disclose "${CASE_ID}" "delivery-photo-ref-77" 10 | python3 -c "
 import sys, json
 r = json.load(sys.stdin)
 assert r['scope'] == '${CASE_ID}' and r['expiry_ts'] > 0, r
@@ -158,7 +160,7 @@ curl -sf -X POST "${PLATFORM}/v1/incidents" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["case_id"];print("ASSERT recurring-pattern escalation OK")'
 
 echo "== TVP: the disclosure grant expires -> the access path is gone =="
-sleep 6
+sleep 14
 EXP_CODE=$(curl -s -o /dev/null -w '%{http_code}' "${PLATFORM}/v1/support/cases/${CASE_ID}/disclosure")
 if [ "$EXP_CODE" != "410" ]; then
     echo "disclosed artifact still accessible after expiry (got ${EXP_CODE})" >&2
