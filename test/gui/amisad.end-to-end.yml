@@ -1,22 +1,25 @@
 # yaml-language-server: $schema=../../../yuruna/test/schemas/test-set.schema.yml
 #
-# AmisAd POC end-to-end playbook: a host-side project clear, then every
-# implemented scenario s001 -> s010 in order. Shaped as a Yuruna test-set
+# AmisAd POC end-to-end playbook: a host-side teardown + topology build, then
+# every implemented scenario s001 -> s010 in order. Shaped as a Yuruna test-set
 # manifest (test-set.schema.yml) so its sequences[] drive the run.
 #
 # Two consumption modes:
-#   - Full end-to-end pass (this file, under test/): a driver runs
-#     clear.project.yml on the HOST first (stop amisad* VMs + sweep orphaned
-#     files, cold-start clean) and then the guest sequences below.
+#   - Full end-to-end pass (this file, under test/gui/): a driver
+#     (Test-SequenceSet) runs set-resource.yml on the HOST first - it tears the
+#     lab down (Clear-Project.ps1) then builds the topology and starts both
+#     edges (Set-Resource.ps1) - and then the guest scenarios below. Self-
+#     contained from a cold host.
 #   - Continuous pool testing: COPY this file (or the guest sequences only) to
 #     project/test/test-sets/<name>.yml - the pool planner reads test-sets/ and
 #     iterates sequences[] each cycle. The pool cycle runner has NO host-script
-#     action, so drop clear.project.yml there and keep the demo warm instead
+#     action, so drop set-resource.yml there and keep the demo warm instead
 #     (the scenarios restore the "amisad-core" snapshot and re-deliver
 #     slice-runtime to the edges, so they are order-independent and repeatable).
 #
-# Either way the guest scenarios assume the topology is built and both edges
-# (amisad-edge-a/-b) are available; bootstrap with poc/build/run-tests.ps1.
+# The guest scenarios need amisad-core + both edges (amisad-edge-a/-b) live. The
+# full pass builds them via set-resource.yml above; in pool mode (no host action)
+# bootstrap once with poc/build/run-tests.ps1 and keep the demo warm.
 # s004 and s010 need both edges; the rest use amisad-edge-a (or the single-VM
 # degraded fallback).
 
@@ -27,13 +30,13 @@ requiredGuests:
   - guest.ubuntu.server.24
 
 sequences:
-  # Host-side clear FIRST (see clear.project.yml): stop every amisad* VM and
-  # sweep orphaned VM files so the pass starts clean. It wraps Clear-Project.ps1
-  # and runs on the host with Administrator - not a guest sequence, so a driver
+  # Host-side teardown + build FIRST (see set-resource.yml): Clear-Project.ps1
+  # removes every lab VM + orphaned files, then Set-Resource.ps1 builds the
+  # stash, both edges, and amisad-core and starts the edges. Runs on the host
+  # with Administrator - not a guest sequence, so a driver (Test-SequenceSet)
   # invokes it before the sNNN sequences below (the pool cycle runner has no
-  # host-script action). Because it stops the edges, this is a COLD-start pass:
-  # pair it with the topology rebuild in poc/build/run-tests.ps1.
-  - clear.project.yml
+  # host-script action, so pool mode drops this entry and stays warm).
+  - set-resource.yml
   - workload.guest.ubuntu.server.24.amisad-core.s001.fulfillment
   - workload.guest.ubuntu.server.24.amisad-core.s002.fitting
   - workload.guest.ubuntu.server.24.amisad-core.s003.silence

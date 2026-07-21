@@ -1,26 +1,28 @@
-# clear.project.yml - canonical project-clear wrapper.
+# set-resource.yml - host-side teardown + warm-up wrapper.
 #
-# The first step of a full end-to-end pass: a HOST-side clear that stops every
-# running "amisad*" VM and sweeps orphaned VM files, so the run starts from a
-# known-clean host. It is a thin wrapper over this project's
-# test/Clear-Project.ps1.
+# The first step of a full end-to-end pass: a HOST-side reset that first tears
+# the lab down and then builds the demo topology back up, so the guest scenarios
+# that follow have amisad-core + both edges live. It runs two host scripts in
+# order (Test-SequenceSet's host.scripts contract):
+#
+#   1. Clear-Project.ps1 - remove every lab VM + storage, sweep orphaned files.
+#   2. Set-Resource.ps1  - build the stash, both edges, and amisad-core, then
+#                          start the edges and wait for their IP reports.
 #
 # HOST action, not a guest interaction sequence. The Yuruna cycle runner's step
-# actions are all guest-facing (ssh*, input*, snapshot ops, callExtension), so
-# this wrapper is invoked by the driver on the host BEFORE any guest sequence -
-# it needs Administrator and does not run inside a VM. Future projects
-# establish the same convention by shipping their own test/Clear-Project.ps1
-# and a copy of this wrapper pointing at it.
-#
-# Because it stops the amisad VMs (including the edges), this is a COLD-start
-# clear: pair it with a topology rebuild (poc/build/run-tests.ps1), not with a
-# warm continuous pool cycle that depends on the demo staying live.
+# actions are all guest-facing (ssh*, input*, snapshot ops, callExtension), so a
+# driver (Test-SequenceSet) invokes this on the host BEFORE any guest sequence.
+# Both scripts need Administrator. This replaces the old clear.project.yml (which
+# only cleared) and supersedes the duplicate build orchestration in
+# poc/build/run-tests.ps1, which will be retired once this path is proven.
 
-name: clear.project
-description: Stop all amisad* VMs and sweep orphaned VM files (host-side, pre-run).
+name: set-resource
+description: Tear down the lab, then build + start the AmisAd topology (host-side, pre-run).
 
 host:
-  # Resolved relative to this file's folder (test/). Runs elevated.
-  script: Clear-Project.ps1
+  # Resolved relative to this file's folder (test/gui/). Run elevated, in order;
+  # the pass stops if either script exits non-zero.
   elevated: true
-  arguments: []
+  scripts:
+    - Clear-Project.ps1
+    - Set-Resource.ps1
