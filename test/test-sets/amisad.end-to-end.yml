@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/test-set.schema.yml
+#
+# AmisAd POC end-to-end test-set: every implemented scenario, s001 -> s010, in
+# order, run each cycle by any pool this test-set is assigned to. The pool
+# planner reads this manifest from project/test/test-sets/<name>.yml and
+# iterates sequences[] in place of test.runner.yml's sequences[].
+#
+# Continuous-testing model. Each sequence opens with loadDiskSnapshot of the
+# "amisad-core" snapshot (its per-scenario state reset) and re-delivers
+# slice-runtime to the edges over SSH, so the set is order-independent and
+# repeatable cycle after cycle. It ASSUMES the demo topology is already built
+# and live - the "amisad-core" snapshot present and BOTH edge VMs
+# (amisad-edge-a/-b) running with fresh IP reports. Bootstrap that once with
+# poc/build/run-tests.ps1 (which builds amisad-build -> edges -> core and
+# leaves the demo live); the pool then continuously re-certifies it. s004 and
+# s010 need both edges; the others use amisad-edge-a (or the single-VM
+# degraded fallback).
+#
+# Assign to a pool by adding to the pool intent (pools.yml, pools.schema.yml):
+#   testSets:
+#     - name: amisad.end-to-end
+# and place the assigned hosts' hostIds in that pool's members[].
+
+schemaVersion: 1
+name: amisad.end-to-end
+
+requiredGuests:
+  - guest.ubuntu.server.24
+
+sequences:
+  - workload.guest.ubuntu.server.24.amisad-core.s001.fulfillment
+  - workload.guest.ubuntu.server.24.amisad-core.s002.fitting
+  - workload.guest.ubuntu.server.24.amisad-core.s003.silence
+  - workload.guest.ubuntu.server.24.amisad-core.s004.failover
+  - workload.guest.ubuntu.server.24.amisad-core.s005.attribution
+  - workload.guest.ubuntu.server.24.amisad-core.s006.mandate
+  - workload.guest.ubuntu.server.24.amisad-core.s007.inventory
+  - workload.guest.ubuntu.server.24.amisad-core.s008.mediation
+  - workload.guest.ubuntu.server.24.amisad-core.s009.suppression
+  - workload.guest.ubuntu.server.24.amisad-core.s010.certification
