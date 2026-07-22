@@ -11,7 +11,7 @@ sudo apt-get install -y git curl build-essential pkg-config python3
 
 if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
-        sh -s -- -y --default-toolchain 1.83.0
+        sh -s -- -y --default-toolchain 1.96.1
 fi
 . "$HOME/.cargo/env"
 cargo --version

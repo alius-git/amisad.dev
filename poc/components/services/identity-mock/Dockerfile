@@ -1,6 +1,6 @@
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/identity-mock/Dockerfile -t amisad/identity-mock .
-FROM rust:1.83-slim AS build
+FROM rust:1.96-slim AS build
 WORKDIR /src
 COPY Cargo.toml ./
 COPY components ./components

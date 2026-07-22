@@ -8,7 +8,7 @@
 # returns when the event-driven scenarios actually wire JetStream in.
 set -euo pipefail
 
-NATS_VERSION=v2.10.29
+NATS_VERSION=v2.14.3
 ARCH=$(uname -m)
 case "$ARCH" in
     x86_64) NARCH=amd64 ;;
