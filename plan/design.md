@@ -96,7 +96,7 @@ amisad.dev/
     config/localhost/       # three-phase deploy config (resources → components → workloads)
     workloads/services/     # minimal Helm chart per service
     db/                     # schema.sql (hash-chained ledgers) + per-scenario seeds
-    test/gui/               # Yuruna sequences: baseline snapshot + s001…s010
+    test/                   # Yuruna sequences (workload.guest.*.yml): baseline snapshot + s001…s010
     test/ubuntu.server.24/  # guest scripts the sequences fetch-and-execute
 ```
 

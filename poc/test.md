@@ -19,7 +19,7 @@ the demo by hand instead, see [demo.md](demo.md).
 
    Edit `test/test.config.yml`:
    - `repositories.projectUrl`: `https://github.com/alius-git/amisad.dev.git`
-     (or a local clone path) — sequences are discovered under `poc/test/gui/`.
+     (or a local clone path) — sequences are discovered under `poc/test/`.
    - `repositories.GH_TOKEN`: a GitHub PAT with read access (host-side clone).
    - `guestSequence`: trim to `- guest.ubuntu.server.24`.
 
@@ -136,13 +136,11 @@ skeleton services run.
 
 1. Implement the guest run script under `poc/test/ubuntu.server.24/`
    (`ubuntu.server.24.amisad-core.sNNN.<word>.sh`) and the sequence under
-   `poc/test/gui/`. Start from the s001–s004 set: chain to
+   `poc/test/`. Start from the s001–s004 set: chain to
    `...amisad-core.deploy`, `requiresSnapshot`/`loadDiskSnapshot`
    `amisad-core`, `username: amisad-core-admin`,
    `hostname: amisad-core`, then `sshWaitReady` + `sshFetchAndExecute` the
-   script + `saveSystemDiagnostic`. (The parked skeletons under
-   `poc/test/gui-parked/` predate this model — rework, don't copy: their
-   `amisad.k8s` restore and skeleton deploy step must not survive.)
+   script + `saveSystemDiagnostic`.
 2. Append the sequence name to the `$Scenarios` registry in
    `poc/build/run-tests.ps1`.
 3. Both edges are started by the driver and stay live; resolve either from

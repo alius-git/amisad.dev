@@ -22,8 +22,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/gui/` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment … s010.certification |
-| `test/gui-parked/` | Empty — every scenario is implemented under `test/gui/` |
+| `test/workload.guest.*.yml` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment … s010.certification |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 | `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
 
@@ -55,7 +54,7 @@ sources.
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
 - **All ten scenarios (s001–s010) are implemented and asserted end to end**
-  against the design topology; `test/gui-parked/` is now empty. Each scenario
+  against the design topology. Each scenario
   restores the `amisad-core` snapshot as its state reset and drives the full
   Target Verification Point over SSH ([test.md](test.md)).
 
