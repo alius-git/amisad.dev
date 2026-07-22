@@ -89,12 +89,20 @@ function Remove-LabVM {
 }
 
 # --- 1) Refuse to sweep VMs out from under an active Yuruna runner -----------
-$runnerPidFile = Join-Path $YurunaRoot 'test\status\runtime\runner.pid'
-if (Test-Path $runnerPidFile) {
-    $runnerPid = 0
-    try { $runnerPid = [int]((Get-Content $runnerPidFile -Raw).Trim()) } catch { $runnerPid = 0 }
-    if ($runnerPid -gt 0 -and (Get-Process -Id $runnerPid -ErrorAction SilentlyContinue)) {
-        throw "A Yuruna runner (PID $runnerPid) is active; stop it before clearing the project."
+# Only when run standalone. Inside a runner cycle the orchestration invokes this
+# as its teardown step (set-resource), so the runner IS expected to be live:
+# $env:YURUNA_CYCLE_CONTEXT -- published by the orchestrator before each step and
+# inherited by this child pwsh (its absence == standalone; see Get-CycleContext)
+# -- marks that in-cycle invocation and skips the guard. Absent it, an operator
+# ran this by hand and the guard still refuses to race an active cycle's VMs.
+if (-not $env:YURUNA_CYCLE_CONTEXT) {
+    $runnerPidFile = Join-Path $YurunaRoot 'test\status\runtime\runner.pid'
+    if (Test-Path $runnerPidFile) {
+        $runnerPid = 0
+        try { $runnerPid = [int]((Get-Content $runnerPidFile -Raw).Trim()) } catch { $runnerPid = 0 }
+        if ($runnerPid -gt 0 -and (Get-Process -Id $runnerPid -ErrorAction SilentlyContinue)) {
+            throw "A Yuruna runner (PID $runnerPid) is active; stop it before clearing the project."
+        }
     }
 }
 
