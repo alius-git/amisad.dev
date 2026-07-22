@@ -3,9 +3,12 @@
 # AmisAd POC end-to-end playbook: a host-side teardown + topology build, then
 # every implemented scenario s001 -> s010 in order. Shaped as a Yuruna
 # orchestration sequence (orchestration-sequence.schema.yml): Test-Sequence.ps1
-# detects the InvokeTestSequence steps, runs every inner sequence in-process
-# under ONE status.json cycle, and shows one dashboard row per inner sequence
-# (unified naming + pass/fail) instead of a cycle per sequence.
+# detects the InvokeTestSequence steps, runs every inner sequence under ONE
+# status.json cycle, and shows one top-level dashboard row per inner sequence
+# (unified naming + pass/fail) instead of a cycle per sequence. The scenario
+# steps (s001..s010) run in-process; set-resource is a host action whose
+# per-stage guest builds (amisad-build / edge-a / edge-b / core) run in child
+# processes and appear as NESTED tiles under the set-resource row.
 #
 # Run it directly:
 #   pwsh test/Test-Sequence.ps1 amisad.end-to-end
