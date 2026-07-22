@@ -64,6 +64,9 @@ independent without per-scenario VMs. Hostnames are set with the framework's
 ([usernames.md](usernames.md)).
 
 ```
+[0] cleanup        remove every amisad lab VM (old and new naming) and any
+                      leftover test-* VMs with their storage dirs; ensure the
+                      core->edge demo keypair exists.
 [1] amisad-build   start.guest -> build tools -> snapshot; compile run
                       uploads amisad-binaries.tgz to the stash service; VM
                       stopped afterwards.

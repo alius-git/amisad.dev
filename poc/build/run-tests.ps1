@@ -8,21 +8,10 @@
 .PROJECTURI https://amisad.com
 #>
 
-# AmisAd POC test automation driver (see poc/test.md). From a clean machine it
-# builds the design topology (plan/design/01-overview.md) and runs every
-# implemented scenario against it:
-#   [0] remove every amisad lab VM (old and new naming) + leftover test-* VMs
-#       AND their storage dirs; ensure the core->edge demo keypair exists
-#   [1] amisad-build: compile + upload binaries to the stash, then stop it
-#   [2] amisad-edge-a and amisad-edge-b: provision + snapshot (each chain
-#       runs solo - first-login OCR is only reliable with no other lab VM up)
-#   [3] amisad-core: k8s + deploy + demo users, snapshot amisad-core
-#   [4] start BOTH edges and wait for their IP reports (s004 needs region B
-#       live; earlier scenarios just don't use it)
-#   [5] each scenario in order: restore amisad-core (the per-scenario state
-#       reset) and drive it over SSH - concurrent edge VMs cannot disturb SSH
-#       stages. On fail the run stops and everything is left up for debugging.
-# Green leaves amisad-core + both edges live as the demo environment.
+# AmisAd POC test automation driver: builds the design topology and runs every
+# scenario against a shared amisad-core (stages [0]-[5]; see poc/test.md). On
+# fail the run stops with everything left up for debugging; green leaves
+# amisad-core + both edges live as the demo environment.
 # Must run ELEVATED (Hyper-V). Stage logs land under -LogDir.
 #requires -RunAsAdministrator
 param(
