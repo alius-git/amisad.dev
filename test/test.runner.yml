@@ -9,4 +9,4 @@
 # orchestration, so the entry below is the latest implemented scenario, for
 # cycle monitoring only.
 sequences:
-- amisad.end-to-end
+  - amisad.end-to-end
