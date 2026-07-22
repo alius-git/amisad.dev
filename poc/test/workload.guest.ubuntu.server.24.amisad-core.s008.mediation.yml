@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s008.mediation (Zero-Knowledge Dispute Mediation and Settlement
 # Adjustment) against the design topology: restore amisad-core, start
@@ -14,7 +14,8 @@ sequenceGuid: 42a95e9f-3748-47f8-b8ad-cc9564d81776
 sequenceRevision: 2
 
 description: "AmisAd s008.mediation: restore amisad-core, run zero-knowledge dispute mediation (metadata-only case, scoped time-boxed disclosure, compensating settlement entries), assert full TVP."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.deploy
 requiresSnapshot:
@@ -23,7 +24,7 @@ variables:
   username: amisad-core-admin
   hostname: amisad-core
 
-steps:
+component:
   - action: loadDiskSnapshot
     id: "amisad-core"
     description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
@@ -32,6 +33,7 @@ steps:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s008.mediation.sh"
     timeoutSeconds: 1800

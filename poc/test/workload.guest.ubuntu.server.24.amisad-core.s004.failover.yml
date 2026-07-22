@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s004.failover (Sovereign Slice Allocation, Isolation Fault,
 # and Attested Failover) against the design topology: restore amisad-core,
@@ -17,7 +17,8 @@ sequenceGuid: 427078bc-c296-4ce8-8d7f-bfc58eaa246d
 sequenceRevision: 2
 
 description: "AmisAd s004.failover: restore amisad-core, sovereign placement over two live edges, injected isolation faults with attested aborts, automatic retry, one settlement, cross-party incident case."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.deploy
 requiresSnapshot:
@@ -26,7 +27,7 @@ variables:
   username: amisad-core-admin
   hostname: amisad-core
 
-steps:
+component:
   - action: loadDiskSnapshot
     id: "amisad-core"
     description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
@@ -35,6 +36,7 @@ steps:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s004.failover.sh"
     timeoutSeconds: 1800

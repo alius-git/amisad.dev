@@ -43,7 +43,7 @@
 .PARAMETER NoConfigGate
     Forwarded to each guest build (skip the pre-cycle Test-Config.ps1 gate).
 .EXAMPLE
-    pwsh test/gui/Set-Resource.ps1
+    pwsh test/Set-Resource.ps1
 #>
 
 param(

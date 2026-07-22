@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s009.suppression (Aggregate Insight Publication and the
 # Demand-Planning Loop) against the design topology: restore amisad-core and
@@ -14,7 +14,8 @@ sequenceGuid: 42abb59b-828b-47cc-bee1-4300127d9e50
 sequenceRevision: 2
 
 description: "AmisAd s009.suppression: restore amisad-core, run aggregate insight publication with anonymity-threshold suppression and identical cross-app outlook figures, assert full TVP."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.deploy
 requiresSnapshot:
@@ -23,7 +24,7 @@ variables:
   username: amisad-core-admin
   hostname: amisad-core
 
-steps:
+component:
   - action: loadDiskSnapshot
     id: "amisad-core"
     description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
@@ -32,6 +33,7 @@ steps:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s009.suppression.sh"
     timeoutSeconds: 1800

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - vm-edge-b (region B slice VM): identical preparation to
 # vm-edge-a under its own hostname/admin. Built per the design topology now;
@@ -10,18 +10,20 @@ sequenceGuid: 4277aa07-3c5d-4e69-9f2b-0d4c6e81f377
 sequenceRevision: 1
 
 description: "Ubuntu Server: provision amisad-edge-b (admin amisad-edge-b-admin), install the demo key + IP reporter over SSH, snapshot amisad-edge-b."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
 variables:
   username: amisad-edge-b-admin
   hostname: amisad-edge-b
 
-steps:
+component:
   - action: sshWaitReady
     timeoutSeconds: 300
     description: "SSH up after the start.guest reboot"
 
+workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-edge.setup.sh"
     timeoutSeconds: 600

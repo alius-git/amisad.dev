@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s005.attribution (Campaign-Boosted Match, Edge Creative
 # Serving, and Attribution Credit) against the design topology: restore
@@ -15,7 +15,8 @@ sequenceGuid: 42566d8a-628d-47e3-b8ce-abf76390b1e3
 sequenceRevision: 2
 
 description: "AmisAd s005.attribution: restore amisad-core, run the campaign-boosted match with edge creative serving and agency+creator attribution, assert full TVP."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.deploy
 requiresSnapshot:
@@ -24,7 +25,7 @@ variables:
   username: amisad-core-admin
   hostname: amisad-core
 
-steps:
+component:
   - action: loadDiskSnapshot
     id: "amisad-core"
     description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
@@ -33,6 +34,7 @@ steps:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s005.attribution.sh"
     timeoutSeconds: 1800

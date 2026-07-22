@@ -40,7 +40,7 @@
     Path to the Yuruna framework checkout that holds
     test/Remove-OrphanedVMFiles.ps1. Defaults to c:\git\yuruna.
 .EXAMPLE
-    pwsh test/gui/Clear-Project.ps1
+    pwsh test/Clear-Project.ps1
 #>
 
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]

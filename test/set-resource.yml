@@ -21,7 +21,7 @@ name: set-resource
 description: Tear down the lab, then build + start the AmisAd topology (host-side, pre-run).
 
 host:
-  # Resolved relative to this file's folder (test/gui/). Run elevated, in order;
+  # Resolved relative to this files folder (test/). Run elevated, in order;
   # the pass stops if either script exits non-zero.
   elevated: true
   scripts:

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../yuruna/test/schemas/orchestration-sequence.schema.yml
+# yaml-language-server: $schema=../../yuruna/test/schemas/orchestration-sequence.schema.yml
 #
 # AmisAd POC end-to-end playbook: a host-side teardown + topology build, then
 # every implemented scenario s001 -> s010 in order. Shaped as a Yuruna

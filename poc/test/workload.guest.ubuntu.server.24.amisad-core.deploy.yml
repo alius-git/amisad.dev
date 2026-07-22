@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - vm-core deploy tier: restore the amisad-core-k8s
 # infrastructure snapshot, download the prebuilt binaries from the stash
@@ -17,7 +17,8 @@ sequenceGuid: 4244dd04-5c0e-4b7d-9f3a-2e8d47c60a44
 sequenceRevision: 5
 
 description: "AmisAd amisad-core: restore amisad-core-k8s, download binaries from the stash, deploy 10 services, add maya/elena/tom/priya/marcel/kai/pat/alex/sam/dana/ingrid + demo key, snapshot amisad-core."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.k8s
 requiresSnapshot:
@@ -30,7 +31,7 @@ variables:
   # the guest .deploy.sh keeps a degraded-mode default if this resolves empty.
   stashHost: "${ext:stash-service.ResolveHost(yuruna-stash-service)}"
 
-steps:
+component:
   - action: loadDiskSnapshot
     id: "amisad-core-k8s"
     description: "Restore the vm-core infrastructure tier"
@@ -39,6 +40,7 @@ steps:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+workload:
   - action: sshFetchAndExecute
     command: "STASH_HOST='${stashHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh"
     timeoutSeconds: 3600

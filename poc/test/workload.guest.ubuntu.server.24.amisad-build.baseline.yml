@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - build VM baseline: a fresh Ubuntu Server (hostname
 # amisad-build, admin amisad-build-admin) plus the build toolchains only
@@ -13,7 +13,8 @@ sequenceGuid: 4211aa01-5c0e-4b7d-9f3a-2e8d47c60a11
 sequenceRevision: 3
 
 description: "Ubuntu Server: provision amisad-build (admin amisad-build-admin), install Rust + bazelisk + git build tools over SSH, snapshot amisad-build."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
 variables:
@@ -22,11 +23,12 @@ variables:
   username: amisad-build-admin
   hostname: amisad-build
 
-steps:
+component:
   - action: sshWaitReady
     timeoutSeconds: 300
     description: "SSH up after the start.guest reboot"
 
+workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh"
     timeoutSeconds: 1800

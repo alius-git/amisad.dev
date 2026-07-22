@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s010.certification (Independent Certification of the Full
 # Evidence Trail) against the design topology: restore amisad-core, start
@@ -16,7 +16,8 @@ sequenceGuid: 429faede-b8b2-447e-97dd-882a44e9b8d4
 sequenceRevision: 2
 
 description: "AmisAd s010.certification: restore amisad-core, self-seed a four-dimension evidence corpus, independently certify it, detect a tamper, and prove read-only audit access."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.deploy
 requiresSnapshot:
@@ -25,7 +26,7 @@ variables:
   username: amisad-core-admin
   hostname: amisad-core
 
-steps:
+component:
   - action: loadDiskSnapshot
     id: "amisad-core"
     description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
@@ -34,6 +35,7 @@ steps:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh"
     timeoutSeconds: 1800

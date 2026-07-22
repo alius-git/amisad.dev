@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s001.fulfillment (Intent-Driven Edge Match and Automated
 # Fulfillment) against the design topology: restore amisad-core (that restore
@@ -15,7 +15,8 @@ sequenceGuid: 4222bb02-7d1f-4c8e-8a4b-3f9e58d71b22
 sequenceRevision: 4
 
 description: "AmisAd s001.fulfillment: restore amisad-core, run Maya's auto-close happy path with slice-runtime on amisad-edge-a, assert full TVP."
-baseline:
+keystrokeMechanism: ssh
+resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.deploy
 requiresSnapshot:
@@ -24,7 +25,7 @@ variables:
   username: amisad-core-admin
   hostname: amisad-core
 
-steps:
+component:
   - action: loadDiskSnapshot
     id: "amisad-core"
     description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
@@ -33,6 +34,7 @@ steps:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s001.fulfillment.sh"
     timeoutSeconds: 1800
