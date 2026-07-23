@@ -3,12 +3,8 @@
 # AmisAd POC - vm-core infrastructure tier: Ubuntu Server (hostname
 # amisad-core, admin amisad-core-admin) + Kubernetes + PostgreSQL + NATS,
 # snapshotted as the intermediate "amisad-core-k8s" (consumed by the deploy
-# tier's rename to amisad-core). Only start.guest uses OCR; everything after
-# runs over SSH.
+# tier's rename to amisad-core).
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 3: amisad-* convention (hostname parameter + <hostname>-admin user);
-# post-provision steps moved from OCR login/typing to SSH.
 sequenceGuid: 42098986-ed31-41e5-ac09-1e50119cc209
 sequenceRevision: 3
 
@@ -18,8 +14,7 @@ resource:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
 variables:
-  # Per-VM admin (see usernames.md); the hostname is the design node name and
-  # is baked at provision time for the whole vm-core lineage.
+  # Per-VM admin (see usernames.md).
   username: amisad-core-admin
   hostname: amisad-core
 

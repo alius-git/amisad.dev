@@ -1,15 +1,10 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s002.fitting (Considered Purchase, Constraint Fidelity, and
-# In-Person Booking) against the design topology: restore amisad-core (the
+# In-Person Booking): restore amisad-core (the
 # per-scenario state reset - s001's orders are gone), then over SSH start
-# slice-runtime on amisad-edge-a, seed the dress catalog, drive Maya's
-# MANUAL-policy need (shortlist -> explicit booking), and assert the FULL
-# Target Verification Point. Entirely SSH-driven; the VM stays amisad-core.
+# slice-runtime on amisad-edge-a
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: design-topology model - runs on amisad-core with the real edge;
-# SSH-driven; per-scenario VM rename retired (snapshot restore = state reset).
 sequenceGuid: 4255ee05-8f3a-4c17-9d2b-6e4a7c90d155
 sequenceRevision: 2
 

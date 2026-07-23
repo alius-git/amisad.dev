@@ -1,15 +1,10 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s008.mediation (Zero-Knowledge Dispute Mediation and Settlement
-# Adjustment) against the design topology: restore amisad-core, start
+# Adjustment): restore amisad-core, start
 # slice-runtime on amisad-edge-a, seed a settled order, open a support case
-# carrying operational metadata only (no buyer identity), run a scoped
-# time-boxed consented disclosure, post a refund as compensating settlement
-# entries referencing the case (history untouched), and prove the disclosure
-# access path is gone after expiry. Entirely SSH-driven; VM left live.
+# carrying operational metadata only (no buyer identity)
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: real implementation on the design topology (skeleton unparked).
 sequenceGuid: 42a95e9f-3748-47f8-b8ad-cc9564d81776
 sequenceRevision: 2
 

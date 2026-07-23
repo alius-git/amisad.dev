@@ -3,12 +3,8 @@
 # AmisAd POC - build VM baseline: a fresh Ubuntu Server (hostname
 # amisad-build, admin amisad-build-admin) plus the build toolchains only
 # (rustup + pinned stable Rust, bazelisk, git, python3), snapshotted as
-# "amisad-build". This VM compiles binaries and nothing else. Only
-# start.guest uses OCR (first-login rotation); everything after runs over SSH.
+# "amisad-build". This VM compiles binaries and nothing else.
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 3: amisad-* convention (hostname parameter + <hostname>-admin user);
-# post-provision steps moved from OCR login to SSH.
 sequenceGuid: 4211aa01-5c0e-4b7d-9f3a-2e8d47c60a11
 sequenceRevision: 3
 
@@ -18,8 +14,7 @@ resource:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
 variables:
-  # Per-VM admin (see usernames.md); hostname set via the framework's new
-  # hostname parameter. Both cascade down to start.guest provisioning.
+  # Per-VM admin (see usernames.md).
   username: amisad-build-admin
   hostname: amisad-build
 

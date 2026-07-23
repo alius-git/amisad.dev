@@ -1,18 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - vm-core deploy tier: restore the amisad-core-k8s
-# infrastructure snapshot, download the prebuilt binaries from the stash
-# service (uploaded by amisad-build), deploy the ten services, add the
-# non-admin demo users (maya, elena, tom, priya) with vault-managed passwords
-# plus the core->edge demo SSH key, then snapshot as "amisad-core". Every
-# scenario restores this snapshot - that restore IS the per-scenario state
-# reset.
+# vm-core deploy tier: restore the amisad-core-k8s snapshot, deploy the ten
+# services + demo users from the stash binaries, then snapshot as "amisad-core".
+# Every scenario restores that snapshot - that restore IS the per-scenario reset.
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: amisad-* convention; SSH-driven; demo users step added.
-# Rev 3: operator personas tom + priya (s004.failover) in users + chpasswd.
-# Rev 4: s005-s007 personas marcel, kai, pat, alex in users + chpasswd.
-# Rev 5: s008-s010 personas sam, dana, ingrid in users + chpasswd.
 sequenceGuid: 4244dd04-5c0e-4b7d-9f3a-2e8d47c60a44
 sequenceRevision: 5
 

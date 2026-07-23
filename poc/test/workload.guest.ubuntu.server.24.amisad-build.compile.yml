@@ -5,8 +5,6 @@
 # for the amisad-core deploy to download. Runs once per test run; every
 # scenario consumes the same artifact (poc/test.md).
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: amisad-* convention; SSH-driven (no OCR login).
 sequenceGuid: 4233cc03-7d1f-4c8e-8a4b-3f9e58d71b33
 sequenceRevision: 2
 

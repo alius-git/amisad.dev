@@ -1,13 +1,10 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - vm-edge-a (region A slice VM): a fresh Ubuntu Server (hostname
-# amisad-edge-a, admin amisad-edge-a-admin) prepared for the stateless
-# slice runtime: the core->edge demo public key in the admin's authorized_keys
-# and a boot-time IP reporter (posts <hostname>.ip.txt to the host status
+# AmisAd POC - vm-edge-a (region A slice VM):
+# a boot-time IP reporter (posts <hostname>.ip.txt to the host status
 # server) so amisad-core can locate this edge. Snapshotted as
 # "amisad-edge-a"; slice-runtime itself is delivered per scenario run.
 
-# Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 4266ff06-2b4c-4d58-8e1a-9c3b5d70e266
 sequenceRevision: 1
 

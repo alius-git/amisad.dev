@@ -1,16 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s006.mandate (Delegated Procurement Under a Scoped Mandate)
-# against the design topology: restore amisad-core, start slice-runtime on
-# amisad-edge-a, and run the full delegation lifecycle - Maya grants Pat a
-# scoped mandate (recorded on the consent ledger), Pat closes an in-scope
-# under-cap match on his own authority with dual attribution, an over-cap
-# match is HELD until Maya approves, an out-of-scope need is refused at
-# submission (zero environments, zero ledger entries), and revocation kills
-# delegated authority immediately. Entirely SSH-driven; VM left live.
+# restore amisad-core, start slice-runtime on
+# amisad-edge-a, and run the full delegation lifecycle
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: real implementation on the design topology (skeleton unparked).
 sequenceGuid: 42c436f1-875b-452c-80b5-e8cff1ce93c4
 sequenceRevision: 2
 

@@ -1,16 +1,10 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s001.fulfillment (Intent-Driven Edge Match and Automated
-# Fulfillment) against the design topology: restore amisad-core (that restore
+# Fulfillment): restore amisad-core (that restore
 # IS the per-scenario state reset), then over SSH start slice-runtime on
-# amisad-edge-a (real edge; single-VM degraded mode retired), seed Elena's
-# offers, drive Maya's auto-close happy path, and assert the FULL Target
-# Verification Point. Entirely SSH-driven - no OCR, so concurrently running
-# edge VMs cannot disturb it. The VM stays amisad-core and is left live.
+# amisad-edge-a
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 4: design-topology model - runs on amisad-core with the real edge;
-# SSH-driven; per-scenario VM rename retired (snapshot restore = state reset).
 sequenceGuid: 4222bb02-7d1f-4c8e-8a4b-3f9e58d71b22
 sequenceRevision: 4
 

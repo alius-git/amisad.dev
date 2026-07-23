@@ -1,16 +1,10 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s005.attribution (Campaign-Boosted Match, Edge Creative
-# Serving, and Attribution Credit) against the design topology: restore
-# amisad-core, start slice-runtime on amisad-edge-a, run the full ad economy -
-# Marcel's campaign + brief, Kai's asset, activation, a boosted match whose
-# creative renders INSIDE the sealed environment, a settlement carrying
-# non-zero agency + creator credit, aggregate-only agency/creator dashboards,
-# and zero buyer signal anywhere on the campaign side. Entirely SSH-driven.
-# The VM stays amisad-core and is left live.
+# Serving, and Attribution Credit): restore amisad-core, start slice-runtime
+# on amisad-edge-a, run the full ad economy with aggregate-only agency/creator
+# attribution and zero buyer signal on the campaign side.
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: real implementation on the design topology (skeleton unparked).
 sequenceGuid: 42566d8a-628d-47e3-b8ce-abf76390b1e3
 sequenceRevision: 2
 

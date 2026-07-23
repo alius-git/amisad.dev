@@ -1,11 +1,10 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - vm-edge-b (region B slice VM): identical preparation to
-# vm-edge-a under its own hostname/admin. Built per the design topology now;
+# vm-edge-a under its own hostname/admin.
 # first exercised by s004.failover (jurisdiction choice) and s009.suppression
 # (anonymity threshold), so the test driver leaves it stopped until then.
 
-# Perf-log identity. Bump revision on step add/remove.
 sequenceGuid: 4277aa07-3c5d-4e69-9f2b-0d4c6e81f377
 sequenceRevision: 1
 

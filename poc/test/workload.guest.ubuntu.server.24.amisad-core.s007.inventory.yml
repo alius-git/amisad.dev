@@ -1,17 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s007.inventory (Enterprise Integration Onboarding and
-# Inventory-Truth Matching) against the design topology: restore amisad-core,
-# start slice-runtime on amisad-edge-a, and run the integration lifecycle -
-# Alex registers and certifies a connector, Elena grants scoped credentials,
-# the connector syncs the ERP catalog and an inventory delta that zeroes the
-# last unit of an item, a buyer need then matches only the in-stock
-# alternative, order-lifecycle events mirror to the ERP idempotently, an
-# out-of-scope call is refused and logged, and revocation kills the
-# credentials. Entirely SSH-driven; VM left live.
+# Inventory-Truth Matching): restore amisad-core,
+# start slice-runtime on amisad-edge-a, and run the integration lifecycle
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: real implementation on the design topology (skeleton unparked).
 sequenceGuid: 421e4385-ea9e-48bf-becf-7ac4e635da8d
 sequenceRevision: 2
 

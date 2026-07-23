@@ -1,12 +1,6 @@
-# Yuruna cycle plan for the AmisAd POC.
-#
 # `amisad.end-to-end` is an orchestration sequence (InvokeTestSequence steps):
-# it builds the design topology (amisad-build -> stash upload; amisad-edge-a/b;
-# amisad-core with k8s + services + demo users), then runs each implemented
-# scenario s001..s010 in order against amisad-core over SSH, each restoring the
-# amisad-core snapshot as its state reset. The unattended runner detects the
+# The unattended runner detects the
 # orchestration entry and delegates the whole cycle to it (one dashboard row per
-# inner sequence) -- the same work `pwsh test/Test-Sequence.ps1 amisad.end-to-end`
-# does locally (see poc/test.md, poc/build/run-tests.ps1).
+# inner sequence)
 sequences:
   - amisad.end-to-end

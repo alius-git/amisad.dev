@@ -1,17 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s003.silence (Consent Revocation and the Right to Silence)
-# against the design topology: restore amisad-core (that restore IS the
-# per-scenario state reset), then over SSH start slice-runtime on
-# amisad-edge-a, seed the in-flight order and two open needs, pause
-# participation, prove silence (a perfectly fitting new offer produces no
-# match, no environment, no notification), settle the pre-revocation order,
-# withdraw (aggregation drops her contribution), resume (open needs served
-# again), and assert the FULL Target Verification Point. Entirely SSH-driven.
-# The VM stays amisad-core and is left live.
+# restore amisad-core (that restore IS the
+# per-scenario state reset)
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: real implementation on the design topology (skeleton unparked).
 sequenceGuid: 42b0e16a-99fa-4086-b2b2-6227ba35ea6a
 sequenceRevision: 2
 

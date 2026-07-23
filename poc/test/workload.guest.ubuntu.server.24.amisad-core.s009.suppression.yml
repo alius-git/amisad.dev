@@ -1,15 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s009.suppression (Aggregate Insight Publication and the
-# Demand-Planning Loop) against the design topology: restore amisad-core and
-# run the aggregate-insights loop entirely on vm-core - seed demand across a
-# high-volume region and a below-threshold region, prove the below-threshold
-# region is SUPPRESSED (absent, not zeroed) from the workbench, the published
-# versioned outlook, and Elena's seller + Marcel's ads views, which carry
-# identical figures. No edge/matching needed. SSH-driven; VM left live.
+# Demand-Planning Loop): restore amisad-core and
+# run the aggregate-insights loop entirely on vm-core
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: real implementation on the design topology (skeleton unparked).
 sequenceGuid: 42abb59b-828b-47cc-bee1-4300127d9e50
 sequenceRevision: 2
 

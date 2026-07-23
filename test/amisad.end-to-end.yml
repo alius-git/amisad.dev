@@ -1,30 +1,9 @@
 # yaml-language-server: $schema=../../yuruna/test/schemas/orchestration-sequence.schema.yml
 #
-# AmisAd POC end-to-end playbook: a host-side teardown + topology build, then
-# every implemented scenario s001 -> s010 in order. Shaped as a Yuruna
-# orchestration sequence (orchestration-sequence.schema.yml): Test-Sequence.ps1
-# detects the InvokeTestSequence steps, runs every inner sequence under ONE
-# status.json cycle, and shows one top-level dashboard row per inner sequence
-# (unified naming + pass/fail) instead of a cycle per sequence. The scenario
-# steps (s001..s010) run in-process; set-resource is a host action whose
-# per-stage guest builds (amisad-build / edge-a / edge-b / core) run in child
-# processes and appear as NESTED tiles under the set-resource row.
-#
-# Run it directly:
-#   pwsh test/Test-Sequence.ps1 amisad.end-to-end
-#
-# The first step (set-resource.yml) is a HOST action: it tears the lab down
-# (Clear-Project.ps1) then builds the topology and starts both edges
-# (Set-Resource.ps1). The guest scenarios below need amisad-core + both edges
-# (amisad-edge-a/-b) live; the full pass builds them via set-resource.yml.
-# s004 and s010 need both edges; the rest use amisad-edge-a (or the single-VM
-# degraded fallback).
-#
-# Continuous pool testing is a SEPARATE path: the pool planner consumes the
-# test-set manifest format (test-set.schema.yml), not this orchestration
-# sequence. Author a project/test/test-sets/<name>.yml for pool mode; keep the
-# demo warm (the scenarios restore the "amisad-core" snapshot and re-deliver
-# slice-runtime to the edges, so they are order-independent and repeatable).
+# Orchestration sequence: InvokeTestSequence steps run under one status.json
+# cycle (one dashboard row per inner sequence). set-resource is a HOST action
+# (lab teardown + topology build) run before the guest scenarios; s004 and
+# s010 need both edges.
 
 name: amisad.end-to-end
 description: Host-side lab teardown + topology build, then every AmisAd scenario s001 -> s010 in order.

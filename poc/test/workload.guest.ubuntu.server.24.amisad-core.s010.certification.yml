@@ -1,17 +1,10 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s010.certification (Independent Certification of the Full
-# Evidence Trail) against the design topology: restore amisad-core, start
+# Evidence Trail): restore amisad-core, start
 # slice-runtime on amisad-edge-a (region identity for residency), self-seed a
-# representative corpus exercising all four audit dimensions (a completed
-# match + an injected abort, consent grant/revoke, a mandate, a disclosure
-# grant + settlement adjustment), then have Ingrid's audit-svc independently
-# certify attestation continuity, residency, consent, and settlement
-# conservation, localize a deliberate tamper, and prove read-only access.
-# Entirely SSH-driven; VM left live.
+# representative corpus exercising all four audit dimensions
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: real implementation on the design topology (skeleton unparked).
 sequenceGuid: 429faede-b8b2-447e-97dd-882a44e9b8d4
 sequenceRevision: 2
 

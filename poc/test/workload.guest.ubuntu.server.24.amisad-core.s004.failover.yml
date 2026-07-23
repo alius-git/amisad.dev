@@ -1,18 +1,10 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s004.failover (Sovereign Slice Allocation, Isolation Fault,
-# and Attested Failover) against the design topology: restore amisad-core,
+# and Attested Failover): restore amisad-core,
 # then over SSH start slice-runtime on BOTH edges (region-a and region-b,
-# region identity attested), configure Tom's sovereignty policy so the
-# roomier region-b is excluded for the restricted jurisdiction, inject two
-# consecutive isolation faults, prove the aborted environments fail SAFE
-# (attested abort, no egress, no match record), the fabric retries to a clean
-# completion with exactly one settlement, the incidents queue for Tom, and
-# the systemic pattern escalates to Priya's cross-party platform case.
-# Entirely SSH-driven. The VM stays amisad-core and is left live.
+# region identity attested)
 
-# Perf-log identity. Bump revision on step add/remove.
-# Rev 2: real implementation on the design topology (skeleton unparked).
 sequenceGuid: 427078bc-c296-4ce8-8d7f-bfc58eaa246d
 sequenceRevision: 2
 
