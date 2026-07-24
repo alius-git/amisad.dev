@@ -4,8 +4,10 @@
 # AmisAd POC - amisad-build compile step: build every release binary and
 # upload the tarball to the stash service, for amisad-core to download and
 # deploy. This VM has the Rust toolchain but no Kubernetes; it produces
-# artifacts, it does not run them. STASH_HOST (default 192.168.7.222): the
-# stash-service VM the binaries are dropped into.
+# artifacts, it does not run them. STASH_HOST (default 192.168.7.138): the
+# stash service the binaries are dropped into. The lab stash is a fixed-address
+# service, not a per-host Hyper-V VM, so ${ext:...ResolveHost} returns empty
+# here and this literal is the address that actually gets used.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -35,7 +37,7 @@ echo "== stash reachability (fail fast, before the ~20-min build) =="
 # HTTP :80 reachability is a proxy for scp :22 reachability (same host). The
 # stash is on the bridged LAN; if this guest (NAT) cannot reach it, stop now
 # instead of building and then failing at the scp upload.
-STASH_HOST="${STASH_HOST:-192.168.7.222}"
+STASH_HOST="${STASH_HOST:-192.168.7.138}"
 curl -fsS --noproxy '*' --connect-timeout 20 "http://${STASH_HOST}/healthz" >/dev/null || {
     echo "STASH UNREACHABLE at http://${STASH_HOST} - cannot upload binaries; aborting before build." >&2
     exit 3
@@ -81,7 +83,7 @@ echo "== upload binaries to the stash service =="
 # The stash records the upload (username=amisad-poc, filename=amisad-binaries.tgz)
 # for later investigation; amisad-core locates it by that label. scp only (the
 # stash SSH server accepts the drop); no key needed - it is a write-only sink.
-STASH_HOST="${STASH_HOST:-192.168.7.222}"
+STASH_HOST="${STASH_HOST:-192.168.7.138}"
 scp -O -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 \
     /tmp/amisad-binaries.tgz "amisad-poc@${STASH_HOST}:/amisad/amisad-binaries.tgz"

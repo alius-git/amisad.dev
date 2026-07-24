@@ -6,7 +6,9 @@
 # them, and deploy the ten services to the in-VM Kubernetes cluster. This VM has
 # the runtime stack (Docker+containerd+kubeadm K8s+Helm+PostgreSQL+NATS from the
 # amisad-core-k8s baseline) plus python3 - but NO Rust toolchain and no source build.
-# STASH_HOST (default 192.168.7.222): the stash-service VM to pull binaries from.
+# STASH_HOST (default 192.168.7.138): the stash service to pull binaries from. The
+# lab stash is a fixed-address service, not a per-host Hyper-V VM, so
+# ${ext:...ResolveHost} returns empty here and this literal is the address used.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -40,7 +42,7 @@ echo "== download prebuilt binaries from the stash service =="
 # would otherwise be sent through squid. Locate the artifact by the constant
 # label amisad-build uploaded under (username amisad-poc, filename amisad-binaries);
 # /api/stashes returns newest-first, so limit=1 is the latest build.
-STASH_HOST="${STASH_HOST:-192.168.7.222}"
+STASH_HOST="${STASH_HOST:-192.168.7.138}"
 STASH="http://${STASH_HOST}"
 curl -fsS --noproxy '*' --connect-timeout 20 "${STASH}/healthz" >/dev/null || {
     echo "STASH UNREACHABLE at ${STASH} - is yuruna-stash-service running and reachable from this guest?" >&2
