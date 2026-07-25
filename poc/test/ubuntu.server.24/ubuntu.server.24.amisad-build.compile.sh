@@ -76,25 +76,39 @@ cargo build --release --workspace
 
 echo "== pack binaries =="
 BINS="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc slice-runtime buyer-client"
+# The stash is one shared service for the whole lab, so the artifact name has
+# to say which machine code it holds. Every host uploads under the same label
+# otherwise, the newest upload wins whatever asks for it, and a guest that
+# fetches another architecture's build gets binaries its kernel cannot run --
+# every pod then dies with "exec format error" and the deploy only reports a
+# rollout timeout, far from the cause.
+#
+# The architecture goes in the MIDDLE of the name on purpose. The stash
+# matches filenames by substring, so a host still asking for the old
+# "amisad-binaries" label would keep matching "amisad-binaries-<arch>" and
+# stay exposed; it cannot match "amisad-<arch>-binaries". Hosts adopt this at
+# their own pace without ever being handed a foreign build.
+ARCH=$(uname -m)
+TARBALL="/tmp/amisad-${ARCH}-binaries.tgz"
 # shellcheck disable=SC2086
-tar czf /tmp/amisad-binaries.tgz -C target/release $BINS
-ls -l /tmp/amisad-binaries.tgz
+tar czf "$TARBALL" -C target/release $BINS
+ls -l "$TARBALL"
 # The stash sink caps each file at 100 MB and truncates SILENTLY (exits 0), which
 # would surface only as a corrupt gunzip on amisad-core. Fail loud here instead.
-SZ=$(stat -c%s /tmp/amisad-binaries.tgz)
+SZ=$(stat -c%s "$TARBALL")
 if [ "$SZ" -ge 104857600 ]; then
     echo "binaries tarball ${SZ}B exceeds the stash 100MB per-file cap; strip binaries or split." >&2
     exit 4
 fi
 
 echo "== upload binaries to the stash service =="
-# The stash records the upload (username=amisad-poc, filename=amisad-binaries.tgz)
+# The stash records the upload (username=amisad-poc, filename=amisad-<arch>-binaries.tgz)
 # for later investigation; amisad-core locates it by that label. scp only (the
 # stash SSH server accepts the drop); no key needed - it is a write-only sink.
 STASH_HOST="${STASH_HOST:-192.168.7.138}"
 scp -O -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 \
-    /tmp/amisad-binaries.tgz "amisad-poc@${STASH_HOST}:/amisad/amisad-binaries.tgz"
-echo "uploaded amisad-binaries.tgz to stash ${STASH_HOST} (label amisad-poc)"
+    "$TARBALL" "amisad-poc@${STASH_HOST}:/amisad/amisad-${ARCH}-binaries.tgz"
+echo "uploaded amisad-${ARCH}-binaries.tgz to stash ${STASH_HOST} (label amisad-poc)"
 
 echo "amisad-build COMPILE+UPLOAD PASSED"

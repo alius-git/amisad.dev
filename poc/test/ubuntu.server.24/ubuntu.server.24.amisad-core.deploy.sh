@@ -45,11 +45,16 @@ cd "$POC"
 
 echo "== download prebuilt binaries from the stash service =="
 # --noproxy '*': the stash IP is not in the guest no_proxy list, so an HTTP GET
-# would otherwise be sent through squid. Locate the artifact by the constant
-# label amisad-build uploaded under (username amisad-poc, filename amisad-binaries);
-# /api/stashes returns newest-first, so limit=1 is the latest build.
+# would otherwise be sent through squid. The label carries the architecture
+# (amisad-<arch>-binaries): the stash is shared by the whole lab, so a plain
+# "newest wins" query hands this guest whatever machine built last, and a
+# foreign build's binaries cannot execute here at all. Match our own uname -m
+# and nothing else. /api/stashes returns newest-first, so limit=1 is the
+# latest build FOR THIS ARCHITECTURE.
 STASH_HOST="${STASH_HOST:-192.168.7.138}"
 STASH="http://${STASH_HOST}"
+ARCH=$(uname -m)
+LABEL="amisad-${ARCH}-binaries"
 curl -fsS --noproxy '*' --connect-timeout 20 "${STASH}/healthz" >/dev/null || {
     echo "STASH UNREACHABLE at ${STASH} - is yuruna-stash-service running and reachable from this guest?" >&2
     exit 3
@@ -57,10 +62,10 @@ curl -fsS --noproxy '*' --connect-timeout 20 "${STASH}/healthz" >/dev/null || {
 # `|| true`: grep exits 1 when the list is empty (no artifact yet), which under
 # `set -o pipefail` would abort here BEFORE the guard below could explain why.
 PERMALINK=$(curl -fsS --noproxy '*' \
-    "${STASH}/api/stashes?username=amisad-poc&filename=amisad-binaries&limit=1" \
+    "${STASH}/api/stashes?username=amisad-poc&filename=${LABEL}&limit=1" \
     | grep -o '"permalink":"[^"]*"' | head -n1 | cut -d'"' -f4 || true)
 if [ -z "$PERMALINK" ]; then
-    echo "no stash artifact found for label amisad-poc/amisad-binaries - did amisad-build run first?" >&2
+    echo "no stash artifact found for label amisad-poc/${LABEL} - did amisad-build run first on a ${ARCH} host?" >&2
     exit 3
 fi
 DOWNLOAD="${STASH}${PERMALINK/#\/s\//\/download\/}"
@@ -70,6 +75,30 @@ tar -xzf /tmp/amisad-binaries.tgz -C target/release
 chmod +x target/release/*
 echo "binaries retrieved from stash:"
 ls -l target/release/
+
+# Confirm the binaries can actually run here before spending the deploy on
+# them. A mismatch is otherwise invisible until every pod crashes with "exec
+# format error" and the rollout wait burns its full timeout, which reports a
+# stuck deployment and says nothing about the cause. Read the ELF header
+# directly: `file` is not installed on this guest, python3 is (installed above).
+python3 - "$ARCH" target/release/seller-svc <<'PY'
+import sys, struct
+want, path = sys.argv[1], sys.argv[2]
+# e_machine sits at offset 18 of the ELF header, 2 bytes little-endian.
+with open(path, 'rb') as fh:
+    head = fh.read(20)
+if head[:4] != b'\x7fELF':
+    sys.exit(f"stash artifact is not an ELF binary: {path}")
+machine = struct.unpack_from('<H', head, 18)[0]
+names = {0x3E: 'x86_64', 0xB7: 'aarch64', 0x28: 'arm', 0xF3: 'riscv64'}
+got = names.get(machine, hex(machine))
+if got != want:
+    sys.exit(
+        f"stash artifact is {got} but this guest is {want}: the binaries cannot "
+        f"execute here. The stash is shared by the whole lab -- an artifact built "
+        f"on another architecture was published under this label.")
+print(f"binaries match this guest ({got})")
+PY
 
 echo "== build thin images + deploy 10 services =="
 sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
@@ -101,7 +130,27 @@ for svc in $SERVICES; do
         --set "image=amisad/${svc}:poc" --set "pullPolicy=Never" "${EXTRA[@]}"
 done
 for svc in $SERVICES; do
-    kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=600s
+    if kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=600s; then
+        continue
+    fi
+    # `wait` reports only that the condition never arrived, so on its own a
+    # failure here says a deployment is stuck and nothing about why -- and the
+    # VM is torn down before anyone can look. Dump what the cluster already
+    # knows: the pod phase, the scheduling/pull events, and whatever the
+    # container wrote before dying are each enough to name the cause on their
+    # own. Every probe is best-effort; the exit below is the real result.
+    echo "== ${svc} never became available; cluster state ==" >&2
+    kubectl -n amisad get pods -o wide >&2 || true
+    kubectl -n amisad describe "deployment/${svc}" 2>&1 | tail -25 >&2 || true
+    echo "-- pod detail (waiting/terminated reason) --" >&2
+    kubectl -n amisad get pods -l "app=${svc}" \
+        -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.phase}{"\t"}{range .status.containerStatuses[*]}{.state}{.lastState}{end}{"\n"}{end}' >&2 || true
+    echo "-- container log --" >&2
+    kubectl -n amisad logs "deployment/${svc}" --all-containers --tail=40 >&2 || true
+    kubectl -n amisad logs "deployment/${svc}" --all-containers --previous --tail=40 >&2 || true
+    echo "-- recent namespace events --" >&2
+    kubectl -n amisad get events --sort-by=.lastTimestamp 2>&1 | tail -25 >&2 || true
+    exit 1
 done
 
 echo "== expose NodePorts for host/edge access =="
