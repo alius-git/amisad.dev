@@ -144,29 +144,3 @@ function Stop-LabConsole {
             Stop-Process -Force -ErrorAction SilentlyContinue
     }
 }
-
-function Remove-LabVM {
-    <#
-    .SYNOPSIS
-        Stop and remove one VM through the host contract, on any hypervisor.
-    .DESCRIPTION
-        Get-VMState returns 'absent' for an unknown VM on every driver, so it
-        doubles as the existence test. The driver's own Remove-VM deletes the
-        per-VM storage as well (the KVM driver removes ~/yuruna/vms/<name>,
-        the Hyper-V driver its VHD dir), and Remove-OrphanedVMFiles.ps1 sweeps
-        anything stranded by a VM that never registered -- so this no longer
-        reaches for Hyper-V's VirtualHardDiskPath by hand.
-    .OUTPUTS
-        [bool] $true when a VM was present and removal was attempted.
-    #>
-    [CmdletBinding(SupportsShouldProcess)]
-    [OutputType([bool])]
-    param([Parameter(Mandatory)][string]$Name)
-
-    if ((Get-VMState -VMName $Name) -eq 'absent') { return $false }
-    if (-not $PSCmdlet.ShouldProcess($Name, 'Stop and remove VM')) { return $false }
-    Write-Information -MessageData "Removing VM $Name" -InformationAction Continue
-    try { $null = Stop-VMForce -VMName $Name } catch { Write-Verbose "Stop-VMForce $Name : $($_.Exception.Message)" }
-    try { $null = Remove-VM -VMName $Name -Confirm:$false } catch { Write-Warning "Remove-VM $Name failed: $($_.Exception.Message)" }
-    return $true
-}

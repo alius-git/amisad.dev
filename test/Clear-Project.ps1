@@ -19,9 +19,9 @@
 
 <#
 .SYNOPSIS
-    Tear down the AmisAd POC lab to a known-clean host: remove every lab VM
-    (and its storage), then sweep orphaned VM files. Runs on any Yuruna host
-    type (Hyper-V, KVM, UTM).
+    Tear down the AmisAd POC lab to a known-clean host: remove every amisad-*
+    VM (and its storage), then sweep orphaned VM files. Runs on any Yuruna
+    host type (Hyper-V, KVM, UTM).
 .DESCRIPTION
     The teardown half of the end-to-end pass (Set-Resource.ps1 builds it back
     up). Steps, in order:
@@ -30,17 +30,15 @@
          live cycle's VMs.
       2. Close lab consoles that would steal GUI keystroke focus (Hyper-V only;
          see Stop-LabConsole).
-      3. Remove every lab VM AND its storage: the known topology names, plus a
-         prefix sweep for amisad-* / amisad.* / the configured test-VM prefix.
-      4. Run the framework's Remove-OrphanedVMFiles.ps1 -Force to sweep files
-         no longer tied to any registered VM.
+      3. Hand the whole teardown to the framework's Remove-TestVMFiles.ps1
+         with the lab's VM-name prefix.
 
-    PORTABILITY. Every VM operation goes through the Yuruna host contract
-    (Get-VMState / Stop-VMForce / Remove-VM from
-    host/<host-type>/modules/Yuruna.Host.psm1, loaded by Initialize-AmisAdHost)
-    rather than Hyper-V cmdlets, and the prefix sweep delegates to the
-    framework's own host-neutral Remove-TestVMFiles.ps1. Nothing here branches
-    on hypervisor.
+    All VM removal lives in the framework: Remove-TestVMFiles.ps1 enumerates,
+    force-stops and removes every VM whose name starts with the prefix, then
+    runs the orphaned-file sweep, and it exits non-zero when anything
+    survived. That single path is exercised by every project on every host
+    type, so this project keeps no VM list and no removal logic of its own --
+    a teardown bug gets fixed once, in the framework, for all of them.
 
     Elevation is required: removing VMs is privileged on every host.
 .PARAMETER YurunaRoot
@@ -66,9 +64,11 @@ $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
 Write-Information -MessageData "Lab teardown on '$HostType' (framework: $YurunaRoot)." -InformationAction Continue
 
-# The known demo topology, swept by exact name even if the prefix sweep misses
-# a renamed-mid-chain remnant (amisad-core-k8s is the intermediate rename).
-$TopologyVms = @('amisad-build', 'amisad-edge-a', 'amisad-edge-b', 'amisad-core', 'amisad-core-k8s')
+# Every lab VM is named amisad-<role> (amisad-build, amisad-core,
+# amisad-edge-a/b, and the amisad-core-k8s intermediate), so one prefix
+# selects the whole topology -- including a remnant from a renamed or
+# half-created VM that no hard-coded name list would know about.
+$LabVmPrefix = 'amisad-'
 
 # --- 1) Refuse to sweep VMs out from under an active Yuruna runner -----------
 # Only when run standalone. Inside a runner cycle the orchestration invokes this
@@ -91,59 +91,22 @@ if (-not $env:YURUNA_CYCLE_CONTEXT) {
 # --- 2) Close lab consoles ---------------------------------------------------
 Stop-LabConsole -HostType $HostType
 
-# --- 3a) Remove the known topology VMs by exact name -------------------------
-$removed = 0
-foreach ($vmName in ($TopologyVms | Sort-Object -Unique)) {
-    if (Remove-LabVM -Name $vmName) { $removed++ }
-}
-Write-Information -MessageData "Lab teardown removed $removed topology VM(s)." -InformationAction Continue
-
-# --- 3b) Prefix sweep for stragglers ----------------------------------------
-# Remove-TestVMFiles.ps1 is the framework's own host-neutral sweep: it
-# enumerates VMs by name prefix through the same driver contract and removes
-# each with its files. Using it here means this project never needs its own
-# per-hypervisor VM listing (the Hyper-V `Get-VM | Where-Object Name -like`
-# that used to live here is exactly what broke on KVM). Best-effort: a sweep
-# failure must not abort a teardown that has already done its main work.
+# --- 3) Remove every lab VM, then the orphaned files it left behind ---------
+# Remove-TestVMFiles.ps1 already force-stops and removes each matching VM
+# through the host contract and finishes with the orphaned-file sweep, so
+# this is the whole teardown. Its non-zero exit means a VM survived; that
+# is propagated rather than swallowed, because the next stage would then be
+# building on top of a stale VM whose disk no longer matches its definition.
 $sweepScript = Join-Path $YurunaRoot 'test/Remove-TestVMFiles.ps1'
-if (Test-Path -LiteralPath $sweepScript) {
-    # -Prefix takes a list, so both lab prefixes go in one sweep and the
-    # host is enumerated once instead of once per prefix. An explicit
-    # -Prefix selects exactly what it names, so the configured test-VM
-    # prefix still needs its own no-argument call below; letting the
-    # framework read that keeps this from hard-coding 'test-'. Best-effort
-    # throughout: a sweep failure must not abort a teardown that has
-    # already removed the topology by name.
-    $labPrefixes = @('amisad-', 'amisad.')
-    if ($PSCmdlet.ShouldProcess("VMs named $($labPrefixes -join '*, ')*", 'Sweep')) {
-        try {
-            & $sweepScript -Prefix $labPrefixes -Quiet
-        } catch {
-            Write-Warning "Prefix sweep reported: $($_.Exception.Message)"
-        }
-    }
-    if ($PSCmdlet.ShouldProcess('configured test-VM prefix', 'Sweep')) {
-        try {
-            & $sweepScript -Quiet
-        } catch {
-            Write-Warning "Configured-prefix sweep reported: $($_.Exception.Message)"
-        }
-    }
-} else {
-    Write-Warning "Remove-TestVMFiles.ps1 not found at '$sweepScript'; skipped the prefix sweep (topology VMs were still removed by name)."
-}
-
-# --- 4) Sweep orphaned VM files (host-neutral dispatcher; -Force skips prompt)
-$removeScript = Join-Path $YurunaRoot 'test/Remove-OrphanedVMFiles.ps1'
-if (-not (Test-Path -LiteralPath $removeScript)) {
-    throw "Remove-OrphanedVMFiles.ps1 not found at '$removeScript' (set -YurunaRoot)."
+if (-not (Test-Path -LiteralPath $sweepScript)) {
+    throw "Remove-TestVMFiles.ps1 not found at '$sweepScript' (set -YurunaRoot)."
 }
 
 $exitCode = 0
-if ($PSCmdlet.ShouldProcess($removeScript, 'Sweep orphaned VM files (-Force)')) {
+if ($PSCmdlet.ShouldProcess("VMs named $LabVmPrefix*", 'Stop, remove, and sweep files')) {
     # Child process isolates the framework script's own `exit`; elevation is
     # inherited from this (already elevated) session.
-    pwsh -NoProfile -File $removeScript -Force
+    pwsh -NoProfile -File $sweepScript -Prefix $LabVmPrefix
     $exitCode = $LASTEXITCODE
 }
 
