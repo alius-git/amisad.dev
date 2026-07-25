@@ -1,0 +1,172 @@
+<#PSScriptInfo
+.VERSION 2026.07.25
+.GUID 5f83c1d7-2a94-4e60-b8d1-3c7e6a09f452
+.AUTHOR Alisson Sol et al.
+.Copyright (c) 2026 by Alisson Sol et al.
+.TAGS amisad poc lab host portability
+.LICENSEURI https://yuruna.link/license
+.PROJECTURI https://amisad.com
+.ICONURI
+.EXTERNALMODULEDEPENDENCIES
+.REQUIREDSCRIPTS
+.EXTERNALSCRIPTDEPENDENCIES
+.RELEASENOTES
+.PRIVATEDATA
+#>
+
+#requires -version 7
+
+<#
+.SYNOPSIS
+    Shared host-portability helpers for the AmisAd host-action scripts
+    (Clear-Project.ps1, Set-Resource.ps1). Dot-sourced, not invoked.
+.DESCRIPTION
+    Both host actions used to be Hyper-V-only: they called `Hyper-V\Get-VM`
+    directly and defaulted -YurunaRoot to 'c:\git\yuruna'. On host.ubuntu.kvm
+    (and host.macos.utm) the module cannot load and 'c:' is read as a PSDrive
+    name, so Join-Path failed with "Cannot find drive" -- the pass died on
+    step 1 of every cycle.
+
+    Yuruna already solves this: host/<host-type>/modules/Yuruna.Host.psm1
+    exports ONE contract (New-VM / Start-VM / Stop-VMForce / Remove-VM /
+    Get-VMState / Save-VMDiskSnapshot / ...) implemented per hypervisor, and
+    Initialize-YurunaHost imports the right driver for the detected host. These
+    helpers wire the project into that contract so the host actions carry no
+    hypervisor branches of their own.
+#>
+
+Set-StrictMode -Version Latest
+
+function Resolve-YurunaRoot {
+    <#
+    .SYNOPSIS
+        Locate the Yuruna framework checkout, without hard-coding a path.
+    .DESCRIPTION
+        Tried in order, first one that actually looks like a checkout wins:
+
+          1. -Explicit (the caller's -YurunaRoot), so an operator override
+             always beats discovery.
+          2. $env:YURUNA_ROOT, for a host whose layout matches nothing below.
+          3. $env:YURUNA_CONFIG_PATH -- the runner publishes the resolved
+             '<root>/test/test.config.yml' before every step and the host
+             action inherits it, which makes this exact in-cycle.
+          4. <this file>/../.. -- the cycle clones the project to
+             '<root>/project', so the project's test/ dir sits two levels
+             under the framework root.
+          5. A per-platform conventional path, for a standalone run outside
+             any cycle (an operator invoking the teardown by hand).
+
+        A candidate counts only if test/modules/Test.HostContract.psm1 is
+        there: that is the module both host actions import, so validating on
+        it means a match can never resolve to a checkout too old or too
+        partial to drive.
+    .OUTPUTS
+        [string] absolute path; throws when nothing validates.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([AllowNull()][AllowEmptyString()][string]$Explicit)
+
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    if (-not [string]::IsNullOrWhiteSpace($Explicit))           { [void]$candidates.Add($Explicit) }
+    if (-not [string]::IsNullOrWhiteSpace($env:YURUNA_ROOT))    { [void]$candidates.Add($env:YURUNA_ROOT) }
+    if (-not [string]::IsNullOrWhiteSpace($env:YURUNA_CONFIG_PATH)) {
+        $testDir = Split-Path -Parent $env:YURUNA_CONFIG_PATH
+        if ($testDir) { [void]$candidates.Add((Split-Path -Parent $testDir)) }
+    }
+    [void]$candidates.Add((Join-Path -Path $PSScriptRoot -ChildPath '..' -AdditionalChildPath '..'))
+    if ($IsWindows) { [void]$candidates.Add('c:\git\yuruna') }
+    else            { [void]$candidates.Add((Join-Path -Path $HOME -ChildPath 'git' -AdditionalChildPath 'yuruna')) }
+
+    foreach ($candidate in $candidates) {
+        if ([string]::IsNullOrWhiteSpace($candidate)) { continue }
+        # Join-Path with forward slashes resolves on every platform; a literal
+        # 'test\modules\...' would be one filename containing backslashes on
+        # Linux/macOS and silently never match.
+        $marker = Join-Path $candidate 'test/modules/Test.HostContract.psm1'
+        if (Test-Path -LiteralPath $marker) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+    throw ("Could not locate the Yuruna framework checkout. Tried: {0}. " -f ($candidates -join ', ')) +
+          "Pass -YurunaRoot, or set YURUNA_ROOT."
+}
+
+function Initialize-AmisAdHost {
+    <#
+    .SYNOPSIS
+        Import the framework's host contract + the driver for THIS host, and
+        return the detected host type.
+    .DESCRIPTION
+        After this returns, the unqualified New-VM / Start-VM / Stop-VMForce /
+        Remove-VM / Get-VMState / Save-VMDiskSnapshot names resolve to the
+        implementation for the running hypervisor -- the drivers deliberately
+        shadow Hyper-V's same-named cmdlets, so a caller never needs a
+        `Hyper-V\` prefix (which is precisely what pinned these scripts to
+        Windows).
+    .OUTPUTS
+        [string] host type, e.g. 'host.ubuntu.kvm'.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([Parameter(Mandatory)][string]$YurunaRoot)
+
+    Import-Module (Join-Path $YurunaRoot 'test/modules/Test.HostContract.psm1') -Global -Force -DisableNameChecking
+    $hostType = Get-HostType
+    if (-not $hostType) { throw "Could not detect the host type (unsupported platform)." }
+    $null = Initialize-YurunaHost -RepoRoot $YurunaRoot -HostType $hostType
+    return $hostType
+}
+
+function Stop-LabConsole {
+    <#
+    .SYNOPSIS
+        Close leftover LAB VM consoles that would steal GUI keystroke focus.
+    .DESCRIPTION
+        This is a Hyper-V/vmconnect problem specifically: vmconnect grabs
+        keyboard focus during a VM's first login and the framework drives that
+        login by synthesizing keystrokes. KVM and UTM are driven over VNC
+        (vmStart.vncPort) with no separate console process to fight, so there
+        is nothing to close there -- the no-op is the correct behavior, not a
+        gap. Only consoles whose window title names a lab VM are touched; an
+        operator's console to an unrelated VM is left alone.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    param([Parameter(Mandatory)][string]$HostType)
+
+    if ($HostType -ne 'host.windows.hyper-v') {
+        Write-Verbose "Stop-LabConsole: no separate console process on '$HostType' (VNC-driven); nothing to close."
+        return
+    }
+    if ($PSCmdlet.ShouldProcess('lab vmconnect consoles', 'Stop process')) {
+        Get-Process vmconnect -ErrorAction SilentlyContinue |
+            Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Remove-LabVM {
+    <#
+    .SYNOPSIS
+        Stop and remove one VM through the host contract, on any hypervisor.
+    .DESCRIPTION
+        Get-VMState returns 'absent' for an unknown VM on every driver, so it
+        doubles as the existence test. The driver's own Remove-VM deletes the
+        per-VM storage as well (the KVM driver removes ~/yuruna/vms/<name>,
+        the Hyper-V driver its VHD dir), and Remove-OrphanedVMFiles.ps1 sweeps
+        anything stranded by a VM that never registered -- so this no longer
+        reaches for Hyper-V's VirtualHardDiskPath by hand.
+    .OUTPUTS
+        [bool] $true when a VM was present and removal was attempted.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([bool])]
+    param([Parameter(Mandatory)][string]$Name)
+
+    if ((Get-VMState -VMName $Name) -eq 'absent') { return $false }
+    if (-not $PSCmdlet.ShouldProcess($Name, 'Stop and remove VM')) { return $false }
+    Write-Information -MessageData "Removing VM $Name" -InformationAction Continue
+    try { $null = Stop-VMForce -VMName $Name } catch { Write-Verbose "Stop-VMForce $Name : $($_.Exception.Message)" }
+    try { $null = Remove-VM -VMName $Name -Confirm:$false } catch { Write-Warning "Remove-VM $Name failed: $($_.Exception.Message)" }
+    return $true
+}

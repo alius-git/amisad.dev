@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.07.21
+.VERSION 2026.07.25
 .GUID 42b4e8da-6f32-4c9e-ad57-8b1c3f74d2e6
 .AUTHOR Alisson Sol et al.
 .Copyright (c) 2026 by Alisson Sol et al.
@@ -21,6 +21,7 @@
 .SYNOPSIS
     Build + start the AmisAd POC topology on a clean host (the "warm-up" half of
     the end-to-end pass; Clear-Project.ps1 is the teardown half that runs first).
+    Runs on any Yuruna host type (Hyper-V, KVM, UTM).
 .DESCRIPTION
     Ports the build stages of poc/build/run-tests.ps1 (everything except the
     scenario loop, which the amisad.end-to-end.yml orchestration sequence drives).
@@ -35,11 +36,26 @@
       4. Start both edges and wait for their boot-time IP reports (the fresh
          handoff/*.ip.txt the scenarios resolve the edge from).
 
-    Leaves amisad-core + both edges live. Elevated (Hyper-V) is required.
+    Leaves amisad-core + both edges live. Elevation is required.
+
+    PORTABILITY. VM lifecycle goes through the Yuruna host contract
+    (Get-VMState / Start-VM / Stop-VMForce, loaded by Initialize-AmisAdHost),
+    so no step names a hypervisor. Two Hyper-V-specific TUNINGS remain, each
+    guarded and each a no-op elsewhere by design rather than omission:
+
+      * Install-media stripping + checkpoint retake. A renamed/restored Hyper-V
+        VM keeps ABSOLUTE references into the autoinstall DVD dir; later cycles
+        overwrite it with files ACL'd to a newer VM and the older VM then fails
+        to start with 0x80070005. KVM and UTM attach the cloud-init seed by
+        path per boot with no ACL inheritance, so there is nothing to strip.
+      * The 4GB edge shrink. Hyper-V has a live Set-VM; on KVM/UTM the guest
+        size is a provisioning-time property (the sequence's memoryStartupBytes
+        variable), so it cannot -- and need not -- be changed after the fact.
 .PARAMETER YurunaRoot
-    Yuruna framework checkout that holds test/Test-Sequence.ps1. Default c:\git\yuruna.
+    Yuruna framework checkout that holds test/Test-Sequence.ps1. Optional --
+    see Resolve-YurunaRoot for the discovery order.
 .PARAMETER LogDir
-    Per-stage Test-Sequence logs. Default: %TEMP%\amisad-tests.
+    Per-stage Test-Sequence logs. Default: <temp>/amisad-tests.
 .PARAMETER NoConfigGate
     Forwarded to each guest build (skip the pre-cycle Test-Config.ps1 gate).
 .EXAMPLE
@@ -47,7 +63,7 @@
 #>
 
 param(
-    [string]$YurunaRoot = 'c:\git\yuruna',
+    [string]$YurunaRoot,
     [string]$LogDir = (Join-Path ([IO.Path]::GetTempPath()) 'amisad-tests'),
     [switch]$NoConfigGate
 )
@@ -56,20 +72,17 @@ $ErrorActionPreference = 'Continue'
 # Progress goes to the information stream (displayed via InformationPreference),
 # never the success stream -- Invoke-Stage returns an exit code the caller checks.
 $InformationPreference = 'Continue'
-$ts = Join-Path $YurunaRoot 'test\Test-Sequence.ps1'
-if (-not (Test-Path $ts)) { Write-Error "Test-Sequence.ps1 not found at $ts"; exit 1 }
-New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
-function Stop-LabConsole {
-    [CmdletBinding(SupportsShouldProcess)]
-    param()
-    # A live lab vmconnect steals GUI keystroke focus during a VM's first login.
-    if ($PSCmdlet.ShouldProcess('lab vmconnect consoles', 'Stop process')) {
-        Get-Process vmconnect -ErrorAction SilentlyContinue |
-            Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
-            Stop-Process -Force -ErrorAction SilentlyContinue
-    }
-}
+. (Join-Path $PSScriptRoot 'AmisAd.HostCommon.ps1')
+
+$YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
+$HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
+$IsHyperV   = ($HostType -eq 'host.windows.hyper-v')
+Write-Information "Warm-up on '$HostType' (framework: $YurunaRoot)."
+
+$ts = Join-Path $YurunaRoot 'test/Test-Sequence.ps1'
+if (-not (Test-Path -LiteralPath $ts)) { Write-Error "Test-Sequence.ps1 not found at $ts"; exit 1 }
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 function Invoke-Stage {
     # Write-Information (not Write-Output) for progress: the function's OUTPUT
@@ -77,30 +90,48 @@ function Invoke-Stage {
     # -ne 0 check. -NoProjectClone: the orchestration run (Test-Sequence) already
     # refreshed <RepoRoot>/project once before invoking set-resource.
     param([string]$Name, [string]$Sequence, [switch]$NoConfigGate)
-    Stop-LabConsole
+    Stop-LabConsole -HostType $HostType
     $out = Join-Path $LogDir "$Name.out.log"
     $err = Join-Path $LogDir "$Name.err.log"
-    $stageArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"{0}"' -f $ts), $Sequence, '-NoProjectClone')
+    $stageArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $ts, $Sequence, '-NoProjectClone')
     if ($NoConfigGate) { $stageArgs += '-NoConfigGate' }
     Write-Information "===== [$Name] $Sequence  $([DateTime]::Now.ToString('s'))  (log: $out) ====="
-    $p = Start-Process pwsh -PassThru -WindowStyle Hidden -RedirectStandardOutput $out -RedirectStandardError $err -ArgumentList $stageArgs
+    # -WindowStyle is a Windows-only concept; passing it on Linux/macOS throws
+    # "not supported on this platform" and would fail every stage before it ran.
+    $spArgs = @{
+        FilePath               = 'pwsh'
+        PassThru               = $true
+        RedirectStandardOutput = $out
+        RedirectStandardError  = $err
+        ArgumentList           = $stageArgs
+    }
+    if ($IsWindows) { $spArgs['WindowStyle'] = 'Hidden' }
+    $p = Start-Process @spArgs
     $p.WaitForExit()
     Write-Information "===== [$Name] exited $($p.ExitCode)  $([DateTime]::Now.ToString('s')) ====="
     if ($p.ExitCode -ne 0) {
-        Get-Content $out -Tail 25 -ErrorAction SilentlyContinue | Out-Host
-        Get-Content $err -Tail 10 -ErrorAction SilentlyContinue | Out-Host
+        Get-Content -LiteralPath $out -Tail 25 -ErrorAction SilentlyContinue | Out-Host
+        Get-Content -LiteralPath $err -Tail 10 -ErrorAction SilentlyContinue | Out-Host
     }
     return $p.ExitCode
 }
 
 function Remove-InstallMedia {
+    <#
+        Hyper-V only -- see the PORTABILITY note in the file header for why the
+        other hosts need no equivalent. Autoinstall DVDs (install ISO + per-VM
+        seed.iso) are only needed to build. A renamed/restored VM keeps ABSOLUTE
+        refs into that dir; later cycles overwrite it with files ACL'd to a newer
+        VM, so starting the older VM fails with 0x80070005. Strip media, then
+        RETAKE the checkpoint so the restored config is DVD-free too (the
+        checkpoint re-attaches DVDs otherwise).
+    #>
     [CmdletBinding(SupportsShouldProcess)]
     param([string]$Name, [string]$SnapshotId)
-    # Autoinstall DVDs (install ISO + per-VM seed.iso) are only needed to build.
-    # A renamed/restored VM keeps ABSOLUTE refs into that dir; later cycles
-    # overwrite it with files ACL'd to a newer VM, so starting the older VM fails
-    # with 0x80070005. Strip media, then RETAKE the checkpoint so the restored
-    # config is DVD-free too (the checkpoint re-attaches DVDs otherwise).
+    if (-not $IsHyperV) {
+        Write-Verbose "Remove-InstallMedia: not applicable on '$HostType'."
+        return
+    }
     if (-not $PSCmdlet.ShouldProcess($Name, 'Remove install media + retake checkpoint')) { return }
     Hyper-V\Get-VMDvdDrive -VMName $Name -ErrorAction SilentlyContinue |
         Hyper-V\Remove-VMDvdDrive -ErrorAction SilentlyContinue
@@ -114,18 +145,40 @@ function Remove-InstallMedia {
     }
 }
 
+function Set-EdgeMemory {
+    <#
+        Hyper-V only. The framework provisions every ubuntu guest at 12GB; edges
+        only run the small slice-runtime. At s004 BOTH edges are live while
+        amisad-core (12GB) restores - 3 x 12GB exceeds host RAM (0x800705AA).
+        Shrink before the checkpoint retake so the restored config is small too.
+        On KVM/UTM the guest size is fixed at provisioning time (the sequence's
+        memoryStartupBytes variable), so there is no post-hoc resize to do.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    param([string]$Name)
+    if (-not $IsHyperV) {
+        Write-Verbose "Set-EdgeMemory: guest memory is a provisioning-time property on '$HostType'; leaving $Name as built."
+        return
+    }
+    if (-not $PSCmdlet.ShouldProcess($Name, 'Set static memory to 4GB')) { return }
+    Hyper-V\Set-VM -Name $Name -StaticMemory -MemoryStartupBytes 4GB
+    Write-Information "$Name memory set to 4GB (slice-runtime only)."
+}
+
 # Opt-in virtual display for headless keystroke/OCR reliability on the cold
-# provisioning chains (no-op unless YURUNA_VIRTUAL_DISPLAY is truthy).
-Import-Module (Join-Path $YurunaRoot 'test\modules\Test.HostCondition.psm1') -Force -DisableNameChecking -ErrorAction SilentlyContinue
+# provisioning chains (no-op unless YURUNA_VIRTUAL_DISPLAY is truthy). The host
+# type is the DETECTED one -- hard-coding Hyper-V here meant KVM/UTM never got
+# the virtual display they are the likeliest to need (headless servers).
+Import-Module (Join-Path $YurunaRoot 'test/modules/Test.HostCondition.psm1') -Force -DisableNameChecking -ErrorAction SilentlyContinue
 if (Get-Command Initialize-HostDisplay -ErrorAction SilentlyContinue) {
-    Initialize-HostDisplay -HostType 'host.windows.hyper-v'
+    Initialize-HostDisplay -HostType $HostType
 }
 
 # --- [0] core->edge demo keypair (served to guests from the status handoff dir)
-$handoff = Join-Path $YurunaRoot 'test\status\handoff'
+$handoff = Join-Path $YurunaRoot 'test/status/handoff'
 New-Item -ItemType Directory -Force -Path $handoff | Out-Null
 $demoKey = Join-Path $handoff 'amisad-demo-key'
-if (-not (Test-Path $demoKey)) {
+if (-not (Test-Path -LiteralPath $demoKey)) {
     Write-Information "Generating the core->edge demo keypair."
     # -N '' (a true empty argument): -N '""' would encrypt with the literal "".
     ssh-keygen -t ed25519 -N '' -C 'amisad-demo' -f $demoKey | Out-Host
@@ -136,7 +189,7 @@ if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisa
     Write-Error "Build stage failed; no binaries in the stash - stopping."
     exit 1
 }
-Hyper-V\Stop-VM -Name 'amisad-build' -TurnOff -Force -Confirm:$false -ErrorAction SilentlyContinue
+try { $null = Stop-VMForce -VMName 'amisad-build' } catch { Write-Verbose "Stop-VMForce amisad-build: $($_.Exception.Message)" }
 Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build'
 Write-Information "amisad-build stopped (kept on disk)."
 
@@ -146,12 +199,7 @@ foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
         Write-Error "$edge provisioning failed - stopping."
         exit 1
     }
-    # Framework provisions every ubuntu guest at 12GB; edges only run the small
-    # slice-runtime. At s004 BOTH edges are live while amisad-core (12GB)
-    # restores - 3 x 12GB exceeds host RAM (0x800705AA). Shrink before the
-    # checkpoint retake so the restored config is small too.
-    Hyper-V\Set-VM -Name $edge -StaticMemory -MemoryStartupBytes 4GB
-    Write-Information "$edge memory set to 4GB (slice-runtime only)."
+    Set-EdgeMemory -Name $edge
     Remove-InstallMedia -Name $edge -SnapshotId $edge
 }
 
@@ -167,16 +215,16 @@ Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core'
 # file from a prior run must not count, so delete first and anchor freshness to
 # THIS start. s004/s010 need region-B live; earlier scenarios just don't use it.
 Write-Information "Starting amisad-edge-a + amisad-edge-b."
-$logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test\status\log' }
+$logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test/status/log' }
 $edges = 'amisad-edge-a', 'amisad-edge-b'
 $edgeState = @{}
 foreach ($edge in $edges) {
-    $edgeIpFile = Join-Path $logRoot "handoff\$edge.ip.txt"
+    $edgeIpFile = Join-Path $logRoot "handoff/$edge.ip.txt"
     Remove-Item -LiteralPath $edgeIpFile -Force -ErrorAction SilentlyContinue
     $edgeState[$edge] = @{ IpFile = $edgeIpFile; Start = (Get-Date); Started = $false }
     foreach ($attempt in 1..3) {
         try {
-            Hyper-V\Start-VM -Name $edge -ErrorAction Stop
+            $null = Start-VM -VMName $edge -ErrorAction Stop
             $edgeState[$edge].Started = $true
             break
         } catch {
@@ -190,8 +238,8 @@ foreach ($edge in $edges) {
     $edgeReady = $false
     if ($edgeState[$edge].Started) {
         while ((Get-Date) -lt $edgeDeadline) {
-            if ((Test-Path $edgeState[$edge].IpFile) -and
-                ((Get-Item $edgeState[$edge].IpFile).LastWriteTime -gt $edgeState[$edge].Start)) {
+            if ((Test-Path -LiteralPath $edgeState[$edge].IpFile) -and
+                ((Get-Item -LiteralPath $edgeState[$edge].IpFile).LastWriteTime -gt $edgeState[$edge].Start)) {
                 $edgeReady = $true; break
             }
             Start-Sleep -Seconds 10
@@ -204,5 +252,7 @@ foreach ($edge in $edges) {
 
 Write-Information "Warm-up complete. Live: amisad-core + amisad-edge-a + amisad-edge-b."
 Write-Information "--- VM inventory ---"
-(Hyper-V\Get-VM | Select-Object Name, State | Format-Table -AutoSize | Out-String -Width 120) | Write-Information
+foreach ($vm in @('amisad-core', 'amisad-edge-a', 'amisad-edge-b', 'amisad-build')) {
+    Write-Information ("  {0,-16} {1}" -f $vm, (Get-VMState -VMName $vm))
+}
 exit 0
