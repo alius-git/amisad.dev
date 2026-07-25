@@ -6,9 +6,11 @@
 # them, and deploy the ten services to the in-VM Kubernetes cluster. This VM has
 # the runtime stack (Docker+containerd+kubeadm K8s+Helm+PostgreSQL+NATS from the
 # amisad-core-k8s baseline) plus python3 - but NO Rust toolchain and no source build.
-# STASH_HOST (default 192.168.7.138): the stash service to pull binaries from. The
-# lab stash is a fixed-address service, not a per-host Hyper-V VM, so
-# ${ext:...ResolveHost} returns empty here and this literal is the address used.
+# STASH_HOST: the stash service to pull binaries from. The sequence supplies it
+# from ${ext:stash-service.ResolveHost(...)}, which returns the address the
+# cycle's warm-up resolved and confirmed answers /healthz. The literal default
+# below only applies to a run that reaches this script outside a cycle, with
+# nothing to have published an address.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"

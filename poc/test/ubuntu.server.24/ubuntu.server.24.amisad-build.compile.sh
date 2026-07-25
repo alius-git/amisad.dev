@@ -6,10 +6,10 @@
 # deploy. This VM has the Rust toolchain but no Kubernetes; it produces
 # artifacts, it does not run them. STASH_HOST: the stash service the binaries
 # are dropped into. The sequence supplies it from
-# ${ext:stash-service.ResolveHost(...)}, which now resolves through the pool
-# aggregator (the address the dashboard's "Extension hosts" table links to), so
-# it finds the stash wherever in the pool it runs. The literal below is only the
-# degraded-mode default for a host with no aggregator to ask.
+# ${ext:stash-service.ResolveHost(...)}, which returns the address the cycle's
+# warm-up resolved and confirmed answers /healthz. The literal below only
+# applies to a run that reaches this script outside a cycle, with nothing to
+# have published an address.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
