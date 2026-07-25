@@ -107,17 +107,21 @@ Write-Information -MessageData "Lab teardown removed $removed topology VM(s)." -
 # failure must not abort a teardown that has already done its main work.
 $sweepScript = Join-Path $YurunaRoot 'test/Remove-TestVMFiles.ps1'
 if (Test-Path -LiteralPath $sweepScript) {
-    foreach ($prefix in @('amisad-', 'amisad.')) {
-        if ($PSCmdlet.ShouldProcess("VMs named $prefix*", 'Sweep')) {
-            try {
-                & $sweepScript -Prefix $prefix -Quiet
-            } catch {
-                Write-Warning "Prefix sweep '$prefix' reported: $($_.Exception.Message)"
-            }
+    # -Prefix takes a list, so both lab prefixes go in one sweep and the
+    # host is enumerated once instead of once per prefix. An explicit
+    # -Prefix selects exactly what it names, so the configured test-VM
+    # prefix still needs its own no-argument call below; letting the
+    # framework read that keeps this from hard-coding 'test-'. Best-effort
+    # throughout: a sweep failure must not abort a teardown that has
+    # already removed the topology by name.
+    $labPrefixes = @('amisad-', 'amisad.')
+    if ($PSCmdlet.ShouldProcess("VMs named $($labPrefixes -join '*, ')*", 'Sweep')) {
+        try {
+            & $sweepScript -Prefix $labPrefixes -Quiet
+        } catch {
+            Write-Warning "Prefix sweep reported: $($_.Exception.Message)"
         }
     }
-    # The test-VM prefix is configured (vmStart.testVmNamePrefix); letting the
-    # framework read it keeps this from hard-coding 'test-'.
     if ($PSCmdlet.ShouldProcess('configured test-VM prefix', 'Sweep')) {
         try {
             & $sweepScript -Quiet
