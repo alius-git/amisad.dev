@@ -29,4 +29,22 @@ if ! command -v bazel >/dev/null 2>&1; then
     sudo chmod +x /usr/local/bin/bazel
 fi
 
+# Verify rather than assume: every tool below is consumed by the compile
+# step running from a RESTORED snapshot, where a missing one surfaces as a
+# bare "command not found" with no trace of which install stage dropped it.
+for tool in cargo rustc bazel git python3; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "tool not on PATH after install: $tool" >&2; exit 1; }
+done
+
+# Flush before returning. The host freezes this VM's disk for a snapshot as
+# soon as this script exits, and it does not ask the guest to write back
+# first; whatever is still in the page cache at that instant is simply not
+# in the snapshot. The failure is silent and deferred -- the file is readable
+# for the rest of this SSH session and missing only once the snapshot is
+# restored, so it surfaces as an unrelated "command not found" in a later
+# sequence. Large, recently written files are lost first: an 8 MB binary
+# installed as the last action here has not aged past the filesystem's
+# writeback interval, while the small files written seconds earlier have.
+sync
+
 echo "AmisAd build tools installed"

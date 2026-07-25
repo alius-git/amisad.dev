@@ -65,4 +65,12 @@ sudo systemctl daemon-reload
 sudo systemctl enable amisad-ip-report.service
 sudo systemctl start amisad-ip-report.service
 
+# Flush before returning: the host snapshots this VM's disk as soon as this
+# script exits, without asking the guest to write back, so anything still in
+# the page cache is absent from the snapshot. Here that would silently strip
+# the authorized_keys entry or the reporter unit -- the edge then boots from
+# the restored snapshot never reporting its IP, and the scenarios that
+# resolve the edge from that report fail far from this script.
+sync
+
 echo "amisad edge setup complete"

@@ -51,6 +51,18 @@ workload:
     sensitive: true
     description: "Set the demo users' vault-managed passwords"
 
+  # The snapshot below freezes the disk without asking the guest to write
+  # back, so anything still in the page cache is absent from it. The step
+  # above rewrites /etc/shadow immediately beforehand; losing that write
+  # yields a restored vm-core whose demo users exist with their pre-vault
+  # passwords, and every scenario that logs in as one of them fails to
+  # authenticate. The guest scripts flush at the end of their own runs -- an
+  # inline sshExec has no such tail, so the flush is a step here.
+  - action: sshExec
+    command: "sync"
+    timeoutSeconds: 120
+    description: "Flush guest writes before the snapshot"
+
   - action: saveDiskSnapshot
     id: "amisad-core"
     description: "Snapshot the deployed AmisAd vm-core"

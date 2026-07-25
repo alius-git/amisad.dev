@@ -42,6 +42,13 @@ sudo systemctl enable --now nats
 
 for _ in $(seq 1 30); do
     if curl -sf http://localhost:8222/healthz >/dev/null 2>&1; then
+        # Flush before returning: the host snapshots this VM's disk as soon
+        # as this script exits, without asking the guest to write back, so
+        # anything still in the page cache is absent from the snapshot. The
+        # NATS binary and its unit file are written moments before this
+        # point; losing them leaves a restored vm-core whose services start
+        # against a JetStream that is not there.
+        sync
         echo "NATS JetStream deployed"
         exit 0
     fi
