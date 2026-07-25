@@ -29,8 +29,14 @@ if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
 fi
 rm -rf "$REAL_HOME/amisad.dev"
 mkdir -p "$REAL_HOME/amisad.dev"
+# /yuruna-project-archive.tar.gz is the framework's project-tarball endpoint --
+# a fresh tar of <RepoRoot>/project, with the project tree (poc/, test/, ...) at
+# the TOP LEVEL, which is exactly what the extract below expects.
+# NOT /yuruna-repo/project-poc.tar.gz: /yuruna-repo/* serves the working tree
+# file-by-file and no such file exists, so that path 404s. wget then exits 8 and
+# `set -euo pipefail` aborts the whole deploy before it starts.
 wget --no-proxy -qO /tmp/project-poc.tar.gz \
-    "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-repo/project-poc.tar.gz?nocache=${RANDOM}"
+    "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-project-archive.tar.gz?nocache=${RANDOM}"
 tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
 rm -f /tmp/project-poc.tar.gz
 

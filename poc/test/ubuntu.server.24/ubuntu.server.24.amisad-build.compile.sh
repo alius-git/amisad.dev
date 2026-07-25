@@ -4,10 +4,12 @@
 # AmisAd POC - amisad-build compile step: build every release binary and
 # upload the tarball to the stash service, for amisad-core to download and
 # deploy. This VM has the Rust toolchain but no Kubernetes; it produces
-# artifacts, it does not run them. STASH_HOST (default 192.168.7.138): the
-# stash service the binaries are dropped into. The lab stash is a fixed-address
-# service, not a per-host Hyper-V VM, so ${ext:...ResolveHost} returns empty
-# here and this literal is the address that actually gets used.
+# artifacts, it does not run them. STASH_HOST: the stash service the binaries
+# are dropped into. The sequence supplies it from
+# ${ext:stash-service.ResolveHost(...)}, which now resolves through the pool
+# aggregator (the address the dashboard's "Extension hosts" table links to), so
+# it finds the stash wherever in the pool it runs. The literal below is only the
+# degraded-mode default for a host with no aggregator to ask.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -25,8 +27,14 @@ if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
 fi
 rm -rf "$REAL_HOME/amisad.dev"
 mkdir -p "$REAL_HOME/amisad.dev"
+# /yuruna-project-archive.tar.gz is the framework's project-tarball endpoint --
+# a fresh tar of <RepoRoot>/project, with the project tree (poc/, test/, ...) at
+# the TOP LEVEL, which is exactly what the extract below expects.
+# NOT /yuruna-repo/project-poc.tar.gz: /yuruna-repo/* serves the working tree
+# file-by-file and no such file exists, so that path 404s. wget then exits 8 and
+# `set -euo pipefail` aborts the whole build before it starts.
 wget --no-proxy -qO /tmp/project-poc.tar.gz \
-    "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-repo/project-poc.tar.gz?nocache=${RANDOM}"
+    "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-project-archive.tar.gz?nocache=${RANDOM}"
 tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
 rm -f /tmp/project-poc.tar.gz
 
