@@ -20,7 +20,7 @@ running `slice-runtime` with their region identity from the last scenario).
 `amisad-build` is kept on disk stopped.
 
 Console logins on `amisad-core` ([usernames.md](usernames.md)):
-- **demo personas** (non-admin): `maya`, `elena`, `tom`, `priya`
+- **demo personas** (non-admin): `maya`, `elena`, `tom`, `priya`, `marcel`, `kai`, `pat`, `alex`, `sam`, `dana`, `ingrid`
 - **administrator**: `amisad-core-admin`
 
 Passwords are in the host vault,
@@ -260,7 +260,7 @@ catches a tamper. This needs a corpus, so run the s010 script (it self-seeds a
 completed match, an abort, consent, a mandate, and a disclosure+adjustment):
 
 ```bash
-sudo project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh   # or, after it seeds:
+sudo test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh   # or, after it seeds:
 curl -s -X POST http://$NODE_IP:30089/v1/certify                     # four dimensions, zero violations
 curl -s http://$NODE_IP:30081/v1/attestations                        # fetch, tamper one payload, then:
 curl -s -X POST http://$NODE_IP:30089/v1/certify/tamper --data-binary @tampered.json   # detected + localized

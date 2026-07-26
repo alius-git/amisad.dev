@@ -65,7 +65,7 @@ sources.
   as the state reset): [test.md](test.md).
 - **Demo by hand** (prebuild once, then drive the deployed topology manually,
   including the mobile app): [demo.md](demo.md).
-- **Hostnames + usernames** (per-VM `<hostname>-admin` + the maya/elena/tom/priya
+- **Hostnames + usernames** (per-VM `<hostname>-admin` + the eleven
   demo personas, and why): [usernames.md](usernames.md).
 
 The lab builds the design topology
@@ -76,7 +76,7 @@ the stash service (`yuruna-stash-service`, durable per-upload record);
 ten services; `amisad-edge-a`/`-b` are the stateless region slice VMs
 (`slice-runtime` delivered per scenario run over SSH). Scenarios run against
 `amisad-core`, each restoring its snapshot as the state reset. Hostnames,
-per-VM `<hostname>-admin` accounts, and the demo users (maya, elena, tom, priya) are in
+per-VM `<hostname>-admin` accounts, and the eleven demo users are in
 [usernames.md](usernames.md).
 
 ## s001.fulfillment implementation notes
