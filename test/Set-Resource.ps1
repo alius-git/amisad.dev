@@ -252,6 +252,40 @@ function Set-EdgeMemory {
     Write-Information "$Name memory set to 4GB (slice-runtime only)."
 }
 
+function Start-VMConfirmed {
+    <#
+        Start a VM and answer whether it is actually running, or the reason it
+        is not. A start request accepted by the hypervisor is not a started VM:
+        the guest process can die on its own resources (a port it cannot bind,
+        a disk it cannot open) after the request has been acknowledged, so the
+        state has to be observed rather than inferred from the request.
+        Returns a { started; reason } record.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([hashtable])]
+    param([string]$Name, [int]$RunningTimeoutSeconds = 60)
+    if (-not $PSCmdlet.ShouldProcess($Name, 'Start VM and confirm running')) {
+        return @{ started = $false; reason = 'WhatIf' }
+    }
+    $record = $null
+    try {
+        # Start-VM answers with a status record on the success stream rather
+        # than throwing, so the record is the only signal; take the last item
+        # in case anything else reached the stream alongside it.
+        $record = @(Start-VM -VMName $Name -ErrorAction Stop) | Select-Object -Last 1
+    } catch {
+        return @{ started = $false; reason = $_.Exception.Message }
+    }
+    if ($record -isnot [hashtable]) { return @{ started = $false; reason = 'Start-VM returned no status record' } }
+    if (-not $record.success) { return @{ started = $false; reason = "$($record.errorMessage)" } }
+    $deadline = (Get-Date).AddSeconds($RunningTimeoutSeconds)
+    while ((Get-Date) -lt $deadline) {
+        if ((Get-VMState -VMName $Name) -eq 'running') { return @{ started = $true; reason = $null } }
+        Start-Sleep -Seconds 2
+    }
+    return @{ started = $false; reason = "start reported success but the VM is '$(Get-VMState -VMName $Name)' after ${RunningTimeoutSeconds}s" }
+}
+
 # Opt-in virtual display for headless keystroke/OCR reliability on the cold
 # provisioning chains (no-op unless YURUNA_VIRTUAL_DISPLAY is truthy). The host
 # type is the DETECTED one -- hard-coding Hyper-V here meant KVM/UTM never got
@@ -315,16 +349,17 @@ $edgeState = @{}
 foreach ($edge in $edges) {
     $edgeIpFile = Join-Path $logRoot "handoff/$edge.ip.txt"
     Remove-Item -LiteralPath $edgeIpFile -Force -ErrorAction SilentlyContinue
-    $edgeState[$edge] = @{ IpFile = $edgeIpFile; Start = (Get-Date); Started = $false }
+    $edgeState[$edge] = @{ IpFile = $edgeIpFile; Start = (Get-Date); Started = $false; Reason = 'not attempted' }
     foreach ($attempt in 1..3) {
-        try {
-            $null = Start-VM -VMName $edge -ErrorAction Stop
+        $startResult = Start-VMConfirmed -Name $edge -Confirm:$false
+        if ($startResult.started) {
             $edgeState[$edge].Started = $true
+            $edgeState[$edge].Reason = $null
             break
-        } catch {
-            Write-Information "Start-VM $edge attempt ${attempt}/3 failed: $($_.Exception.Message)"
-            Start-Sleep -Seconds 10
         }
+        $edgeState[$edge].Reason = $startResult.reason
+        Write-Information "Start-VM $edge attempt ${attempt}/3 failed: $($startResult.reason)"
+        Start-Sleep -Seconds 10
     }
 }
 $edgeDeadline = (Get-Date).AddMinutes(8)
@@ -338,15 +373,27 @@ foreach ($edge in $edges) {
             }
             Start-Sleep -Seconds 10
         }
+        if (-not $edgeReady) { $edgeState[$edge].Reason = 'started but never reported its IP' }
     }
-    if (-not $edgeReady) {
-        Write-Warning "$edge IP report not seen; dependent scenarios will fall back or fail loudly."
-    }
+    $edgeState[$edge].Ready = $edgeReady
 }
 
-Write-Information "Warm-up complete. Live: amisad-core + amisad-edge-a + amisad-edge-b."
 Write-Information "--- VM inventory ---"
 foreach ($vm in @('amisad-core', 'amisad-edge-a', 'amisad-edge-b', 'amisad-build')) {
     Write-Information ("  {0,-16} {1}" -f $vm, (Get-VMState -VMName $vm))
 }
+
+# Both edges have to be live before the scenarios start. Nothing downstream
+# can report a missing edge usefully: the scenarios that need region B run
+# last, so the symptom is a guest script asserting on an absent peer -- a
+# failure that names the wrong scenario, on the wrong VM, after every earlier
+# scenario has already spent its time.
+$deadEdges = @($edges | Where-Object { -not $edgeState[$_].Ready })
+if ($deadEdges.Count -gt 0) {
+    $detail = ($deadEdges | ForEach-Object { "$_ ($($edgeState[$_].Reason))" }) -join '; '
+    Write-Error "Region edges are not live: $detail. Stopping the warm-up instead of handing the scenarios a topology they cannot run on."
+    exit 1
+}
+
+Write-Information "Warm-up complete. Live: amisad-core + $($edges -join ' + ')."
 exit 0
