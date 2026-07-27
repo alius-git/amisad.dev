@@ -30,7 +30,8 @@
     once, so guest builds run with -NoProjectClone). Stages, in order:
 
       0. Generate the core->edge demo keypair (once per host).
-      1. Resolve the stash service and publish its address for the cycle.
+      1. Resolve the stash service and publish its address for the cycle
+         (discovered or pinned; no stash found stops the pass immediately).
       2. Build once: compile + upload binaries to the stash (amisad-build).
       3. Edge VMs: provision + snapshot amisad-edge-a / -b, shrink to 4GB.
       4. vm-core: k8s + PostgreSQL + NATS + deploy 10 services + demo users.
@@ -60,8 +61,9 @@
 .PARAMETER NoConfigGate
     Forwarded to each guest build (skip the pre-cycle Test-Config.ps1 gate).
 .PARAMETER StashHost
-    Pins the stash service instead of discovering it. Empty (the default)
-    runs the discovery order in Resolve-StashService.
+    Pins the stash service instead of discovering it. Empty (the default) runs
+    the discovery order in Resolve-StashService; when neither a pin nor
+    discovery produces an address that answers /healthz, the pass stops.
 .EXAMPLE
     pwsh test/Set-Resource.ps1
 #>
@@ -79,6 +81,10 @@ $ErrorActionPreference = 'Continue'
 $InformationPreference = 'Continue'
 
 . (Join-Path $PSScriptRoot 'AmisAd.HostCommon.ps1')
+# Resolve-StashService lives in a module, not here: poc/build/run-tests.ps1 runs
+# the same pre-flight, and the address a pass uploads its binaries to must not
+# depend on which entry point started it.
+Import-Module (Join-Path $PSScriptRoot 'AmisAd.Stash.psm1') -Force -DisableNameChecking
 
 $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
@@ -119,88 +125,6 @@ function Invoke-Stage {
         Get-Content -LiteralPath $err -Tail 10 -ErrorAction SilentlyContinue | Out-Host
     }
     return $p.ExitCode
-}
-
-# The lab's stash service is a fixed-address appliance on the bridged LAN, not
-# a VM any single host owns, so no host-contract lookup can name it and the
-# address has to be stated. Stating it HERE, where it is probed before anything
-# depends on it, is what makes the same literal in the guest scripts dead
-# weight: they get a verified STASH_HOST from the cycle and never fall back.
-$LabStashHost = '192.168.7.138'
-
-function Resolve-StashService {
-    <#
-    .SYNOPSIS
-        Find the stash service, verify it answers, and publish the address for
-        the rest of the cycle to resolve without re-probing.
-    .DESCRIPTION
-        The build uploads its binaries to the stash and vm-core downloads them,
-        so a stash nobody can reach makes the whole pass pointless -- but the
-        guests only discover that from inside their own long chains, tens of
-        minutes in. Resolving here, before any VM starts, turns that into an
-        immediate stop.
-
-        A pin (-StashHost, or $env:YURUNA_STASH_HOST for the address a pool
-        handed this host) is the ONLY candidate when present -- a pass told to
-        use a particular stash must fail rather than quietly exercise a
-        different one. Otherwise candidates are tried in order and the first
-        that answers /healthz wins:
-
-          1. Get-VMIp 'yuruna-stash-service' -- a host that runs the stash VM
-             itself must use its live address, which changes across rebuilds.
-          2. $LabStashHost -- the shared lab appliance.
-
-        Publishing the winner makes every later
-        ${ext:stash-service.ResolveHost(...)} expansion return the address that
-        was actually verified, instead of each sequence re-probing for a VM this
-        host may not run and warning when it finds none.
-    .OUTPUTS
-        [string] the published address, or '' when nothing answered.
-    #>
-    [CmdletBinding()]
-    [OutputType([string])]
-    param([Parameter(Mandatory)][string]$YurunaRoot, [AllowEmptyString()][string]$Pin)
-
-    $module = Join-Path $YurunaRoot 'test/extension/stash-service/default.psm1'
-    Import-Module $module -Force -DisableNameChecking -ErrorAction Stop
-    if (-not (Get-Command Test-StashHost -ErrorAction SilentlyContinue) -or
-        -not (Get-Command Publish-StashHost -ErrorAction SilentlyContinue)) {
-        Write-Warning "The stash-service extension at $module has no reachability/publish verbs; skipping the stash pre-flight (the guests will fall back to their own defaults)."
-        return ''
-    }
-
-    $candidates = [System.Collections.Generic.List[hashtable]]::new()
-    if (-not [string]::IsNullOrWhiteSpace($Pin)) {
-        $candidates.Add(@{ Address = $Pin.Trim(); Source = '-StashHost' })
-    } elseif (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_HOST)) {
-        $candidates.Add(@{ Address = $env:YURUNA_STASH_HOST.Trim(); Source = '$env:YURUNA_STASH_HOST' })
-    } else {
-        if (Get-Command Get-VMIp -ErrorAction SilentlyContinue) {
-            $vmIp = ''
-            try { $vmIp = [string](Get-VMIp -VMName 'yuruna-stash-service') } catch {
-                Write-Verbose "Get-VMIp yuruna-stash-service: $($_.Exception.Message)"
-            }
-            if (-not [string]::IsNullOrWhiteSpace($vmIp)) {
-                $candidates.Add(@{ Address = $vmIp.Trim(); Source = 'yuruna-stash-service VM' })
-            }
-        }
-        $candidates.Add(@{ Address = $LabStashHost; Source = 'lab stash appliance' })
-    }
-
-    Write-Information "== Resolving the stash service =="
-    foreach ($candidate in $candidates) {
-        if (Test-StashHost -Address $candidate.Address) {
-            Write-Information ("  [PASS] {0} ({1}) answered /healthz" -f $candidate.Address, $candidate.Source)
-            $null = Publish-StashHost -Address $candidate.Address
-            Write-Information "Stash service: $($candidate.Address) -- published for this cycle."
-            return $candidate.Address
-        }
-        Write-Information ("  [FAIL] {0} ({1}) did not answer /healthz" -f $candidate.Address, $candidate.Source)
-    }
-    # Nothing answered: clear any address a previous cycle left behind so the
-    # sequences cannot resolve one this cycle never confirmed.
-    $null = Publish-StashHost -Address ''
-    return ''
 }
 
 function Remove-InstallMedia {
@@ -306,9 +230,14 @@ if (-not (Test-Path -LiteralPath $demoKey)) {
 }
 
 # --- [1] stash service: resolve + publish before anything long starts ---
-$resolvedStash = Resolve-StashService -YurunaRoot $YurunaRoot -Pin $StashHost
-if (-not $resolvedStash) {
-    Write-Error "No stash service answered /healthz; the build has nowhere to upload binaries and vm-core has nowhere to fetch them - stopping before the provisioning stages. Pin one with -StashHost or `$env:YURUNA_STASH_HOST."
+# A stash is a requirement of this pass, not an optimization, and the project
+# states no address of its own to fall back to -- so "none found" stops here,
+# where it costs seconds, rather than an hour later inside a guest chain.
+$stash = Resolve-StashService -YurunaRoot $YurunaRoot -Pin $StashHost
+foreach ($line in $stash.Lines) { Write-Information $line }
+if (-not $stash.Address) {
+    Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and vm-core has nowhere to fetch them - stopping before the provisioning stages. " +
+        "Start one on this host (Start-StashVM.ps1), join a pool that runs one, or pin an address with -StashHost / `$env:YURUNA_STASH_HOST.")
     exit 1
 }
 

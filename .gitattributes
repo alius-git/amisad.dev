@@ -20,3 +20,31 @@ Dockerfile    text eol=lf
 .bazelrc      text eol=lf
 .dockerignore text eol=lf
 .gitignore    text eol=lf
+
+# PowerShell driving the build and the Yuruna resource steps. pwsh handles
+# either EOL, but these are edited on Windows and macOS workstations and run
+# from a Windows checkout, so pin LF to stop the round-trip CRLF<->LF churn
+# from showing up as whole-file diffs.
+*.ps1   text eol=lf
+*.psm1  text eol=lf
+*.psd1  text eol=lf
+
+*.svg   text eol=lf
+*.txt   text eol=lf
+*.lock  text eol=lf
+*.proto text eol=lf
+LICENSE text eol=lf
+# Read verbatim and used as a version string.
+VERSION text eol=lf
+.gitattributes text eol=lf
+
+# Binaries -- never normalize, so git cannot misclassify them as text and
+# rewrite bytes inside them.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.zip   binary
+*.exe   binary

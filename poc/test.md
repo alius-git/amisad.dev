@@ -51,7 +51,24 @@ the demo by hand instead, see [demo.md](demo.md).
    The vault is a local, gitignored file. Seed every new username before its
    first cold run ([usernames.md](usernames.md) explains why).
 
-4. **Validate.** `test/Test-Config.ps1` from the `yuruna` folder.
+4. **Provide a stash service.** `amisad-build` uploads its binaries to it and
+   `amisad-core` downloads them, so a run without one has nothing to deploy.
+   This project ships **no stash address** — a lab's stash address is that
+   lab's, and a literal here would go stale the first time the service moved.
+   Any one of these is enough:
+
+   - run one on this host: `test/Start-StashVM.ps1` from the `yuruna` folder;
+   - join a pool that runs one — the service announces itself to the
+     pool-aggregator and this host reads the address back (nothing to
+     configure beyond the caching proxy you already point at);
+   - state it: `$env:YURUNA_STASH_HOST = '<address>'`, or
+     `pwsh test/Set-Resource.ps1 -StashHost '<address>'`.
+
+   The pre-flight probes `/healthz` on each candidate before anything long
+   starts, publishes the one that answered for the rest of the cycle, and
+   **stops the run immediately** when none does — it never guesses an address.
+
+5. **Validate.** `test/Test-Config.ps1` from the `yuruna` folder.
 
 ## The automation model
 
@@ -66,7 +83,9 @@ independent without per-scenario VMs. Hostnames are set with the framework's
 ```
 [0] cleanup        remove every amisad lab VM (old and new naming) and any
                       leftover test-* VMs with their storage dirs; ensure the
-                      core->edge demo keypair exists.
+                      core->edge demo keypair exists; resolve the stash
+                      service (pinned or discovered), verify /healthz, and
+                      publish the address -- no stash, no run.
 [1] amisad-build   start.guest -> build tools -> snapshot; compile run
                       uploads amisad-binaries.tgz to the stash service; VM
                       stopped afterwards.
@@ -99,7 +118,9 @@ pwsh poc\build\run-tests.ps1 -NoConfigGate
 
 `run-tests.ps1` removes every amisad lab VM and leftover `test-*` VM
 (enforcing the clean start), generates the core→edge demo keypair if missing,
-builds the topology, then runs each scenario from its registry in order. Green
+resolves the stash service and stops at once if none answers (see
+[one-time setup](#one-time-setup) step 4), builds the topology, then runs each
+scenario from its registry in order. Green
 ends with `ALL SCENARIOS PASSED`, leaving `amisad-core` and both edge VMs
 live as the demo environment. Stage logs land under `%TEMP%\amisad-tests\`;
 watch live progress at `http://localhost:8080/status/`. Expect ~15 min for the

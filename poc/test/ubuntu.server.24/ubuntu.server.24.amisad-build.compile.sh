@@ -5,11 +5,11 @@
 # upload the tarball to the stash service, for amisad-core to download and
 # deploy. This VM has the Rust toolchain but no Kubernetes; it produces
 # artifacts, it does not run them. STASH_HOST: the stash service the binaries
-# are dropped into. The sequence supplies it from
-# ${ext:stash-service.ResolveHost(...)}, which returns the address the cycle's
-# warm-up resolved and confirmed answers /healthz. The literal below only
-# applies to a run that reaches this script outside a cycle, with nothing to
-# have published an address.
+# are dropped into. REQUIRED, and with no default -- the sequence supplies it
+# from ${ext:stash-service.ResolveHost(...)}, which returns the address the
+# cycle's warm-up resolved and confirmed answers /healthz. A run that reaches
+# this script with nothing to have published an address stops immediately
+# rather than shipping a build's binaries at a guessed host.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -45,7 +45,12 @@ echo "== stash reachability (fail fast, before the ~20-min build) =="
 # HTTP :80 reachability is a proxy for scp :22 reachability (same host). The
 # stash is on the bridged LAN; if this guest (NAT) cannot reach it, stop now
 # instead of building and then failing at the scp upload.
-STASH_HOST="${STASH_HOST:-192.168.7.138}"
+# No default address: the caller supplies one it already verified, and guessing
+# here would send a build's binaries at whatever answers on someone's network.
+if [ -z "${STASH_HOST:-}" ]; then
+    echo "STASH_HOST is empty - the sequence supplies it from \${ext:stash-service.ResolveHost(...)} and the cycle's warm-up publishes the address it verified. Nowhere to upload binaries; aborting before build." >&2
+    exit 3
+fi
 curl -fsS --noproxy '*' --connect-timeout 20 "http://${STASH_HOST}/healthz" >/dev/null || {
     echo "STASH UNREACHABLE at http://${STASH_HOST} - cannot upload binaries; aborting before build." >&2
     exit 3
@@ -105,7 +110,7 @@ echo "== upload binaries to the stash service =="
 # The stash records the upload (username=amisad-poc, filename=amisad-<arch>-binaries.tgz)
 # for later investigation; amisad-core locates it by that label. scp only (the
 # stash SSH server accepts the drop); no key needed - it is a write-only sink.
-STASH_HOST="${STASH_HOST:-192.168.7.138}"
+# STASH_HOST was required and proven reachable by the pre-flight above.
 scp -O -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 \
     "$TARBALL" "amisad-poc@${STASH_HOST}:/amisad/amisad-${ARCH}-binaries.tgz"

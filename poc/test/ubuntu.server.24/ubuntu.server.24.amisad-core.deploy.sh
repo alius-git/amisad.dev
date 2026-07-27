@@ -6,11 +6,11 @@
 # them, and deploy the ten services to the in-VM Kubernetes cluster. This VM has
 # the runtime stack (Docker+containerd+kubeadm K8s+Helm+PostgreSQL+NATS from the
 # amisad-core-k8s baseline) plus python3 - but NO Rust toolchain and no source build.
-# STASH_HOST: the stash service to pull binaries from. The sequence supplies it
-# from ${ext:stash-service.ResolveHost(...)}, which returns the address the
-# cycle's warm-up resolved and confirmed answers /healthz. The literal default
-# below only applies to a run that reaches this script outside a cycle, with
-# nothing to have published an address.
+# STASH_HOST: the stash service to pull binaries from. REQUIRED, and with no
+# default -- the sequence supplies it from ${ext:stash-service.ResolveHost(...)},
+# which returns the address the cycle's warm-up resolved and confirmed answers
+# /healthz. A run that reaches this script with nothing to have published an
+# address stops immediately rather than fetching executables from a guessed host.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -53,7 +53,12 @@ echo "== download prebuilt binaries from the stash service =="
 # foreign build's binaries cannot execute here at all. Match our own uname -m
 # and nothing else. /api/stashes returns newest-first, so limit=1 is the
 # latest build FOR THIS ARCHITECTURE.
-STASH_HOST="${STASH_HOST:-192.168.7.138}"
+# No default address: the caller supplies one it already verified, and guessing
+# here would pull executables from whatever answers on someone's network.
+if [ -z "${STASH_HOST:-}" ]; then
+    echo "STASH_HOST is empty - the sequence supplies it from \${ext:stash-service.ResolveHost(...)} and the cycle's warm-up publishes the address it verified. Nowhere to fetch the binaries from; aborting." >&2
+    exit 3
+fi
 STASH="http://${STASH_HOST}"
 ARCH=$(uname -m)
 LABEL="amisad-${ARCH}-binaries"

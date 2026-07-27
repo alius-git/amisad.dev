@@ -165,6 +165,27 @@ if (-not (Test-Path $demoKey)) {
     ssh-keygen -t ed25519 -N '' -C 'amisad-demo' -f $demoKey | Out-Host
 }
 
+# --- pre-flight: stash service, resolved + published before anything long starts ---
+# A stash is a requirement of this pass, not an optimization: the build uploads
+# its binaries to it and amisad-core downloads them. This project states no
+# address of its own, so "none found" stops here, where it costs seconds,
+# rather than an hour later inside the build guest.
+# The host contract brings Get-VMIp into scope so the pre-flight can see a stash
+# VM running on THIS host; every hypervisor call in this script is `Hyper-V\`-
+# qualified, so the driver's same-named cmdlets shadow nothing here.
+Import-Module (Join-Path $YurunaRoot 'test\modules\Test.HostContract.psm1') -Force -DisableNameChecking -ErrorAction SilentlyContinue
+if (Get-Command Initialize-YurunaHost -ErrorAction SilentlyContinue) {
+    $null = Initialize-YurunaHost -RepoRoot $YurunaRoot -HostType 'host.windows.hyper-v'
+}
+Import-Module (Join-Path $PSScriptRoot '..\..\test\AmisAd.Stash.psm1') -Force -DisableNameChecking
+$stash = Resolve-StashService -YurunaRoot $YurunaRoot
+foreach ($line in $stash.Lines) { Write-Information $line }
+if (-not $stash.Address) {
+    Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and amisad-core has nowhere to fetch them - stopping before the provisioning stages. " +
+        "Start one on this host (Start-StashVM.ps1), join a pool that runs one, or pin an address with `$env:YURUNA_STASH_HOST.")
+    exit 1
+}
+
 # --- [1] build once: compile + upload binaries to the stash ---
 if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "Build stage failed; no binaries in the stash - stopping."
