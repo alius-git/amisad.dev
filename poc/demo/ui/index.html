@@ -1,0 +1,44 @@
+<!doctype html>
+<!-- LICENSEURI https://yuruna.link/license -->
+<!-- Copyright (c) 2026 by Alisson Sol et al. -->
+<!-- AmisAd demo console: persona-switching mock UI over the live POC
+     topology. Served by ../serve-demo.ps1; all API calls go through its
+     same-origin proxy. The guided 30-minute walkthrough is /slides.html. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AmisAd — demo console</title>
+  <link rel="icon" href="/art/icon.svg" />
+  <link rel="stylesheet" href="/ui/style.css" />
+</head>
+<body>
+  <header>
+    <img src="/art/icon.svg" alt="AmisAd" width="36" height="36" />
+    <h1>AmisAd <span>demo console</span></h1>
+    <label for="persona-select">Persona</label>
+    <select id="persona-select">
+      <option value="">— overview —</option>
+    </select>
+    <span id="topology" class="topo">resolving topology…</span>
+    <a href="/slides.html" target="_blank" rel="noopener">Slides ↗</a>
+    <button id="reset-state" type="button" title="Forget captured ids and step check-marks (the lab itself is untouched)">Reset demo state</button>
+  </header>
+  <main>
+    <aside id="identity"><!-- persona card --></aside>
+    <section id="steps"><!-- scenario panels --></section>
+    <aside id="side">
+      <div class="panel">
+        <h2>Demo notebook</h2>
+        <p class="hint">Ids captured from responses; later steps reuse them automatically.</p>
+        <div id="notebook"></div>
+      </div>
+      <div class="panel">
+        <h2>Call log</h2>
+        <div id="log"></div>
+      </div>
+    </aside>
+  </main>
+  <script src="/ui/app.js"></script>
+</body>
+</html>

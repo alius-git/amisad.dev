@@ -1,0 +1,195 @@
+/* LICENSEURI https://yuruna.link/license */
+/* Copyright (c) 2026 by Alisson Sol et al. */
+/* AmisAd demo console styling. Brand tokens copied from
+   ../components/art/palette.css (canonical - do not fork the values). */
+:root {
+  --amisad-navy: #2b3a67;
+  --amisad-terracotta: #e2725b;
+  --amisad-white: #ffffff;
+  --ink: #22283a;
+  --paper: #f6f5f2;
+  --card: #ffffff;
+  --line: #dcd9d2;
+  --ok: #2e7d4f;
+  --warn: #b26a00;
+  --bad: #b3352b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 1rem;
+  background: var(--amisad-navy);
+  color: var(--amisad-white);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+header h1 { font-size: 1.1rem; margin: 0 1rem 0 0; font-weight: 600; }
+header h1 span { font-weight: 300; opacity: 0.8; }
+header label { font-size: 0.85rem; opacity: 0.85; }
+header select {
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--amisad-terracotta);
+}
+header a { color: var(--amisad-white); font-size: 0.85rem; margin-left: auto; }
+header button {
+  background: transparent;
+  color: var(--amisad-white);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+header button:hover { border-color: var(--amisad-terracotta); }
+.topo { font-size: 0.75rem; opacity: 0.8; font-family: Consolas, monospace; }
+.topo.bad { color: #ffb4a8; opacity: 1; }
+
+main {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 320px;
+  gap: 1rem;
+  padding: 1rem;
+  align-items: start;
+}
+@media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+
+.panel, .card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem;
+  margin-bottom: 1rem;
+}
+.panel h2 { margin: 0 0 0.4rem; font-size: 0.95rem; color: var(--amisad-navy); }
+.hint { font-size: 0.75rem; color: #777; margin: 0 0 0.5rem; }
+
+/* Persona identity card */
+.avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--amisad-terracotta);
+  color: var(--amisad-white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; font-weight: 600;
+}
+#identity .card { text-align: left; }
+#identity h2 { margin: 0.5rem 0 0.1rem; font-size: 1.15rem; }
+#identity .role { color: var(--amisad-terracotta); font-weight: 600; font-size: 0.85rem; }
+#identity .app { font-family: Consolas, monospace; font-size: 0.8rem; color: #666; }
+#identity .blurb { font-size: 0.85rem; line-height: 1.35; }
+.cred {
+  font-family: Consolas, monospace;
+  font-size: 0.82rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  margin-top: 0.35rem;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.cred b { font-weight: 600; }
+.cred button { border: none; background: none; cursor: pointer; font-size: 0.8rem; }
+
+/* Scenario panels */
+.scenario { border-left: 4px solid var(--amisad-navy); }
+.scenario > h2 { font-size: 1rem; }
+.scenario .act { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amisad-terracotta); }
+.scenario .tagline { font-size: 0.8rem; color: #666; margin: 0.1rem 0 0.6rem; }
+.step {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.45rem 0;
+  border-top: 1px dashed var(--line);
+}
+.step .num {
+  font-size: 0.7rem; color: #999; font-family: Consolas, monospace; padding-top: 0.2rem;
+}
+.step .who {
+  font-size: 0.72rem;
+  border-radius: 10px;
+  padding: 0.1rem 0.5rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.step .who.active { background: var(--amisad-terracotta); color: var(--amisad-white); border-color: var(--amisad-terracotta); }
+.step .what .label { font-size: 0.9rem; font-weight: 600; }
+.step .what .label .done { color: var(--ok); margin-left: 0.3rem; }
+.step .what .explain { font-size: 0.78rem; color: #666; }
+.step .what .missing { font-size: 0.75rem; color: var(--warn); }
+.step.optional { opacity: 0.75; }
+.step.optional .label::after { content: " (optional)"; font-weight: 400; font-size: 0.75rem; color: #999; }
+.step button.run {
+  background: var(--amisad-navy);
+  color: var(--amisad-white);
+  border: none; border-radius: 4px;
+  padding: 0.3rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.step button.run:disabled { background: #b9bcc9; cursor: not-allowed; }
+.step button.run.busy { background: var(--amisad-terracotta); }
+
+.results { grid-column: 1 / -1; margin: 0.2rem 0 0 4.5rem; }
+.result-line { font-family: Consolas, monospace; font-size: 0.75rem; margin: 0.15rem 0; }
+.result-line .status { border-radius: 3px; padding: 0 0.35rem; color: #fff; }
+.result-line .status.ok { background: var(--ok); }
+.result-line .status.warn { background: var(--warn); }
+.result-line .status.bad { background: var(--bad); }
+.results details { margin: 0.1rem 0 0.3rem; }
+.results summary { font-size: 0.72rem; color: #888; cursor: pointer; }
+.results pre {
+  margin: 0.2rem 0;
+  padding: 0.5rem;
+  background: #202538;
+  color: #d8e0f5;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  max-height: 240px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.verdict { font-size: 0.78rem; margin-top: 0.2rem; }
+.verdict.ok { color: var(--ok); }
+.verdict.warn { color: var(--warn); }
+.verdict.bad { color: var(--bad); }
+
+/* Notebook + log */
+#notebook .chip {
+  display: inline-block;
+  font-family: Consolas, monospace;
+  font-size: 0.72rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+  margin: 0.15rem 0.2rem 0.15rem 0;
+}
+#notebook .chip b { color: var(--amisad-navy); }
+#log { font-family: Consolas, monospace; font-size: 0.7rem; max-height: 320px; overflow: auto; }
+#log div { padding: 0.1rem 0; border-bottom: 1px solid #f0eee9; }
+#log .s2 { color: var(--ok); }
+#log .s4 { color: var(--warn); }
+#log .s5 { color: var(--bad); }
+
+/* Overview cast grid */
+.cast { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.6rem; }
+.cast .member { display: flex; gap: 0.5rem; align-items: center; cursor: pointer; border: 1px solid var(--line); border-radius: 6px; padding: 0.4rem; background: var(--card); }
+.cast .member:hover { border-color: var(--amisad-terracotta); }
+.cast .avatar { width: 34px; height: 34px; font-size: 1rem; flex: none; }
+.cast .member .m-name { font-size: 0.85rem; font-weight: 600; }
+.cast .member .m-role { font-size: 0.7rem; color: #666; }
