@@ -10,6 +10,8 @@ sudo apt-get update -y
 sudo apt-get install -y git curl build-essential pkg-config python3
 
 if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+    # Rust version in lockstep with poc/MODULE.bazel rust.toolchain (see the
+    # comment there) and the rust:*-slim Dockerfiles; bump all together.
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
         sh -s -- -y --default-toolchain 1.96.1
 fi

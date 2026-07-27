@@ -3,11 +3,13 @@
 # Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - install NATS JetStream as a host systemd service. Deliberately
 # NOT in-cluster: docker.io pulls fail in this lab (invalid_token via the
-# caching path, cycles 246-247); the GitHub release binary avoids Docker Hub.
+# caching path); the GitHub release binary avoids Docker Hub.
 # Services reach NATS at <node-ip>:4222; the in-cluster Service indirection
 # returns when the event-driven scenarios actually wire JetStream in.
 set -euo pipefail
 
+# Pinned (not 'latest'): resolving latest needs the unauthenticated GitHub
+# releases API, which 403s behind the shared NAT egress. Bump by editing this line.
 NATS_VERSION=v2.14.3
 ARCH=$(uname -m)
 case "$ARCH" in

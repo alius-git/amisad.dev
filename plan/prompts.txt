@@ -89,11 +89,11 @@ Design principles:
 
 ==== Design - Part 2
 
-Act as the Principal Systems Architect for AmisAd. Create Mermaid sequence diagrams for all ten verification scenarios in plan/scenarios.md — one file per scenario under plan/design/ (seq-001.md … seq-010.md), each following the existing design-doc conventions ("One sentence:" header, links back to 00-index.md and scenarios.md).
+Act as the Principal Systems Architect for AmisAd. Create Mermaid sequence diagrams for all ten verification scenarios in plan/scenarios.md — one file per scenario under plan/design/ (seq-001.md … seq-010.md), each following the existing design-doc conventions ("One sentence:" header, links back to 00-index.md (now plan/design.md) and scenarios.md).
 
 Integration:
 
-- Add the ten files to the document table in plan/design/00-index.md.
+- Add the ten files to the document table in plan/design/00-index.md (now plan/design.md).
 - Link the set from plan/design.md §9 (Diagrams).
 - Verify README.md still links to plan/design.md; fix it if it does not.
 

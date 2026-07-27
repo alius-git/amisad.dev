@@ -109,8 +109,8 @@ function Remove-InstallMedia {
         Hyper-V\Remove-VMDvdDrive -ErrorAction SilentlyContinue
     # Stripping the CURRENT config is not enough for restore targets: the
     # checkpoint still re-attaches the DVDs, and the strip drops the VM's ACE
-    # on the ISO files, so the next loadDiskSnapshot fails with 0x80070005
-    # (proved 2026-07-20). Retake the checkpoint so the RESTORED config is
+    # on the ISO files, so the next loadDiskSnapshot fails with 0x80070005.
+    # Retake the checkpoint so the RESTORED config is
     # DVD-free too. The snapshot manifest compares (VMName, SnapshotId,
     # HostType) only, all unchanged by the retake.
     if ($SnapshotId) {
@@ -183,7 +183,7 @@ foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
     # The framework provisions every ubuntu guest at a FIXED 12GB. Edges only
     # run the small slice-runtime binary, and since s004 BOTH edges are live
     # while amisad-core (12GB) restores - 3 x 12GB exceeds host RAM
-    # (0x800705AA, proven 2026-07-20). Shrink edges before the checkpoint
+    # (0x800705AA). Shrink edges before the checkpoint
     # retake so the restored config is small too.
     Hyper-V\Set-VM -Name $edge -StaticMemory -MemoryStartupBytes 4GB
     Write-Information "$edge memory set to 4GB (slice-runtime only)."
@@ -214,8 +214,8 @@ foreach ($edge in $edges) {
     $edgeIpFile = Join-Path $logRoot "handoff\$edge.ip.txt"
     Remove-Item -LiteralPath $edgeIpFile -Force -ErrorAction SilentlyContinue
     $edgeState[$edge] = @{ IpFile = $edgeIpFile; Start = (Get-Date); Started = $false }
-    # Loud + retried: a silent Start-VM failure previously left the edge Off and
-    # pushed the scenarios into the degraded fallback with no evidence why.
+    # Loud + retried: a silent Start-VM failure would leave the edge Off and
+    # push the scenarios into the degraded fallback with no evidence why.
     foreach ($attempt in 1..3) {
         try {
             Hyper-V\Start-VM -Name $edge -ErrorAction Stop

@@ -661,8 +661,8 @@ mod tests {
         // persisted hash-chained payloads on reload.
         assert!(json::parse("{\"x\":1e309}").is_err());
         assert!(json::parse("1e309").is_err());
-        // A high surrogate must pair with a low surrogate (debug builds
-        // previously panicked on subtraction underflow here).
+        // A high surrogate must pair with a low surrogate (an unpaired one
+        // would underflow the pairing subtraction and panic in debug builds).
         assert!(json::parse("\"\\ud800\\u0041\"").is_err());
         let paired = json::parse("\"\\ud83d\\ude00\"").expect("surrogate pair");
         assert_eq!(paired.as_str(), Some("😀"));

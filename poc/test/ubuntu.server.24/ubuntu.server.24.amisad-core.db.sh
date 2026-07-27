@@ -20,7 +20,7 @@ if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
 fi
 
 # Self-sufficient PostgreSQL install (Ubuntu's default packages): the
-# framework's pgdg-based script raced its own cluster re-init (cycle 248).
+# framework's pgdg-based script raced its own cluster re-init.
 if ! command -v psql >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update -y

@@ -288,8 +288,8 @@ function Start-VMConfirmed {
 
 # Opt-in virtual display for headless keystroke/OCR reliability on the cold
 # provisioning chains (no-op unless YURUNA_VIRTUAL_DISPLAY is truthy). The host
-# type is the DETECTED one -- hard-coding Hyper-V here meant KVM/UTM never got
-# the virtual display they are the likeliest to need (headless servers).
+# type is the DETECTED one -- hard-coding Hyper-V would leave KVM/UTM (headless
+# servers, the likeliest to need it) without the virtual display.
 Import-Module (Join-Path $YurunaRoot 'test/modules/Test.HostCondition.psm1') -Force -DisableNameChecking -ErrorAction SilentlyContinue
 if (Get-Command Initialize-HostDisplay -ErrorAction SilentlyContinue) {
     Initialize-HostDisplay -HostType $HostType
