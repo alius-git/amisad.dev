@@ -1,0 +1,165 @@
+<!doctype html>
+<!-- LICENSEURI https://yuruna.link/license -->
+<!-- Copyright (c) 2026 by Alisson Sol et al. -->
+<!-- AmisAd data-view demo, data window: the live state of the three lab VMs
+     while the scenarios run. Read-only - it issues GET requests to the lab and
+     nothing else, so it never changes what it observes. The companion action
+     window is at / and the deck at /slides.html. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AmisAd — live data</title>
+  <link rel="icon" href="/art/icon.svg" />
+  <link rel="stylesheet" href="/ui/shared.css" />
+<style>
+  main { padding: 10px 12px 4px 12px; }
+
+  /* --- privacy strip: the answer to "how much about her is moving?" --- */
+  .strip {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-gap: 10px;
+    margin-bottom: 10px;
+  }
+  @media (min-width: 760px) { .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .sc {
+    border: 1px solid var(--d-line);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    background: -webkit-linear-gradient(top, #16204040, #0e142a);
+    background: linear-gradient(to bottom, rgba(22, 32, 64, 0.25), #0e142a);
+    position: relative;
+    overflow: hidden;
+  }
+  .sc h3 {
+    margin: 0 0 6px 0; font-size: 0.66rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--d-dim); font-weight: 700;
+  }
+  .sc .big {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 1.5rem; font-weight: 600; line-height: 1.15;
+    color: var(--d-glow);
+    text-shadow: 0 0 16px rgba(89, 224, 255, 0.45);
+    word-break: break-all;
+  }
+  .sc.green .big { color: var(--d-ok); text-shadow: 0 0 16px rgba(56, 217, 150, 0.45); }
+  .sc.alarm { border-color: var(--d-bad); }
+  .sc.alarm .big { color: var(--d-bad); text-shadow: 0 0 18px rgba(255, 107, 94, 0.5); }
+  .sc .cap { font-size: 0.72rem; color: var(--d-dim); line-height: 1.45; margin-top: 5px; }
+  .sc .sub { font-size: 0.7rem; color: var(--d-dim); font-family: "SF Mono", Consolas, monospace; }
+
+  /* --- VM cards --- */
+  .vms { display: grid; grid-template-columns: minmax(0, 1fr); grid-gap: 10px; margin-bottom: 10px; }
+  @media (min-width: 760px) { .vms { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  .vm {
+    border: 1px solid var(--d-line); border-radius: var(--radius);
+    padding: 9px 12px; background: var(--d-deep);
+  }
+  .vm-top { display: flex; align-items: center; }
+  .vm-top > * { margin-right: 8px; }
+  .vm-name { font-weight: 650; font-size: 0.9rem; }
+  .vm-ip { font-family: "SF Mono", Consolas, monospace; font-size: 0.7rem; color: var(--d-dim); }
+  .led {
+    width: 10px; height: 10px; border-radius: 50%; background: #4a5678; flex: 0 0 auto;
+  }
+  .led.up { background: var(--d-ok); box-shadow: 0 0 8px var(--d-ok); }
+  .led.down { background: var(--d-bad); box-shadow: 0 0 8px var(--d-bad); }
+  .dots { margin-top: 7px; display: flex; flex-wrap: wrap; }
+  .dot {
+    width: 9px; height: 9px; border-radius: 2px; background: #35406b;
+    margin: 0 4px 4px 0;
+  }
+  .dot.up { background: var(--d-ok); }
+  .dot.down { background: var(--d-bad); box-shadow: 0 0 6px rgba(255, 107, 94, 0.6); }
+  .vm-cap { font-size: 0.68rem; color: var(--d-dim); margin-top: 2px; }
+
+  /* --- box grid --- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); grid-gap: 10px; }
+  .box {
+    border: 1px solid var(--d-line); border-radius: var(--radius);
+    background: var(--d-panel); padding: 9px 11px; position: relative;
+    transition: box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+  .box.flash {
+    border-color: var(--amisad-terracotta);
+    box-shadow: 0 0 0 1px var(--amisad-terracotta), 0 0 22px rgba(226, 114, 91, 0.45);
+  }
+  .box.stale { opacity: 0.55; }
+  .box h4 { margin: 0; font-size: 0.78rem; font-weight: 650; color: var(--d-text); }
+  .box .src {
+    font-family: "SF Mono", Consolas, monospace; font-size: 0.62rem;
+    color: var(--d-dim); margin-bottom: 6px;
+  }
+  .kv { display: flex; justify-content: space-between; font-size: 0.76rem; padding: 1px 0; }
+  .kv span:first-child { color: var(--d-dim); margin-right: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .kv span:last-child { font-family: "SF Mono", Consolas, monospace; color: var(--d-text); white-space: nowrap; }
+  .kv .delta { color: var(--amisad-terracotta); font-size: 0.66rem; margin-left: 5px; }
+  .box .attr {
+    font-size: 0.63rem; color: var(--d-dim); margin-top: 6px;
+    border-top: 1px solid var(--d-line); padding-top: 4px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .box .why { font-size: 0.64rem; color: #7f8bb8; margin-top: 5px; line-height: 1.4; }
+  .grp {
+    grid-column: 1 / -1; font-size: 0.64rem; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--d-dim); font-weight: 700;
+    margin: 6px 0 -2px 0;
+  }
+  .mini-wrap { margin-top: 12px; }
+  #ticker {
+    font-family: "SF Mono", Consolas, monospace; font-size: 0.64rem;
+    color: var(--d-dim); max-height: 76px; overflow: hidden; margin-top: 8px;
+  }
+  #ticker div { padding: 1px 0; }
+</style>
+</head>
+<body class="theme-dark">
+  <div class="bar">
+    <img src="/art/icon.svg" alt="AmisAd" width="30" height="30" />
+    <h1>AmisAd <span>live data</span></h1>
+    <span id="topology" class="chip">resolving…</span>
+    <span class="spacer"></span>
+    <span id="clock" class="chip mono"></span>
+    <a href="/" target="_blank" rel="noopener">Actions ↗</a>
+    <button id="reset-demo" class="danger" type="button">Reset demo</button>
+  </div>
+
+  <main>
+    <div class="strip">
+      <div class="sc" id="sc-subject">
+        <h3>The buyer on the wire</h3>
+        <div class="big" id="subject-hash">…</div>
+        <div class="cap">sha256("maya|person|subject")[:16] — the coordinator, the ledger and every
+          box below know her only as this.</div>
+      </div>
+      <div class="sc green" id="sc-identity">
+        <h3>Her identity, anywhere</h3>
+        <div class="big" id="identity-count">0 hits</div>
+        <div class="sub" id="identity-sub">0 responses scanned</div>
+        <div class="cap">Every lab response is scanned for her login and for personal-data fields.
+          Seller tenant and creator credits are public catalog data, not buyer data.</div>
+      </div>
+      <div class="sc" id="sc-context">
+        <h3>What she chose to share</h3>
+        <div class="big" id="context-count">0 places</div>
+        <div class="sub" id="context-sub">her one-line context</div>
+        <div class="cap">The context summary she wrote does travel — to the seller's order and the
+          egress log. That half of the envelope is hers to share; her name is not in it.</div>
+      </div>
+    </div>
+
+    <div class="vms" id="vms"></div>
+    <div class="grid" id="boxes"></div>
+
+    <div class="panel mini-wrap">
+      <h2>Who acted, in order — all eleven at once</h2>
+      <div id="mini"></div>
+      <div id="ticker"></div>
+    </div>
+  </main>
+
+  <script src="/ui/shared.js"></script>
+  <script src="/ui/data.js"></script>
+</body>
+</html>

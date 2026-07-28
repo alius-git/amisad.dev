@@ -1,0 +1,152 @@
+<!doctype html>
+<!-- LICENSEURI https://yuruna.link/license -->
+<!-- Copyright (c) 2026 by Alisson Sol et al. -->
+<!-- AmisAd data-view demo, action window: the whole scenario script as a
+     persona swimlane chart plus the runner that executes the selected step
+     against the live lab. Served by ../serve-data-demo.ps1; the companion
+     data view is at /data and the deck at /slides.html. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AmisAd — actions</title>
+  <link rel="icon" href="/art/icon.svg" />
+  <link rel="stylesheet" href="/ui/shared.css" />
+<style>
+  main { padding: 12px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr); grid-gap: 12px; }
+  @media (min-width: 900px) {
+    .cols { grid-template-columns: minmax(0, 1fr) 300px; }
+  }
+  .tl-panel { padding-bottom: 6px; }
+  .tl-legend { font-size: 0.7rem; color: var(--muted); margin-top: 6px; }
+  .tl-legend b { font-weight: 600; color: var(--ink); }
+  .swatch {
+    display: inline-block; width: 10px; height: 10px; border-radius: 2px;
+    vertical-align: -1px; margin-right: 3px;
+  }
+  .who-row { display: flex; align-items: center; flex-wrap: wrap; }
+  .who-row > * { margin-right: 10px; }
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--amisad-terracotta); color: #fff;
+    font-weight: 700; font-size: 1.15rem;
+    text-align: center; line-height: 44px;
+  }
+  .role { font-size: 0.78rem; color: var(--muted); }
+  .cred {
+    font-family: "SF Mono", Consolas, monospace; font-size: 0.78rem;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 6px;
+    padding: 6px 10px; display: flex; align-items: center; margin-top: 8px;
+  }
+  .cred > * { margin-right: 8px; }
+  .cred button { min-height: 32px; padding: 0 10px; font-size: 0.75rem; }
+  .step-head { display: flex; align-items: baseline; flex-wrap: wrap; }
+  .step-head > * { margin-right: 8px; }
+  .step-num {
+    font-family: "SF Mono", Consolas, monospace; font-size: 0.72rem;
+    color: var(--muted); background: var(--paper);
+    border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px;
+  }
+  .step-label { font-size: 1.05rem; font-weight: 650; }
+  .step-explain { font-size: 0.86rem; line-height: 1.5; margin: 8px 0 0 0; }
+  .step-actions { margin-top: 12px; display: flex; align-items: center; flex-wrap: wrap; }
+  .step-actions > * { margin-right: 10px; margin-bottom: 6px; }
+  .missing {
+    font-size: 0.75rem; color: var(--warn);
+    background: #fdf6e8; border-radius: 6px; padding: 4px 8px;
+  }
+  .verdict { font-size: 0.88rem; font-weight: 600; margin-top: 10px; }
+  .verdict.ok { color: var(--ok); }
+  .verdict.bad { color: var(--bad); }
+  .res { margin-top: 10px; }
+  .res-row { border-top: 1px dashed var(--line); padding: 6px 0; }
+  .res-row summary {
+    cursor: pointer; font-size: 0.8rem; list-style: none;
+    display: flex; align-items: center; min-height: 30px;
+  }
+  .res-row summary > * { margin-right: 8px; }
+  .res-row pre {
+    font-size: 0.72rem; background: #f4f5f9; border-radius: 6px;
+    padding: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+    max-height: 260px; margin: 6px 0 0 0;
+  }
+  .nb-chip {
+    display: block; font-family: "SF Mono", Consolas, monospace; font-size: 0.72rem;
+    border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; margin-bottom: 5px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .nb-chip b { color: var(--muted); font-weight: 600; }
+  .nb-chip.hot { border-color: var(--amisad-terracotta); color: var(--amisad-terracotta); }
+  #log { max-height: 240px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  #log div {
+    font-family: "SF Mono", Consolas, monospace; font-size: 0.68rem;
+    padding: 1px 0; color: var(--muted); white-space: nowrap;
+  }
+  #log div.s2 { color: var(--ok); }
+  #log div.s4 { color: var(--warn); }
+  #log div.s5, #log div.s0 { color: var(--bad); }
+  .cast { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); grid-gap: 8px; }
+  .member {
+    display: flex; align-items: center; border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px; cursor: pointer; min-height: 56px;
+    background: var(--card);
+  }
+  .member:hover { border-color: var(--amisad-terracotta); }
+  .member .avatar { width: 34px; height: 34px; line-height: 34px; font-size: 0.9rem; margin-right: 8px; }
+  .m-name { font-size: 0.85rem; font-weight: 600; }
+  .m-role { font-size: 0.7rem; color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <img src="/art/icon.svg" alt="AmisAd" width="30" height="30" />
+    <h1>AmisAd <span>actions</span></h1>
+    <label for="persona-select" class="chip">Persona</label>
+    <select id="persona-select">
+      <option value="">— overview —</option>
+    </select>
+    <span id="topology" class="chip">resolving topology…</span>
+    <span id="consents" class="chip"></span>
+    <span class="spacer"></span>
+    <a href="/data" target="_blank" rel="noopener">Data view ↗</a>
+    <a href="/slides.html" target="_blank" rel="noopener">Slides ↗</a>
+    <button id="reset-demo" class="danger" type="button">Reset demo</button>
+  </div>
+
+  <main>
+    <div class="panel tl-panel">
+      <h2>The whole demo, all eleven people at once</h2>
+      <div id="timeline"></div>
+      <div class="tl-legend">
+        <span class="swatch" style="background:var(--act-1)"></span><b>Act I</b>
+        <span class="swatch" style="background:var(--act-2);margin-left:10px"></span><b>Act II</b>
+        <span class="swatch" style="background:var(--act-3);margin-left:10px"></span><b>Act III</b>
+        <span class="swatch" style="background:var(--warn);margin-left:10px"></span><b>refused — the boundary held</b>
+        <span style="margin-left:10px">· dotted = not run yet · tap any slot to inspect it</span>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div>
+        <div class="panel" id="runner"></div>
+      </div>
+      <div>
+        <div class="panel" id="identity"></div>
+        <div class="panel">
+          <h2>Demo notebook</h2>
+          <p class="hint">Ids captured from responses; later steps reuse them automatically.</p>
+          <div id="notebook"></div>
+        </div>
+        <div class="panel">
+          <h2>Call log</h2>
+          <div id="log"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/ui/shared.js"></script>
+  <script src="/ui/actions.js"></script>
+</body>
+</html>

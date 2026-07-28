@@ -1,0 +1,322 @@
+/* LICENSEURI https://yuruna.link/license */
+/* Copyright (c) 2026 by Alisson Sol et al. */
+/* AmisAd data-view demo styling, shared by the action window (light) and the
+   data window (dark, .theme-dark on body). Brand tokens copied from
+   ../components/art/palette.css (canonical - do not fork the values).
+
+   Baseline is Safari 13.1 / iPadOS 13: no flexbox `gap` (grid-gap only), no
+   :is()/:where()/:has(), no container queries, no logical properties. Spacing
+   inside flex rows is done with margins for that reason. Interactive targets
+   are >=44px so the demo can be driven from a tablet. */
+:root {
+  --amisad-navy: #2b3a67;
+  --amisad-terracotta: #e2725b;
+  --amisad-white: #ffffff;
+
+  --ink: #22283a;
+  --paper: #f6f5f2;
+  --card: #ffffff;
+  --line: #dcd9d2;
+  --muted: #6b7185;
+  --ok: #2e7d4f;
+  --warn: #b26a00;
+  --bad: #b3352b;
+
+  /* Dark surface family for the data window. Hue-matched to the navy so the
+     two windows read as one product side by side. */
+  --d-void: #0c1020;
+  --d-deep: #131a30;
+  --d-panel: #182140;
+  --d-line: #24305a;
+  --d-text: #e6ecff;
+  --d-dim: #8d99c4;
+  --d-glow: #59e0ff;
+  --d-ok: #38d996;
+  --d-bad: #ff6b5e;
+
+  --act-1: #2b3a67;
+  --act-2: #6b4ea8;
+  --act-3: #0f6f83;
+
+  --cell: 15px;
+  --cell-mini: 9px;
+  --lane-h: 26px;
+  --lane-h-mini: 12px;
+  --label-w: 108px;
+  --label-w-mini: 66px;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-text-size-adjust: 100%;
+}
+.mono { font-family: "SF Mono", "Cascadia Mono", Consolas, "Roboto Mono", monospace; }
+
+/* ---------- header chrome (both windows) ---------- */
+.bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  background: var(--amisad-navy);
+  color: var(--amisad-white);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+.bar > * { margin-right: 10px; }
+.bar h1 {
+  font-size: 1.02rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+.bar h1 span { font-weight: 300; opacity: 0.75; }
+.bar .spacer { flex: 1 1 auto; margin-right: 0; }
+.chip {
+  font-size: 0.72rem;
+  font-family: "SF Mono", Consolas, monospace;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.chip.bad { color: #ffb4a8; opacity: 1; }
+.chip.good { color: #9df5c8; opacity: 1; }
+.bar a { color: var(--amisad-white); font-size: 0.8rem; }
+
+/* ---------- controls ---------- */
+button {
+  font: inherit;
+  font-size: 0.85rem;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--amisad-navy);
+  color: var(--amisad-white);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+button:hover { background: #35477e; }
+button:active { transform: translateY(1px); }
+button:disabled { background: #b9bcc9; cursor: default; transform: none; }
+button.ghost {
+  background: transparent;
+  color: var(--amisad-white);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+button.ghost:hover { background: rgba(255, 255, 255, 0.14); }
+button.danger { background: var(--amisad-terracotta); }
+button.danger:hover { background: #ee8570; }
+button.busy { background: var(--amisad-terracotta); }
+select {
+  font: inherit;
+  font-size: 0.85rem;
+  min-height: 44px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ---------- panels ---------- */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(20, 24, 40, 0.05);
+}
+.panel h2 {
+  margin: 0 0 8px 0;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.hint { font-size: 0.75rem; color: var(--muted); margin: 4px 0 0 0; line-height: 1.45; }
+
+/* ---------- swimlane timeline (shared: full + mini) ---------- */
+.tl-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.tl-acts, .tl-scen, .tl-lane { display: flex; align-items: stretch; }
+.tl-acts, .tl-scen { margin-left: var(--label-w); }
+.tl--mini .tl-acts, .tl--mini .tl-scen { margin-left: var(--label-w-mini); }
+.tl-act, .tl-sc {
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 3px 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 1px solid var(--line);
+  color: var(--amisad-white);
+  font-weight: 700;
+}
+.tl-sc { background: transparent; color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
+.tl-lane { height: var(--lane-h); align-items: center; }
+.tl--mini .tl-lane { height: var(--lane-h-mini); }
+.tl-lane + .tl-lane { border-top: 1px dotted rgba(120, 128, 160, 0.28); }
+.tl-label {
+  width: var(--label-w);
+  min-width: var(--label-w);
+  font-size: 0.72rem;
+  padding-right: 8px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  color: var(--muted);
+  position: sticky;
+  left: 0;
+  background: var(--card);
+  z-index: 2;
+}
+.tl--mini .tl-label {
+  width: var(--label-w-mini);
+  min-width: var(--label-w-mini);
+  font-size: 0.6rem;
+}
+.tl-label.on { color: var(--amisad-terracotta); font-weight: 700; }
+.tl-cells { display: flex; align-items: center; }
+/* The cell fills the lane height so a finger has something to hit; the visible
+   bar is the ::before inside it. Without that the tap target would be the
+   13px bar itself, which no tablet user can reliably reach. */
+.tl-cell {
+  width: var(--cell);
+  min-width: var(--cell);
+  height: var(--lane-h);
+  position: relative;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.tl-cell::before {
+  content: "";
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  top: 6px;
+  bottom: 6px;
+  border-radius: 3px;
+  background: transparent;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.tl--mini .tl-cell {
+  width: var(--cell-mini);
+  min-width: var(--cell-mini);
+  height: var(--lane-h-mini);
+  cursor: default;
+}
+.tl--mini .tl-cell::before { top: 2px; bottom: 2px; }
+.tl-cell.empty { cursor: default; }
+/* A ghost slot: the step exists in the script but has not run. Seeing all 69
+   of them before the demo starts is the point of the chart. */
+.tl-cell.ghost::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -2px 0 0 -2px;
+  border-radius: 50%;
+  background: rgba(120, 128, 160, 0.55);
+}
+.tl-cell.done::before { background: var(--act-1); }
+.tl-cell.a2.done::before { background: var(--act-2); }
+.tl-cell.a3.done::before { background: var(--act-3); }
+.tl-cell.refused::before { background: var(--warn); }
+.tl-cell.failed::before { background: var(--bad); }
+.tl-cell.opt::before { opacity: 0.5; }
+.tl-cell.cur::before {
+  box-shadow: 0 0 0 2px var(--amisad-terracotta);
+  -webkit-animation: pulse 1.4s ease-in-out infinite;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.tl-cell.sel::before { box-shadow: 0 0 0 2px var(--ink); }
+@-webkit-keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.tl-now {
+  width: 2px;
+  min-width: 2px;
+  height: 15px;
+  background: var(--amisad-terracotta);
+  margin: 0 1px;
+}
+
+/* ---------- status pills ---------- */
+.pill {
+  display: inline-block;
+  font-family: "SF Mono", Consolas, monospace;
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #e8eaf0;
+  color: var(--ink);
+}
+.pill.ok { background: #dcf1e5; color: var(--ok); }
+.pill.warn { background: #fdf0da; color: var(--warn); }
+.pill.bad { background: #fbe0dd; color: var(--bad); }
+
+/* ---------- dark theme: the data window ---------- */
+.theme-dark {
+  background: var(--d-void);
+  color: var(--d-text);
+  /* A faint horizontal rule pattern reads as a control-room surface without
+     costing a repaint per frame the way an animated overlay would. */
+  background-image: -webkit-linear-gradient(top, rgba(89, 224, 255, 0.035) 1px, transparent 1px);
+  background-image: linear-gradient(to bottom, rgba(89, 224, 255, 0.035) 1px, transparent 1px);
+  background-size: 100% 3px;
+}
+.theme-dark .bar {
+  background: -webkit-linear-gradient(left, #101733, #1a2450);
+  background: linear-gradient(to right, #101733, #1a2450);
+  border-bottom: 1px solid var(--d-line);
+  box-shadow: 0 1px 18px rgba(89, 224, 255, 0.14);
+}
+.theme-dark .panel {
+  background: var(--d-panel);
+  border-color: var(--d-line);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+}
+.theme-dark .panel h2 { color: var(--d-dim); }
+.theme-dark .hint { color: var(--d-dim); }
+.theme-dark .tl-label { background: var(--d-deep); color: var(--d-dim); }
+.theme-dark .tl-sc { color: var(--d-dim); }
+.theme-dark .tl-cell.ghost::after { background: rgba(141, 153, 196, 0.45); }
+.theme-dark .tl-cell.done::before { background: var(--d-glow); box-shadow: 0 0 6px rgba(89, 224, 255, 0.6); }
+.theme-dark .tl-cell.a2.done::before { background: #b98cff; box-shadow: 0 0 6px rgba(185, 140, 255, 0.6); }
+.theme-dark .tl-cell.a3.done::before { background: #46e3b0; box-shadow: 0 0 6px rgba(70, 227, 176, 0.55); }
+.theme-dark .tl-cell.refused::before { background: #ffc46b; }
+.theme-dark .tl-cell.failed::before { background: var(--d-bad); }
+.theme-dark button { background: #24325f; color: var(--d-text); }
+.theme-dark button:hover { background: #2f4180; }
+.theme-dark button.danger { background: var(--amisad-terracotta); color: #fff; }
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    -webkit-animation: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
