@@ -108,6 +108,30 @@ async function token(actor) {
 // One result row per API call a step makes.
 const mk = (label, r) => ({ label, status: r.status, data: r.data });
 
+// The buyer's signup grants are a PRECONDITION of every need she submits: the
+// coordinator's consent gate refuses POST /v1/needs with 403 "participation
+// revoked" whenever the newest consent entry for her pseudonymous subject is a
+// revoke. The consent ledger is durable PostgreSQL, so a revoke left behind by
+// an earlier run (s003.silence's pause, s010.certification's corpus seeding)
+// survives into the console and would 403 Maya's very first step. Each
+// scenario script seeds the same grants with `buyer-client resume` before it
+// asserts anything; this is the console's equivalent.
+//
+// Repair only what actually reads "revoked": an unconditional grant would
+// prepend noise to the grant -> revoke -> re-grant history s003 puts on screen.
+async function ensureBuyerConsents() {
+  const st = await post("core/30080/v1/consents/state", { token: await token("maya") });
+  if (st.status !== 200) return { ok: false, note: "consent state unavailable (" + st.status + ")" };
+  const stale = ["participation", "contribution"].filter((g) => st.data[g] === "revoked");
+  if (!stale.length) return { ok: true, note: "" };
+  for (const grant of stale) {
+    const r = await post("core/30080/v1/consents",
+      { token: await token("maya"), grant_type: grant, action: "grant" });
+    if (r.status !== 201) return { ok: false, note: "re-granting " + grant + " failed (" + r.status + ")" };
+  }
+  return { ok: true, note: "re-granted Maya's " + stale.join(" + ") + " (left revoked by an earlier run)" };
+}
+
 function offer(id, title, category, price, extra) {
   return Object.assign({
     offer_id: id, tenant: "elena-atelier", title, category,
@@ -815,6 +839,17 @@ async function boot() {
     for (const e of list) personaSecrets[e.username] = e.password;
   } catch {
     /* card shows <unavailable>; the API steps still work */
+  }
+  if (topo.core) {
+    const el = $("#consents");
+    try {
+      const r = await ensureBuyerConsents();
+      el.textContent = r.note;
+      if (!r.ok) el.classList.add("bad");
+    } catch (e) {
+      el.textContent = "consent preflight failed: " + (e.message || e);
+      el.classList.add("bad");
+    }
   }
   render();
 }

@@ -30,10 +30,42 @@ Then open, on the host:
 | URL | What |
 |-----|------|
 | `http://localhost:8091/` | The demo console (persona dropdown → scenario step buttons) |
-| `http://localhost:8091/slides.html` | The deck. Arrows navigate; **N** toggles presenter notes (the operator cues live there) |
+| `http://localhost:8091/slides.html` | The deck. **N**/**P** (or arrows, space, the left/right edge strips) navigate, **Home**/**End** jump to first/last, **S** toggles presenter notes (the operator cues live there). Each slide is a history entry, so the browser's Back button steps back through the deck |
 
-The server binds **localhost only** on purpose: `/api/personas` returns the
-vault passwords in the clear for the persona identity cards.
+By default the server binds **loopback only**, so those URLs work on the host
+and nowhere else.
+
+## Presenting from another machine
+
+To let the lab host do the work while you drive from a laptop, bind the console
+to the network:
+
+```powershell
+pwsh poc/demo/serve-demo.ps1 -BindAddress any     # every interface
+pwsh poc/demo/serve-demo.ps1 -BindAddress 10.0.0.5  # one NIC (localhost stays bound too)
+```
+
+The banner prints the exact `http://<host ip>:8091/` URLs to type on the
+laptop. Two more things have to be true:
+
+- **The host firewall must allow inbound 8091.** The script never touches
+  firewall rules.
+- **On Windows only**, a non-loopback prefix is an http.sys reservation: run
+  the shell elevated, or register it once with
+  `netsh http add urlacl url=http://+:8091/ user=<domain>\<user>`. Linux and
+  macOS need nothing. The script says which one it hit if the bind fails.
+
+`/api/personas` returns the vault passwords in the clear for the identity
+cards, so they are gated on the **client**, not the binding: loopback requests
+(the host's own browser) always get them, and everyone else sees
+`<withheld: remote viewer>`. Add `-SharePersonaPasswords` to serve them to
+remote viewers too — on a trusted network, since anything that can reach the
+port then gets them.
+
+Nothing else changes: the API steps, the proxy and the deck all work
+identically for a remote browser. Note the **notebook is per browser**
+(localStorage), so the machine you present from is the one that carries the
+captured ids — driving one demo from two browsers splits the state.
 
 ## How it works
 
@@ -83,6 +115,13 @@ narrative holds without them.
   framework checkout was not located, or the vault module import failed; pass
   `-YurunaRoot`. The startup banner prints the resolved path. The API steps
   still work; only the password display is lost.
+- **The laptop cannot reach `http://<host ip>:8091/`** — the default binding is
+  loopback; restart with `-BindAddress any` and confirm the banner lists the
+  host IP. If it does and the laptop still times out, it is the host firewall.
+- **Every buyer step returns 403 `participation revoked`** — the console
+  re-grants Maya's signup consents at load and reports it in the header; a
+  `bad` note there means the coordinator refused, so check `/api/topology` and
+  that `amisad-core` is up.
 - **s004 placement answers oddly** — a rebooted core lost the in-memory edge
   registry; the "Register both regions" step rebuilds it (that is why it is
   step 1 of the scene).

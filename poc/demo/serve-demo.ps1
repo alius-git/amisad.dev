@@ -23,14 +23,20 @@
 # operator clicks in the UI, and it requires no change to the deployed
 # topology left live by amisad.end-to-end.yml.
 #
-# Binds localhost ONLY: /api/personas returns vault passwords in the clear,
-# which is fine for the operator's own browser and nobody else.
+# Binds loopback by default. -BindAddress opens it to the network so the lab
+# host can serve a console driven from the presenter's laptop; the vault
+# passwords on /api/personas stay loopback-only regardless, until
+# -SharePersonaPasswords says otherwise (see Get-PersonaSecrets).
 param(
     [int]$Port = 8091,
     [string]$YurunaRoot,
     [string]$CoreIp = '',
     [string]$EdgeAIp = '',
-    [string]$EdgeBIp = ''
+    [string]$EdgeBIp = '',
+    # 'localhost' (default), 'any'/'*'/'+' for every interface, or one
+    # hostname/IP to bind a single NIC.
+    [string]$BindAddress = 'localhost',
+    [switch]$SharePersonaPasswords
 )
 $ErrorActionPreference = 'Stop'
 $demoRoot = $PSScriptRoot
@@ -106,6 +112,18 @@ function Get-PersonaSecrets {
     return $script:personaCache
 }
 
+# The vault passwords are the one thing here that must not travel further than
+# the operator intends, so they are gated per REQUEST, not per binding: opening
+# the console to the network still leaves the host's own browser fully
+# featured, and remote viewers see the cards without the secrets.
+function Test-LoopbackClient($Request) {
+    $addr = $Request.RemoteEndPoint.Address
+    # A dual-stack listener reports IPv4 peers as ::ffff:127.0.0.1, which
+    # IsLoopback does not recognize in its mapped form.
+    if ($addr.IsIPv4MappedToIPv6) { $addr = $addr.MapToIPv4() }
+    return [System.Net.IPAddress]::IsLoopback($addr)
+}
+
 $mime = @{
     '.html' = 'text/html; charset=utf-8'
     '.js'   = 'text/javascript; charset=utf-8'
@@ -171,9 +189,49 @@ function Send-StaticFile($Response, [string]$UrlPath) {
 }
 
 $listener = [System.Net.HttpListener]::new()
-$listener.Prefixes.Add("http://localhost:$Port/")
-$listener.Start()
+# 'localhost' as an HttpListener prefix binds the loopback interface alone -
+# not "every interface, addressed by name" - so a console reachable from the
+# presenter's laptop needs the wildcard or that NIC's own address.
+$wildcard = $BindAddress -in @('any', '*', '+', '0.0.0.0', '::')
+if ($wildcard) {
+    $listener.Prefixes.Add("http://+:$Port/")
+} else {
+    $listener.Prefixes.Add("http://${BindAddress}:$Port/")
+    # A single-NIC binding would otherwise lock the host's own browser out,
+    # and the loopback clients are the ones allowed to see vault passwords.
+    if ($BindAddress -ne 'localhost') { $listener.Prefixes.Add("http://localhost:$Port/") }
+}
+try {
+    $listener.Start()
+} catch [System.Net.HttpListenerException] {
+    # Windows reserves non-loopback prefixes in http.sys; Linux/macOS use the
+    # managed listener and need no reservation.
+    if ($_.Exception.ErrorCode -eq 5) {
+        throw ("Access denied binding $($listener.Prefixes -join ', '). On Windows a " +
+            "non-loopback prefix needs a reservation - run elevated, or once as admin: " +
+            "netsh http add urlacl url=http://+:$Port/ user=$env:USERDOMAIN\$env:USERNAME")
+    }
+    throw
+}
+
+# Print what a remote browser should actually type. Reaching it also needs the
+# host firewall to allow inbound $Port; nothing here changes firewall rules.
+$hostUrls = if ($wildcard) {
+    [System.Net.Dns]::GetHostAddresses([System.Net.Dns]::GetHostName()) |
+        Where-Object { $_.AddressFamily -eq 'InterNetwork' -and -not [System.Net.IPAddress]::IsLoopback($_) } |
+        ForEach-Object { "http://$($_):$Port/" }
+} else { @() }
 Write-Information "AmisAd demo console: http://localhost:$Port/   slides: http://localhost:$Port/slides.html" -InformationAction Continue
+if ($hostUrls) {
+    Write-Information "Reachable from other machines at: $($hostUrls -join '  ')  (open $Port on the host firewall)" -InformationAction Continue
+} elseif (-not $wildcard -and $BindAddress -ne 'localhost') {
+    Write-Information "Bound to ${BindAddress}: other machines use http://${BindAddress}:$Port/ (open $Port on the host firewall)" -InformationAction Continue
+} else {
+    Write-Information "Loopback only - pass -BindAddress any to present from another machine." -InformationAction Continue
+}
+if (($wildcard -or $BindAddress -ne 'localhost') -and $SharePersonaPasswords) {
+    Write-Warning "-SharePersonaPasswords: the vault passwords on /api/personas are served in the clear to ANY machine that can reach port $Port."
+}
 Write-Information "Topology: core=$(if ($CoreIp) { $CoreIp } else { '<unresolved>' })  edge-a=$(if ($EdgeAIp) { $EdgeAIp } else { '<unresolved>' })  edge-b=$(if ($EdgeBIp) { $EdgeBIp } else { '<unresolved>' })" -InformationAction Continue
 Write-Information "Framework: $(if ($YurunaRoot) { $YurunaRoot } else { '<not located>' })" -InformationAction Continue
 if (-not $CoreIp) {
@@ -187,7 +245,12 @@ try {
         try {
             $path = $req.Url.AbsolutePath
             if ($path -eq '/api/personas') {
-                Write-Json $res 200 (Get-PersonaSecrets)
+                if ($SharePersonaPasswords -or (Test-LoopbackClient $req)) {
+                    Write-Json $res 200 (Get-PersonaSecrets)
+                } else {
+                    Write-Json $res 200 @($personaUsers | ForEach-Object {
+                        [ordered]@{ username = $_; password = '<withheld: remote viewer>' } })
+                }
             } elseif ($path -eq '/api/topology') {
                 Write-Json $res 200 ([ordered]@{ core = $CoreIp; edgeA = $EdgeAIp; edgeB = $EdgeBIp })
             } elseif ($path -match '^/api/core/(\d+)(/.*)$') {

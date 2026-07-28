@@ -2,9 +2,11 @@
 <!-- LICENSEURI https://yuruna.link/license -->
 <!-- Copyright (c) 2026 by Alisson Sol et al. -->
 <!-- AmisAd 30-minute demo deck. Self-contained: serve via serve-demo.ps1
-     (/slides.html) or open from disk. Keys: arrows/space = navigate,
-     N = presenter notes (operator cues live there; slides stay
-     audience-facing and vendor-neutral). Brand tokens copied from
+     (/slides.html) or open from disk. Keys: N/P or arrows/space = navigate,
+     Home/End = first/last, S = presenter notes (operator cues live there;
+     slides stay audience-facing and vendor-neutral). The edge strips
+     navigate by click and the browser's Back button walks the deck
+     backwards. Brand tokens copied from
      ../components/art/palette.css (canonical - do not fork the values). -->
 <html lang="en">
 <head>
@@ -18,6 +20,9 @@
     --white: #ffffff;
     --paper: #f6f5f2;
     --ink: #22283a;
+    /* Width of the click-to-navigate edge strips. Slide padding, the HUD and
+       the footer all clear this, so nothing readable sits under a strip. */
+    --edge: clamp(30px, 4vw, 68px);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -33,7 +38,9 @@
     display: none;
     flex-direction: column;
     justify-content: center;
-    padding: 4vh 7vw;
+    /* max() keeps the roomy 7vw look on a projector but still clears the edge
+       strips on a narrow window, where 7vw is thinner than a strip. */
+    padding: 4vh max(7vw, calc(var(--edge) + 2vw));
     background: var(--paper);
   }
   .slide.current { display: flex; }
@@ -104,7 +111,7 @@
   .footer {
     position: absolute;
     bottom: 1.6vh;
-    right: 2.5vw;
+    right: calc(var(--edge) + 1.2vw);
     font-size: 1.6vh;
     color: #999;
   }
@@ -130,13 +137,16 @@
     font-size: 1.9vh;
     line-height: 1.4;
     border-top: 0.5vh solid var(--terracotta);
+    /* Above the edge strips: the cues must stay readable full-width, and the
+       strips keep working everywhere the panel does not reach. */
+    z-index: 11;
   }
   .notes b { color: #f0a795; }
   body.show-notes .current .notes { display: block; }
   #hud {
     position: fixed;
     bottom: 1.2vh;
-    left: 1.5vw;
+    left: calc(var(--edge) + 1.2vw);
     z-index: 10;
     color: rgba(255, 255, 255, 0.85);
     background: rgba(20, 24, 40, 0.65);
@@ -144,10 +154,55 @@
     padding: 0.4vh 1.4vh;
     font-size: 1.7vh;
   }
+  .edge {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: var(--edge);
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    font: inherit;
+    font-size: 4.5vh;
+    line-height: 1;
+    cursor: pointer;
+    color: rgba(43, 58, 103, 0.4);
+    background: rgba(43, 58, 103, 0.07);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .edge.prev { left: 0; border-right: 1px solid rgba(43, 58, 103, 0.14); }
+  .edge.next { right: 0; border-left: 1px solid rgba(43, 58, 103, 0.14); }
+  .edge:hover, .edge:focus-visible {
+    background: rgba(226, 114, 91, 0.2);
+    color: var(--terracotta);
+    outline: none;
+  }
+  .edge:disabled { cursor: default; background: transparent; color: rgba(43, 58, 103, 0.12); }
+  /* Divider slides are navy; the strips have to invert or they vanish. */
+  body.on-divider .edge {
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.07);
+  }
+  body.on-divider .edge.prev { border-right-color: rgba(255, 255, 255, 0.16); }
+  body.on-divider .edge.next { border-left-color: rgba(255, 255, 255, 0.16); }
+  body.on-divider .edge:hover, body.on-divider .edge:focus-visible {
+    background: rgba(226, 114, 91, 0.3);
+    color: var(--white);
+  }
+  body.on-divider .edge:disabled { background: transparent; color: rgba(255, 255, 255, 0.14); }
+  @media (prefers-reduced-motion: reduce) { .edge { transition: none; } }
 </style>
 </head>
 <body>
-<div id="hud">1 / 20 — N for notes</div>
+<div id="hud">1 / 20 — N next · P prev · S notes</div>
+<button class="edge prev" id="edge-prev" type="button" aria-label="Previous slide" title="Previous (P)">&lsaquo;</button>
+<button class="edge next" id="edge-next" type="button" aria-label="Next slide" title="Next (N)">&rsaquo;</button>
 
 <!-- 1 -->
 <section class="slide divider current">
@@ -438,25 +493,63 @@
   "use strict";
   const slides = [...document.querySelectorAll(".slide")];
   const hud = document.getElementById("hud");
-  let at = Math.min(Math.max(parseInt(location.hash.slice(1) || "1", 10) - 1 || 0, 0), slides.length - 1);
-  function show(i) {
-    at = Math.min(Math.max(i, 0), slides.length - 1);
+  const edgePrev = document.getElementById("edge-prev");
+  const edgeNext = document.getElementById("edge-next");
+  const clamp = (i) => Math.min(Math.max(i, 0), slides.length - 1);
+  const fromHash = () => {
+    const n = parseInt(location.hash.slice(1), 10);
+    return Number.isFinite(n) ? clamp(n - 1) : 0;
+  };
+  let at = fromHash();
+
+  function render() {
     slides.forEach((s, j) => s.classList.toggle("current", j === at));
-    hud.textContent = (at + 1) + " / " + slides.length + " — N for notes";
-    location.hash = String(at + 1);
+    document.body.classList.toggle("on-divider", slides[at].classList.contains("divider"));
+    edgePrev.disabled = at === 0;
+    edgeNext.disabled = at === slides.length - 1;
+    hud.textContent = (at + 1) + " / " + slides.length + " — N next · P prev · S notes";
   }
+  // One history entry per slide, so the browser's Back button walks the deck
+  // backwards. pushState (not `location.hash = ...`) keeps the initial render
+  // from adding a spurious entry ahead of whatever page linked here.
+  function show(i, replace) {
+    at = clamp(i);
+    render();
+    const target = "#" + (at + 1);
+    if (location.hash !== target) {
+      if (replace) { history.replaceState(null, "", target); }
+      else { history.pushState(null, "", target); }
+    }
+  }
+  // Back/Forward (popstate) and a hand-edited #n (hashchange) both land here.
+  // Re-rendering without pushing is what makes them non-destructive.
+  function syncFromHash() {
+    const i = fromHash();
+    if (i !== at) { at = i; render(); }
+  }
+  addEventListener("popstate", syncFromHash);
+  addEventListener("hashchange", syncFromHash);
+
   addEventListener("keydown", (e) => {
-    if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(at + 1); }
-    else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(at - 1); }
-    else if (e.key === "Home") show(0);
-    else if (e.key === "End") show(slides.length - 1);
-    else if (e.key.toLowerCase() === "n") document.body.classList.toggle("show-notes");
+    // Never shadow a browser/OS chord (Ctrl+N, Alt+Left = Back, ...).
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+    const k = e.key.toLowerCase();
+    if (["ArrowRight", "PageDown", " "].includes(e.key) || k === "n") { e.preventDefault(); show(at + 1); }
+    else if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key) || k === "p") { e.preventDefault(); show(at - 1); }
+    else if (e.key === "Home") { e.preventDefault(); show(0); }
+    else if (e.key === "End") { e.preventDefault(); show(slides.length - 1); }
+    else if (k === "s") { e.preventDefault(); document.body.classList.toggle("show-notes"); }
   });
+
+  edgePrev.addEventListener("click", () => show(at - 1));
+  edgeNext.addEventListener("click", () => show(at + 1));
   addEventListener("click", (e) => {
-    if (e.target.closest(".notes") || e.target.closest("a")) return;
+    // The edge strips carry their own handlers; the notes panel and links are
+    // read/clicked, not navigated through.
+    if (e.target.closest(".edge") || e.target.closest(".notes") || e.target.closest("a")) return;
     show(at + 1);
   });
-  show(at);
+  show(at, true);
 </script>
 </body>
 </html>
