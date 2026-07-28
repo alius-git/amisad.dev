@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 2026.07.27
+.VERSION 2026.07.28
 .GUID 42b8c9d4-7e2f-4a61-9c05-3f8e1a6b2d47
 .AUTHOR Alisson Sol et al.
 .Copyright (c) 2026 by Alisson Sol et al.
@@ -27,29 +27,54 @@
 # which is fine for the operator's own browser and nobody else.
 param(
     [int]$Port = 8091,
-    [string]$YurunaRoot = 'c:\git\yuruna',
+    [string]$YurunaRoot,
     [string]$CoreIp = '',
     [string]$EdgeAIp = '',
     [string]$EdgeBIp = ''
 )
 $ErrorActionPreference = 'Stop'
 $demoRoot = $PSScriptRoot
-$artRoot = [IO.Path]::GetFullPath((Join-Path $demoRoot '..\components\art'))
+# Forward slashes in every framework-relative path: a literal '..\components\art'
+# is one filename containing backslashes on Linux/macOS, and a 'c:\...' root is
+# read as a PSDrive name there ("Cannot find drive").
+$artRoot = [IO.Path]::GetFullPath((Join-Path $demoRoot '../components/art'))
 
-# VM IP resolution: explicit param -> Hyper-V guest report -> the status
-# server's handoff file (the edges' boot-time IP reporter posts
+# Resolve-YurunaRoot discovers the framework checkout (explicit param ->
+# YURUNA_ROOT -> YURUNA_CONFIG_PATH -> the clone layout -> a per-platform
+# conventional path); Initialize-AmisAdHost imports the host driver so the
+# unqualified Get-VMIp below reaches whichever hypervisor is running.
+. ([IO.Path]::GetFullPath((Join-Path $demoRoot '../../test/AmisAd.HostCommon.ps1')))
+try {
+    $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
+} catch {
+    # Not fatal: the UI, the deck and the proxy all work without the framework.
+    # Only the vault passwords and the handoff-file IP fallback need it.
+    Write-Warning "$($_.Exception.Message) Persona passwords will show as unavailable."
+    $YurunaRoot = ''
+}
+if ($YurunaRoot) {
+    try { $null = Initialize-AmisAdHost -YurunaRoot $YurunaRoot }
+    catch { Write-Warning "Host driver unavailable ($($_.Exception.Message)); VM IPs fall back to the handoff files." }
+}
+
+# VM IP resolution: explicit param -> the host driver's guest report -> the
+# status server's handoff file (the edges' boot-time IP reporter posts
 # <hostname>.ip.txt there; see poc/usernames.md "Core->edge access").
 function Resolve-VmIp([string]$Name) {
-    try {
-        $vm = Hyper-V\Get-VM -Name $Name -ErrorAction Stop
-        $ip = @($vm.NetworkAdapters.IPAddresses) |
-            Where-Object { $_ -match '^\d+\.' -and $_ -notlike '169.254.*' } |
-            Select-Object -First 1
-        if ($ip) { return [string]$ip }
-    } catch {}
-    $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test\status\log' }
-    $ipFile = Join-Path $logRoot "handoff\$Name.ip.txt"
-    if (Test-Path $ipFile) { return (Get-Content -LiteralPath $ipFile -Raw).Trim() }
+    if (Get-Command -Name 'Get-VMIp' -ErrorAction SilentlyContinue) {
+        try {
+            $ip = Get-VMIp -VMName $Name
+            if ($ip) { return [string]$ip }
+        } catch {
+            Write-Verbose "Get-VMIp '$Name' failed: $($_.Exception.Message); trying the handoff file."
+        }
+    }
+    $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR }
+               elseif ($YurunaRoot)     { Join-Path $YurunaRoot 'test/status/log' }
+               else                     { '' }
+    if (-not $logRoot) { return '' }
+    $ipFile = Join-Path $logRoot "handoff/$Name.ip.txt"
+    if (Test-Path -LiteralPath $ipFile) { return (Get-Content -LiteralPath $ipFile -Raw).Trim() }
     return ''
 }
 if (-not $CoreIp) { $CoreIp = Resolve-VmIp 'amisad-core' }
@@ -64,10 +89,17 @@ $personaUsers = 'maya', 'elena', 'tom', 'marcel', 'kai', 'priya', 'ingrid', 'dan
 $script:personaCache = $null
 function Get-PersonaSecrets {
     if ($null -ne $script:personaCache) { return $script:personaCache }
-    Import-Module (Join-Path $YurunaRoot 'test\extension\authentication\default.psm1') -Force
+    $vaultError = ''
+    if (-not $YurunaRoot) {
+        $vaultError = 'framework checkout not located; pass -YurunaRoot or set YURUNA_ROOT'
+    } else {
+        try { Import-Module (Join-Path $YurunaRoot 'test/extension/authentication/default.psm1') -Force }
+        catch { $vaultError = $_.Exception.Message }
+    }
     $list = foreach ($u in $personaUsers) {
         $pw = ''
-        try { $pw = Get-Password -Username $u } catch { $pw = "<vault error: $($_.Exception.Message)>" }
+        if ($vaultError) { $pw = "<vault error: $vaultError>" }
+        else { try { $pw = Get-Password -Username $u } catch { $pw = "<vault error: $($_.Exception.Message)>" } }
         [ordered]@{ username = $u; password = $pw }
     }
     $script:personaCache = @($list)
@@ -143,8 +175,9 @@ $listener.Prefixes.Add("http://localhost:$Port/")
 $listener.Start()
 Write-Information "AmisAd demo console: http://localhost:$Port/   slides: http://localhost:$Port/slides.html" -InformationAction Continue
 Write-Information "Topology: core=$(if ($CoreIp) { $CoreIp } else { '<unresolved>' })  edge-a=$(if ($EdgeAIp) { $EdgeAIp } else { '<unresolved>' })  edge-b=$(if ($EdgeBIp) { $EdgeBIp } else { '<unresolved>' })" -InformationAction Continue
+Write-Information "Framework: $(if ($YurunaRoot) { $YurunaRoot } else { '<not located>' })" -InformationAction Continue
 if (-not $CoreIp) {
-    Write-Warning 'amisad-core IP not resolved (Hyper-V + handoff both empty) - pass -CoreIp; API calls will fail until then.'
+    Write-Warning 'amisad-core IP not resolved (host driver + handoff both empty) - pass -CoreIp; API calls will fail until then.'
 }
 try {
     while ($listener.IsListening) {

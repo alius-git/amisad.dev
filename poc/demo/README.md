@@ -13,14 +13,16 @@ UI drives the same NodePort APIs the sequences exercise
   `amisad-core` (services on NodePorts 30080–30089) and both edges running
   `slice-runtime`. If a VM rebooted since, re-arm per
   [demo.md](../demo.md#driving-the-demo) first.
-- Yuruna at `c:\git\yuruna` (or pass `-YurunaRoot`) — the persona passwords
-  are read from its authentication vault, and VM IPs fall back to its status
-  handoff files when Hyper-V queries fail.
+- A Yuruna checkout — the persona passwords are read from its authentication
+  vault, and VM IPs fall back to its status handoff files when the host driver
+  reports none. It is discovered automatically (`-YurunaRoot` → `YURUNA_ROOT` →
+  `YURUNA_CONFIG_PATH` → the `<root>/project` clone layout → `c:\git\yuruna` on
+  Windows, `~/git/yuruna` elsewhere); pass `-YurunaRoot` for anything else.
 
 ## Start
 
 ```powershell
-pwsh poc\demo\serve-demo.ps1            # add -CoreIp/-EdgeAIp/-EdgeBIp if auto-detect fails
+pwsh poc/demo/serve-demo.ps1            # add -CoreIp/-EdgeAIp/-EdgeBIp if auto-detect fails
 ```
 
 Then open, on the host:
@@ -36,7 +38,9 @@ vault passwords in the clear for the persona identity cards.
 ## How it works
 
 - `serve-demo.ps1` serves the static UI and deck, answers `/api/personas`
-  (vault via the Yuruna authentication module) and `/api/topology` (VM IPs),
+  (vault via the Yuruna authentication module) and `/api/topology` (VM IPs
+  from the framework's per-hypervisor host driver, so Hyper-V, KVM and UTM
+  hosts all resolve),
   and proxies `/api/core/<nodeport>/…` and `/api/edge-a|b/…` to the lab —
   the POC services send no CORS headers, so the browser goes same-origin
   through the proxy.
@@ -75,8 +79,10 @@ narrative holds without them.
   `-CoreIp <ip>` (find it on the VM with `hostname -I`).
 - **503/502 from a step** — the proxy could not reach that VM; check it is
   running and the IP is right (`/api/topology`).
-- **Persona card shows `<unavailable>`** — vault module import failed; check
-  `-YurunaRoot`. The API steps still work; only the password display is lost.
+- **Persona card shows `<unavailable>` or a `<vault error: …>`** — the
+  framework checkout was not located, or the vault module import failed; pass
+  `-YurunaRoot`. The startup banner prints the resolved path. The API steps
+  still work; only the password display is lost.
 - **s004 placement answers oddly** — a rebooted core lost the in-memory edge
   registry; the "Register both regions" step rebuilds it (that is why it is
   step 1 of the scene).
