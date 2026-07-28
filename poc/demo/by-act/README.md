@@ -1,4 +1,4 @@
-# AmisAd POC — the 30-minute guided demo
+# AmisAd POC — the 30-minute guided demo (by act)
 
 A persona-switching **mock UI** plus a **slide deck** that walk all ten
 scenarios in half an hour, on the topology a green
@@ -22,15 +22,16 @@ UI drives the same NodePort APIs the sequences exercise
 ## Start
 
 ```powershell
-pwsh poc/demo/serve-demo.ps1            # add -CoreIp/-EdgeAIp/-EdgeBIp if auto-detect fails
+pwsh poc/demo/by-act/serve-by-act.ps1            # add -CoreIp/-EdgeAIp/-EdgeBIp if auto-detect fails
 ```
 
-Then open, on the host:
+The banner prints the exact URLs, led by this host's own address so they can
+be typed on another machine:
 
 | URL | What |
 |-----|------|
-| `http://localhost:8091/` | The demo console (persona dropdown → scenario step buttons) |
-| `http://localhost:8091/slides.html` | The deck. **N**/**P** (or arrows, space, the left/right edge strips) navigate, **Home**/**End** jump to first/last, **S** toggles presenter notes (the operator cues live there). Each slide is a history entry, so the browser's Back button steps back through the deck |
+| `http://<host-ip>:8091/` | The demo console (persona dropdown → scenario step buttons) |
+| `http://<host-ip>:8091/slides.html` | The deck. **N**/**P** (or arrows, space, the left/right edge strips) navigate, **Home**/**End** jump to first/last, **S** toggles presenter notes (the operator cues live there). Each slide is a history entry, so the browser's Back button steps back through the deck |
 
 By default the server binds **loopback only**, so those URLs work on the host
 and nowhere else.
@@ -41,8 +42,9 @@ To let the lab host do the work while you drive from a laptop, bind the console
 to the network:
 
 ```powershell
-pwsh poc/demo/serve-demo.ps1 -BindAddress any     # every interface
-pwsh poc/demo/serve-demo.ps1 -BindAddress 10.0.0.5  # one NIC (localhost stays bound too)
+pwsh poc/demo/by-act/serve-by-act.ps1                     # every interface (default)
+pwsh poc/demo/by-act/serve-by-act.ps1 -BindAddress 10.0.0.5  # one NIC (localhost stays bound too)
+pwsh poc/demo/by-act/serve-by-act.ps1 -BindAddress localhost  # this machine only
 ```
 
 The banner prints the exact `http://<host ip>:8091/` URLs to type on the
@@ -69,7 +71,7 @@ captured ids — driving one demo from two browsers splits the state.
 
 ## How it works
 
-- `serve-demo.ps1` serves the static UI and deck, answers `/api/personas`
+- `serve-by-act.ps1` serves the static UI and deck, answers `/api/personas`
   (vault via the Yuruna authentication module) and `/api/topology` (VM IPs
   from the framework's per-hypervisor host driver, so Hyper-V, KVM and UTM
   hosts all resolve),

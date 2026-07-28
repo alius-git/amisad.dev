@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- LICENSEURI https://yuruna.link/license -->
 <!-- Copyright (c) 2026 by Alisson Sol et al. -->
-<!-- AmisAd 30-minute demo deck. Self-contained: serve via serve-demo.ps1
+<!-- AmisAd 30-minute demo deck. Self-contained: serve via serve-by-act.ps1
      (/slides.html) or open from disk. Keys: N/P or arrows/space = navigate,
      Home/End = first/last, S = presenter notes (operator cues live there;
      slides stay audience-facing and vendor-neutral). The edge strips
@@ -210,7 +210,7 @@
   <h1>AmisAd</h1>
   <p class="lead">Matching what a buyer needs with sellers who have it — in complete privacy.</p>
   <p class="quote">Buyer served, seller found, network rewarded, platform credited — and not one secret spent.</p>
-  <div class="notes"><b>Setup before the audience arrives:</b> serve-demo.ps1 running; demo console open in a second window (localhost:8091), persona = overview; topology chip green in the console header. Click "Reset demo state" for a fresh notebook. Everything you will click is a real API call against the live system — say that early and often.</div>
+  <div class="notes"><b>Setup before the audience arrives:</b> serve-by-act.ps1 running; demo console open in a second window (the host-ip URL the script prints), persona = overview; topology chip green in the console header. Click "Reset demo state" for a fresh notebook. Everything you will click is a real API call against the live system — say that early and often.</div>
   <div class="footer">AmisAd demo</div>
 </section>
 
@@ -481,7 +481,7 @@
   <h1>Backup: running this demo</h1>
   <ul>
     <li><b>Prereq:</b> a green <code>amisad.end-to-end.yml</code> run; all VMs left live. No snapshot restore needed mid-demo — every id this deck touches is demo-prefixed and category-isolated.</li>
-    <li><b>Start:</b> <code>pwsh poc\demo\serve-demo.ps1</code> → console at <code>localhost:8091</code>, this deck at <code>/slides.html</code>.</li>
+    <li><b>Start:</b> <code>pwsh poc/demo/by-act/serve-by-act.ps1</code> → console at <code>&lt;host-ip&gt;:8091</code>, this deck at <code>/slides.html</code>.</li>
     <li><b>Budget:</b> intro 3 · Act I 9 · Act II 8 · Act III 8 · close 2 = 30 min. Optional steps are the buffer.</li>
     <li><b>Recovery:</b> any step can be re-run; "Reset demo state" only clears the browser notebook, never the lab.</li>
   </ul>

@@ -4,7 +4,7 @@
 // panel lists its steps in demo order with the acting persona on each row —
 // only the selected persona's buttons are live, which is what walks the
 // operator through the switches. Every button is a real API call against the
-// deployed topology, sent through serve-demo.ps1's same-origin proxy
+// deployed topology, sent through serve-by-act.ps1's same-origin proxy
 // (/api/core/<nodeport>/..., /api/edge-a/...). Request bodies mirror
 // poc/demo.md and buyer-client, with demo- prefixed ids and demo-only
 // categories so the walkthrough is deterministic on top of whatever durable
@@ -827,7 +827,7 @@ async function boot() {
     if (t.core) {
       el.textContent = "core " + t.core + " · edge-a " + (t.edgeA || "?") + " · edge-b " + (t.edgeB || "?");
     } else {
-      el.textContent = "amisad-core unresolved — restart serve-demo.ps1 with -CoreIp";
+      el.textContent = "amisad-core unresolved — restart serve-by-act.ps1 with -CoreIp";
       el.classList.add("bad");
     }
   } catch {

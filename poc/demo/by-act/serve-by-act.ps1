@@ -14,8 +14,8 @@
 .PRIVATEDATA
 #>
 
-# AmisAd demo console server (host-side). Serves the poc/demo mock UI and
-# slide deck, exposes the demo persona passwords from the Yuruna
+# AmisAd by-act demo console server (host-side). Serves the scenario-at-a-time
+# mock UI and slide deck, exposes the demo persona passwords from the Yuruna
 # authentication vault, and proxies browser API calls to the amisad-core
 # NodePorts and the edge slice-runtimes (the POC services send no CORS
 # headers, so the browser cannot call them cross-origin; same-origin via this
@@ -23,33 +23,36 @@
 # operator clicks in the UI, and it requires no change to the deployed
 # topology left live by amisad.end-to-end.yml.
 #
-# Binds loopback by default. -BindAddress opens it to the network so the lab
-# host can serve a console driven from the presenter's laptop; the vault
-# passwords on /api/personas stay loopback-only regardless, until
-# -SharePersonaPasswords says otherwise (see Get-PersonaSecrets).
+# Serves the network by default so the console can be driven from a laptop or
+# tablet; the vault passwords on /api/personas stay loopback-only regardless,
+# until -SharePersonaPasswords says otherwise (see Get-PersonaSecrets).
 param(
     [int]$Port = 8091,
     [string]$YurunaRoot,
     [string]$CoreIp = '',
     [string]$EdgeAIp = '',
     [string]$EdgeBIp = '',
-    # 'localhost' (default), 'any'/'*'/'+' for every interface, or one
-    # hostname/IP to bind a single NIC.
-    [string]$BindAddress = 'localhost',
-    [switch]$SharePersonaPasswords
+    # 'any' (default) for every interface, 'localhost' for this machine only,
+    # or one hostname/IP to bind a single NIC.
+    [string]$BindAddress = 'any',
+    [switch]$SharePersonaPasswords,
+    # Skip the inbound-port firewall rule (and, on Windows, the http.sys
+    # reservation) when the port is already open or policy forbids it.
+    [switch]$SkipFirewall
 )
 $ErrorActionPreference = 'Stop'
 $demoRoot = $PSScriptRoot
 # Forward slashes in every framework-relative path: a literal '..\components\art'
 # is one filename containing backslashes on Linux/macOS, and a 'c:\...' root is
 # read as a PSDrive name there ("Cannot find drive").
-$artRoot = [IO.Path]::GetFullPath((Join-Path $demoRoot '../components/art'))
+$artRoot = [IO.Path]::GetFullPath((Join-Path $demoRoot '../../components/art'))
+Import-Module ([IO.Path]::GetFullPath((Join-Path $demoRoot '../AmisAd.DemoHost.psm1'))) -Force
 
 # Resolve-YurunaRoot discovers the framework checkout (explicit param ->
 # YURUNA_ROOT -> YURUNA_CONFIG_PATH -> the clone layout -> a per-platform
 # conventional path); Initialize-AmisAdHost imports the host driver so the
 # unqualified Get-VMIp below reaches whichever hypervisor is running.
-. ([IO.Path]::GetFullPath((Join-Path $demoRoot '../../test/AmisAd.HostCommon.ps1')))
+. ([IO.Path]::GetFullPath((Join-Path $demoRoot '../../../test/AmisAd.HostCommon.ps1')))
 try {
     $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 } catch {
@@ -188,48 +191,29 @@ function Send-StaticFile($Response, [string]$UrlPath) {
     Write-Body $Response 200 ([IO.File]::ReadAllBytes($full)) $type
 }
 
-$listener = [System.Net.HttpListener]::new()
-# 'localhost' as an HttpListener prefix binds the loopback interface alone -
-# not "every interface, addressed by name" - so a console reachable from the
-# presenter's laptop needs the wildcard or that NIC's own address.
-$wildcard = $BindAddress -in @('any', '*', '+', '0.0.0.0', '::')
-if ($wildcard) {
-    $listener.Prefixes.Add("http://+:$Port/")
-} else {
-    $listener.Prefixes.Add("http://${BindAddress}:$Port/")
-    # A single-NIC binding would otherwise lock the host's own browser out,
-    # and the loopback clients are the ones allowed to see vault passwords.
-    if ($BindAddress -ne 'localhost') { $listener.Prefixes.Add("http://localhost:$Port/") }
+$servesNetwork = $BindAddress -ne 'localhost'
+if ($servesNetwork -and -not $SkipFirewall) {
+    $null = Add-DemoFirewallRule -Port $Port -RuleName "AmisAd demo console ($Port)"
 }
-try {
-    $listener.Start()
-} catch [System.Net.HttpListenerException] {
-    # Windows reserves non-loopback prefixes in http.sys; Linux/macOS use the
-    # managed listener and need no reservation.
-    if ($_.Exception.ErrorCode -eq 5) {
-        throw ("Access denied binding $($listener.Prefixes -join ', '). On Windows a " +
-            "non-loopback prefix needs a reservation - run elevated, or once as admin: " +
-            "netsh http add urlacl url=http://+:$Port/ user=$env:USERDOMAIN\$env:USERNAME")
-    }
-    throw
-}
+$listener = New-DemoListener -Port $Port -BindAddress $BindAddress
 
-# Print what a remote browser should actually type. Reaching it also needs the
-# host firewall to allow inbound $Port; nothing here changes firewall rules.
-$hostUrls = if ($wildcard) {
-    [System.Net.Dns]::GetHostAddresses([System.Net.Dns]::GetHostName()) |
-        Where-Object { $_.AddressFamily -eq 'InterNetwork' -and -not [System.Net.IPAddress]::IsLoopback($_) } |
-        ForEach-Object { "http://$($_):$Port/" }
-} else { @() }
-Write-Information "AmisAd demo console: http://localhost:$Port/   slides: http://localhost:$Port/slides.html" -InformationAction Continue
-if ($hostUrls) {
-    Write-Information "Reachable from other machines at: $($hostUrls -join '  ')  (open $Port on the host firewall)" -InformationAction Continue
-} elseif (-not $wildcard -and $BindAddress -ne 'localhost') {
-    Write-Information "Bound to ${BindAddress}: other machines use http://${BindAddress}:$Port/ (open $Port on the host firewall)" -InformationAction Continue
+# Lead with the address someone can actually type on another machine: a
+# localhost URL is unusable on a projector or read out to a person holding a
+# tablet.
+$hostIp = if ($servesNetwork) { Get-DemoHostIp } else { 'localhost' }
+$base = "http://${hostIp}:$Port"
+Write-Information "AmisAd demo console (by act)" -InformationAction Continue
+Write-Information "  console: $base/     slides: $base/slides.html" -InformationAction Continue
+if ($servesNetwork) {
+    $others = @(Get-DemoHostIpList | Where-Object { $_ -ne $hostIp })
+    if ($others) {
+        Write-Information "  also on: $(($others | ForEach-Object { "http://${_}:$Port/" }) -join '  ')" -InformationAction Continue
+    }
+    Write-Information "  on this machine: http://localhost:$Port/" -InformationAction Continue
 } else {
-    Write-Information "Loopback only - pass -BindAddress any to present from another machine." -InformationAction Continue
+    Write-Information '  loopback only - drop -BindAddress localhost to serve the network.' -InformationAction Continue
 }
-if (($wildcard -or $BindAddress -ne 'localhost') -and $SharePersonaPasswords) {
+if ($servesNetwork -and $SharePersonaPasswords) {
     Write-Warning "-SharePersonaPasswords: the vault passwords on /api/personas are served in the clear to ANY machine that can reach port $Port."
 }
 Write-Information "Topology: core=$(if ($CoreIp) { $CoreIp } else { '<unresolved>' })  edge-a=$(if ($EdgeAIp) { $EdgeAIp } else { '<unresolved>' })  edge-b=$(if ($EdgeBIp) { $EdgeBIp } else { '<unresolved>' })" -InformationAction Continue
@@ -237,9 +221,27 @@ Write-Information "Framework: $(if ($YurunaRoot) { $YurunaRoot } else { '<not lo
 if (-not $CoreIp) {
     Write-Warning 'amisad-core IP not resolved (host driver + handoff both empty) - pass -CoreIp; API calls will fail until then.'
 }
+$keyStop = Enable-DemoStopKey
+Write-Information $(if ($keyStop) { 'Press Ctrl+C, End or Q to stop.' } else { 'Press Ctrl+C to stop.' }) -InformationAction Continue
 try {
+    # GetContextAsync rather than GetContext: a thread parked in the blocking
+    # call cannot be interrupted, which is what makes a naive listener
+    # stoppable only by killing the terminal. Polling the task leaves room to
+    # notice a stop key - and lets PowerShell act on a real Ctrl+C - between
+    # requests.
+    $pending = $listener.GetContextAsync()
     while ($listener.IsListening) {
-        $ctx = $listener.GetContext()
+        if ($keyStop -and (Test-DemoStopKey)) {
+            Write-Information 'Stopping.' -InformationAction Continue
+            break
+        }
+        try {
+            if (-not $pending.Wait(250)) { continue }
+        } catch {
+            break   # the listener was stopped underneath us
+        }
+        $ctx = $pending.Result
+        $pending = $listener.GetContextAsync()
         $req = $ctx.Request
         $res = $ctx.Response
         try {
@@ -270,7 +272,9 @@ try {
         }
     }
 } finally {
+    Disable-DemoStopKey
     $listener.Stop()
     $listener.Close()
     $http.Dispose()
+    Write-Information 'AmisAd demo console stopped.' -InformationAction Continue
 }
