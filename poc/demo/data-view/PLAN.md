@@ -1,4 +1,4 @@
-# poc/demo-data-view — implementation prompt
+# poc/demo/data-view — implementation prompt
 
 <!-- LICENSEURI https://yuruna.link/license -->
 <!-- Copyright (c) 2026 by Alisson Sol et al. -->
@@ -13,8 +13,8 @@
 
 ## 1. Mission
 
-Build a second, data-forward AmisAd demo under `poc/demo-data-view/`. The
-existing `poc/demo` walks the ten scenarios through persona buttons, but the
+Build a second, data-forward AmisAd demo under `poc/demo/data-view/`. The
+existing `poc/demo/by-act` walks the ten scenarios through persona buttons, but the
 backend stays invisible — the audience never sees what the machine knows,
 which is precisely the product's claim. This demo makes the claim visible by
 serving **two synchronized browser windows plus a minimal slide deck** from
@@ -44,7 +44,7 @@ questions.
 
 ## 2. Hard constraints
 
-- **Create files only under `poc/demo-data-view/`.** Do not modify anything
+- **Create files only under `poc/demo/data-view/`.** Do not modify anything
   in `poc/demo/`, `poc/components/`, `poc/test/`, or any deployed service.
   The lab topology left by a green `test/amisad.end-to-end.yml` run is used
   as-is.
@@ -59,17 +59,17 @@ questions.
   log, tokens accumulate in identity-mock), and a dashboard must not mutate
   what it observes. Everything it shows comes from the GET endpoints in §7
   plus the server's own `/api/*` endpoints.
-- **Do not inherit `poc/demo`'s consent-preflight side effect into the data
+- **Do not inherit `poc/demo/by-act`'s consent-preflight side effect into the data
   window.** The actions window keeps the boot-time re-grant of Maya's
   revoked consents (it is an action surface); the data window must load with
   zero writes.
 - **Different port, different storage keys.** Default port **8092** (8091
-  belongs to `poc/demo`, and HttpListener prefixes are exclusive per port).
+  belongs to `poc/demo/by-act`, and HttpListener prefixes are exclusive per port).
   localStorage keys `amisad-dv-state` / `amisad-dv-done` (the old demo owns
   `amisad-demo-state` / `amisad-demo-done`; a different port is a different
   origin, but keep the names distinct anyway so the two consoles are never
   confused in devtools).
-- **Same lab ids as `poc/demo`.** Step bodies are copied verbatim (`demo-`
+- **Same lab ids as `poc/demo/by-act`.** Step bodies are copied verbatim (`demo-`
   prefixed offer ids, demo-only categories), so either console can re-run on
   the same durable lab state deterministically. Offers are upserts; repeats
   are safe.
@@ -78,7 +78,7 @@ questions.
   artifact (workspace rule in `CLAUDE.md`). This applies to HTML comments
   and PowerShell help text too.
 - **PowerShell Script Analyzer** must report no new findings relative to
-  `poc/demo/serve-demo.ps1`'s existing baseline (currently:
+  `poc/demo/by-act/serve-by-act.ps1`'s existing baseline (currently:
   PSAvoidUsingEmptyCatchBlock ×1, PSUseSingularNouns ×1, positional-param
   informationals). Match the existing style: `Write-Information
   -InformationAction Continue`, `Write-Warning` for degradation,
@@ -86,17 +86,17 @@ questions.
 - **JavaScript:** plain ES2020, no build step, no external requests (all
   same-origin). `node --check` must pass on every `.js` file.
 - **Brand:** re-mount `/art/` from `poc/components/art` exactly as
-  `serve-demo.ps1` does (path `../components/art` relative to the script —
-  the same relative depth holds from `poc/demo-data-view/`). Use palette
+  `serve-by-act.ps1` does (path `../components/art` relative to the script —
+  the same relative depth holds from `poc/demo/data-view/`). Use palette
   tokens (`--amisad-navy #2B3A67`, `--amisad-terracotta #E2725B`); do not
   fork values.
 
 ## 3. Deliverables — file layout
 
 ```
-poc/demo-data-view/
+poc/demo/data-view/
   PLAN.md                (this file; leave untouched)
-  serve-data-demo.ps1    server: static + proxy + journal + vms + subjects
+  serve-data-view.ps1    server: static + proxy + journal + vms + subjects
   README.md              operator doc (§12)
   slides.html            the minimal deck (§11)
   ui/
@@ -111,9 +111,9 @@ poc/demo-data-view/
 No other files. `slides.html` is self-contained (inline CSS/JS) like the
 existing deck.
 
-## 4. Server — `serve-data-demo.ps1`
+## 4. Server — `serve-data-view.ps1`
 
-Copy-adapt from `poc/demo/serve-demo.ps1` (do not dot-source it). Carry over
+Copy-adapt from `poc/demo/by-act/serve-by-act.ps1` (do not dot-source it). Carry over
 verbatim-in-behavior:
 
 - `param` block: `-Port` (default **8092**), `-YurunaRoot`, `-CoreIp`,
@@ -183,7 +183,7 @@ Changes and additions:
 7. Banner additions: print both window URLs and the deck URL, e.g.
    `actions: http://localhost:8092/   data: http://localhost:8092/data
    slides: http://localhost:8092/slides.html`, plus the same remote-URL
-   enumeration and firewall reminder as `serve-demo.ps1`.
+   enumeration and firewall reminder as `serve-by-act.ps1`.
 
 ## 5. Journal event contract
 
@@ -237,7 +237,7 @@ Consumer rules (both windows):
 
 ### 6.1 The step script
 
-Port the `SCENARIOS` and `STEPS` arrays from `poc/demo/ui/app.js` **verbatim
+Port the `SCENARIOS` and `STEPS` arrays from `poc/demo/by-act/ui/app.js` **verbatim
 in content** (same order, same personas, same labels, same explain texts,
 same request bodies, same `capture`/`check`/`refusal`/`optional`/`needs`
 semantics), with two mechanical changes:
@@ -575,9 +575,9 @@ table is authoritative — do not add speculative touches.
   With two displays, project `/data` and `/` side by side and the
   mini-timeline becomes redundant headroom.
 
-## 10. What changes vs. `poc/demo` (for the README's "which demo when")
+## 10. What changes vs. `poc/demo/by-act` (for the README's "which demo when")
 
-`poc/demo` remains the button-per-scenario console; this demo adds the
+`poc/demo/by-act` remains the button-per-scenario console; this demo adds the
 machine's own view and the parallel-persona picture. Neither replaces the
 other; they must not run on the same port and must not be open against the
 same lab *simultaneously during a presentation* (double consent-preflights
@@ -585,7 +585,7 @@ and duplicate `demo-` upserts are harmless but muddy the timeline).
 
 ## 11. The deck — `slides.html`
 
-Self-contained single file. Carry over from `poc/demo/slides.html`: the vh
+Self-contained single file. Carry over from `poc/demo/by-act/slides.html`: the vh
 typography scale, navy/terracotta/paper tokens, divider styling (+
 `body.on-divider` edge-strip inversion), edge strips, keys
 (N/→/PageDown/Space next; P/←/PageUp/Backspace prev; Home/End; S notes;
@@ -627,7 +627,7 @@ the s008 countdown talk-over).
 
 Sections: what this demo is (two windows + deck, one server); prerequisites
 (green end-to-end run, VMs still up, Yuruna checkout for vault passwords —
-same as `poc/demo`); start (`pwsh poc/demo-data-view/serve-data-demo.ps1`,
+same as `poc/demo/by-act`); start (`pwsh poc/demo/data-view/serve-data-view.ps1`,
 `-BindAddress any` for presenting from another machine, firewall + Windows
 urlacl notes); the three URLs; stage setup (§9); the 30-minute budget table
 below; "what the boxes can and cannot show" (the hidden-state list from
@@ -653,8 +653,8 @@ Optional steps remain the schedule buffer.
 
 ## 13. Verification (run all; report results honestly)
 
-1. `Invoke-ScriptAnalyzer poc/demo-data-view/serve-data-demo.ps1` — no new
-   rule/severity classes beyond the `serve-demo.ps1` baseline.
+1. `Invoke-ScriptAnalyzer poc/demo/data-view/serve-data-view.ps1` — no new
+   rule/severity classes beyond the `serve-by-act.ps1` baseline.
 2. `node --check` on `ui/actions.js`, `ui/data.js`, `ui/shared.js`; open
    `slides.html`'s inline script through `node --check` on an extracted
    copy in the scratchpad.
@@ -682,7 +682,7 @@ Optional steps remain the schedule buffer.
    windows load, `/api/personas` returns withheld passwords, journal sync
    still works across two machines.
 9. `git -C /home/ytest/git/amisad.dev status --short` shows only
-   `poc/demo-data-view/` additions. Do not commit.
+   `poc/demo/data-view/` additions. Do not commit.
 10. Stop any server processes started for testing; leave the operator's own
     servers untouched.
 
@@ -718,5 +718,5 @@ slice-runtime `/v1/egress` and `/v1/ingress` → `entries` (egress entries are
   (the health probes through the proxy are the process view — an SSH
   channel would be write-capable and prove less about reachability).
 - No historical persistence of the journal across server restarts.
-- No editing of `poc/demo` (including its README).
+- No editing of `poc/demo/by-act` (including its README).
 - No screenshot/recording tooling.

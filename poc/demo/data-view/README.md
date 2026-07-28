@@ -2,15 +2,15 @@
 
 Two synchronized browser windows and a slide deck, served by one PowerShell
 script, on the topology a green [`test/amisad.end-to-end.yml`](../../test/amisad.end-to-end.yml)
-run leaves live. Where [`poc/demo`](../demo/) walks the ten scenarios through
+run leaves live. Where [`by-act`](../by-act/) walks the ten scenarios through
 persona buttons, this demo adds the thing the audience actually wonders about:
 **what the machine knows, while it happens.**
 
 | Window | URL | What |
 |--------|-----|------|
-| Actions | `http://localhost:8092/` | All ten scenarios as a persona swimlane chart — the whole 30 minutes visible as ghost slots from the first second — plus the runner that executes the selected step |
-| Data | `http://localhost:8092/data` | Live processes and data structures on `amisad-core`, `amisad-edge-a`, `amisad-edge-b`, flashing as steps change them, with the privacy strip on top |
-| Deck | `http://localhost:8092/slides.html` | 18 slides, at most three short bullets each; the narration lives in the presenter notes (**S**) |
+| Actions | `http://<host-ip>:8092/` | All ten scenarios as a persona swimlane chart — the whole 30 minutes visible as ghost slots from the first second — plus the runner that executes the selected step |
+| Data | `http://<host-ip>:8092/data` | Live processes and data structures on `amisad-core`, `amisad-edge-a`, `amisad-edge-b`, flashing as steps change them, with the privacy strip on top |
+| Deck | `http://<host-ip>:8092/slides.html` | 18 slides, at most three short bullets each; the narration lives in the presenter notes (**S**) |
 
 Both demos can coexist — they use different ports and different browser
 storage — but do not drive both against the same lab during a presentation, or
@@ -33,8 +33,8 @@ the timeline will show only half the story.
 ## Start
 
 ```powershell
-pwsh poc/demo-data-view/serve-data-demo.ps1              # add -CoreIp/-EdgeAIp/-EdgeBIp if auto-detect fails
-pwsh poc/demo-data-view/serve-data-demo.ps1 -BindAddress any   # present from another machine
+pwsh poc/demo/data-view/serve-data-view.ps1              # add -CoreIp/-EdgeAIp/-EdgeBIp if auto-detect fails
+pwsh poc/demo/data-view/serve-data-view.ps1 -BindAddress localhost   # this machine only
 ```
 
 The banner prints the exact URLs to type, including the host's own addresses
