@@ -1,3 +1,19 @@
+<#PSScriptInfo
+.VERSION 2026.07.29
+.GUID 42ece3f0-71f7-49a5-b325-387b1c3c98ca
+.AUTHOR Alisson Sol et al.
+.COPYRIGHT (c) 2026 by Alisson Sol et al.
+.TAGS amisad poc demo host serve
+.LICENSEURI https://yuruna.link/license
+.PROJECTURI https://amisad.com
+.ICONURI
+.EXTERNALMODULEDEPENDENCIES
+.REQUIREDSCRIPTS
+.EXTERNALSCRIPTDEPENDENCIES
+.RELEASENOTES
+.PRIVATEDATA
+#>
+
 <#
 .SYNOPSIS
 Shared host plumbing for the AmisAd demo servers.
@@ -11,9 +27,6 @@ listener that accepts off-box connections, and how to stop cleanly from the
 keyboard.
 
 Imported with -Force by each serve script; nothing here touches the lab.
-
-LICENSEURI https://yuruna.link/license
-Copyright (c) 2026 by Alisson Sol et al.
 #>
 
 # No Set-StrictMode here: it propagates to the scripts that import this module

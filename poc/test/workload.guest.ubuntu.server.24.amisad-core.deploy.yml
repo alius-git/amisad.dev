@@ -51,13 +51,8 @@ workload:
     sensitive: true
     description: "Set the demo users' vault-managed passwords"
 
-  # The snapshot below freezes the disk without asking the guest to write
-  # back, so anything still in the page cache is absent from it. The step
-  # above rewrites /etc/shadow immediately beforehand; losing that write
-  # yields a restored vm-core whose demo users exist with their pre-vault
-  # passwords, and every scenario that logs in as one of them fails to
-  # authenticate. The guest scripts flush at the end of their own runs -- an
-  # inline sshExec has no such tail, so the flush is a step here.
+  # The step above rewrites /etc/shadow and an inline sshExec has no flush
+  # tail, so the flush is a step here (poc/test.md "Snapshot page-cache flush").
   - action: sshExec
     command: "sync"
     timeoutSeconds: 120

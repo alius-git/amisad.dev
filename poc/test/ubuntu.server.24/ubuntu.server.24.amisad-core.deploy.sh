@@ -31,12 +31,7 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
 fi
 rm -rf "$REAL_HOME/amisad.dev"
 mkdir -p "$REAL_HOME/amisad.dev"
-# /yuruna-project-archive.tar.gz is the framework's project-tarball endpoint --
-# a fresh tar of <RepoRoot>/project, with the project tree (poc/, test/, ...) at
-# the TOP LEVEL, which is exactly what the extract below expects.
-# NOT /yuruna-repo/project-poc.tar.gz: /yuruna-repo/* serves the working tree
-# file-by-file and no such file exists, so that path 404s. wget then exits 8 and
-# `set -euo pipefail` aborts the whole deploy before it starts.
+# Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
 wget --no-proxy -qO /tmp/project-poc.tar.gz \
     "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/yuruna-project-archive.tar.gz?nocache=${RANDOM}"
 tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
@@ -48,11 +43,9 @@ cd "$POC"
 echo "== download prebuilt binaries from the stash service =="
 # --noproxy '*': the stash IP is not in the guest no_proxy list, so an HTTP GET
 # would otherwise be sent through squid. The label carries the architecture
-# (amisad-<arch>-binaries): the stash is shared by the whole lab, so a plain
-# "newest wins" query hands this guest whatever machine built last, and a
-# foreign build's binaries cannot execute here at all. Match our own uname -m
-# and nothing else. /api/stashes returns newest-first, so limit=1 is the
-# latest build FOR THIS ARCHITECTURE.
+# (amisad-<arch>-binaries; see poc/test.md "Stash artifact naming"): match our
+# own uname -m and nothing else. /api/stashes returns newest-first, so limit=1
+# is the latest build FOR THIS ARCHITECTURE.
 # No default address: the caller supplies one it already verified, and guessing
 # here would pull executables from whatever answers on someone's network.
 if [ -z "${STASH_HOST:-}" ]; then

@@ -1,8 +1,8 @@
 <#PSScriptInfo
 .VERSION 2026.07.28
-.GUID 7c1e5a92-4d3b-4f88-a0e6-2b9d7c41f503
+.GUID 4227a029-3092-4ae9-989e-f24508a92a0f
 .AUTHOR Alisson Sol et al.
-.Copyright (c) 2026 by Alisson Sol et al.
+.COPYRIGHT (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc demo data view serve
 .LICENSEURI https://yuruna.link/license
 .PROJECTURI https://amisad.com

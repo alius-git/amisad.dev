@@ -27,12 +27,7 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
 fi
 rm -rf "$REAL_HOME/amisad.dev"
 mkdir -p "$REAL_HOME/amisad.dev"
-# /yuruna-project-archive.tar.gz is the framework's project-tarball endpoint --
-# a fresh tar of <RepoRoot>/project, with the project tree (poc/, test/, ...) at
-# the TOP LEVEL, which is exactly what the extract below expects.
-# NOT /yuruna-repo/project-poc.tar.gz: /yuruna-repo/* serves the working tree
-# file-by-file and no such file exists, so that path 404s. wget then exits 8 and
-# `set -euo pipefail` aborts the whole build before it starts.
+# Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
 wget --no-proxy -qO /tmp/project-poc.tar.gz \
     "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/yuruna-project-archive.tar.gz?nocache=${RANDOM}"
 tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
@@ -81,18 +76,7 @@ cargo build --release --workspace
 
 echo "== pack binaries =="
 BINS="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc slice-runtime buyer-client"
-# The stash is one shared service for the whole lab, so the artifact name has
-# to say which machine code it holds. Every host uploads under the same label
-# otherwise, the newest upload wins whatever asks for it, and a guest that
-# fetches another architecture's build gets binaries its kernel cannot run --
-# every pod then dies with "exec format error" and the deploy only reports a
-# rollout timeout, far from the cause.
-#
-# The architecture goes in the MIDDLE of the name on purpose. The stash
-# matches filenames by substring, so a host still asking for the old
-# "amisad-binaries" label would keep matching "amisad-binaries-<arch>" and
-# stay exposed; it cannot match "amisad-<arch>-binaries". Hosts adopt this at
-# their own pace without ever being handed a foreign build.
+# Label amisad-<arch>-binaries: see poc/test.md "Stash artifact naming".
 ARCH=$(uname -m)
 TARBALL="/tmp/amisad-${ARCH}-binaries.tgz"
 # shellcheck disable=SC2086

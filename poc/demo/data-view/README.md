@@ -1,7 +1,7 @@
 # AmisAd — the data-view demo
 
 Two synchronized browser windows and a slide deck, served by one PowerShell
-script, on the topology a green [`test/amisad.end-to-end.yml`](../../test/amisad.end-to-end.yml)
+script, on the topology a green [`test/amisad.end-to-end.yml`](../../../test/amisad.end-to-end.yml)
 run leaves live. Where [`by-act`](../by-act/) walks the ten scenarios through
 persona buttons, this demo adds the thing the audience actually wonders about:
 **what the machine knows, while it happens.**
@@ -21,7 +21,7 @@ the timeline will show only half the story.
 - The end-to-end run finished green and the machines are still up:
   `amisad-core` (services on NodePorts 30080–30089) and both edges running
   `slice-runtime`. If a VM rebooted since, re-arm per
-  [demo.md](../demo.md#driving-the-demo) first.
+  [demo.md](../../demo.md#driving-the-demo) first.
 - A Yuruna checkout — the persona passwords are read from its authentication
   vault, and VM power state and IPs come from its host driver. It is discovered
   automatically (`-YurunaRoot` → `YURUNA_ROOT` → `YURUNA_CONFIG_PATH` → the
@@ -42,16 +42,18 @@ when bound to the network.
 
 ## Presenting from another machine
 
-`-BindAddress any` binds every interface; `-BindAddress 10.0.0.5` binds one NIC
-(localhost stays bound too, so the host's own browser keeps working). Two more
-things have to be true:
+`-BindAddress any` (the default) binds every interface; `-BindAddress 10.0.0.5`
+binds one NIC (localhost stays bound too, so the host's own browser keeps
+working). The server handles the host-side plumbing itself:
 
-- **The host firewall must allow inbound 8092.** The script never touches
-  firewall rules.
-- **On Windows only**, a non-loopback prefix is an http.sys reservation: run the
-  shell elevated, or register it once with
-  `netsh http add urlacl url=http://+:8092/ user=<domain>\<user>`. Linux and
-  macOS need nothing. The script says which one it hit if the bind fails.
+- **It opens inbound 8092** on whichever firewall the platform runs and, on
+  Windows, adds the http.sys reservation a non-loopback listener needs. The
+  change is announced before it happens, is idempotent, and downgrades to a
+  warning if declined; `-SkipFirewall` opts out when the port is already open
+  or policy forbids the change.
+- If that step was declined or the bind still fails on Windows, register the
+  reservation once by hand from an elevated shell:
+  `netsh http add urlacl url=http://+:8092/ user=<domain>\<user>`.
 
 `/api/personas` returns the vault passwords in the clear for the identity card,
 so they are gated on the **client**, not the binding: loopback requests (the
@@ -172,9 +174,9 @@ you want the count-drop moments to land visibly.
   by design. Open windows detect the restart within a second and rebuild
   themselves; the lab's own state is unaffected, and the notebook ids are
   recaptured by re-running the steps (or read from the still-live lab).
-- **A laptop cannot reach `http://<host ip>:8092/`** — the default binding is
-  loopback; restart with `-BindAddress any`, confirm the banner lists the host
-  IP, then check the firewall.
+- **A laptop cannot reach `http://<host ip>:8092/`** — confirm the banner lists
+  the host IP; if it does, it is the host firewall (rerun without
+  `-SkipFirewall`, or open inbound TCP 8092 manually).
 - **s004 placement answers oddly** — a rebooted core lost the in-memory edge
   registry; `s004`'s first step rebuilds it (that is why it is step 1).
 

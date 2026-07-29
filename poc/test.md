@@ -87,8 +87,8 @@ independent without per-scenario VMs. Hostnames are set with the framework's
                       service (pinned or discovered), verify /healthz, and
                       publish the address -- no stash, no run.
 [1] amisad-build   start.guest -> build tools -> snapshot; compile run
-                      uploads amisad-binaries.tgz to the stash service; VM
-                      stopped afterwards.
+                      uploads amisad-<arch>-binaries.tgz to the stash service;
+                      VM stopped afterwards.
 [2] amisad-edge-a  start.guest -> demo key + IP reporter -> snapshot.
     amisad-edge-b  (provisioned one at a time: first-login OCR is only
                       reliable with no other lab VM running)
@@ -133,8 +133,15 @@ otherwise keep an active console/RDP session on the host during provisioning.
 
 **Repo delivery.** In lab iteration mode (current), guests fetch the repo as a
 tarball of `amisad.dev` HEAD from the host status service — rerun
-`poc\build\serve-local.ps1` after every commit. The production path (kept for
-later) git-clones with the vault PAT in a `sensitive: true` step.
+`poc\build\serve-local.ps1` after every commit. The guest scripts pull
+`/yuruna-project-archive.tar.gz`, the framework's project-tarball endpoint: a
+fresh tar of `<RepoRoot>/project` with the project tree (`poc/`, `test/`, …)
+at the top level, which is exactly what their extract step expects. Not
+`/yuruna-repo/project-poc.tar.gz` — `/yuruna-repo/*` serves the working tree
+file-by-file and no such file exists, so that path 404s, `wget` exits 8, and
+the scripts' `set -euo pipefail` aborts the run before anything is built or
+deployed. The production path (kept for later) git-clones with the vault PAT
+in a `sensitive: true` step.
 
 **Durable stores.** The db step provisions the `amisad` database with the app
 role `amisad` (fixed lab password `amisadpoc2026` — it rides inside a URL, so
@@ -152,6 +159,42 @@ s008 the compensating adjustment entries + disclosure grant; s010 the
 independent four-dimension certification and tamper localization. Empty `databaseUrl` (the
 chart default) keeps a service in-memory — which is how `cargo test` and
 skeleton services run.
+
+## Snapshot page-cache flush
+
+Guest steps that end in a snapshot finish with `sync`. The host freezes the
+VM's disk for the snapshot as soon as the step exits, and it does not ask the
+guest to write back first; whatever is still in the page cache at that
+instant is simply not in the snapshot. The failure is silent and deferred —
+the file stays readable for the rest of the SSH session and is missing only
+once the snapshot is restored — so it surfaces far from its cause, in
+whichever later sequence first needs the lost write: a dropped tool is a bare
+"command not found", a dropped service binary or unit file means a restored
+VM whose dependents start against a service that is not there, and a dropped
+`/etc/shadow` rewrite leaves users whose logins accept only their old
+passwords. Large, recently written files are lost first: an 8 MB binary
+installed as a script's last action has not aged past the filesystem's
+writeback interval, while the small files written seconds earlier have. The
+guest scripts flush at the end of their own runs; a sequence whose last write
+rides an inline `sshExec` (which has no such tail) adds an explicit `sync`
+step before the snapshot instead.
+
+## Stash artifact naming
+
+The compile step packs the release binaries as `amisad-<arch>-binaries.tgz`
+(`<arch>` from `uname -m`) and the deploy step downloads only the label
+matching its own architecture. The stash is one shared service for the whole
+lab, so the artifact name has to say which machine code it holds: were every
+host to upload under one label, the newest upload would win whatever asked
+for it, and a guest handed another architecture's build gets binaries its
+kernel cannot run — every pod then dies with "exec format error" and the
+deploy only reports a rollout timeout, far from the cause.
+
+The architecture sits in the middle of the name on purpose. The stash matches
+filenames by substring, so a host still asking for the old `amisad-binaries`
+label would keep matching a trailing `amisad-binaries-<arch>` form and stay
+exposed; it cannot match `amisad-<arch>-binaries`. Hosts adopt the new label
+at their own pace without ever being handed a foreign build.
 
 ## Adding a scenario
 
