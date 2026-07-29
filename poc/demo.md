@@ -139,7 +139,7 @@ match to the compliant region although region-b is roomier, two injected
 isolation faults abort safely and retry clean, and the systemic pattern
 becomes a cross-party case. Fresh snapshot recommended (attestation counts
 assume a clean ledger). Both edges run `slice-runtime`; their IPs are in the
-status server's `/log/handoff/amisad-edge-*.ip.txt` files:
+status service's `/log/handoff/amisad-edge-*.ip.txt` files:
 
 ```bash
 # Tom: two regions with capacity, region-a sovereign (policy is the ONLY thing

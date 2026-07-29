@@ -26,7 +26,7 @@
     Ports the build stages of poc/build/run-tests.ps1 (everything except the
     scenario loop, which the amisad.end-to-end.yml orchestration sequence drives).
     Assumes the host is already clean (Clear-Lab.ps1 ran) and <RepoRoot>/project
-    is already cloned (Test-Sequence, running the orchestration sequence, clones
+    is already cloned (Invoke-TestSequence, running the orchestration sequence, clones
     once, so guest builds run with -NoProjectClone). Stages, in order:
 
       0. Generate the core->edge demo keypair (once per host).
@@ -54,10 +54,10 @@
         size is a provisioning-time property (the sequence's memoryStartupBytes
         variable), so it cannot -- and need not -- be changed after the fact.
 .PARAMETER YurunaRoot
-    Yuruna framework checkout that holds test/Test-Sequence.ps1. Optional --
+    Yuruna framework checkout that holds test/Invoke-TestSequence.ps1. Optional --
     see Resolve-YurunaRoot for the discovery order.
 .PARAMETER LogDir
-    Per-stage Test-Sequence logs. Default: <temp>/amisad-tests.
+    Per-stage Invoke-TestSequence logs. Default: <temp>/amisad-tests.
 .PARAMETER NoConfigGate
     Forwarded to each guest build (skip the pre-cycle Test-Config.ps1 gate).
 .PARAMETER StashServiceHost
@@ -91,14 +91,14 @@ $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
 $IsHyperV   = ($HostType -eq 'host.windows.hyper-v')
 Write-Information "Warm-up on '$HostType' (framework: $YurunaRoot)."
 
-$ts = Join-Path $YurunaRoot 'test/Test-Sequence.ps1'
-if (-not (Test-Path -LiteralPath $ts)) { Write-Error "Test-Sequence.ps1 not found at $ts"; exit 1 }
+$ts = Join-Path $YurunaRoot 'test/Invoke-TestSequence.ps1'
+if (-not (Test-Path -LiteralPath $ts)) { Write-Error "Invoke-TestSequence.ps1 not found at $ts"; exit 1 }
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 function Invoke-Stage {
     # Write-Information (not Write-Output) for progress: the function's OUTPUT
     # stream is its return value, and a polluted return would break the caller's
-    # -ne 0 check. -NoProjectClone: the orchestration run (Test-Sequence) already
+    # -ne 0 check. -NoProjectClone: the orchestration run (Invoke-TestSequence) already
     # refreshed <RepoRoot>/project once before invoking initialize-lab.
     param([string]$Name, [string]$Sequence, [switch]$NoConfigGate)
     Stop-LabConsole -HostType $HostType

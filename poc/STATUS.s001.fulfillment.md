@@ -261,7 +261,7 @@ automatically if it appears.
 - **Auth vault**: `amisad-pat` (operator-owned key) holds the PAT for the
   production GitHub-clone path; lab mode doesn't need it.
 - **Guest source (lab mode)**: guest fetches
-  `/yuruna-repo/project-poc.tar.gz` from the host status server;
+  `/yuruna-repo/project-poc.tar.gz` from the host status service;
   `poc/build/serve-local.ps1` republishes from HEAD after every commit
   (currently published).
 - **Sequences**: `build.amisad` pair + two chained baselines active; ten

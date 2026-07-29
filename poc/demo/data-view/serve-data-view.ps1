@@ -75,7 +75,7 @@ if ($YurunaRoot) {
 $vmNames = 'amisad-core', 'amisad-edge-a', 'amisad-edge-b'
 
 # VM IP resolution: explicit param -> the host driver's guest report -> the
-# status server's handoff file (the edges' boot-time IP reporter posts
+# status service's handoff file (the edges' boot-time IP reporter posts
 # <hostname>.ip.txt there).
 function Resolve-VmIp([string]$Name) {
     if (Get-Command -Name 'Get-VMIp' -ErrorAction SilentlyContinue) {

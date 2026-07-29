@@ -3,7 +3,7 @@
 # Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - edge VM setup (shared by amisad-edge-a/b): authorize the
 # core->edge demo key for the admin user, and install a boot-time IP reporter
-# that posts <hostname>.ip.txt to the host status server so amisad-core can
+# that posts <hostname>.ip.txt to the host status service so amisad-core can
 # locate this edge. The slice runtime itself is delivered per scenario run -
 # the edge VM stays stateless.
 set -euo pipefail
@@ -16,7 +16,7 @@ if [ -r /etc/yuruna/host.env ]; then
     . /etc/yuruna/host.env
 fi
 if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
-    echo "no host.env - cannot locate the host status server" >&2
+    echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
 BASE="http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}"
@@ -30,7 +30,7 @@ chmod 600 "$REAL_HOME/.ssh/authorized_keys"
 chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.ssh"
 
 echo "== boot-time IP reporter =="
-# Posts this VM's IP to the status server's log-upload sink at every boot (and
+# Posts this VM's IP to the status service's log-upload sink at every boot (and
 # now), so vm-core resolves the edge without DNS: GET /log/handoff/<hostname>.ip.txt
 sudo tee /usr/local/lib/amisad-ip-report.sh >/dev/null <<'EOS'
 #!/bin/bash
@@ -50,7 +50,7 @@ sudo chmod 755 /usr/local/lib/amisad-ip-report.sh
 
 sudo tee /etc/systemd/system/amisad-ip-report.service >/dev/null <<'EOS'
 [Unit]
-Description=Report this edge VM's IP to the Yuruna status server
+Description=Report this edge VM's IP to the Yuruna status service
 Wants=network-online.target
 After=network-online.target
 

@@ -26,7 +26,7 @@ if [ -r /etc/yuruna/host.env ]; then
     . /etc/yuruna/host.env
 fi
 if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
-    echo "no host.env - cannot locate the host status server" >&2
+    echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
 rm -rf "$REAL_HOME/amisad.dev"

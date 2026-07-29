@@ -50,7 +50,7 @@ for port in 30080 30081 30082 30083 30084 30085 30086 30087 30088 30089; do
 done
 
 echo "== slice-runtime (edge amisad-edge-a) =="
-# Resolve the edge from its boot-time IP report on the status server; an
+# Resolve the edge from its boot-time IP report on the status service; an
 # explicit EDGE_HOST env wins. Core->edge auth uses the demo keypair the
 # users step installed for the admin.
 if [ -r /etc/yuruna/host.env ]; then

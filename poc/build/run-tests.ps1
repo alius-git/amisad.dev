@@ -23,8 +23,8 @@ $ErrorActionPreference = 'Continue'
 # Progress goes to the information stream (displayed via InformationPreference),
 # never the success stream -- Invoke-Stage returns an exit code the caller checks.
 $InformationPreference = 'Continue'
-$ts = Join-Path $YurunaRoot 'test\Test-Sequence.ps1'
-if (-not (Test-Path $ts)) { Write-Error "Test-Sequence.ps1 not found at $ts"; exit 1 }
+$ts = Join-Path $YurunaRoot 'test\Invoke-TestSequence.ps1'
+if (-not (Test-Path $ts)) { Write-Error "Invoke-TestSequence.ps1 not found at $ts"; exit 1 }
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 # Ordered scenario registry: append here as scenarios are implemented (test.md).
@@ -153,7 +153,7 @@ $labVms += $topologyVms
 foreach ($vmName in ($labVms | Sort-Object -Unique)) { Remove-LabVM -Name $vmName }
 Stop-LabConsole
 
-# Core->edge demo keypair, served to guests from the status server's handoff
+# Core->edge demo keypair, served to guests from the status service's handoff
 # dir (lab-trusted LAN; see poc/usernames.md). Generated once per host.
 $handoff = Join-Path $YurunaRoot 'test\status\handoff'
 New-Item -ItemType Directory -Force -Path $handoff | Out-Null

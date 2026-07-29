@@ -97,7 +97,7 @@ independent without per-scenario VMs. Hostnames are set with the framework's
                       10 services (ledger+seller on PostgreSQL), add
                       maya/elena/tom/priya/marcel/kai/pat/alex/sam/dana/ingrid -> snapshot
                       amisad-core.
-[4] both edges started; each reports its IP to the status server.
+[4] both edges started; each reports its IP to the status service.
 [5] scenarios in order, each: restore amisad-core -> drive over SSH
     (sshWaitReady + sshFetchAndExecute; no OCR, so live edge VMs cannot
     disturb it) -> full TVP asserts. slice-runtime runs on amisad-edge-a
@@ -112,7 +112,7 @@ SSH with the harness key and passwordless sudo.
 From an **elevated** PowerShell:
 
 ```powershell
-poc\build\serve-local.ps1              # lab mode: publish HEAD to the status server
+poc\build\serve-local.ps1              # lab mode: publish HEAD to the status service
 pwsh poc\build\run-tests.ps1 -NoConfigGate
 ```
 
@@ -132,7 +132,7 @@ is painting. For unattended runs, opt into the framework's virtual display once
 otherwise keep an active console/RDP session on the host during provisioning.
 
 **Repo delivery.** In lab iteration mode (current), guests fetch the repo as a
-tarball of `amisad.dev` HEAD from the host status server — rerun
+tarball of `amisad.dev` HEAD from the host status service — rerun
 `poc\build\serve-local.ps1` after every commit. The production path (kept for
 later) git-clones with the vault PAT in a `sensitive: true` step.
 

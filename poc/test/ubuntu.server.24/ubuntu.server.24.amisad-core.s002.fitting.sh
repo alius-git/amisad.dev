@@ -49,7 +49,7 @@ done
 SELLER="http://${NODE_IP}:30083"
 
 echo "== slice-runtime (edge amisad-edge-a) =="
-# Resolve the edge from its boot-time IP report on the status server; an
+# Resolve the edge from its boot-time IP report on the status service; an
 # explicit EDGE_HOST env wins; unresolvable falls back to this VM.
 if [ -r /etc/yuruna/host.env ]; then
     # shellcheck disable=SC1091

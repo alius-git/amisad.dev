@@ -6,7 +6,7 @@
 # DATABASE_URL - see poc/test.md), listen_addresses '*', pg_hba for the pod
 # and node networks. The role gets NO UPDATE/DELETE on ledger tables - the
 # database itself enforces append-only. Schema is fetched from the host
-# status server into /tmp because the postgres user cannot read the login
+# status service into /tmp because the postgres user cannot read the login
 # user's 0750 home.
 set -euo pipefail
 
@@ -15,7 +15,7 @@ if [ -r /etc/yuruna/host.env ]; then
     . /etc/yuruna/host.env
 fi
 if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
-    echo "no host.env - cannot locate the host status server" >&2
+    echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
 
