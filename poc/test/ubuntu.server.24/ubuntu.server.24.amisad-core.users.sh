@@ -18,11 +18,11 @@ if [ -r /etc/yuruna/host.env ]; then
     # shellcheck disable=SC1091
     . /etc/yuruna/host.env
 fi
-if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
+if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:-}" ]; then
     echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
-BASE="http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}"
+BASE="http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}"
 
 echo "== non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex, sam, dana, ingrid) =="
 for u in maya elena tom priya marcel kai pat alex sam dana ingrid; do

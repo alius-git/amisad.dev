@@ -51,7 +51,7 @@ if [ -r /etc/yuruna/host.env ]; then
     # shellcheck disable=SC1091
     . /etc/yuruna/host.env
 fi
-if [ -z "${YURUNA_HOST_IP:-}" ]; then
+if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
     echo "no host.env - cannot resolve the edges" >&2
     exit 2
 fi
@@ -61,7 +61,7 @@ start_slice() { # <edge-hostname> <region>
     # loudly by hand; the exit code escapes through pipefail to the caller.
     local edge="$1" region="$2" ip host
     ip=$(wget --no-proxy -qO- \
-        "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/log/handoff/${edge}.ip.txt" 2>/dev/null || true)
+        "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log/handoff/${edge}.ip.txt" 2>/dev/null || true)
     if [ -z "$ip" ]; then
         echo "edge ${edge} IP report missing - s004 requires both edges live" >&2
         exit 7

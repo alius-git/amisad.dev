@@ -14,7 +14,7 @@ if [ -r /etc/yuruna/host.env ]; then
     # shellcheck disable=SC1091
     . /etc/yuruna/host.env
 fi
-if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
+if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:-}" ]; then
     echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
@@ -35,7 +35,7 @@ sudo -u postgres pg_isready
 
 SCHEMA=/tmp/amisad-schema.sql
 wget --no-proxy -qO "$SCHEMA" \
-    "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
+    "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
 chmod 644 "$SCHEMA"
 
 sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='amisad'" | grep -q 1 || \

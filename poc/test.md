@@ -57,11 +57,11 @@ the demo by hand instead, see [demo.md](demo.md).
    lab's, and a literal here would go stale the first time the service moved.
    Any one of these is enough:
 
-   - run one on this host: `test/Start-StashVM.ps1` from the `yuruna` folder;
+   - run one on this host: `test/Start-StashServiceVM.ps1` from the `yuruna` folder;
    - join a pool that runs one — the service announces itself to the
      pool-aggregator and this host reads the address back (nothing to
      configure beyond the caching proxy you already point at);
-   - state it: `$env:YURUNA_STASH_HOST = '<address>'`, or
+   - state it: `$env:YURUNA_STASH_SERVICE_HOST = '<address>'`, or
      `pwsh test/Initialize-Lab.ps1 -StashServiceHost '<address>'`.
 
    The pre-flight probes `/healthz` on each candidate before anything long

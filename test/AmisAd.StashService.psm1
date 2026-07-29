@@ -46,7 +46,7 @@ function Resolve-StashService {
         minutes in. Resolving here, before any VM starts, turns that into an
         immediate stop.
 
-        A pin (-Pin, or $env:YURUNA_STASH_HOST for the address a pool handed
+        A pin (-Pin, or $env:YURUNA_STASH_SERVICE_HOST for the address a pool handed
         this host) is the ONLY candidate when present -- a pass told to use a
         particular stash must fail rather than quietly exercise a different one.
         Otherwise every address the framework can find for the area
@@ -105,8 +105,8 @@ function Resolve-StashService {
     $candidates = [System.Collections.Generic.List[hashtable]]::new()
     if (-not [string]::IsNullOrWhiteSpace($Pin)) {
         $candidates.Add(@{ Address = $Pin.Trim(); Source = 'pinned' })
-    } elseif (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_HOST)) {
-        $candidates.Add(@{ Address = $env:YURUNA_STASH_HOST.Trim(); Source = '$env:YURUNA_STASH_HOST' })
+    } elseif (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_SERVICE_HOST)) {
+        $candidates.Add(@{ Address = $env:YURUNA_STASH_SERVICE_HOST.Trim(); Source = '$env:YURUNA_STASH_SERVICE_HOST' })
     } elseif (Get-Command Get-ExtensionHostAddress -ErrorAction SilentlyContinue) {
         # @(): a single discovered address unrolls to a scalar string, and
         # iterating THAT walks its characters.
@@ -118,7 +118,7 @@ function Resolve-StashService {
             $candidates.Add(@{ Address = $address; Source = 'discovered (this host, or the pool)' })
         }
     } else {
-        Write-Warning "The framework at $YurunaRoot has no Get-ExtensionHostAddress, so nothing can discover a stash service. Upgrade the framework checkout, or pin an address with `$env:YURUNA_STASH_HOST."
+        Write-Warning "The framework at $YurunaRoot has no Get-ExtensionHostAddress, so nothing can discover a stash service. Upgrade the framework checkout, or pin an address with `$env:YURUNA_STASH_SERVICE_HOST."
     }
 
     $lines.Add('== Resolving the stash service ==')

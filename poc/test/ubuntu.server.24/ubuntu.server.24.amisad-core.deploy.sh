@@ -25,7 +25,7 @@ if [ -r /etc/yuruna/host.env ]; then
     # shellcheck disable=SC1091
     . /etc/yuruna/host.env
 fi
-if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
+if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:-}" ]; then
     echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
@@ -38,7 +38,7 @@ mkdir -p "$REAL_HOME/amisad.dev"
 # file-by-file and no such file exists, so that path 404s. wget then exits 8 and
 # `set -euo pipefail` aborts the whole deploy before it starts.
 wget --no-proxy -qO /tmp/project-poc.tar.gz \
-    "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/yuruna-project-archive.tar.gz?nocache=${RANDOM}"
+    "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/yuruna-project-archive.tar.gz?nocache=${RANDOM}"
 tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
 rm -f /tmp/project-poc.tar.gz
 

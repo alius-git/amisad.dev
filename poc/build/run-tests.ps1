@@ -182,7 +182,7 @@ $stash = Resolve-StashService -YurunaRoot $YurunaRoot
 foreach ($line in $stash.Lines) { Write-Information $line }
 if (-not $stash.Address) {
     Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and amisad-core has nowhere to fetch them - stopping before the provisioning stages. " +
-        "Start one on this host (Start-StashVM.ps1), join a pool that runs one, or pin an address with `$env:YURUNA_STASH_HOST.")
+        "Start one on this host (Start-StashServiceVM.ps1), join a pool that runs one, or pin an address with `$env:YURUNA_STASH_SERVICE_HOST.")
     exit 1
 }
 

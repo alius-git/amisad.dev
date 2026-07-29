@@ -15,11 +15,11 @@ if [ -r /etc/yuruna/host.env ]; then
     # shellcheck disable=SC1091
     . /etc/yuruna/host.env
 fi
-if [ -z "${YURUNA_HOST_IP:-}" ] || [ -z "${YURUNA_HOST_PORT:-}" ]; then
+if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:-}" ]; then
     echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
-BASE="http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}"
+BASE="http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}"
 
 echo "== authorize the core->edge demo key =="
 mkdir -p "$REAL_HOME/.ssh"
@@ -40,7 +40,7 @@ for _ in $(seq 1 30); do
     ip=$(hostname -I | awk '{print $1}')
     if [ -n "$ip" ]; then
         curl -fsS --noproxy '*' -X PUT --data "$ip" \
-            "http://${YURUNA_HOST_IP}:${YURUNA_HOST_PORT}/log-upload/handoff/$(hostname).ip.txt" && exit 0
+            "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log-upload/handoff/$(hostname).ip.txt" && exit 0
     fi
     sleep 5
 done
