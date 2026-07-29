@@ -34,7 +34,7 @@
   }
   .slide {
     position: absolute;
-    inset: 0;
+    top: 0; right: 0; bottom: 0; left: 0;
     display: none;
     flex-direction: column;
     justify-content: center;
@@ -79,11 +79,13 @@
     font-size: 2.1vh;
   }
   .proof b { color: var(--terracotta); }
-  .cols { display: flex; gap: 4vw; }
+  .cols { display: flex; }
   .cols > div { flex: 1; }
+  .cols > div + div { margin-left: 4vw; }
   .cast-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    grid-gap: 1.4vh;
     gap: 1.4vh;
     margin-top: 1vh;
   }
@@ -95,7 +97,8 @@
     font-size: 1.9vh;
   }
   .cast-grid b { color: var(--terracotta); display: block; }
-  .diagram { display: flex; gap: 1.5vw; align-items: stretch; margin-top: 2vh; }
+  .diagram { display: flex; align-items: stretch; margin-top: 2vh; }
+  .diagram > * + * { margin-left: 1.5vw; }
   .diagram .box {
     flex: 1;
     background: var(--white);

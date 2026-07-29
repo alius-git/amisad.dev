@@ -22,7 +22,7 @@ Run them one at a time. They use different ports and different browser
 storage so they *can* coexist, but two consoles writing to one lab during a
 presentation muddies both stories.
 
-## Both servers, same host behaviour
+## Both servers, same host behavior
 
 `AmisAd.DemoHost.psm1` holds the parts that are about the host rather than
 either demo, so the two behave identically:
