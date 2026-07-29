@@ -177,7 +177,7 @@ Import-Module (Join-Path $YurunaRoot 'test\modules\Test.HostContract.psm1') -For
 if (Get-Command Initialize-YurunaHost -ErrorAction SilentlyContinue) {
     $null = Initialize-YurunaHost -RepoRoot $YurunaRoot -HostType 'host.windows.hyper-v'
 }
-Import-Module (Join-Path $PSScriptRoot '..\..\test\AmisAd.Stash.psm1') -Force -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot '..\..\test\AmisAd.StashService.psm1') -Force -DisableNameChecking
 $stash = Resolve-StashService -YurunaRoot $YurunaRoot
 foreach ($line in $stash.Lines) { Write-Information $line }
 if (-not $stash.Address) {
@@ -187,7 +187,7 @@ if (-not $stash.Address) {
 }
 
 # --- [1] build once: compile + upload binaries to the stash ---
-if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
+if ((Invoke-Stage -Name 'amisad-build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "Build stage failed; no binaries in the stash - stopping."
     exit 1
 }
@@ -212,7 +212,7 @@ foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
 }
 
 # --- [3] vm-core: k8s + deploy + demo users (cold chain, solo) ---
-if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
+if ((Invoke-Stage -Name 'amisad-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "amisad-core deploy failed - stopping."
     exit 1
 }

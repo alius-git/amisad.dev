@@ -19,7 +19,7 @@
 <#
 .SYNOPSIS
     Stash-service pre-flight shared by the AmisAd entry points that build the
-    topology (test/Set-Resource.ps1, poc/build/run-tests.ps1).
+    topology (test/Initialize-Lab.ps1, poc/build/run-tests.ps1).
 .DESCRIPTION
     A module rather than a dot-sourced helper so both drivers run ONE
     implementation: the address a pass uploads its binaries to must not depend
@@ -89,8 +89,8 @@ function Resolve-StashService {
 
     $module = Join-Path $YurunaRoot 'test/extension/stash-service/default.psm1'
     Import-Module $module -Force -Global -DisableNameChecking -ErrorAction Stop
-    if (-not (Get-Command Test-StashHost -ErrorAction SilentlyContinue) -or
-        -not (Get-Command Publish-StashHost -ErrorAction SilentlyContinue)) {
+    if (-not (Get-Command Test-StashServiceHost -ErrorAction SilentlyContinue) -or
+        -not (Get-Command Publish-StashServiceHost -ErrorAction SilentlyContinue)) {
         Write-Warning "The stash-service extension at $module has no reachability/publish verbs; the pre-flight cannot verify a stash."
         $result.Lines = $lines.ToArray()
         return $result
@@ -123,9 +123,9 @@ function Resolve-StashService {
 
     $lines.Add('== Resolving the stash service ==')
     foreach ($candidate in $candidates) {
-        if (Test-StashHost -Address $candidate.Address) {
+        if (Test-StashServiceHost -Address $candidate.Address) {
             $lines.Add(("  [PASS] {0} ({1}) answered /healthz" -f $candidate.Address, $candidate.Source))
-            $null = Publish-StashHost -Address $candidate.Address
+            $null = Publish-StashServiceHost -Address $candidate.Address
             $lines.Add("Stash service: $($candidate.Address) -- published for this cycle.")
             $result.Address = $candidate.Address
             $result.Lines = $lines.ToArray()
@@ -138,7 +138,7 @@ function Resolve-StashService {
     }
     # Nothing answered: clear any address a previous cycle left behind so the
     # sequences cannot resolve one this cycle never confirmed.
-    $null = Publish-StashHost -Address ''
+    $null = Publish-StashServiceHost -Address ''
     $result.Lines = $lines.ToArray()
     return $result
 }

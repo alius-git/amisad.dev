@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=../../yuruna/test/schemas/orchestration-sequence.schema.yml
 #
 # Orchestration sequence: InvokeTestSequence steps run under one status.json
-# cycle (one dashboard row per inner sequence). set-resource is a HOST action
+# cycle (one dashboard row per inner sequence). initialize-lab is a HOST action
 # (lab teardown + topology build) run before the guest scenarios; s004 and
 # s010 need both edges.
 
@@ -10,7 +10,7 @@ description: Host-side lab teardown + topology build, then every AmisAd scenario
 
 steps:
   - action: InvokeTestSequence
-    sequence: set-resource.yml
+    sequence: initialize-lab.yml
     description: "Host: tear down the lab, build + start the AmisAd topology"
 
   - action: InvokeTestSequence

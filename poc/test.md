@@ -62,7 +62,7 @@ the demo by hand instead, see [demo.md](demo.md).
      pool-aggregator and this host reads the address back (nothing to
      configure beyond the caching proxy you already point at);
    - state it: `$env:YURUNA_STASH_HOST = '<address>'`, or
-     `pwsh test/Set-Resource.ps1 -StashHost '<address>'`.
+     `pwsh test/Initialize-Lab.ps1 -StashServiceHost '<address>'`.
 
    The pre-flight probes `/healthz` on each candidate before anything long
    starts, publishes the one that answered for the rest of the cycle, and

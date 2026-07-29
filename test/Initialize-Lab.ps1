@@ -20,12 +20,12 @@
 <#
 .SYNOPSIS
     Build + start the AmisAd POC topology on a clean host (the "warm-up" half of
-    the end-to-end pass; Clear-Project.ps1 is the teardown half that runs first).
+    the end-to-end pass; Clear-Lab.ps1 is the teardown half that runs first).
     Runs on any Yuruna host type (Hyper-V, KVM, UTM).
 .DESCRIPTION
     Ports the build stages of poc/build/run-tests.ps1 (everything except the
     scenario loop, which the amisad.end-to-end.yml orchestration sequence drives).
-    Assumes the host is already clean (Clear-Project.ps1 ran) and <RepoRoot>/project
+    Assumes the host is already clean (Clear-Lab.ps1 ran) and <RepoRoot>/project
     is already cloned (Test-Sequence, running the orchestration sequence, clones
     once, so guest builds run with -NoProjectClone). Stages, in order:
 
@@ -60,19 +60,19 @@
     Per-stage Test-Sequence logs. Default: <temp>/amisad-tests.
 .PARAMETER NoConfigGate
     Forwarded to each guest build (skip the pre-cycle Test-Config.ps1 gate).
-.PARAMETER StashHost
+.PARAMETER StashServiceHost
     Pins the stash service instead of discovering it. Empty (the default) runs
     the discovery order in Resolve-StashService; when neither a pin nor
     discovery produces an address that answers /healthz, the pass stops.
 .EXAMPLE
-    pwsh test/Set-Resource.ps1
+    pwsh test/Initialize-Lab.ps1
 #>
 
 param(
     [string]$YurunaRoot,
     [string]$LogDir = (Join-Path ([IO.Path]::GetTempPath()) 'amisad-tests'),
     [switch]$NoConfigGate,
-    [string]$StashHost = ''
+    [string]$StashServiceHost = ''
 )
 
 $ErrorActionPreference = 'Continue'
@@ -84,7 +84,7 @@ $InformationPreference = 'Continue'
 # Resolve-StashService lives in a module, not here: poc/build/run-tests.ps1 runs
 # the same pre-flight, and the address a pass uploads its binaries to must not
 # depend on which entry point started it.
-Import-Module (Join-Path $PSScriptRoot 'AmisAd.Stash.psm1') -Force -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot 'AmisAd.StashService.psm1') -Force -DisableNameChecking
 
 $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
@@ -99,7 +99,7 @@ function Invoke-Stage {
     # Write-Information (not Write-Output) for progress: the function's OUTPUT
     # stream is its return value, and a polluted return would break the caller's
     # -ne 0 check. -NoProjectClone: the orchestration run (Test-Sequence) already
-    # refreshed <RepoRoot>/project once before invoking set-resource.
+    # refreshed <RepoRoot>/project once before invoking initialize-lab.
     param([string]$Name, [string]$Sequence, [switch]$NoConfigGate)
     Stop-LabConsole -HostType $HostType
     $out = Join-Path $LogDir "$Name.out.log"
@@ -233,16 +233,16 @@ if (-not (Test-Path -LiteralPath $demoKey)) {
 # A stash is a requirement of this pass, not an optimization, and the project
 # states no address of its own to fall back to -- so "none found" stops here,
 # where it costs seconds, rather than an hour later inside a guest chain.
-$stash = Resolve-StashService -YurunaRoot $YurunaRoot -Pin $StashHost
+$stash = Resolve-StashService -YurunaRoot $YurunaRoot -Pin $StashServiceHost
 foreach ($line in $stash.Lines) { Write-Information $line }
 if (-not $stash.Address) {
     Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and vm-core has nowhere to fetch them - stopping before the provisioning stages. " +
-        "Start one on this host (Start-StashVM.ps1), join a pool that runs one, or pin an address with -StashHost / `$env:YURUNA_STASH_HOST.")
+        "Start one on this host (Start-StashVM.ps1), join a pool that runs one, or pin an address with -StashServiceHost / `$env:YURUNA_STASH_HOST.")
     exit 1
 }
 
 # --- [2] build once: compile + upload binaries to the stash ---
-if ((Invoke-Stage -Name 'build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
+if ((Invoke-Stage -Name 'amisad-build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "Build stage failed; no binaries in the stash - stopping."
     exit 1
 }
@@ -261,7 +261,7 @@ foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
 }
 
 # --- [4] vm-core: k8s + deploy + demo users (cold chain, solo) ---
-if ((Invoke-Stage -Name 'vm-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
+if ((Invoke-Stage -Name 'amisad-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "amisad-core deploy failed - stopping."
     exit 1
 }

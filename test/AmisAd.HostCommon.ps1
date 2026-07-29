@@ -19,7 +19,7 @@
 <#
 .SYNOPSIS
     Shared host-portability helpers for the AmisAd host-action scripts
-    (Clear-Project.ps1, Set-Resource.ps1). Dot-sourced, not invoked.
+    (Clear-Lab.ps1, Initialize-Lab.ps1). Dot-sourced, not invoked.
 .DESCRIPTION
     Both host actions used to be Hyper-V-only: they called `Hyper-V\Get-VM`
     directly and defaulted -YurunaRoot to 'c:\git\yuruna'. On host.ubuntu.kvm

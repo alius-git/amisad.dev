@@ -1,9 +1,9 @@
-# set-resource.yml - host-side teardown + warm-up wrapper.
-#   1. Clear-Project.ps1 - remove every lab VM + storage, sweep orphaned files.
-#   2. Set-Resource.ps1  - build the stash, both edges, and amisad-core
+# initialize-lab.yml - host-side teardown + warm-up wrapper.
+#   1. Clear-Lab.ps1 - remove every lab VM + storage, sweep orphaned files.
+#   2. Initialize-Lab.ps1  - build the stash, both edges, and amisad-core
 # HOST action, not a guest interaction sequence.
 
-name: set-resource
+name: initialize-lab
 description: Tear down the lab, then build + start the AmisAd topology (host-side, pre-run).
 
 host:
@@ -11,5 +11,5 @@ host:
   # the pass stops if either script exits non-zero.
   elevated: true
   scripts:
-    - Clear-Project.ps1
-    - Set-Resource.ps1
+    - Clear-Lab.ps1
+    - Initialize-Lab.ps1

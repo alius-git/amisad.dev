@@ -23,7 +23,7 @@
     VM (and its storage), then sweep orphaned VM files. Runs on any Yuruna
     host type (Hyper-V, KVM, UTM).
 .DESCRIPTION
-    The teardown half of the end-to-end pass (Set-Resource.ps1 builds it back
+    The teardown half of the end-to-end pass (Initialize-Lab.ps1 builds it back
     up). Steps, in order:
 
       1. Refuse to run if a Yuruna runner owns runner.pid -- it would race the
@@ -46,9 +46,9 @@
     Resolve-YurunaRoot for the discovery order (the runner's
     YURUNA_CONFIG_PATH makes it exact in-cycle).
 .EXAMPLE
-    pwsh test/Clear-Project.ps1
+    pwsh test/Clear-Lab.ps1
 .EXAMPLE
-    pwsh test/Clear-Project.ps1 -YurunaRoot /home/tester/git/yuruna
+    pwsh test/Clear-Lab.ps1 -YurunaRoot /home/tester/git/yuruna
 #>
 
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
@@ -72,7 +72,7 @@ $LabVmPrefix = 'amisad-'
 
 # --- 1) Refuse to sweep VMs out from under an active Yuruna runner -----------
 # Only when run standalone. Inside a runner cycle the orchestration invokes this
-# as its teardown step (set-resource), so the runner IS expected to be live:
+# as its teardown step (initialize-lab), so the runner IS expected to be live:
 # $env:YURUNA_CYCLE_CONTEXT -- published by the orchestrator before each step and
 # inherited by this child pwsh (its absence == standalone; see Get-CycleContext)
 # -- marks that in-cycle invocation and skips the guard. Absent it, an operator
