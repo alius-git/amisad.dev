@@ -4,3 +4,16 @@
 # inner sequence)
 sequences:
   - amisad.end-to-end
+
+# Optional named groupings of the sequences above, offered to the pool-control
+# board so an operator can assign one to a pool by a readable name. The implicit
+# set "all" (everything under `sequences:`) always exists and is not declared
+# here. This project runs a single orchestration top-level, so the one named set
+# is the whole cycle -- declared anyway so the board shows a meaningful label
+# rather than the derived key.
+testSets:
+  - name: end-to-end
+    displayName: AmisAd end-to-end
+    description: The full orchestration -- build, deploy and verify the site.
+    sequences:
+      - amisad.end-to-end
