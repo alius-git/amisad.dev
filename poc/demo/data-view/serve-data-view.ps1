@@ -142,7 +142,7 @@ function Get-SubjectHash([string]$Actor) {
 # password either.
 $personaUsers = 'maya', 'elena', 'tom', 'marcel', 'kai', 'priya', 'ingrid', 'dana', 'alex', 'sam', 'pat'
 $script:personaCache = $null
-function Get-PersonaSecrets {
+function Get-PersonaSecret {
     if ($null -ne $script:personaCache) { return $script:personaCache }
     $vaultError = ''
     if (-not $YurunaRoot) {
@@ -202,7 +202,7 @@ function Write-Body($Response, [int]$Status, [byte[]]$Bytes, [string]$ContentTyp
 function Write-Json($Response, [int]$Status, $Object, [int]$Depth = 8) {
     $Response.Headers['Cache-Control'] = 'no-store'
     $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $Object -Depth $Depth))
-    Write-Body $Response $Status $bytes 'application/json'
+    Write-Body -Response $Response -Status $Status -Bytes $bytes -ContentType 'application/json'
 }
 function Read-RequestBody($Request) {
     if (-not $Request.HasEntityBody) { return '' }
@@ -234,9 +234,10 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
         $text = $up.Content.ReadAsStringAsync().GetAwaiter().GetResult()
         $ct = if ($up.Content.Headers.ContentType) { $up.Content.Headers.ContentType.ToString() } else { 'application/json' }
         $Response.Headers['Cache-Control'] = 'no-store'
-        Write-Body $Response ([int]$up.StatusCode) ([Text.Encoding]::UTF8.GetBytes($text)) $ct
+        $bytes = [Text.Encoding]::UTF8.GetBytes($text)
+        Write-Body -Response $Response -Status ([int]$up.StatusCode) -Bytes $bytes -ContentType $ct
     } catch {
-        Write-Json $Response 502 @{ error = $_.Exception.Message; target = $uri }
+        Write-Json -Response $Response -Status 502 -Object @{ error = $_.Exception.Message; target = $uri }
     } finally {
         if ($cts) { $cts.Dispose() }
     }
@@ -252,12 +253,12 @@ function Send-StaticFile($Response, [string]$UrlPath) {
     $full = [IO.Path]::GetFullPath((Join-Path $root $rel))
     if (-not $full.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or
         -not (Test-Path -LiteralPath $full -PathType Leaf)) {
-        Write-Json $Response 404 @{ error = "not found: $UrlPath" }
+        Write-Json -Response $Response -Status 404 -Object @{ error = "not found: $UrlPath" }
         return
     }
     $ext = [IO.Path]::GetExtension($full).ToLowerInvariant()
     $type = if ($mime.Contains($ext)) { $mime[$ext] } else { 'application/octet-stream' }
-    Write-Body $Response 200 ([IO.File]::ReadAllBytes($full)) $type
+    Write-Body -Response $Response -Status 200 -Bytes ([IO.File]::ReadAllBytes($full)) -ContentType $type
 }
 
 $servesNetwork = $BindAddress -ne 'localhost'
@@ -317,17 +318,17 @@ try {
             $path = $req.Url.AbsolutePath
             if ($path -eq '/api/personas') {
                 if ($SharePersonaPasswords -or (Test-LoopbackClient $req)) {
-                    Write-Json $res 200 (Get-PersonaSecrets)
+                    Write-Json -Response $res -Status 200 -Object (Get-PersonaSecret)
                 } else {
-                    Write-Json $res 200 @($personaUsers | ForEach-Object {
+                    Write-Json -Response $res -Status 200 -Object @($personaUsers | ForEach-Object {
                         [ordered]@{ username = $_; password = '<withheld: remote viewer>' } })
                 }
             } elseif ($path -eq '/api/topology') {
-                Write-Json $res 200 ([ordered]@{ core = $CoreIp; edgeA = $EdgeAIp; edgeB = $EdgeBIp })
+                Write-Json -Response $res -Status 200 -Object ([ordered]@{ core = $CoreIp; edgeA = $EdgeAIp; edgeB = $EdgeBIp })
             } elseif ($path -eq '/api/vms') {
-                Write-Json $res 200 (Get-VmReport)
+                Write-Json -Response $res -Status 200 -Object (Get-VmReport)
             } elseif ($path -eq '/api/subjects') {
-                Write-Json $res 200 ([ordered]@{ maya = (Get-SubjectHash 'maya'); pat = (Get-SubjectHash 'pat') })
+                Write-Json -Response $res -Status 200 -Object ([ordered]@{ maya = (Get-SubjectHash 'maya'); pat = (Get-SubjectHash 'pat') })
             } elseif ($path -eq '/api/journal/reset') {
                 # The sequence keeps climbing so a client that missed the reset
                 # still sees its cursor overtaken rather than silently reused.
@@ -339,42 +340,47 @@ try {
                     ts   = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
                 }
                 $script:journal.Add([pscustomobject]$entry)
-                Write-Json $res 200 @{ ok = $true; seq = $seq }
+                Write-Json -Response $res -Status 200 -Object @{ ok = $true; seq = $seq }
             } elseif ($path -eq '/api/journal') {
                 if ($req.HttpMethod -eq 'POST') {
                     $raw = Read-RequestBody $req
                     $obj = $null
                     try { $obj = $raw | ConvertFrom-Json } catch { $obj = $null }
                     if ($null -eq $obj) {
-                        Write-Json $res 400 @{ error = 'journal event must be a JSON object' }
+                        Write-Json -Response $res -Status 400 -Object @{ error = 'journal event must be a JSON object' }
                     } else {
                         $seq = ++$script:journalSeq
                         $ts = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
                         $obj | Add-Member -NotePropertyName 'seq' -NotePropertyValue $seq -Force
                         $obj | Add-Member -NotePropertyName 'ts' -NotePropertyValue $ts -Force
                         $script:journal.Add($obj)
-                        Write-Json $res 201 @{ seq = $seq; ts = $ts }
+                        Write-Json -Response $res -Status 201 -Object @{ seq = $seq; ts = $ts }
                     }
                 } else {
                     $since = 0
                     $sinceRaw = $req.QueryString['since']
                     if ($sinceRaw) { [void][int]::TryParse($sinceRaw, [ref]$since) }
                     $events = @($script:journal | Where-Object { $_.seq -gt $since })
-                    Write-Json $res 200 ([ordered]@{ latest = $script:journalSeq; events = $events }) 12
+                    Write-Json -Response $res -Status 200 -Depth 12 -Object ([ordered]@{ latest = $script:journalSeq; events = $events })
                 }
             } elseif ($path -match '^/api/core/(\d+)(/.*)$') {
-                if ($CoreIp) { Invoke-Proxy $req $res "http://${CoreIp}:$($Matches[1])" $Matches[2] }
-                else { Write-Json $res 503 @{ error = 'amisad-core IP unresolved; restart with -CoreIp <ip>' } }
+                if ($CoreIp) { Invoke-Proxy -Request $req -Response $res -TargetBase "http://${CoreIp}:$($Matches[1])" -Rest $Matches[2] }
+                else { Write-Json -Response $res -Status 503 -Object @{ error = 'amisad-core IP unresolved; restart with -CoreIp <ip>' } }
             } elseif ($path -match '^/api/(edge-a|edge-b)(/.*)$') {
                 $ip = if ($Matches[1] -eq 'edge-a') { $EdgeAIp } else { $EdgeBIp }
-                if ($ip) { Invoke-Proxy $req $res "http://${ip}:8080" $Matches[2] }
-                else { Write-Json $res 503 @{ error = "$($Matches[1]) IP unresolved; restart with -Edge$(($Matches[1][5]).ToString().ToUpper())Ip <ip>" } }
+                if ($ip) { Invoke-Proxy -Request $req -Response $res -TargetBase "http://${ip}:8080" -Rest $Matches[2] }
+                else { Write-Json -Response $res -Status 503 -Object @{ error = "$($Matches[1]) IP unresolved; restart with -Edge$(($Matches[1][5]).ToString().ToUpper())Ip <ip>" } }
             } else {
-                Send-StaticFile $res $path
+                Send-StaticFile -Response $res -UrlPath $path
             }
         } catch {
-            try { Write-Json $res 500 @{ error = $_.Exception.Message } } catch {}
-            Write-Warning "$($req.HttpMethod) $($req.Url.AbsolutePath) failed: $($_.Exception.Message)"
+            # Best effort: a handler that already wrote (or closed) the response
+            # stream makes this second write throw, and losing the 500 must not
+            # take the listener loop down with it.
+            $failure = $_.Exception.Message
+            try { Write-Json -Response $res -Status 500 -Object @{ error = $failure } }
+            catch { Write-Verbose "500 for $($req.Url.AbsolutePath) could not be sent: $($_.Exception.Message)" }
+            Write-Warning "$($req.HttpMethod) $($req.Url.AbsolutePath) failed: $failure"
         }
     }
 } finally {

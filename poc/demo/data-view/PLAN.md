@@ -124,7 +124,7 @@ verbatim-in-behavior:
   `Resolve-YurunaRoot` (warn-and-degrade), `Initialize-AmisAdHost`
   (warn-and-degrade), forward-slash relative paths.
 - `Resolve-VmIp` (driver `Get-VMIp` → handoff `<name>.ip.txt` fallback).
-- `Get-PersonaSecrets` with the 11-user list and per-process cache.
+- `Get-PersonaSecret` with the 11-user list and per-process cache.
 - `Test-LoopbackClient` and the per-request vault-password gate on
   `/api/personas` (`<withheld: remote viewer>` for remote clients unless
   `-SharePersonaPasswords`).
