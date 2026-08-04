@@ -87,8 +87,8 @@ and it:
 - **re-arms the buyer's participation consent** — the coordinator refuses a need
   with `403 participation revoked` whenever the newest consent entry for her
   subject is a revoke, and that state is durable, so a pause left behind by an
-  earlier run (or by `s003`) would otherwise refuse her very first step. Only a
-  grant that actually reads `revoked` is written, keeping the
+  earlier run (or by `s003`) would otherwise refuse her very first step. Only
+  the grant types that actually read `revoked` are re-granted, keeping the
   grant → revoke → re-grant history that `s003` puts on screen clean;
 - leaves the lab's own records — offers, orders, ledgers — untouched.
 

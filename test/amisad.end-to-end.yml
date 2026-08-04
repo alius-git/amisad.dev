@@ -1,9 +1,9 @@
-# yaml-language-server: $schema=../../yuruna/test/schemas/orchestration-sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/orchestration-sequence.schema.yml
 #
 # Orchestration sequence: InvokeTestSequence steps run under one status.json
 # cycle (one dashboard row per inner sequence). initialize-lab is a HOST action
-# (lab teardown + topology build) run before the guest scenarios; s004 and
-# s010 need both edges.
+# (lab teardown + topology build) run before the guest scenarios; s004 is the
+# only scenario that needs both edges live.
 
 name: amisad.end-to-end
 description: Host-side lab teardown + topology build, then every AmisAd scenario s001 -> s010 in order.

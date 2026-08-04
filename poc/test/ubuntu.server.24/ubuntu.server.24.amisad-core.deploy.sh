@@ -9,8 +9,8 @@
 # STASH_HOST: the stash service to pull binaries from. REQUIRED, and with no
 # default -- the sequence supplies it from ${ext:stash-service.ResolveHost(...)},
 # which returns the address the cycle's warm-up resolved and confirmed answers
-# /healthz. A run that reaches this script with nothing to have published an
-# address stops immediately rather than fetching executables from a guessed host.
+# /healthz. A run that reaches this script with no published address stops
+# immediately rather than fetching executables from a guessed host.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"

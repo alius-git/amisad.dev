@@ -13,7 +13,12 @@
   <link rel="icon" href="/art/icon.svg" />
   <link rel="stylesheet" href="/ui/shared.css" />
 <style>
-  main { padding: 10px 12px 4px 12px; }
+  /* viewport-fit=cover: keep the body out from under the notch in landscape. */
+  main {
+    padding: 10px 12px 4px 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
 
   /* --- privacy strip: the answer to "how much about her is moving?" --- */
   .strip {

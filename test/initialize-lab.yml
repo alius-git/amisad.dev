@@ -1,6 +1,6 @@
 # initialize-lab.yml - host-side teardown + warm-up wrapper.
 #   1. Clear-Lab.ps1 - remove every lab VM + storage, sweep orphaned files.
-#   2. Initialize-Lab.ps1  - build the stash, both edges, and amisad-core
+#   2. Initialize-Lab.ps1 - build the stash, both edges, and amisad-core.
 # HOST action, not a guest interaction sequence.
 
 name: initialize-lab

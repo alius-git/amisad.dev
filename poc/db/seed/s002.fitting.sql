@@ -2,8 +2,8 @@
 -- Copyright (c) 2026 by Alisson Sol et al.
 -- AmisAd POC - s002.fitting seed: Elena's dress catalog (one dusty blue), a
 -- second seller's out-of-range/past-deadline dresses, and fitting slots.
--- NOTE: the live sequence seeds via the seller-svc API, which now WRITES
--- THROUGH to PostgreSQL; attributes and fitting slots ride in the persisted
+-- NOTE: the live sequence seeds via the seller-svc API, which WRITES THROUGH
+-- to PostgreSQL; attributes and fitting slots ride in the persisted
 -- offer document (seller.offers.document) and land in relational form when
 -- the schema grows offer_attributes/fitting_slots tables.
 

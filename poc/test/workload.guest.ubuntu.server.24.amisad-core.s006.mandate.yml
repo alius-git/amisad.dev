@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - s006.mandate (Delegated Procurement Under a Scoped Mandate)
-# restore amisad-core, start slice-runtime on
-# amisad-edge-a, and run the full delegation lifecycle
+# AmisAd POC - s006.mandate (Delegated Procurement Under a Scoped Mandate):
+# restore amisad-core, start slice-runtime on amisad-edge-a, and run the full
+# delegation lifecycle.
 
 sequenceGuid: 42c436f1-875b-452c-80b5-e8cff1ce93c4
 sequenceRevision: 2

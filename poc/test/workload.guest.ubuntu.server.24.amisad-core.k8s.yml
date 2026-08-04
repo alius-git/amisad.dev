@@ -14,7 +14,7 @@ resource:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
 variables:
-  # Per-VM admin (see usernames.md).
+  # Per-VM admin (see poc/usernames.md).
   username: amisad-core-admin
   hostname: amisad-core
 

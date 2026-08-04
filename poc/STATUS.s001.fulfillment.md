@@ -24,8 +24,6 @@ no script changes were needed. Vault entries seeded keystroke-safe
 `fd9ccea`; see memory `yuruna-guest-username-per-vm`. This supersedes the
 earlier "durability blocked" caveat — cold starts are now repeatable.
 
-
-
 ## Official runner-log green (cycle 002401)
 
 The Yuruna runner drove the entire cold chain to green: `start.guest` →
@@ -61,8 +59,6 @@ step 6/9 and ran green end-to-end.
 - The runner does **not** warm-path across cycles here: each cycle provisions a
   fresh `test-` VM and rebuilds rather than reusing the `build.amisad` snapshot
   VM, so the "second cycle warm-paths" expectation isn't met on this setup.
-
-
 
 ## Result: GREEN
 

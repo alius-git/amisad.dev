@@ -110,9 +110,9 @@ function Remove-InstallMedia {
     # Stripping the CURRENT config is not enough for restore targets: the
     # checkpoint still re-attaches the DVDs, and the strip drops the VM's ACE
     # on the ISO files, so the next loadDiskSnapshot fails with 0x80070005.
-    # Retake the checkpoint so the RESTORED config is
-    # DVD-free too. The snapshot manifest compares (VMName, SnapshotId,
-    # HostType) only, all unchanged by the retake.
+    # Retake the checkpoint so the RESTORED config is DVD-free too; the
+    # snapshot manifest compares (VMName, SnapshotId, HostType) only, all
+    # unchanged by the retake.
     if ($SnapshotId) {
         $cp = Hyper-V\Get-VMCheckpoint -VMName $Name -Name $SnapshotId -ErrorAction SilentlyContinue
         if ($cp) {
@@ -202,10 +202,10 @@ foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
         exit 1
     }
     # The framework provisions every ubuntu guest at a FIXED 12GB. Edges only
-    # run the small slice-runtime binary, and since s004 BOTH edges are live
+    # run the small slice-runtime binary, and from s004 on BOTH edges are live
     # while amisad-core (12GB) restores - 3 x 12GB exceeds host RAM
-    # (0x800705AA). Shrink edges before the checkpoint
-    # retake so the restored config is small too.
+    # (0x800705AA). Shrink edges before the checkpoint retake so the restored
+    # config is small too.
     Hyper-V\Set-VM -Name $edge -StaticMemory -MemoryStartupBytes 4GB
     Write-Information "$edge memory set to 4GB (slice-runtime only)."
     Remove-InstallMedia -Name $edge -SnapshotId $edge

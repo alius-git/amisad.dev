@@ -7,7 +7,7 @@ This document is the functional blueprint for the end-to-end automated system de
 **Conventions**
 
 - **Actors** are the personas defined in [personas.md](personas.md); **applications** and **shared foundations** are as defined in [applications.md](applications.md).
-- **Execution environment.** Sequences may span web, local, or mobile application interfaces — whatever surface each application presents. Scenarios describe the end-to-end user and system journey only; current temporary guest-environment limitations within the Yuruna framework are explicitly out of scope for this design.
+- **Execution environment.** Sequences may span web, local, or mobile application interfaces — whatever surface each application presents. Scenarios describe the end-to-end user and system journey only; current temporary guest-environment limitations within the Yuruna framework are out of scope for this design.
 - **Priorities.** `P0` — the core value loop and the privacy promise; nothing else matters if these fail. `P1` — the trust-boundary and economic expansions that make the ecosystem viable at scale. `P2` — governance and insight capstones that consume the evidence the rest produce. Scenarios are ordered by rank; within a rank, by dependency.
 - **Target Verification Point.** The desired state (and, where applicable, cryptographic proof) Yuruna must assert to declare the sequence successful. Every assertion names observable state — ledger entries, application views, attestation records — never internal implementation detail.
 

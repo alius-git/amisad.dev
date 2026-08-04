@@ -2,7 +2,8 @@
 
 How to get the deployed AmisAd topology ("prebuild", via the Yuruna framework)
 and then drive the demo manually. Full test automation lives in
-[test.md](test.md).
+[test.md](test.md); the browser-driven 30-minute walkthroughs live in
+[demo/README.md](demo/README.md).
 
 ## Prebuild
 
@@ -38,11 +39,11 @@ or LAN at `http://<vm-ip>:<nodeport>`.
 
 **Re-arm (only after a VM restart).** A reboot of `amisad-core` loses the
 in-memory state (coordinator routing, identity tokens, the registered edge) —
-but the ledgers, offers, and orders come back from PostgreSQL, chains intact. Run the
-command steps below as **`amisad-core-admin`** — the repo and
+but the ledgers, offers, and orders come back from PostgreSQL, chains intact.
+Run the command steps below as **`amisad-core-admin`**: the repo and
 `target/release/` binaries live under its home, which the non-admin personas
-cannot traverse; maya/elena/tom/priya are the demo *narrative* logins, and the
-plain `curl` steps also work from any user or from the host via the NodePorts:
+cannot traverse. maya/elena/tom/priya are the demo *narrative* logins, and the
+plain `curl` steps work from any user, or from the host via the NodePorts:
 
 ```bash
 cd ~/amisad.dev/poc

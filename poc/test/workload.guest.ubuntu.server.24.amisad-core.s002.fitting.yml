@@ -1,9 +1,8 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s002.fitting (Considered Purchase, Constraint Fidelity, and
-# In-Person Booking): restore amisad-core (the
-# per-scenario state reset - s001's orders are gone), then over SSH start
-# slice-runtime on amisad-edge-a
+# In-Person Booking): restore amisad-core (the per-scenario state reset -
+# s001's orders are gone), then over SSH start slice-runtime on amisad-edge-a.
 
 sequenceGuid: 4255ee05-8f3a-4c17-9d2b-6e4a7c90d155
 sequenceRevision: 2

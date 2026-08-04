@@ -2,9 +2,9 @@
 -- Copyright (c) 2026 by Alisson Sol et al.
 -- AmisAd POC - s001.fulfillment seed: Elena's catalog with standing auto-close
 -- deals in region-a. NOTE: the live sequence seeds via the seller-svc API,
--- which now WRITES THROUGH to PostgreSQL (offers persist with their full
--- document JSON) - API seeding stays canonical. This file remains the
--- relational sketch of the same seed for direct-SQL use.
+-- which WRITES THROUGH to PostgreSQL (offers persist with their full document
+-- JSON) - API seeding stays canonical. This file is the relational sketch of
+-- the same seed, for direct-SQL use.
 
 INSERT INTO seller.offers
     (offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close)

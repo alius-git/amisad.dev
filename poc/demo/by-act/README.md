@@ -3,7 +3,7 @@
 A persona-switching **mock UI** plus a **slide deck** that walk all ten
 scenarios in half an hour, on the topology a green
 [`test/amisad.end-to-end.yml`](../../../test/amisad.end-to-end.yml) run leaves
-live. Nothing here changes the existing POC code or the deployed system — the
+live. Nothing here changes the POC code or the deployed system — the
 UI drives the same NodePort APIs the sequences exercise
 ([demo.md](../../demo.md)), just from a browser instead of `curl`.
 
@@ -47,8 +47,7 @@ pwsh poc/demo/by-act/serve-by-act.ps1 -BindAddress 10.0.0.5  # one NIC (localhos
 pwsh poc/demo/by-act/serve-by-act.ps1 -BindAddress localhost  # this machine only
 ```
 
-The banner prints the exact `http://<host ip>:8091/` URLs to type on the
-laptop. The server handles the host-side plumbing itself:
+The server handles the host-side plumbing itself:
 
 - **It opens inbound 8091** on whichever firewall the platform runs and, on
   Windows, adds the http.sys reservation a non-loopback listener needs. The
@@ -76,10 +75,9 @@ captured ids — driving one demo from two browsers splits the state.
 - `serve-by-act.ps1` serves the static UI and deck, answers `/api/personas`
   (vault via the Yuruna authentication module) and `/api/topology` (VM IPs
   from the framework's per-hypervisor host driver, so Hyper-V, KVM and UTM
-  hosts all resolve),
-  and proxies `/api/core/<nodeport>/…` and `/api/edge-a|b/…` to the lab —
-  the POC services send no CORS headers, so the browser goes same-origin
-  through the proxy.
+  hosts all resolve), and proxies `/api/core/<nodeport>/…` and
+  `/api/edge-a|b/…` to the lab — the POC services send no CORS headers, so
+  the browser goes same-origin through the proxy.
 - `ui/app.js` holds the whole demo script: each scenario panel lists its
   steps in order with the acting persona on every row; the dropdown enables
   that persona's buttons. Ids returned by the system (match, handle,

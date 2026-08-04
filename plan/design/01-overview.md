@@ -71,7 +71,7 @@ flowchart LR
     foundations --> pg
 ```
 
-Two edge VMs are the minimum honest topology: s004.failover asserts a jurisdiction-restricted allocation choosing the compliant region, and s009.suppression asserts one region above and one below the anonymity threshold. The slice VMs hold no state; a reboot must be indistinguishable from a fresh provision.
+Two edge VMs are the minimum honest topology (see [../design.md](../design.md) §2): s004.failover asserts a jurisdiction-restricted allocation choosing the compliant region, and s009.suppression asserts one region above and one below the anonymity threshold. The slice VMs hold no state — a reboot is indistinguishable from a fresh provision.
 
 ---
 

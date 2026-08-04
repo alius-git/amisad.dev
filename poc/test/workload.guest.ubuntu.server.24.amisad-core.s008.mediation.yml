@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s008.mediation (Zero-Knowledge Dispute Mediation and Settlement
-# Adjustment): restore amisad-core, start
-# slice-runtime on amisad-edge-a, seed a settled order, open a support case
-# carrying operational metadata only (no buyer identity)
+# Adjustment): restore amisad-core, start slice-runtime on amisad-edge-a, seed
+# a settled order, open a support case carrying operational metadata only (no
+# buyer identity).
 
 sequenceGuid: 42a95e9f-3748-47f8-b8ad-cc9564d81776
 sequenceRevision: 2

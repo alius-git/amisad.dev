@@ -57,12 +57,14 @@ the demo by hand instead, see [demo.md](demo.md).
    lab's, and a literal here would go stale the first time the service moved.
    Any one of these is enough:
 
-   - run one on this host: `test/Start-StashServiceVM.ps1` from the `yuruna` folder;
+   - run one on this host: `test/Start-StashServiceVM.ps1` from the `yuruna`
+     folder;
    - join a pool that runs one — the service announces itself to the
      pool-aggregator and this host reads the address back (nothing to
-     configure beyond the caching proxy you already point at);
+     configure beyond the caching proxy this host already uses);
    - state it: `$env:YURUNA_STASH_SERVICE_HOST = '<address>'`, or
-     `pwsh test/Initialize-Lab.ps1 -StashServiceHost '<address>'`.
+     `pwsh test/Initialize-Lab.ps1 -StashServiceHost '<address>'` from this
+     repository.
 
    The pre-flight probes `/healthz` on each candidate before anything long
    starts, publishes the one that answered for the rest of the cycle, and
@@ -81,11 +83,11 @@ independent without per-scenario VMs. Hostnames are set with the framework's
 ([usernames.md](usernames.md)).
 
 ```
-[0] cleanup        remove every amisad lab VM (old and new naming) and any
-                      leftover test-* VMs with their storage dirs; ensure the
-                      core->edge demo keypair exists; resolve the stash
-                      service (pinned or discovered), verify /healthz, and
-                      publish the address -- no stash, no run.
+[0] cleanup        remove every amisad lab VM (current and legacy names)
+                      and any leftover test-* VMs with their storage dirs;
+                      ensure the core->edge demo keypair exists; resolve the
+                      stash service (pinned or discovered), verify /healthz,
+                      and publish the address -- no stash, no run.
 [1] amisad-build   start.guest -> build tools -> snapshot; compile run
                       uploads amisad-<arch>-binaries.tgz to the stash service;
                       VM stopped afterwards.
@@ -120,11 +122,11 @@ pwsh poc\build\run-tests.ps1 -NoConfigGate
 (enforcing the clean start), generates the core→edge demo keypair if missing,
 resolves the stash service and stops at once if none answers (see
 [one-time setup](#one-time-setup) step 4), builds the topology, then runs each
-scenario from its registry in order. Green
-ends with `ALL SCENARIOS PASSED`, leaving `amisad-core` and both edge VMs
-live as the demo environment. Stage logs land under `%TEMP%\amisad-tests\`;
-watch live progress at `http://localhost:8080/status/`. Expect ~15 min for the
-build, ~15 min per edge, ~20 min for vm-core, and a few minutes per scenario.
+scenario from its registry in order. Green ends with `ALL SCENARIOS PASSED`,
+leaving `amisad-core` and both edge VMs live as the demo environment. Stage
+logs land under `%TEMP%\amisad-tests\`; watch live progress at
+`http://localhost:8080/status/`. Expect ~15 min for the build, ~15 min per
+edge, ~20 min for vm-core, and a few minutes per scenario.
 
 **Headless runs.** First-login GUI keystrokes are only reliable while a display
 is painting. For unattended runs, opt into the framework's virtual display once
@@ -136,7 +138,7 @@ tarball of `amisad.dev` HEAD from the host status service — rerun
 `poc\build\serve-local.ps1` after every commit. The guest scripts pull
 `/yuruna-project-archive.tar.gz`, the framework's project-tarball endpoint: a
 fresh tar of `<RepoRoot>/project` with the project tree (`poc/`, `test/`, …)
-at the top level, which is exactly what their extract step expects. Not
+at the top level, exactly what their extract step expects. Not
 `/yuruna-repo/project-poc.tar.gz` — `/yuruna-repo/*` serves the working tree
 file-by-file and no such file exists, so that path 404s, `wget` exits 8, and
 the scripts' `set -euo pipefail` aborts the run before anything is built or
@@ -156,16 +158,16 @@ consent chain's six grant/revoke/re-grant rows; s004 asserts all twelve
 attestation rows; s005 the boosted 5-way settlement; s006 the mandate
 grant+revoke consent rows; s007 the delta-zeroed offer leaving the catalog;
 s008 the compensating adjustment entries + disclosure grant; s010 the
-independent four-dimension certification and tamper localization. Empty `databaseUrl` (the
-chart default) keeps a service in-memory — which is how `cargo test` and
-skeleton services run.
+independent four-dimension certification and tamper localization. An empty
+`databaseUrl` (the chart default) keeps a service in-memory — how `cargo test`
+and skeleton services run.
 
 ## Snapshot page-cache flush
 
 Guest steps that end in a snapshot finish with `sync`. The host freezes the
 VM's disk for the snapshot as soon as the step exits, and it does not ask the
 guest to write back first; whatever is still in the page cache at that
-instant is simply not in the snapshot. The failure is silent and deferred —
+instant is not in the snapshot. The failure is silent and deferred —
 the file stays readable for the rest of the SSH session and is missing only
 once the snapshot is restored — so it surfaces far from its cause, in
 whichever later sequence first needs the lost write: a dropped tool is a bare
@@ -185,16 +187,17 @@ The compile step packs the release binaries as `amisad-<arch>-binaries.tgz`
 (`<arch>` from `uname -m`) and the deploy step downloads only the label
 matching its own architecture. The stash is one shared service for the whole
 lab, so the artifact name has to say which machine code it holds: were every
-host to upload under one label, the newest upload would win whatever asked
-for it, and a guest handed another architecture's build gets binaries its
-kernel cannot run — every pod then dies with "exec format error" and the
-deploy only reports a rollout timeout, far from the cause.
+host to upload under one label, the newest upload would answer every request,
+and a guest handed another architecture's build gets binaries its kernel
+cannot run — every pod then dies with "exec format error" and the deploy only
+reports a rollout timeout, far from the cause.
 
 The architecture sits in the middle of the name on purpose. The stash matches
-filenames by substring, so a host still asking for the old `amisad-binaries`
+filenames by substring, so a host still asking for the bare `amisad-binaries`
 label would keep matching a trailing `amisad-binaries-<arch>` form and stay
-exposed; it cannot match `amisad-<arch>-binaries`. Hosts adopt the new label
-at their own pace without ever being handed a foreign build.
+exposed; it cannot match `amisad-<arch>-binaries`. Hosts adopt the
+architecture-qualified label at their own pace without ever being handed a
+foreign build.
 
 ## Adding a scenario
 

@@ -28,6 +28,9 @@ body {
 header {
   display: flex;
   align-items: center;
+  /* The chrome is wider than a phone: without wrapping it forces a horizontal
+     scrollbar on the whole page rather than overflowing itself. */
+  flex-wrap: wrap;
   padding: 0.55rem 1rem;
   background: var(--amisad-navy);
   color: var(--amisad-white);

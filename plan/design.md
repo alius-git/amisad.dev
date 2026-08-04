@@ -118,7 +118,7 @@ Yuruna provisions the four nodes, deploys via `poc/config/localhost/`, seeds fro
 
 ## 9. Diagrams
 
-The documents under [design/](design/) visualize this design, they do not restate it. Every diagram holds at most seven boxes; planned/growth-path items use dashed edges.
+The documents under [design/](design/) visualize this design; they do not restate it. Every diagram holds at most seven boxes; planned/growth-path items use dashed edges.
 
 | # | Document | Diagram type | Shows |
 |---|----------|--------------|-------|
@@ -132,7 +132,7 @@ The documents under [design/](design/) visualize this design, they do not restat
 | 8 | [AmisAd/audit](design/08-audit.md) | flowchart | audit-svc: chain verification, certification, reporting. |
 | 9 | [AmisAd/connect](design/09-connect.md) | flowchart | connect-svc: contracts, sandbox, credentials, webhooks. |
 
-One sequence diagram per verification scenario, faithful to the numbered steps in [scenarios.md](scenarios.md); participants are the POC components above, personas as actors, at most 8 lifelines each. Each traces its scenario's steps through the POC components to its Target Verification Point.
+One sequence diagram per verification scenario, faithful to the numbered steps in [scenarios.md](scenarios.md): participants are the POC components above, personas are actors, at most 8 lifelines each, and each diagram traces its scenario's steps to its Target Verification Point.
 
 | Document | Sequence for |
 |----------|--------------|

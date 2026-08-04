@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s004.failover (Sovereign Slice Allocation, Isolation Fault,
-# and Attested Failover): restore amisad-core,
-# then over SSH start slice-runtime on BOTH edges (region-a and region-b,
-# region identity attested)
+# and Attested Failover): restore amisad-core, then over SSH start
+# slice-runtime on BOTH edges (region-a and region-b, region identity
+# attested).
 
 sequenceGuid: 427078bc-c296-4ce8-8d7f-bfc58eaa246d
 sequenceRevision: 2

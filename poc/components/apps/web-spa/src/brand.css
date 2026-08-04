@@ -18,6 +18,10 @@ body {
   max-width: 40rem;
   margin: 4rem auto;
   padding: 0 1rem;
+  /* index.html declares viewport-fit=cover, so in landscape the page extends
+     under the notch; the inset has to be added on top of the base padding. */
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
 }
 
 .amisad-home nav {
@@ -27,8 +31,12 @@ body {
 }
 
 /* Margins, not flex gap: gap in flex is unsupported on iPhone X-era Safari
-   (<14.5) and old Android WebView. */
+   (<14.5) and old Android WebView. inline-flex + min-height because a bare
+   text link is a ~19px touch target, well under the 44px a finger needs. */
 .amisad-home nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   margin: 0 0.75rem 0.5rem 0;
 }
 

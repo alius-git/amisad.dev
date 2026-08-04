@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - vm-edge-b (region B slice VM): identical preparation to
-# vm-edge-a under its own hostname/admin.
-# first exercised by s004.failover (jurisdiction choice) and s009.suppression
-# (anonymity threshold), so the test driver leaves it stopped until then.
+# vm-edge-a under its own hostname/admin. Only s004.failover uses it - a
+# jurisdiction-restricted allocation needs a second region to exclude - but
+# the lab driver brings both edges up together.
 
 sequenceGuid: 4277aa07-3c5d-4e69-9f2b-0d4c6e81f377
 sequenceRevision: 1

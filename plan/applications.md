@@ -4,7 +4,7 @@
 
 AmisAd is a privacy-first matching ecosystem: buyers state needs privately, sellers post offers openly, and the match is computed where the buyer is — on their device or in a sealed, ephemeral slice of the network nearby. The introduction travels; the buyer's life stays home. Every match compensates four parties — seller, network, platform, and ad partners — from value created, not data extracted.
 
-This document defines each application required to run that ecosystem: its business objective, its core user-facing functionality, and the architectural paradigms suited to the job. It deliberately avoids specific frameworks and vendors; it names the *shape* of each system, not its parts list.
+This document defines each application required to run that ecosystem: its business objective, its core user-facing functionality, and the architectural paradigms suited to the job. It deliberately avoids specific frameworks and vendors, naming the *shape* of each system rather than its parts list.
 
 ---
 
@@ -55,7 +55,7 @@ Beneath the applications sit four **shared platform foundations** — the matchi
 **Architectural paradigms**
 
 - **Personal data vault, device-resident** — the buyer's needs, history, and preferences live with the buyer; the application is the sole custodian of individual data in the entire ecosystem.
-- **Edge-local computation** — matching executes on-device where possible, otherwise in a sealed, attested environment at the network edge (see [Private Matching Fabric](#shared-platform-foundations)); offers travel in, results travel out, the need never leaves.
+- **Edge-local computation** — matching executes on-device where possible, otherwise in a sealed, attested environment at the network edge (see [Private Matching Fabric](#private-matching-fabric)); offers travel in, results travel out, the need never leaves.
 - **Offline-first mobile experience** — needs are captured and managed regardless of connectivity; matching resumes when the edge is reachable.
 - **Policy engine for autonomous closing** — user-authored rules evaluated locally decide what closes without a tap.
 - **Capability-scoped delegated authorization** — a mandate is a first-class Consent Ledger record, not a shared login: every delegate action carries dual attribution (actor + principal + mandate), is checked against scope, cap, and expiry at execution time, and dies the moment the mandate does. Delegates never gain access to the principal's vault beyond the mandated categories.
@@ -241,7 +241,7 @@ Beneath the applications sit four **shared platform foundations** — the matchi
 
 ## Shared Platform Foundations
 
-Four capabilities sit beneath the applications. They are system components, not user-facing products; every application above consumes them.
+Four capabilities sit beneath the applications: system components, not user-facing products, consumed by every application above.
 
 ### Private Matching Fabric
 The sealed execution environments where a buyer's need meets sellers' offers. Environments are **ephemeral** (created per match, destroyed on completion), **attested** (their isolation is provable, feeding the audit evidence log), and **located by sovereignty rules** (on the buyer's device or at the network edge within jurisdiction). Offers and creative travel in; match results, settlement records, and threshold-protected aggregates travel out; the need itself never does. For delegated needs, the fabric enforces the mandate at match time — category scope, budget cap, closing authority — and stamps the match record with delegate attribution (actor, principal, mandate) for settlement and audit. Hosted on carrier infrastructure administered through AmisAd/resource.
@@ -291,7 +291,7 @@ Every persona workflow from [personas.md](personas.md) traced to the capability 
 | Priya oversees the four-way settlement split | AmisAd/platform — settlement oversight |
 | Priya investigates a fraud pattern | AmisAd/platform — trust and safety (metadata-only anomaly detection) |
 | Priya resolves an escalated cross-party dispute | AmisAd/platform — dispute desk (operations mode) |
-| Ingrid verifies vaults were sealed and destroyed | AmisAd/audit — attestation ledger access |
+| Ingrid verifies environments were sealed and destroyed | AmisAd/audit — attestation ledger access |
 | Ingrid audits mandates and disclosure grants | AmisAd/audit — consent audit (all three grant types) |
 | Ingrid certifies a jurisdiction | AmisAd/audit — certification runs, regulator-facing reporting |
 | Dana maps rising demand by neighborhood | AmisAd/insights — insights workbench |

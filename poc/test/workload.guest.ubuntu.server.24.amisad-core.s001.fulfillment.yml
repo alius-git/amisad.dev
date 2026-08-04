@@ -1,9 +1,8 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s001.fulfillment (Intent-Driven Edge Match and Automated
-# Fulfillment): restore amisad-core (that restore
-# IS the per-scenario state reset), then over SSH start slice-runtime on
-# amisad-edge-a
+# Fulfillment): restore amisad-core - that restore IS the per-scenario state
+# reset - then over SSH start slice-runtime on amisad-edge-a.
 
 sequenceGuid: 4222bb02-7d1f-4c8e-8a4b-3f9e58d71b22
 sequenceRevision: 4

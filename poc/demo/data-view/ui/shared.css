@@ -68,6 +68,10 @@ body {
   position: sticky;
   top: 0;
   z-index: 40;
+  /* Both windows declare viewport-fit=cover, so in landscape the page extends
+     under the notch; the inset has to be added on top of the base padding. */
+  padding-left: max(14px, env(safe-area-inset-left));
+  padding-right: max(14px, env(safe-area-inset-right));
 }
 .bar > * { margin-right: 10px; }
 .bar h1 {
@@ -117,7 +121,9 @@ button.danger:hover { background: #ee8570; }
 button.busy { background: var(--amisad-terracotta); }
 select {
   font: inherit;
-  font-size: 0.85rem;
+  /* 16px floor: iOS Safari zooms the whole page when a focused form control's
+     text is smaller, and the demo never zooms back out on its own. */
+  font-size: 1rem;
   min-height: 44px;
   padding: 0 10px;
   border-radius: 8px;

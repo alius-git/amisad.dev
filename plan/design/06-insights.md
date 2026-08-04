@@ -32,7 +32,7 @@ flowchart TD
 - **Suppression is indistinguishable from absence:** below-floor cells are dropped, not zeroed — s009.suppression asserts the below-threshold region appears in no downstream view of any application.
 - **Outlooks are published products:** versioned, dated rows that seller-svc and ads-svc read; all consumers of a version see identical figures (asserted in s009.suppression step 5).
 - **Unmet demand** compares aggregate need counts against match counts per category/region — the growth signal, carrying category and region only.
-- **POC threshold is a config value** (deliberately low so lab-scale seeds can cross it); production tuning is a growth-path concern, the gate's position in the pipeline is not.
+- **POC threshold is a config value** (deliberately low so lab-scale seeds can cross it); production tuning is a growth-path concern; the gate's position in the pipeline is not.
 
 **Scenario coverage:** s005.attribution (demand views), s009.suppression.
 

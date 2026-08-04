@@ -270,7 +270,7 @@ Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core'
 # --- [5] start BOTH region edges and wait for their IP reports ---
 # The scenarios resolve amisad-edge-a/-b from these boot-time reports; a stale
 # file from a prior run must not count, so delete first and anchor freshness to
-# THIS start. s004/s010 need region-B live; earlier scenarios just don't use it.
+# THIS start. Only s004.failover needs region-B live; the rest ignore it.
 Write-Information "Starting amisad-edge-a + amisad-edge-b."
 $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test/status/log' }
 $edges = 'amisad-edge-a', 'amisad-edge-b'

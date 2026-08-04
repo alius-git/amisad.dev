@@ -8,7 +8,7 @@ metadata:
 spec:
   replicas: {{ .Values.replicas }}
   # Single-writer store: never let an old and a new pod overlap, or two
-  # in-memory chain heads could fork the persisted ledger.
+  # in-memory copies of the catalog and order board could diverge.
   strategy:
     type: Recreate
   selector:

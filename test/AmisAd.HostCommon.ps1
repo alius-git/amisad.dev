@@ -21,15 +21,14 @@
     Shared host-portability helpers for the AmisAd host-action scripts
     (Clear-Lab.ps1, Initialize-Lab.ps1). Dot-sourced, not invoked.
 .DESCRIPTION
-    Both host actions used to be Hyper-V-only: they called `Hyper-V\Get-VM`
-    directly and defaulted -YurunaRoot to 'c:\git\yuruna'. On host.ubuntu.kvm
-    (and host.macos.utm) the module cannot load and 'c:' is read as a PSDrive
-    name, so Join-Path failed with "Cannot find drive" -- the pass died on
-    step 1 of every cycle.
+    A host action that calls `Hyper-V\Get-VM` directly, or defaults its root to
+    'c:\git\yuruna', cannot run on host.ubuntu.kvm or host.macos.utm: the
+    Hyper-V module is absent and 'c:' is read as a PSDrive name, so Join-Path
+    fails with "Cannot find drive".
 
-    Yuruna already solves this: host/<host-type>/modules/Yuruna.Host.psm1
-    exports ONE contract (New-VM / Start-VM / Stop-VMForce / Remove-VM /
-    Get-VMState / Save-VMDiskSnapshot / ...) implemented per hypervisor, and
+    Yuruna solves this: host/<host-type>/modules/Yuruna.Host.psm1 exports ONE
+    contract (New-VM / Start-VM / Stop-VMForce / Remove-VM / Get-VMState /
+    Save-VMDiskSnapshot / ...) implemented per hypervisor, and
     Initialize-YurunaHost imports the right driver for the detected host. These
     helpers wire the project into that contract so the host actions carry no
     hypervisor branches of their own.
@@ -102,8 +101,7 @@ function Initialize-AmisAdHost {
         Remove-VM / Get-VMState / Save-VMDiskSnapshot names resolve to the
         implementation for the running hypervisor -- the drivers deliberately
         shadow Hyper-V's same-named cmdlets, so a caller never needs a
-        `Hyper-V\` prefix (which is precisely what pinned these scripts to
-        Windows).
+        `Hyper-V\` prefix, which would pin the script to Windows.
     .OUTPUTS
         [string] host type, e.g. 'host.ubuntu.kvm'.
     #>

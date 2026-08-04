@@ -206,7 +206,7 @@ Personas 1–5 were defined by the founding product narrative. Personas 6–8 cl
 
 **Responsibilities within the ecosystem**
 
-- Onboard and verify participants: real sellers, real agencies, real creative partners, real carriers — and now real integration partners and delegates.
+- Onboard and verify participants: real sellers, agencies, creative partners, carriers, integration partners, and delegates.
 - Oversee settlement: the split of every match among seller, network, platform, and ad partners — computed correctly, paid on time.
 - Operate trust and safety: fraud and abuse detection on operational metadata, never on match content.
 - Coordinate cross-party incidents that no single participant can resolve alone.
@@ -240,7 +240,7 @@ Personas 1–5 were defined by the founding product narrative. Personas 6–8 cl
 
 - Examine attestation evidence that matching environments were isolated, ephemeral, and destroyed on completion.
 - Verify that data residency and processing boundaries were honored for every jurisdiction in scope.
-- Audit consent records: participation was informed, current, and revocable — and revocation was honored. This now includes delegation mandates and mediation disclosure grants.
+- Audit consent records: participation was informed, current, and revocable — and revocation was honored. This covers delegation mandates and mediation disclosure grants as well.
 - Certify compliance on a recurring cycle and produce reports for regulators and the public.
 - Investigate suspected breaches of the privacy model, with findings binding on the platform.
 
@@ -388,7 +388,7 @@ The five founding personas cover demand (Maya), supply (Elena, Kai), infrastruct
 2. **Nobody verified the promise.** The entire ecosystem rests on a claim — nothing about the buyer leaves — that must be provable to regulators and the public, by someone independent of the platform. **Ingrid (Trust Auditor)** owns verification: attestation review, residency and consent audit, certification.
 3. **Nobody turned aggregates into decisions.** The system's only legitimate analytical window — privacy-thresholded aggregate demand — had producers and consumers but no analyst. **Dana (Demand Analyst)** owns it: demand outlooks for sellers and agencies, health metrics for the platform, unmet demand as the growth signal.
 
-**Pass two — trust boundaries.** Three roles initially deferred are now promoted to day-one scope (personas 9–11), because each one changes a **shared foundation contract**, and foundation contracts are cheap to design in and expensive to retrofit:
+**Pass two — trust boundaries.** Three initially deferred roles belong in day-one scope (personas 9–11), because each one changes a **shared foundation contract**, and foundation contracts are cheap to design in and expensive to retrofit:
 
 4. **Enterprise integration was assumed but unowned.** Sellers beyond a certain size will not hand-maintain catalogs; external systems must become first-class actors. **Alex (Integration Partner)** requires workload identity, scoped credentials, and versioned contracts in the Identity & Verification foundation — decisions that must precede the first API, not follow it.
 5. **Support was absorbed into operations — and support is where privacy promises quietly die.** A support function bolted on later would inevitably demand "just a little" visibility. **Sam (Support Agent)** forces the zero-knowledge mediation model — metadata-first evidence and consented, time-boxed disclosure grants in the Consent Ledger — to exist from the start.

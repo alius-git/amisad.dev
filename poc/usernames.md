@@ -38,7 +38,7 @@ over SSH.
 | `maya` | Maya, the buyer | Console/SSH login persona for the demo narrative; API (`curl`) steps work from her account. `buyer-client` itself runs from the admin account (the binaries live under the admin's 0750 home). |
 | `elena` | Elena, the seller | Console/SSH login persona for the seller narrative; the order-board `curl` steps work from her account. |
 | `tom` | Tom, the carrier/resource operator | s004.failover narrative: allocation policy, incident queue, escalation; the resource-svc `curl` steps work from his account. |
-| `priya` | Priya, the platform operator | s004.failover + s007 narrative: cross-party incident case; participant registry verification. |
+| `priya` | Priya, the platform operator | s004.failover + s007.inventory narrative: cross-party incident case; participant registry verification. |
 | `marcel` | Marcel, the ad agency | s005.attribution narrative: campaign, creative brief, attribution report; the ads-svc `curl` steps work from his account. |
 | `kai` | Kai, the creative | s005.attribution narrative: accepts the brief, produces the asset, performance view. |
 | `pat` | Pat, the delegate | s006.mandate narrative: acts under Maya's scoped mandate in the delegate workspace. |
@@ -64,9 +64,8 @@ Scenario scripts on vm-core reach the edge VMs with a dedicated **demo
 keypair** (`amisad-demo-key`), generated host-side by `run-tests.ps1` under
 `test/status/handoff/` and fetched by the guests from the status service. The
 edges' boot-time IP reporter posts `<hostname>.ip.txt` under the status
-server's `log/handoff/`, which is how
-vm-core resolves them without DNS. Lab deviation, deliberate: the handoff dir
-is readable on the trusted lab LAN.
+server's `log/handoff/`, which is how vm-core resolves them without DNS. Lab
+deviation, deliberate: the handoff dir is readable on the trusted lab LAN.
 
 ---
 

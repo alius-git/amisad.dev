@@ -1,8 +1,7 @@
 """AmisAd POC Bazel module.
 
 Rust builds through rules_rust with a pinned toolchain. Third-party crates
-resolve through crate_universe from the committed Cargo.lock - wired together
-with the first external dependency (postgres), as poc/README.md planned.
+resolve through crate_universe from the committed Cargo.lock (poc/README.md).
 """
 
 module(

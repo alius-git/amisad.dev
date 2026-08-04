@@ -10,7 +10,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | Path | Contents |
 |------|----------|
 | `MODULE.bazel`, `.bazelversion`, `BUILD.bazel` | Bazel root (bzlmod, pinned via bazelisk) |
-| `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `serve-local.ps1` (lab-mode guest source, served from HEAD) |
+| `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `run-tests.ps1` (the scenario driver), `serve-local.ps1` (lab-mode guest source, served from HEAD) |
 | `contracts/` | OpenAPI specs per service — real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest — + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
@@ -24,6 +24,7 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
 | `test/workload.guest.*.yml` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment … s010.certification |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
+| `demo/` | Two browser-driven 30-minute demos (`by-act`, `data-view`) on the topology a green run leaves live |
 | `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
 
 ## Building
@@ -43,9 +44,8 @@ sources.
 - **One third-party crate: `postgres`.** The services serve their routes with
   the std-only responder in `amisad-common`; the first external dependency is
   the PostgreSQL client for the durable ledger/catalog stores, wired through
-  **crate_universe** in `MODULE.bazel` with the committed `Cargo.lock`.
-  (Actix replaces the
-  responder when the surface outgrows it — plan/design.md §1.)
+  **crate_universe** in `MODULE.bazel` with the committed `Cargo.lock`. (Actix
+  replaces the responder when the surface outgrows it — plan/design.md §1.)
 - **App builds are `bazel run` wrappers.** Flutter and Vite have no mature
   Bazel rules, and their toolchains fight sandboxing (Gradle/pub/npm caches).
   `sh_binary` wrappers keep Bazel as the single entry point without lying
@@ -54,17 +54,17 @@ sources.
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
 - **All ten scenarios (s001–s010) are implemented and asserted end to end**
-  against the design topology. Each scenario
-  restores the `amisad-core` snapshot as its state reset and drives the full
-  Target Verification Point over SSH ([test.md](test.md)).
+  against the design topology. Each restores the `amisad-core` snapshot as its
+  state reset and drives the full Target Verification Point over SSH
+  ([test.md](test.md)).
 
 ## Running it
 
 - **Test automation** (clean machine → build the design topology → every
-  implemented scenario against `amisad-core`, each restoring its snapshot
-  as the state reset): [test.md](test.md).
+  implemented scenario against `amisad-core`): [test.md](test.md).
 - **Demo by hand** (prebuild once, then drive the deployed topology manually,
-  including the mobile app): [demo.md](demo.md).
+  including the mobile app): [demo.md](demo.md). For the browser-driven
+  30-minute walkthroughs, see [demo/README.md](demo/README.md).
 - **Hostnames + usernames** (per-VM `<hostname>-admin` + the eleven
   demo personas, and why): [usernames.md](usernames.md).
 
@@ -74,14 +74,11 @@ The lab builds the design topology
 the stash service (`yuruna-stash-service`, durable per-upload record);
 `amisad-core` downloads it, builds thin distroless images, and deploys the
 ten services; `amisad-edge-a`/`-b` are the stateless region slice VMs
-(`slice-runtime` delivered per scenario run over SSH). Scenarios run against
-`amisad-core`, each restoring its snapshot as the state reset. Hostnames,
-per-VM `<hostname>-admin` accounts, and the eleven demo users are in
-[usernames.md](usernames.md).
+(`slice-runtime` delivered per scenario run over SSH).
 
 ## s001.fulfillment implementation notes
 
-s001.fulfillment is implemented end to end: `buyer-client` (the headless buyer)
+s001.fulfillment is the base path: `buyer-client` (the headless buyer)
 submits Maya's gift need as an opaque envelope; the coordinator verifies the
 token, gets a jurisdiction-checked placement, and dispatches envelope + offers
 to `slice-runtime`; the environment matches, attests its full lifecycle,
@@ -203,7 +200,7 @@ after Maya's recorded approval; an out-of-scope category is refused at
 submission (scope is fabric-enforceable, so it is checked before any
 environment - zero environments, zero ledger entries); and revocation clears
 the delegate workspace and fails every subsequent delegated attempt
-immediately. Booking is generalized to accept a plain accept (no fitting
+immediately. Booking is generalized to allow a plain accept (no fitting
 slot).
 
 ## s007.inventory implementation notes
@@ -253,8 +250,8 @@ region appears in no view anywhere downstream.
 s010.certification is the capstone: audit-svc independently re-verifies the
 evidence trail across FOUR dimensions - attestation continuity (every
 environment's created -> attested -> executed|aborted -> destroyed lifecycle),
-residency (region satisfies jurisdiction), consent (chain integrity across all
-three grant types), and settlement conservation (splits sum, adjustments are
+residency (region satisfies jurisdiction), consent (chain integrity across
+every grant type), and settlement conservation (splits sum, adjustments are
 compensating entries referencing a case, nothing edited) - trusting no
 self-report from the ledger (it recomputes the sha256 chains from the raw
 dumps). Because each scenario restores a fresh snapshot, s010 self-seeds a

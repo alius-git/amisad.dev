@@ -8,6 +8,6 @@ description = "Append-only hash-chained consent, settlement, and attestation led
 
 [dependencies]
 amisad-common = { path = "../../lib/amisad-common" }
-# First external dependency (poc/README.md: wired together with crate_universe):
-# PostgreSQL client for the durable ledger/catalog stores (DATABASE_URL-gated).
+# PostgreSQL client for the durable ledger/catalog stores (DATABASE_URL-gated);
+# resolved for Bazel through crate_universe from the committed Cargo.lock.
 postgres = "0.19"

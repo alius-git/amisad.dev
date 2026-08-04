@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s009.suppression (Aggregate Insight Publication and the
-# Demand-Planning Loop): restore amisad-core and
-# run the aggregate-insights loop entirely on vm-core
+# Demand-Planning Loop): restore amisad-core and run the aggregate-insights
+# loop entirely on vm-core.
 
 sequenceGuid: 42abb59b-828b-47cc-bee1-4300127d9e50
 sequenceRevision: 2

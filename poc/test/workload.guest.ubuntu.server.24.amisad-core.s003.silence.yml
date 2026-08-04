@@ -1,8 +1,7 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - s003.silence (Consent Revocation and the Right to Silence)
-# restore amisad-core (that restore IS the
-# per-scenario state reset)
+# AmisAd POC - s003.silence (Consent Revocation and the Right to Silence):
+# restore amisad-core - that restore IS the per-scenario state reset.
 
 sequenceGuid: 42b0e16a-99fa-4086-b2b2-6227ba35ea6a
 sequenceRevision: 2

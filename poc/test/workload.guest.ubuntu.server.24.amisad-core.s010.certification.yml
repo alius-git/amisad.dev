@@ -1,9 +1,9 @@
 # yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s010.certification (Independent Certification of the Full
-# Evidence Trail): restore amisad-core, start
-# slice-runtime on amisad-edge-a (region identity for residency), self-seed a
-# representative corpus exercising all four audit dimensions
+# Evidence Trail): restore amisad-core, start slice-runtime on amisad-edge-a
+# (region identity for residency), and self-seed a representative corpus
+# exercising all four audit dimensions.
 
 sequenceGuid: 429faede-b8b2-447e-97dd-882a44e9b8d4
 sequenceRevision: 2

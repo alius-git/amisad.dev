@@ -41,8 +41,8 @@ either demo, so the two behave identically:
   if declined. `-SkipFirewall` skips it entirely.
 - **They stop from the keyboard.** Press **Ctrl+C**, **End** or **Q**. The
   request loop polls `GetContextAsync` instead of parking in the blocking
-  `GetContext`, which is what previously made a server killable only by
-  closing the terminal.
+  `GetContext`, which would leave a server killable only by closing the
+  terminal.
 - **They gate the vault passwords per client, not per binding.** `/api/personas`
   serves real persona passwords to loopback requests — the host's own browser —
   and `<withheld: remote viewer>` to everyone else. `-SharePersonaPasswords`
