@@ -2,7 +2,7 @@
 .VERSION 2026.07.28
 .GUID 42b8c9d4-7e2f-4a61-9c05-3f8e1a6b2d47
 .AUTHOR Alisson Sol et al.
-.Copyright (c) 2026 by Alisson Sol et al.
+.COPYRIGHT (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc demo serve
 .LICENSEURI https://yuruna.link/license
 .PROJECTURI https://amisad.com

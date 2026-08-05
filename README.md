@@ -11,7 +11,7 @@ AmisAd development
 ## Proof of concept
 
 - [poc/](poc/README.md) — POC implementation: Bazel/Cargo workspace, service contracts, deploy config, and the Yuruna lab setup for running the scenarios.
-- [poc/STATUS.s001.fulfillment.md](poc/STATUS.s001.fulfillment.md) — Status of the s001.fulfillment unattended verification run.
+- [poc/STATUS.s001.fulfillment.md](poc/STATUS.s001.fulfillment.md) — Historical record (2026-07-19) of the s001.fulfillment unattended verification run. Current test automation and topology: [poc/test.md](poc/test.md).
 
 ---
 

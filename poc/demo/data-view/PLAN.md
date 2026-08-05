@@ -3,11 +3,10 @@
 <!-- LICENSEURI https://yuruna.link/license -->
 <!-- Copyright (c) 2026 by Alisson Sol et al. -->
 
-> **Status: PLAN, awaiting operator review.** Once approved, this document is
-> the complete implementation prompt: execute it top to bottom without asking
-> questions. Every design decision is already made below; where the codebase
-> could contradict a detail, the "verify against source" notes say what to
-> re-check and what to do in each case.
+> **Status: IMPLEMENTED.** This document was the implementation prompt for
+> `poc/demo/data-view/`; it is kept as the record of the design decisions the
+> demo was built from. The shipped behavior is described in
+> [README.md](README.md) — where the two disagree, the README wins.
 
 ---
 
@@ -120,7 +119,7 @@ verbatim-in-behavior:
   `-EdgeAIp`, `-EdgeBIp`, `-BindAddress` (default `localhost`; `any`/`*`/`+`
   = wildcard; a single hostname/IP binds that NIC **plus** localhost),
   `-SharePersonaPasswords`.
-- Framework bootstrap: dot-source `../../test/AmisAd.HostCommon.ps1`,
+- Framework bootstrap: dot-source `../../../test/AmisAd.HostCommon.ps1`,
   `Resolve-YurunaRoot` (warn-and-degrade), `Initialize-AmisAdHost`
   (warn-and-degrade), forward-slash relative paths.
 - `Resolve-VmIp` (driver `Get-VMIp` → handoff `<name>.ip.txt` fallback).

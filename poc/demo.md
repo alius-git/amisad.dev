@@ -175,10 +175,10 @@ recommended (settlement/attribution totals assume a clean ledger):
 ```bash
 curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
 # Marcel: campaign + brief; Kai: asset; Marcel: activate (capture the ids):
-CAMP=$(curl -sf -X POST http://$NODE_IP:30087/v1/campaigns -d '{"tenant":"elena-atelier","region":"region-a","category":"housewares","ad_cents_per_match":2000,"budget_cents":10000}')
+curl -sf -X POST http://$NODE_IP:30087/v1/campaigns -d '{"tenant":"elena-atelier","region":"region-a","category":"housewares","ad_cents_per_match":2000,"budget_cents":10000}'   # capture <campaign_id>
 curl -sf -X POST http://$NODE_IP:30087/v1/briefs -d '{"campaign_id":"<campaign_id>"}'
 curl -sf http://$NODE_IP:30087/v1/briefs                              # Kai's demand queue
-ASSET=$(curl -sf -X POST http://$NODE_IP:30087/v1/assets -d '{"campaign_id":"<campaign_id>","creator":"kai","creative":"summer-hero-01"}')
+curl -sf -X POST http://$NODE_IP:30087/v1/assets -d '{"campaign_id":"<campaign_id>","creator":"kai","creative":"summer-hero-01"}'   # capture <asset_id>
 curl -sf -X POST http://$NODE_IP:30087/v1/campaigns/activate -d '{"campaign_id":"<campaign_id>","asset_id":"<asset_id>"}'
 # Maya: her need's shortlist carries the creative; she accepts (no slot):
 target/release/buyer-client campaign                                  # -> handle + boosted shortlist
@@ -211,9 +211,9 @@ inventory truth governs matching, order state mirrors to the ERP, and the
 credential scope is a hard ceiling:
 
 ```bash
-PID=$(curl -sf -X POST http://$NODE_IP:30088/v1/partners -d '{"name":"alex-erp"}')    # sandbox only
+curl -sf -X POST http://$NODE_IP:30088/v1/partners -d '{"name":"alex-erp"}'    # sandbox only; capture <partner_id>
 curl -sf -X POST http://$NODE_IP:30088/v1/partners/certify -d '{"partner_id":"<partner_id>"}'
-CRED=$(curl -sf -X POST http://$NODE_IP:30088/v1/grants -d '{"tenant":"elena-atelier","partner_id":"<partner_id>","scopes":["catalog","inventory","orders"]}')
+curl -sf -X POST http://$NODE_IP:30088/v1/grants -d '{"tenant":"elena-atelier","partner_id":"<partner_id>","scopes":["catalog","inventory","orders"]}'   # capture <cred>
 curl -sf -X POST http://$NODE_IP:30088/v1/sync/catalog -d '{"credential":"<cred>","offers":[{"offer_id":"erp-lamp-01","tenant":"elena-atelier","title":"ERP table lamp","category":"housewares","region":"region-a","price_cents":8000,"deliver_by_days":5,"auto_close":true},{"offer_id":"erp-clock-02","tenant":"elena-atelier","title":"ERP wall clock","category":"housewares","region":"region-a","price_cents":9000,"deliver_by_days":5,"auto_close":true}]}'
 curl -sf -X POST http://$NODE_IP:30088/v1/sync/inventory -d "{\"credential\":\"<cred>\",\"offer_id\":\"erp-lamp-01\",\"stock\":0,\"delta_ts\":$(date +%s)}"   # zero the cheaper lamp
 target/release/buyer-client submit                                    # matches erp-clock-02 (in stock), not the zeroed lamp

@@ -17,9 +17,9 @@ sequenceDiagram
     Note over Maya,LedgerSvc: Seeded - Elena's catalog includes a dusty blue dress and a Thursday slot, a second seller is out of range or past deadline
     Maya->>BuyerApp: State need - midi, sleeves, warm fabric, NOT dusty blue, fitting before Friday, manual closing
     BuyerApp->>Coordinator: Encrypted need envelope
+    Coordinator->>SliceRT: Create attested environment, route envelope
     Coordinator->>SellerSvc: Fetch candidate offers
     SellerSvc-->>SliceRT: Offers travel into sealed environment
-    Coordinator->>SliceRT: Create attested environment, route envelope
     SliceRT->>SliceRT: Evaluate every constraint including exclusions
     SliceRT-->>Coordinator: Shortlist - only fully fitting offers
     Coordinator-->>BuyerApp: Shortlist delivered (notification 1)
