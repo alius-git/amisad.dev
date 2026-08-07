@@ -181,7 +181,14 @@
   }
   .edge.prev { left: 0; border-right: 1px solid rgba(43, 58, 103, 0.14); }
   .edge.next { right: 0; border-left: 1px solid rgba(43, 58, 103, 0.14); }
-  .edge:hover, .edge:focus-visible {
+  /* :hover and :focus-visible stay in separate rules: grouping them makes
+     engines without :focus-visible (Safari < 15.4, inside the deck's 13.1
+     baseline) drop the whole selector list, killing the hover style too. */
+  .edge:hover {
+    background: rgba(226, 114, 91, 0.2);
+    color: var(--terracotta);
+  }
+  .edge:focus-visible {
     background: rgba(226, 114, 91, 0.2);
     color: var(--terracotta);
     outline: none;
@@ -194,7 +201,11 @@
   }
   body.on-divider .edge.prev { border-right-color: rgba(255, 255, 255, 0.16); }
   body.on-divider .edge.next { border-left-color: rgba(255, 255, 255, 0.16); }
-  body.on-divider .edge:hover, body.on-divider .edge:focus-visible {
+  body.on-divider .edge:hover {
+    background: rgba(226, 114, 91, 0.3);
+    color: var(--white);
+  }
+  body.on-divider .edge:focus-visible {
     background: rgba(226, 114, 91, 0.3);
     color: var(--white);
   }

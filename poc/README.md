@@ -83,10 +83,9 @@ submits Maya's gift need as an opaque envelope; the coordinator verifies the
 token, gets a jurisdiction-checked placement, and dispatches envelope + offers
 to `slice-runtime`; the environment matches, attests its full lifecycle,
 emits the settlement instruction, and destroys itself; seller fulfillment
-confirms the four-way split on the hash-chained ledger. It spans the topology
-(amisad-build → stash → amisad-core, with slice-runtime on
-amisad-edge-a — see "Running it" above), asserting the full Target
-Verification Point at the end.
+confirms the four-way split on the hash-chained ledger. It spans the full
+topology (see "Running it" above), asserting the full Target Verification
+Point at the end.
 
 Deviations from the target design, deliberate and to be retired in later
 scenarios — the wire contracts (`contracts/openapi/`) are unchanged by all of
