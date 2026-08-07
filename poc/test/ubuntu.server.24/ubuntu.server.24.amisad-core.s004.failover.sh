@@ -24,8 +24,39 @@ for _ in $(seq 1 60); do
     sleep 5
 done
 SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
+# The snapshot boots with deployment/pod status frozen at snapshot time, and
+# kubelet restarts every container once shortly after boot. Waiting on the
+# frozen "available" condition (or a single health probe) can pass against a
+# pre-restart container that dies moments later, leaving the NodePort DNAT
+# pointing at a dead veth: "No route to host". Gate on the live state instead:
+# every amisad pod's running container must have started during this boot, and
+# the rollouts must be complete against those fresh pods.
+BOOT_EPOCH=$(date -d "$(uptime -s)" +%s)
+EXPECTED_PODS=$(echo "$SERVICES" | wc -w)
+PODS_FRESH=0
+for _ in $(seq 1 60); do
+    POD_TOTAL=0
+    POD_FRESH=0
+    while read -r STARTED_AT; do
+        POD_TOTAL=$((POD_TOTAL + 1))
+        [ -n "$STARTED_AT" ] || continue
+        if [ "$(date -d "$STARTED_AT" +%s)" -ge "$BOOT_EPOCH" ]; then
+            POD_FRESH=$((POD_FRESH + 1))
+        fi
+    done < <(kubectl -n amisad get pods \
+        -o jsonpath='{range .items[*]}{.status.containerStatuses[0].state.running.startedAt}{"\n"}{end}' 2>/dev/null)
+    if [ "$POD_TOTAL" -ge "$EXPECTED_PODS" ] && [ "$POD_FRESH" -eq "$POD_TOTAL" ]; then
+        PODS_FRESH=1
+        break
+    fi
+    sleep 5
+done
+if [ "$PODS_FRESH" -ne 1 ]; then
+    echo "amisad pods did not all restart after the post-restore boot (fresh ${POD_FRESH}/${POD_TOTAL}, expected ${EXPECTED_PODS})" >&2
+    exit 9
+fi
 for svc in $SERVICES; do
-    kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=600s
+    kubectl -n amisad rollout status "deployment/${svc}" --timeout=600s
 done
 
 NODE_IP=$(hostname -I | awk '{print $1}')
