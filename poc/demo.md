@@ -8,11 +8,11 @@ and then drive the demo manually. Full test automation lives in
 ## Prebuild
 
 With the [one-time setup](test.md#one-time-setup) done, run the automation once
-from an **elevated** PowerShell:
+from `pwsh` (**elevated** on a Hyper-V host — see [test.md](test.md#run)):
 
 ```powershell
-poc\build\serve-local.ps1
-pwsh poc\build\run-tests.ps1 -NoConfigGate
+pwsh poc/build/serve-local.ps1
+pwsh poc/build/run-tests.ps1 -NoConfigGate
 ```
 
 A green run leaves the demo environment **live**: `amisad-core` (the ten
@@ -25,7 +25,7 @@ Console logins on `amisad-core` ([usernames.md](usernames.md)):
 - **administrator**: `amisad-core-admin`
 
 Passwords are in the host vault,
-`c:\git\yuruna\test\status\extension\authentication\vault.yml`.
+`<yuruna-root>/test/status/extension/authentication/vault.yml`.
 
 The last scenario's state is still live after a run — you can inspect it, or
 re-arm below for a fresh walkthrough.

@@ -10,7 +10,7 @@ their scenarios.
 **Vault seeding (required once per username).** Auto-generated vault passwords
 can contain characters (`@`, `^`, …) the GUI keystroke path mistypes at first
 login. Seed every username keystroke-safe (letters+digits) before its first
-cold run, from `c:\git\yuruna` in `pwsh`:
+cold run, from the Yuruna checkout root in `pwsh`:
 
 ```powershell
 Import-Module ./test/extension/authentication/default.psm1

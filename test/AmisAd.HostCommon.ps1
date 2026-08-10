@@ -22,9 +22,9 @@
     (Clear-Lab.ps1, Initialize-Lab.ps1). Dot-sourced, not invoked.
 .DESCRIPTION
     A host action that calls `Hyper-V\Get-VM` directly, or defaults its root to
-    'c:\git\yuruna', cannot run on host.ubuntu.kvm or host.macos.utm: the
-    Hyper-V module is absent and 'c:' is read as a PSDrive name, so Join-Path
-    fails with "Cannot find drive".
+    a drive-letter path, cannot run on host.ubuntu.kvm or host.macos.utm: the
+    Hyper-V module is absent, and a leading 'c:' is read as a PSDrive name
+    there, so Join-Path fails with "Cannot find drive".
 
     Yuruna solves this: host/<host-type>/modules/Yuruna.Host.psm1 exports ONE
     contract (New-VM / Start-VM / Stop-VMForce / Remove-VM / Get-VMState /
@@ -52,8 +52,11 @@ function Resolve-YurunaRoot {
           4. <this file>/../.. -- the cycle clones the project to
              '<root>/project', so the project's test/ dir sits two levels
              under the framework root.
-          5. A per-platform conventional path, for a standalone run outside
-             any cycle (an operator invoking the teardown by hand).
+          5. $HOME/git/yuruna, for a standalone run outside any cycle (an
+             operator invoking the teardown by hand). That is where the
+             bootstrap installers clone on every platform, Windows included,
+             so one candidate covers all three hosts and no drive letter is
+             written down anywhere.
 
         A candidate counts only if test/modules/Test.HostContract.psm1 is
         there: that is the module both host actions import, so validating on
@@ -74,8 +77,7 @@ function Resolve-YurunaRoot {
         if ($testDir) { [void]$candidates.Add((Split-Path -Parent $testDir)) }
     }
     [void]$candidates.Add((Join-Path -Path $PSScriptRoot -ChildPath '..' -AdditionalChildPath '..'))
-    if ($IsWindows) { [void]$candidates.Add('c:\git\yuruna') }
-    else            { [void]$candidates.Add((Join-Path -Path $HOME -ChildPath 'git' -AdditionalChildPath 'yuruna')) }
+    [void]$candidates.Add((Join-Path -Path $HOME -ChildPath 'git' -AdditionalChildPath 'yuruna'))
 
     foreach ($candidate in $candidates) {
         if ([string]::IsNullOrWhiteSpace($candidate)) { continue }

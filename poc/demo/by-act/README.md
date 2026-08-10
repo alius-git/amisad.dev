@@ -16,8 +16,9 @@ UI drives the same NodePort APIs the sequences exercise
 - A Yuruna checkout — the persona passwords are read from its authentication
   vault, and VM IPs fall back to its status handoff files when the host driver
   reports none. It is discovered automatically (`-YurunaRoot` → `YURUNA_ROOT` →
-  `YURUNA_CONFIG_PATH` → the `<root>/project` clone layout → `c:\git\yuruna` on
-  Windows, `~/git/yuruna` elsewhere); pass `-YurunaRoot` for anything else.
+  `YURUNA_CONFIG_PATH` → the `<root>/project` clone layout → `~/git/yuruna`,
+  where the bootstrap installers clone on every platform); pass `-YurunaRoot`
+  for anything else.
 
 ## Start
 

@@ -18,9 +18,15 @@
 # server as /yuruna-repo/project-poc.tar.gz (the guest fetches it in lab
 # iteration mode - see the s001.fulfillment sequence header). Run after every
 # commit; serves HEAD, so uncommitted changes never reach the guest.
-param([string]$YurunaRoot = 'c:\git\yuruna')
+#
+# .PARAMETER YurunaRoot
+#   Yuruna framework checkout to publish into. Optional -- see
+#   Resolve-YurunaRoot for the discovery order.
+param([string]$YurunaRoot)
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+. (Join-Path $repo 'test/AmisAd.HostCommon.ps1')
+$YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $out = Join-Path $YurunaRoot 'project-poc.tar.gz'
 git -C $repo archive --format=tar.gz -o $out HEAD
 if ($LASTEXITCODE -ne 0) { throw 'git archive failed' }

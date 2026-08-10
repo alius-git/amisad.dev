@@ -15,7 +15,6 @@
 #>
 
 #requires -version 7
-#requires -RunAsAdministrator
 
 <#
 .SYNOPSIS
@@ -38,7 +37,15 @@
       5. Start both edges and wait for their boot-time IP reports (the fresh
          handoff/*.ip.txt the scenarios resolve the edge from).
 
-    Leaves amisad-core + both edges live. Elevation is required.
+    Leaves amisad-core + both edges live.
+
+    PRIVILEGE is asserted at runtime against the DETECTED host rather than
+    declared with '#requires -RunAsAdministrator': what building a VM takes
+    differs per host -- Administrator on Hyper-V, libvirt group membership on
+    KVM, the invoking user's own utmctl session on UTM -- and a static
+    requirement reads as "root" on Linux/macOS, which would refuse exactly the
+    hosts this script claims to run on. Test-HostRequirement asks the host
+    driver what applies and explains what is missing.
 
     PORTABILITY. VM lifecycle goes through the Yuruna host contract
     (Get-VMState / Start-VM / Stop-VMForce, loaded by Initialize-AmisAdHost),
@@ -90,6 +97,12 @@ $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
 $IsHyperV   = ($HostType -eq 'host.windows.hyper-v')
 Write-Information "Warm-up on '$HostType' (framework: $YurunaRoot)."
+
+# Fail fast on a host that cannot drive its own hypervisor (Administrator on
+# Hyper-V, virsh + /dev/kvm on KVM, utmctl + UTM.app on macOS). Without this
+# gate the first provisioning stage burns its startup time before dying inside
+# the hypervisor with a raw message that names the computer but not the fix.
+if (-not (Test-HostRequirement -HostType $HostType)) { exit 1 }
 
 $ts = Join-Path $YurunaRoot 'test/Invoke-TestSequence.ps1'
 if (-not (Test-Path -LiteralPath $ts)) { Write-Error "Invoke-TestSequence.ps1 not found at $ts"; exit 1 }

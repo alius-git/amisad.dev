@@ -25,8 +25,9 @@ the timeline will show only half the story.
 - A Yuruna checkout — the persona passwords are read from its authentication
   vault, and VM power state and IPs come from its host driver. It is discovered
   automatically (`-YurunaRoot` → `YURUNA_ROOT` → `YURUNA_CONFIG_PATH` → the
-  `<root>/project` clone layout → `c:\git\yuruna` on Windows, `~/git/yuruna`
-  elsewhere); pass `-YurunaRoot` for anything else. Without it the windows, the
+  `<root>/project` clone layout → `~/git/yuruna`, where the bootstrap
+  installers clone on every platform); pass `-YurunaRoot` for anything else.
+  Without it the windows, the
   proxy and the deck all still work; only the passwords and the VM power states
   are lost.
 

@@ -15,7 +15,6 @@
 #>
 
 #requires -version 7
-#requires -RunAsAdministrator
 
 <#
 .SYNOPSIS
@@ -26,11 +25,14 @@
     The teardown half of the end-to-end pass (Initialize-Lab.ps1 builds it back
     up). Steps, in order:
 
-      1. Refuse to run if a Yuruna runner owns runner.pid -- it would race the
+      1. Assert this host can drive its own hypervisor at all (see PRIVILEGE
+         below), so a missing right fails here with the fix rather than
+         inside the first removal with the hypervisor's raw message.
+      2. Refuse to run if a Yuruna runner owns runner.pid -- it would race the
          live cycle's VMs.
-      2. Close lab consoles that would steal GUI keystroke focus (Hyper-V only;
+      3. Close lab consoles that would steal GUI keystroke focus (Hyper-V only;
          see Stop-LabConsole).
-      3. Hand the whole teardown to the framework's Remove-TestVMFiles.ps1
+      4. Hand the whole teardown to the framework's Remove-TestVMFiles.ps1
          with the lab's VM-name prefix.
 
     All VM removal lives in the framework: Remove-TestVMFiles.ps1 enumerates,
@@ -40,7 +42,13 @@
     type, so this project keeps no VM list and no removal logic of its own --
     a teardown bug gets fixed once, in the framework, for all of them.
 
-    Elevation is required: removing VMs is privileged on every host.
+    PRIVILEGE is asserted at runtime against the DETECTED host rather than
+    declared with '#requires -RunAsAdministrator': what removing a VM takes
+    differs per host -- Administrator on Hyper-V, libvirt group membership on
+    KVM, the invoking user's own utmctl session on UTM -- and a static
+    requirement reads as "root" on Linux/macOS, which would refuse exactly the
+    hosts this script claims to run on. Test-HostRequirement asks the host
+    driver what applies and explains what is missing.
 .PARAMETER YurunaRoot
     Path to the Yuruna framework checkout that holds test/. Optional -- see
     Resolve-YurunaRoot for the discovery order (the runner's
@@ -48,7 +56,9 @@
 .EXAMPLE
     pwsh test/Clear-Lab.ps1
 .EXAMPLE
-    pwsh test/Clear-Lab.ps1 -YurunaRoot /home/tester/git/yuruna
+    # Only needed for a checkout somewhere discovery would not look;
+    # $HOME/git/yuruna is already the conventional fallback.
+    pwsh test/Clear-Lab.ps1 -YurunaRoot /srv/lab/yuruna-checkout
 #>
 
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Low')]
@@ -64,13 +74,19 @@ $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
 Write-Information -MessageData "Lab teardown on '$HostType' (framework: $YurunaRoot)." -InformationAction Continue
 
+# --- 1) This host can drive its own hypervisor ------------------------------
+# Administrator on Hyper-V, virsh + /dev/kvm on KVM, utmctl + UTM.app on macOS.
+# Without this gate the sweep dies inside the hypervisor with its own raw
+# message, which names the computer but not the fix.
+if (-not (Test-HostRequirement -HostType $HostType)) { exit 1 }
+
 # Every lab VM is named amisad-<role> (amisad-build, amisad-core,
 # amisad-edge-a/b, and the amisad-core-k8s intermediate), so one prefix
 # selects the whole topology -- including a remnant from a renamed or
 # half-created VM that no hard-coded name list would know about.
 $LabVmPrefix = 'amisad-'
 
-# --- 1) Refuse to sweep VMs out from under an active Yuruna runner -----------
+# --- 2) Refuse to sweep VMs out from under an active Yuruna runner -----------
 # Only when run standalone. Inside a runner cycle the orchestration invokes this
 # as its teardown step (initialize-lab), so the runner IS expected to be live:
 # $env:YURUNA_CYCLE_CONTEXT -- published by the orchestrator before each step and
@@ -88,10 +104,10 @@ if (-not $env:YURUNA_CYCLE_CONTEXT) {
     }
 }
 
-# --- 2) Close lab consoles ---------------------------------------------------
+# --- 3) Close lab consoles ---------------------------------------------------
 Stop-LabConsole -HostType $HostType
 
-# --- 3) Remove every lab VM, then the orphaned files it left behind ---------
+# --- 4) Remove every lab VM, then the orphaned files it left behind ---------
 # Remove-TestVMFiles.ps1 already force-stops and removes each matching VM
 # through the host contract and finishes with the orphaned-file sweep, so
 # this is the whole teardown. Its non-zero exit means a VM survived; that

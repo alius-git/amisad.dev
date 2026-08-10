@@ -7,8 +7,15 @@ name: initialize-lab
 description: Tear down the lab, then build + start the AmisAd topology (host-side, pre-run).
 
 host:
-  # Resolved relative to this file's folder (test/). Run elevated, in order;
-  # the pass stops if either script exits non-zero.
+  # Resolved relative to this file's folder (test/), run in order; the pass
+  # stops if either script exits non-zero.
+  #
+  # elevated: true is the orchestrator's Windows-side pre-check -- it refuses
+  # an unelevated shell before spawning the child pwsh, so a Hyper-V operator
+  # is told at once rather than after the first VM call fails. It is a no-op
+  # on KVM/UTM by design (elevation there means sudo/polkit, not an
+  # Administrator token): each script asserts what its OWN detected host
+  # actually requires via Test-HostRequirement.
   elevated: true
   scripts:
     - Clear-Lab.ps1

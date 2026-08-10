@@ -111,11 +111,13 @@ SSH with the harness key and passwordless sudo.
 
 ## Run
 
-From an **elevated** PowerShell:
+From `pwsh` — on a Hyper-V host it must be **elevated** (KVM and UTM drive the
+hypervisor as the invoking user, so they need no elevation; the driver asserts
+whichever applies to the detected host before it touches a VM):
 
 ```powershell
-poc\build\serve-local.ps1              # lab mode: publish HEAD to the status service
-pwsh poc\build\run-tests.ps1 -NoConfigGate
+pwsh poc/build/serve-local.ps1         # lab mode: publish HEAD to the status service
+pwsh poc/build/run-tests.ps1 -NoConfigGate
 ```
 
 `run-tests.ps1` removes every amisad lab VM and leftover `test-*` VM
@@ -124,7 +126,7 @@ resolves the stash service and stops at once if none answers (see
 [one-time setup](#one-time-setup) step 4), builds the topology, then runs each
 scenario from its registry in order. Green ends with `ALL SCENARIOS PASSED`,
 leaving `amisad-core` and both edge VMs live as the demo environment. Stage
-logs land under `%TEMP%\amisad-tests\`; watch live progress at
+logs land under `<temp>/amisad-tests/` (override with `-LogDir`); watch live progress at
 `http://localhost:8080/status/`. Expect ~15 min for the build, ~15 min per
 edge, ~20 min for vm-core, and a few minutes per scenario.
 
