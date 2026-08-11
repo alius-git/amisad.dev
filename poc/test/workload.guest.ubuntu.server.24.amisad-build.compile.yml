@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - amisad-build compile run: restore the build snapshot, build
 # every release binary over SSH, and upload the tarball to the stash service

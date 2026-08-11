@@ -10,7 +10,6 @@ workloads:
   deployments:
     # Uninstall previous workloads: idempotent
     - kubectl: "delete namespace ${env:namespace} --ignore-not-found=true --v=1"
-    # Install
     - kubectl: "create namespace ${env:namespace} --v=1"
     - kubectl: "config set-context --current --namespace=${env:namespace} --v=1"
     - chart: "services/seller-svc"

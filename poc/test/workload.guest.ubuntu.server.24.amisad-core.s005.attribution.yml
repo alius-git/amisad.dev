@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s005.attribution (Campaign-Boosted Match, Edge Creative
 # Serving, and Attribution Credit): restore amisad-core, start slice-runtime

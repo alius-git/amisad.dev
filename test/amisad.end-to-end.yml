@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../yuruna/test/schemas/orchestration-sequence.schema.yml
+# yaml-language-server: $schema=../../yuruna/test/schemas/orchestration-sequence.schema.yml
 #
 # Orchestration sequence: InvokeTestSequence steps run under one status.json
 # cycle (one dashboard row per inner sequence). initialize-lab is a HOST action

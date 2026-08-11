@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s001.fulfillment (Intent-Driven Edge Match and Automated
 # Fulfillment): restore amisad-core - that restore IS the per-scenario state

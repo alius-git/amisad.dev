@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s006.mandate (Delegated Procurement Under a Scoped Mandate):
 # restore amisad-core, start slice-runtime on amisad-edge-a, and run the full

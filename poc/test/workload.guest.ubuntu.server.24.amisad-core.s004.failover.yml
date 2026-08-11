@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s004.failover (Sovereign Slice Allocation, Isolation Fault,
 # and Attested Failover): restore amisad-core, then over SSH start

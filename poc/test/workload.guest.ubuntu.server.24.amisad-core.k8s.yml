@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - vm-core infrastructure tier: Ubuntu Server (hostname
 # amisad-core, admin amisad-core-admin) + Kubernetes + PostgreSQL + NATS,

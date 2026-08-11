@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s010.certification (Independent Certification of the Full
 # Evidence Trail): restore amisad-core, start slice-runtime on amisad-edge-a

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - vm-edge-b (region B slice VM): identical preparation to
 # vm-edge-a under its own hostname/admin. Only s004.failover uses it - a

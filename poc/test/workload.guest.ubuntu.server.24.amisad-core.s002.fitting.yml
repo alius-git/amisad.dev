@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s002.fitting (Considered Purchase, Constraint Fidelity, and
 # In-Person Booking): restore amisad-core (the per-scenario state reset -

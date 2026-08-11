@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - vm-edge-a (region A slice VM): install the core->edge demo key
 # and a boot-time IP reporter (posts <hostname>.ip.txt to the host status

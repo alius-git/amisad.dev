@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - s007.inventory (Enterprise Integration Onboarding and
 # Inventory-Truth Matching): restore amisad-core, start slice-runtime on

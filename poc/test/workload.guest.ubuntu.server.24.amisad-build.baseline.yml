@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # AmisAd POC - build VM baseline: a fresh Ubuntu Server (hostname
 # amisad-build, admin amisad-build-admin) plus the build toolchains only

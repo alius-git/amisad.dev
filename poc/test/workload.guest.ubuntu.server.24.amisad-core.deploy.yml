@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../../../yuruna/test/schemas/sequence.schema.yml
+# yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
 # vm-core deploy tier: restore the amisad-core-k8s snapshot, deploy the ten
 # services + demo users from the stash binaries, then snapshot as "amisad-core".
