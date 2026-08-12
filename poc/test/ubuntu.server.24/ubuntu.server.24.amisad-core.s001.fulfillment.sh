@@ -89,9 +89,27 @@ if [ -r /etc/yuruna/host.env ]; then
     . /etc/yuruna/host.env
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
+# --- REGION: https://yuruna.link/network#defining-the-guest-to-guest-rail
+# Where a peer edge answers. The rail is tried first: on a host that has one,
+# both guests hold a second address on a network the site DHCP server cannot
+# move, and libvirt's resolver answers the peer's reserved name -- so there is
+# nothing to publish and nothing to go stale. The answer is accepted only from
+# the rail subnet, because these VM names also resolve on the LAN and that is
+# precisely the answer that can be out of date.
+#
+# The published handoff file stays underneath, unchanged. Two of the three host
+# types this workload runs on have no libvirt network at all, so the rail is an
+# optimisation here and never a requirement.
+amisad_edge_addr() { # <edge-vm-name>
+    local edge="$1" ip
+    ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
+    if [ -n "$ip" ]; then printf '%s' "$ip"; return 0; fi
+    wget --no-proxy --timeout=10 --tries=2 -qO- \
+        "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log/handoff/${edge}.ip.txt" 2>/dev/null || true
+}
+
 if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
-    EDGE_IP=$(wget --no-proxy --timeout=10 --tries=2 -qO- \
-        "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log/handoff/amisad-edge-a.ip.txt" 2>/dev/null || true)
+    EDGE_IP=$(amisad_edge_addr amisad-edge-a)
     if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-edge-a-admin@${EDGE_IP}"; fi
 fi
 if [ -n "${EDGE_HOST:-}" ]; then
