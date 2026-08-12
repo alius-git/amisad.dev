@@ -27,6 +27,12 @@ workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh"
     timeoutSeconds: 1800
+    # Safe to re-run after a dropped SSH transport: every install below is
+    # behind a `command -v` guard or apt, so a second pass over a half-done
+    # first one converges instead of compounding. Minutes of toolchain download
+    # otherwise ride on the session surviving, and it is a lease renewal on
+    # either endpoint that ends it.
+    transportRetries: 1
     description: "Install build tools (rustup, bazelisk, git, python3)"
 
   - action: saveDiskSnapshot

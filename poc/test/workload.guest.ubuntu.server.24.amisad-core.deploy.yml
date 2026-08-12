@@ -35,6 +35,12 @@ workload:
   - action: sshFetchAndExecute
     command: "STASH_HOST='${stashHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh"
     timeoutSeconds: 3600
+    # Safe to re-run after a dropped SSH transport: the script wipes and
+    # re-fetches the project tree, and every service goes out through
+    # `helm upgrade --install`, so a second pass converges on the same release
+    # set. The longest step in the cycle, so also the most exposed to a lease
+    # renewal landing inside it.
+    transportRetries: 1
     description: "Add python3, download binaries from the stash, build images, deploy 10 services"
 
   - action: sshFetchAndExecute

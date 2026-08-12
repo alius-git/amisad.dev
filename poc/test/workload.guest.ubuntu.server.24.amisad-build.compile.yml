@@ -36,4 +36,8 @@ workload:
   - action: sshFetchAndExecute
     command: "STASH_HOST='${stashHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh"
     timeoutSeconds: 3600
+    # Safe to re-run after a dropped SSH transport: the script wipes and
+    # re-fetches the project tree before building, and the stash upload
+    # overwrites, so a second pass starts from the same place the first did.
+    transportRetries: 1
     description: "cargo build --release + upload binaries to the stash service"
