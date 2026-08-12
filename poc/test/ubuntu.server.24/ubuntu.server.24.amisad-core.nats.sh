@@ -19,8 +19,17 @@ case "$ARCH" in
 esac
 
 if ! command -v nats-server >/dev/null 2>&1; then
-    wget -qO /tmp/nats-server.tar.gz \
-        "https://github.com/nats-io/nats-server/releases/download/${NATS_VERSION}/nats-server-${NATS_VERSION}-linux-${NARCH}.tar.gz"
+    # Same exposure as the bazelisk download: one transient empty reply through
+    # the lab proxy ends the script under `set -e`. fetch-and-execute exports the
+    # framework's retry wrappers into this environment; without them, a bounded
+    # single attempt with wget's own retries is the most that can be asked for.
+    NATS_URL="https://github.com/nats-io/nats-server/releases/download/${NATS_VERSION}/nats-server-${NATS_VERSION}-linux-${NARCH}.tar.gz"
+    if declare -F wget_try >/dev/null 2>&1; then
+        wget_try -qO /tmp/nats-server.tar.gz "$NATS_URL"
+    else
+        wget --tries=3 --waitretry=5 --retry-connrefused --read-timeout=60 \
+            -qO /tmp/nats-server.tar.gz "$NATS_URL"
+    fi
     tar -xzf /tmp/nats-server.tar.gz -C /tmp
     sudo install -m 0755 "/tmp/nats-server-${NATS_VERSION}-linux-${NARCH}/nats-server" /usr/local/bin/nats-server
     rm -rf /tmp/nats-server.tar.gz "/tmp/nats-server-${NATS_VERSION}-linux-${NARCH}"

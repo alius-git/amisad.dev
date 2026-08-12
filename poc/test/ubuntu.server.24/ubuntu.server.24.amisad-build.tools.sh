@@ -47,6 +47,20 @@ fi
 cargo --version
 rustc --version
 
+# Retried for the same reason the rustup install above is, and it was the one
+# download here that was not: a single "empty reply from server" through the lab
+# proxy -- a transient this cycle has produced -- exited the script under
+# `set -e` and cost the whole cycle, after rust had already installed cleanly.
+#
+# The fetch is unprivileged and the install is the only privileged step. sudo
+# inside the retried unit would put the privilege where the retry cannot see
+# whether it was the download or the elevation that failed, and curl writing
+# straight to /usr/local/bin leaves a truncated binary on a partial transfer.
+amisad_install_bazelisk() {
+    curl -fsSL --connect-timeout 15 --max-time 300 -o /tmp/bazelisk \
+        "https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-${BARCH}"
+}
+
 if ! command -v bazel >/dev/null 2>&1; then
     ARCH=$(uname -m)
     case "$ARCH" in
@@ -54,9 +68,9 @@ if ! command -v bazel >/dev/null 2>&1; then
         aarch64) BARCH=arm64 ;;
         *) BARCH=amd64 ;;
     esac
-    sudo curl -fsSL -o /usr/local/bin/bazel \
-        "https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-${BARCH}"
-    sudo chmod +x /usr/local/bin/bazel
+    amisad_retry bazelisk_install amisad_install_bazelisk
+    sudo install -m 0755 /tmp/bazelisk /usr/local/bin/bazel
+    rm -f /tmp/bazelisk
 fi
 
 # Verify rather than assume: every tool below is consumed by the compile
