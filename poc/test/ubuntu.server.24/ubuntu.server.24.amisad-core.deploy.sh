@@ -29,11 +29,41 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
     echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
+
+# --- REGION: https://yuruna.link/network#why-host-coordinates-are-re-read-per-use
+# The coordinates above are read once, and this script then runs for minutes on
+# a host whose DHCP lease moves under it. yuruna-host-locate.timer refreshes
+# /etc/yuruna/host.env every 60s, so re-reading immediately before each fetch
+# follows the host rather than freezing where it was at startup. A failed fetch
+# additionally earns one forced refresh: the file can be up to a refresh
+# interval behind the very move that broke the fetch, so retrying without it
+# would just re-dial the address that already failed.
+amisad_host_fetch() {
+    local dest="$1" path="$2" attempt
+    for attempt in 1 2; do
+        if [ "$attempt" -eq 2 ] && [ -x /usr/local/lib/yuruna/yuruna-host-locate.sh ]; then
+            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null 2>&1 || true
+        fi
+        if [ -r /etc/yuruna/host.env ]; then
+            # shellcheck disable=SC1091
+            . /etc/yuruna/host.env
+        fi
+        if [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_PORT:-}" ] && \
+           wget --no-proxy --timeout=30 --tries=2 -qO "$dest" \
+                "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/${path}"; then
+            return 0
+        fi
+        if [ "$attempt" -eq 1 ]; then
+            echo "host fetch of '${path}' failed; refreshing the host coordinates and retrying." >&2
+        fi
+    done
+    return 1
+}
+
 rm -rf "$REAL_HOME/amisad.dev"
 mkdir -p "$REAL_HOME/amisad.dev"
 # Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
-wget --no-proxy --timeout=30 --tries=2 -qO /tmp/project-poc.tar.gz \
-    "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/yuruna-project-archive.tar.gz?nocache=${RANDOM}"
+amisad_host_fetch /tmp/project-poc.tar.gz "yuruna-project-archive.tar.gz?nocache=${RANDOM}"
 tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
 rm -f /tmp/project-poc.tar.gz
 

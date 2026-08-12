@@ -19,6 +19,37 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
     exit 2
 fi
 
+# --- REGION: https://yuruna.link/network#why-host-coordinates-are-re-read-per-use
+# The coordinates above are read once, and this script then runs for minutes on
+# a host whose DHCP lease moves under it. yuruna-host-locate.timer refreshes
+# /etc/yuruna/host.env every 60s, so re-reading immediately before each fetch
+# follows the host rather than freezing where it was at startup. A failed fetch
+# additionally earns one forced refresh: the file can be up to a refresh
+# interval behind the very move that broke the fetch, so retrying without it
+# would just re-dial the address that already failed.
+amisad_host_fetch() {
+    local dest="$1" path="$2" attempt
+    for attempt in 1 2; do
+        if [ "$attempt" -eq 2 ] && [ -x /usr/local/lib/yuruna/yuruna-host-locate.sh ]; then
+            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null 2>&1 || true
+        fi
+        if [ -r /etc/yuruna/host.env ]; then
+            # shellcheck disable=SC1091
+            . /etc/yuruna/host.env
+        fi
+        if [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_PORT:-}" ] && \
+           wget --no-proxy --timeout=30 --tries=2 -qO "$dest" \
+                "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/${path}"; then
+            return 0
+        fi
+        if [ "$attempt" -eq 1 ]; then
+            echo "host fetch of '${path}' failed; refreshing the host coordinates and retrying." >&2
+        fi
+    done
+    return 1
+}
+
+
 # Self-sufficient PostgreSQL install (Ubuntu's default packages): the
 # framework's pgdg-based script raced its own cluster re-init.
 if ! command -v psql >/dev/null 2>&1; then
@@ -34,8 +65,7 @@ done
 sudo -u postgres pg_isready
 
 SCHEMA=/tmp/amisad-schema.sql
-wget --no-proxy --timeout=10 --tries=2 -qO "$SCHEMA" \
-    "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
+amisad_host_fetch "$SCHEMA" "yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
 chmod 644 "$SCHEMA"
 
 sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='amisad'" | grep -q 1 || \
