@@ -83,7 +83,7 @@ if [ -r /etc/yuruna/host.env ]; then
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
 if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
-    EDGE_IP=$(wget --no-proxy -qO- \
+    EDGE_IP=$(wget --no-proxy --timeout=10 --tries=2 -qO- \
         "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log/handoff/amisad-edge-a.ip.txt" 2>/dev/null || true)
     if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-edge-a-admin@${EDGE_IP}"; fi
 fi
@@ -96,6 +96,19 @@ if [ -n "${EDGE_HOST:-}" ]; then
     EDGE_IP=$(ssh "${SSH_OPTS[@]}" "$EDGE_HOST" "hostname -I | awk '{print \$1}'")
     SLICE_EP="http://${EDGE_IP}:8080"
 else
+    # --- REGION: https://yuruna.link/network#why-the-single-vm-fallback-is-gated
+    # Refuse rather than degrade. This branch runs the whole scenario against
+    # this one VM and then asserts the full Target Verification Point over it,
+    # printing PASSED -- so a cycle in which the edge was simply unreachable
+    # reports the same result as one in which the distributed topology worked.
+    # On a host whose address moves, an unreachable edge is a routine event, so
+    # that is the difference between a green cycle that means something and one
+    # that means the scenario quietly stopped testing what it exists to test.
+    # Set AMISAD_ALLOW_SINGLE_VM=1 to run the degraded shape deliberately.
+    if [ "${AMISAD_ALLOW_SINGLE_VM:-0}" != "1" ]; then
+        echo "edge unresolved, and AMISAD_ALLOW_SINGLE_VM is not set: refusing to assert a distributed scenario against a single-VM topology." >&2
+        exit 4
+    fi
     echo "edge unresolved - slice-runtime on this VM (single-VM degraded fallback)"
     pkill -x slice-runtime 2>/dev/null || true
     PORT=8090 LEDGER_URL="$LEDGER" RESOURCE_URL="$RESOURCE" \

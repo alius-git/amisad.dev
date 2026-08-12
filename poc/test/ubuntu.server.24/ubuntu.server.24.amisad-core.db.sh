@@ -34,7 +34,7 @@ done
 sudo -u postgres pg_isready
 
 SCHEMA=/tmp/amisad-schema.sql
-wget --no-proxy -qO "$SCHEMA" \
+wget --no-proxy --timeout=10 --tries=2 -qO "$SCHEMA" \
     "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
 chmod 644 "$SCHEMA"
 

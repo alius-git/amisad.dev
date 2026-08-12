@@ -32,7 +32,7 @@ fi
 rm -rf "$REAL_HOME/amisad.dev"
 mkdir -p "$REAL_HOME/amisad.dev"
 # Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
-wget --no-proxy -qO /tmp/project-poc.tar.gz \
+wget --no-proxy --timeout=30 --tries=2 -qO /tmp/project-poc.tar.gz \
     "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/yuruna-project-archive.tar.gz?nocache=${RANDOM}"
 tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
 rm -f /tmp/project-poc.tar.gz

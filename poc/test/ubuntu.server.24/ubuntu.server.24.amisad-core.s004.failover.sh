@@ -91,7 +91,7 @@ start_slice() { # <edge-hostname> <region>
     # Runs inside $( ) - errexit does NOT reach in here, so every step fails
     # loudly by hand; the exit code escapes through pipefail to the caller.
     local edge="$1" region="$2" ip host
-    ip=$(wget --no-proxy -qO- \
+    ip=$(wget --no-proxy --timeout=10 --tries=2 -qO- \
         "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log/handoff/${edge}.ip.txt" 2>/dev/null || true)
     if [ -z "$ip" ]; then
         echo "edge ${edge} IP report missing - s004 requires both edges live" >&2
