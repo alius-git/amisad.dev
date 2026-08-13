@@ -207,9 +207,16 @@ foreign build.
    (`ubuntu.server.24.amisad-core.sNNN.<word>.sh`) and the sequence under
    `poc/test/`. Start from the s001–s004 set: chain to
    `...amisad-core.deploy`, `requiresSnapshot`/`loadDiskSnapshot`
-   `amisad-core`, `username: amisad-core-admin`,
-   `hostname: amisad-core`, then `sshWaitReady` + `sshFetchAndExecute` the
-   script + `saveSystemDiagnostic`.
+   `amisad-core`, `username: amisad-core-admin`, `hostname: amisad-core`.
+   `component:` is a single `retry` block — `loadDiskSnapshot`,
+   `sshWaitReady`, then `sshFetchAndExecute` of
+   `...amisad-core.ready.sh`, which restarts the deployed services onto pods
+   that exist now and waits for every NodePort to answer. `workload:` is
+   `sshFetchAndExecute` of the scenario script plus `saveSystemDiagnostic`,
+   outside the retry on purpose: putting the cluster in position is
+   idempotent and worth a second attempt, while a scenario that passes only
+   on a replay is reporting a defect. The scenario script therefore assumes a
+   live cluster and starts at its first call — no readiness gate of its own.
 2. Append the sequence name to the `$Scenarios` registry in
    `poc/build/run-tests.ps1`.
 3. Both edges are started by the driver and stay live; resolve either from

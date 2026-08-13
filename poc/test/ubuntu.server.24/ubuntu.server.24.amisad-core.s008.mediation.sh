@@ -15,65 +15,11 @@ REAL_HOME=$(eval echo "~$REAL_USER")
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
 
-echo "== wait for the deployed services to recover (post-restore boot) =="
-sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
-for _ in $(seq 1 60); do
-    if kubectl get --raw='/readyz' >/dev/null 2>&1; then break; fi
-    sleep 5
-done
-SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
-# The snapshot boots with deployment/pod status frozen at snapshot time, and
-# kubelet restarts every container once shortly after boot. Waiting on the
-# frozen "available" condition (or a single health probe) can pass against a
-# pre-restart container that dies moments later, leaving the NodePort DNAT
-# pointing at a dead veth: "No route to host". Gate on the live state instead:
-# every amisad pod's running container must have started during this boot, and
-# the rollouts must be complete against those fresh pods.
-BOOT_EPOCH=$(date -d "$(uptime -s)" +%s)
-EXPECTED_PODS=$(echo "$SERVICES" | wc -w)
-PODS_FRESH=0
-for _ in $(seq 1 60); do
-    POD_TOTAL=0
-    POD_FRESH=0
-    while read -r STARTED_AT; do
-        POD_TOTAL=$((POD_TOTAL + 1))
-        [ -n "$STARTED_AT" ] || continue
-        if [ "$(date -d "$STARTED_AT" +%s)" -ge "$BOOT_EPOCH" ]; then
-            POD_FRESH=$((POD_FRESH + 1))
-        fi
-    done < <(kubectl -n amisad get pods \
-        -o jsonpath='{range .items[*]}{.status.containerStatuses[0].state.running.startedAt}{"\n"}{end}' 2>/dev/null)
-    if [ "$POD_TOTAL" -ge "$EXPECTED_PODS" ] && [ "$POD_FRESH" -eq "$POD_TOTAL" ]; then
-        PODS_FRESH=1
-        break
-    fi
-    sleep 5
-done
-if [ "$PODS_FRESH" -ne 1 ]; then
-    echo "amisad pods did not all restart after the post-restore boot (fresh ${POD_FRESH}/${POD_TOTAL}, expected ${EXPECTED_PODS})" >&2
-    exit 9
-fi
-for svc in $SERVICES; do
-    kubectl -n amisad rollout status "deployment/${svc}" --timeout=600s
-done
-
 NODE_IP=$(hostname -I | awk '{print $1}')
 LEDGER="http://${NODE_IP}:30081"
 RESOURCE="http://${NODE_IP}:30082"
 SELLER="http://${NODE_IP}:30083"
 PLATFORM="http://${NODE_IP}:30086"
-
-echo "== wait for the NodePort services to actually answer (post-restore) =="
-for port in 30080 30081 30082 30083 30084 30085 30086 30087 30088 30089; do
-    for _ in $(seq 1 60); do
-        if curl -sf "http://${NODE_IP}:${port}/health" >/dev/null 2>&1; then break; fi
-        sleep 5
-    done
-    curl -sf "http://${NODE_IP}:${port}/health" >/dev/null || {
-        echo "NodePort ${port} never answered - stale amisad-core snapshot? The deploy chain must be re-run (run-tests.ps1 rebuilds it)." >&2
-        exit 8
-    }
-done
 
 echo "== slice-runtime (edge amisad-edge-a) =="
 if [ -r /etc/yuruna/host.env ]; then

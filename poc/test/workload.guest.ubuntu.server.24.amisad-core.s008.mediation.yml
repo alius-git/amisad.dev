@@ -6,7 +6,7 @@
 # buyer identity).
 
 sequenceGuid: 42a95e9f-3748-47f8-b8ad-cc9564d81776
-sequenceRevision: 2
+sequenceRevision: 3
 
 description: "AmisAd s008.mediation: restore amisad-core, run zero-knowledge dispute mediation (metadata-only case, scoped time-boxed disclosure, compensating settlement entries), assert full TVP."
 keystrokeMechanism: ssh
@@ -19,14 +19,27 @@ variables:
   username: amisad-core-admin
   hostname: amisad-core
 
+# The retry covers putting amisad-core in position -- restore, SSH, a cluster
+# whose pods and NodePort rules are the live ones -- and stops there. Those steps
+# are idempotent and every attempt starts from the snapshot again. The workload
+# below is deliberately outside it: a scenario that passes only on a second run
+# is reporting a defect, and replaying it would file the report in the bin.
 component:
-  - action: loadDiskSnapshot
-    id: "amisad-core"
-    description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
+  - action: retry
+    description: "Put amisad-core in position for s008.mediation: restore, SSH, cluster live"
+    steps:
+      - action: loadDiskSnapshot
+        id: "amisad-core"
+        description: "Restore the deployed AmisAd vm-core (per-scenario state reset)"
 
-  - action: sshWaitReady
-    timeoutSeconds: 300
-    description: "SSH up after the restore"
+      - action: sshWaitReady
+        timeoutSeconds: 300
+        description: "SSH up after the restore"
+
+      - action: sshFetchAndExecute
+        command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh"
+        timeoutSeconds: 900
+        description: "Bring the restored cluster to a known-live state (deployments restarted, every NodePort answering)"
 
 workload:
   - action: sshFetchAndExecute
