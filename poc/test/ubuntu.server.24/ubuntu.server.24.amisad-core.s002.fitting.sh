@@ -39,6 +39,42 @@ SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-n
 # The published handoff file stays underneath, unchanged. Two of the three host
 # types this workload runs on have no libvirt network at all, so the rail is an
 # optimisation here and never a requirement.
+# --- REGION: a failed service call must name the service and what it answered
+# `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
+# pipe that is invisible: the parser downstream reads empty stdin and reports a
+# syntax error at line 1, so a service that never answered is diagnosed as
+# malformed data -- the run then ends on a traceback naming neither the URL nor
+# the status. Takes the same arguments as `amisad_curl` and, on success, writes the
+# body to stdout unchanged, so callers pipe exactly as they did before.
+amisad_curl() { # <same args as curl -sf>
+    local out status body url='' arg
+    for arg in "$@"; do
+        case "$arg" in http://*|https://*) url="$arg" ;; esac
+    done
+    if ! out=$(curl -sS -w '\n%{http_code}' "$@"); then
+        printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   cause:  the request did not complete (curl reported it above)\n\n' \
+            "${url:-<no url among the arguments>}" >&2
+        return 1
+    fi
+    status=${out##*$'\n'}
+    body=${out%$'\n'*}
+    case "$status" in
+        2[0-9][0-9]) ;;
+        *)
+            printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   status: HTTP %s\n!!   body:   %s\n\n' \
+                "${url:-<no url among the arguments>}" "$status" "$(printf '%.400s' "${body:-<empty>}")" >&2
+            return 1
+            ;;
+    esac
+    # A 2xx with no body is normal for a POST and fatal for a caller about to
+    # parse it. Say so here rather than leave the parser to report a syntax
+    # error at line 1 of nothing.
+    if [ -z "$body" ]; then
+        printf '!! note: %s answered HTTP %s with an empty body\n' "$url" "$status" >&2
+    fi
+    printf '%s' "$body"
+}
+
 amisad_edge_addr() { # <edge-vm-name>
     local edge="$1" ip
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
@@ -89,20 +125,20 @@ for _ in $(seq 1 15); do
     sleep 2
 done
 curl -sf "${SLICE_EP}/health" >/dev/null
-curl -sf -X POST "${RESOURCE}/v1/edges" \
+amisad_curl -X POST "${RESOURCE}/v1/edges" \
     -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
 
 echo "== seed: Elena's dresses (one dusty blue), a second seller's misfits, slots =="
 # Qualifying: every required attribute, no exclusion, Thursday slot.
-curl -sf -X POST "${SELLER}/v1/offers" -d '{"offer_id":"linen-midi-04","tenant":"elena-atelier","title":"Linen midi dress","category":"dresses","region":"region-a","price_cents":18000,"deliver_by_days":3,"auto_close":false,"attributes":["midi","sleeves","warm-fabric"],"fitting_slots":[{"slot_id":"thu-1","day":"thursday","day_ordinal":4},{"slot_id":"sat-1","day":"saturday","day_ordinal":6}]}'
+amisad_curl -X POST "${SELLER}/v1/offers" -d '{"offer_id":"linen-midi-04","tenant":"elena-atelier","title":"Linen midi dress","category":"dresses","region":"region-a","price_cents":18000,"deliver_by_days":3,"auto_close":false,"attributes":["midi","sleeves","warm-fabric"],"fitting_slots":[{"slot_id":"thu-1","day":"thursday","day_ordinal":4},{"slot_id":"sat-1","day":"saturday","day_ordinal":6}]}'
 # Excluded color: qualifies on everything else - and is CHEAPER, so its absence
 # proves the exclusion decided, not the price.
-curl -sf -X POST "${SELLER}/v1/offers" -d '{"offer_id":"dusty-blue-02","tenant":"elena-atelier","title":"Dusty blue midi dress","category":"dresses","region":"region-a","price_cents":16000,"deliver_by_days":3,"auto_close":false,"attributes":["midi","sleeves","warm-fabric","dusty-blue"],"fitting_slots":[{"slot_id":"thu-2","day":"thursday","day_ordinal":4}]}'
+amisad_curl -X POST "${SELLER}/v1/offers" -d '{"offer_id":"dusty-blue-02","tenant":"elena-atelier","title":"Dusty blue midi dress","category":"dresses","region":"region-a","price_cents":16000,"deliver_by_days":3,"auto_close":false,"attributes":["midi","sleeves","warm-fabric","dusty-blue"],"fitting_slots":[{"slot_id":"thu-2","day":"thursday","day_ordinal":4}]}'
 # Missing required attributes (sleeveless, no warm fabric).
-curl -sf -X POST "${SELLER}/v1/offers" -d '{"offer_id":"silk-slip-03","tenant":"elena-atelier","title":"Silk slip dress","category":"dresses","region":"region-a","price_cents":15000,"deliver_by_days":3,"auto_close":false,"attributes":["midi","sleeveless"],"fitting_slots":[{"slot_id":"thu-3","day":"thursday","day_ordinal":4}]}'
+amisad_curl -X POST "${SELLER}/v1/offers" -d '{"offer_id":"silk-slip-03","tenant":"elena-atelier","title":"Silk slip dress","category":"dresses","region":"region-a","price_cents":15000,"deliver_by_days":3,"auto_close":false,"attributes":["midi","sleeveless"],"fitting_slots":[{"slot_id":"thu-3","day":"thursday","day_ordinal":4}]}'
 # Second seller: past the deadline (in region), and out of range (region-b).
-curl -sf -X POST "${SELLER}/v1/offers" -d '{"offer_id":"wool-midi-07","tenant":"brisa-outlet","title":"Wool midi dress","category":"dresses","region":"region-a","price_cents":14000,"deliver_by_days":30,"auto_close":false,"attributes":["midi","sleeves","warm-fabric"],"fitting_slots":[{"slot_id":"wed-7","day":"wednesday","day_ordinal":3}]}'
-curl -sf -X POST "${SELLER}/v1/offers" -d '{"offer_id":"linen-wrap-08","tenant":"brisa-outlet","title":"Linen wrap dress","category":"dresses","region":"region-b","price_cents":13000,"deliver_by_days":2,"auto_close":false,"attributes":["midi","sleeves","warm-fabric"],"fitting_slots":[{"slot_id":"thu-8","day":"thursday","day_ordinal":4}]}'
+amisad_curl -X POST "${SELLER}/v1/offers" -d '{"offer_id":"wool-midi-07","tenant":"brisa-outlet","title":"Wool midi dress","category":"dresses","region":"region-a","price_cents":14000,"deliver_by_days":30,"auto_close":false,"attributes":["midi","sleeves","warm-fabric"],"fitting_slots":[{"slot_id":"wed-7","day":"wednesday","day_ordinal":3}]}'
+amisad_curl -X POST "${SELLER}/v1/offers" -d '{"offer_id":"linen-wrap-08","tenant":"brisa-outlet","title":"Linen wrap dress","category":"dresses","region":"region-b","price_cents":13000,"deliver_by_days":2,"auto_close":false,"attributes":["midi","sleeves","warm-fabric"],"fitting_slots":[{"slot_id":"thu-8","day":"thursday","day_ordinal":4}]}'
 
 echo "== Maya's manual dress need -> shortlist (notification 1) =="
 export COORDINATOR_URL="http://${NODE_IP}:30080"
@@ -123,7 +159,7 @@ print('ASSERT shortlist constraint fidelity OK')
 "
 
 echo "== TVP assert 2: zero commitments before the buyer's explicit action =="
-curl -sf "${SELLER}/v1/orders" | python3 -c "
+amisad_curl "${SELLER}/v1/orders" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 assert o['count'] == 0, f'commitment exists before booking: {o}'
@@ -142,7 +178,7 @@ echo "booking: ${BOOKING}"
 MATCH_ID=$(echo "$BOOKING" | python3 -c 'import sys,json;print(json.load(sys.stdin)["match_id"])')
 
 echo "== TVP assert 3: consistent, identity-free appointment records =="
-curl -sf "${SELLER}/v1/orders/match/${MATCH_ID}" | python3 -c "
+amisad_curl "${SELLER}/v1/orders/match/${MATCH_ID}" | python3 -c "
 import sys, json
 booking = json.loads('''${BOOKING}''')
 o = json.load(sys.stdin)
@@ -155,9 +191,9 @@ print('ASSERT appointment records OK')
 "
 
 echo "== Elena: fitting fulfilled, sale closed -> settled with split =="
-curl -sf -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
-curl -sf -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
-curl -sf "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
+amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['confirmed'] is True, 'settlement not confirmed'

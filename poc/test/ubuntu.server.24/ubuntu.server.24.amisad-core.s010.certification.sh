@@ -41,6 +41,42 @@ SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-n
 # The published handoff file stays underneath, unchanged. Two of the three host
 # types this workload runs on have no libvirt network at all, so the rail is an
 # optimisation here and never a requirement.
+# --- REGION: a failed service call must name the service and what it answered
+# `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
+# pipe that is invisible: the parser downstream reads empty stdin and reports a
+# syntax error at line 1, so a service that never answered is diagnosed as
+# malformed data -- the run then ends on a traceback naming neither the URL nor
+# the status. Takes the same arguments as `amisad_curl` and, on success, writes the
+# body to stdout unchanged, so callers pipe exactly as they did before.
+amisad_curl() { # <same args as curl -sf>
+    local out status body url='' arg
+    for arg in "$@"; do
+        case "$arg" in http://*|https://*) url="$arg" ;; esac
+    done
+    if ! out=$(curl -sS -w '\n%{http_code}' "$@"); then
+        printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   cause:  the request did not complete (curl reported it above)\n\n' \
+            "${url:-<no url among the arguments>}" >&2
+        return 1
+    fi
+    status=${out##*$'\n'}
+    body=${out%$'\n'*}
+    case "$status" in
+        2[0-9][0-9]) ;;
+        *)
+            printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   status: HTTP %s\n!!   body:   %s\n\n' \
+                "${url:-<no url among the arguments>}" "$status" "$(printf '%.400s' "${body:-<empty>}")" >&2
+            return 1
+            ;;
+    esac
+    # A 2xx with no body is normal for a POST and fatal for a caller about to
+    # parse it. Say so here rather than leave the parser to report a syntax
+    # error at line 1 of nothing.
+    if [ -z "$body" ]; then
+        printf '!! note: %s answered HTTP %s with an empty body\n' "$url" "$status" >&2
+    fi
+    printf '%s' "$body"
+}
+
 amisad_edge_addr() { # <edge-vm-name>
     local edge="$1" ip
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
@@ -92,16 +128,16 @@ echo "slice-runtime at ${SLICE_EP}"
 export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
 
 echo "== self-seed the evidence corpus =="
-curl -sf -X POST "${RESOURCE}/v1/edges" -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
-curl -sf -X POST "${SELLER}/v1/offers" \
+amisad_curl -X POST "${RESOURCE}/v1/edges" -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
+amisad_curl -X POST "${SELLER}/v1/offers" \
     -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
 
 # (1) a completed match, advanced to settled -> attestation + settlement.
 RESULT=$(target/release/buyer-client submit)
 MATCH_ID=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["match_id"])')
 ENV_ID=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["environment_id"])')
-curl -sf -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
-curl -sf -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
 
 # (2) an injected abort: the fabric retries to a clean completion, so the
 # attestation log carries an aborted lifecycle too (like s004.failover).
@@ -114,7 +150,7 @@ target/release/buyer-client pause >/dev/null         # participation revoke
 target/release/buyer-client grant-mandate pat housewares 14000 >/dev/null
 
 # (5) a disclosure grant + a settlement adjustment referencing a support case.
-CASE_ID=$(curl -sf -X POST "${PLATFORM}/v1/support/cases" \
+CASE_ID=$(amisad_curl -X POST "${PLATFORM}/v1/support/cases" \
     -d "{\"match_id\":\"${MATCH_ID}\",\"metadata\":{\"order_state\":\"settled\"}}" \
     | python3 -c 'import sys,json;print(json.load(sys.stdin)["case_id"])')
 curl -sf -X POST "${PLATFORM}/v1/support/cases/disclosure/request" -d "{\"case_id\":\"${CASE_ID}\"}" >/dev/null
@@ -123,7 +159,7 @@ curl -sf -X POST "${LEDGER}/v1/settlements/adjust" -d "{\"match_id\":\"${MATCH_I
 echo "corpus seeded"
 
 echo "== Ingrid runs the certification: all four dimensions, zero violations =="
-curl -sf -X POST "${AUDIT}/v1/certify" | python3 -c "
+amisad_curl -X POST "${AUDIT}/v1/certify" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
 for dim in ['attestation','residency','consent','settlement']:
@@ -133,7 +169,7 @@ print('ASSERT four-dimension certification clean OK')
 "
 
 echo "== TVP: a deliberate tamper is detected and localized to the exact record =="
-curl -sf "${LEDGER}/v1/attestations" | python3 -c "
+amisad_curl "${LEDGER}/v1/attestations" | python3 -c "
 import sys, json
 entries = json.load(sys.stdin)['entries']
 # Modify one record's payload after the fact (index 5 of the corpus).
@@ -143,7 +179,7 @@ print(json.dumps({'entries': entries, 'expected': idx}))
 " > /tmp/tamper.json
 EXPECTED=$(python3 -c "import json;print(json.load(open('/tmp/tamper.json'))['expected'])")
 python3 -c "import json;d=json.load(open('/tmp/tamper.json'));json.dump({'entries':d['entries']},open('/tmp/tamper-body.json','w'))"
-curl -sf -X POST "${AUDIT}/v1/certify/tamper" --data-binary @/tmp/tamper-body.json | python3 -c "
+amisad_curl -X POST "${AUDIT}/v1/certify/tamper" --data-binary @/tmp/tamper-body.json | python3 -c "
 import sys, json
 r = json.load(sys.stdin)
 assert r['detected'] is True, r
@@ -152,12 +188,12 @@ print('ASSERT tamper detected and localized OK')
 "
 
 echo "== Ingrid issues findings -> Priya receives them in the platform =="
-curl -sf -X POST "${PLATFORM}/v1/incidents" \
+amisad_curl -X POST "${PLATFORM}/v1/incidents" \
     -d "{\"summary\":\"certification findings: corpus certified, tamper detected\",\"from\":\"audit\",\"environment_ids\":[\"${ENV_ID}\"]}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["case_id"];print("ASSERT findings delivered to the platform OK")'
 
 echo "== TVP: the auditor only ever READ - no writes, no personal data =="
-curl -sf "${AUDIT}/v1/access-log" | python3 -c "
+amisad_curl "${AUDIT}/v1/access-log" | python3 -c "
 import sys, json
 a = json.load(sys.stdin)['access']
 assert len(a) >= 3, a

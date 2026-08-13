@@ -44,6 +44,42 @@ SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-n
 # The published handoff file stays underneath, unchanged. Two of the three host
 # types this workload runs on have no libvirt network at all, so the rail is an
 # optimisation here and never a requirement.
+# --- REGION: a failed service call must name the service and what it answered
+# `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
+# pipe that is invisible: the parser downstream reads empty stdin and reports a
+# syntax error at line 1, so a service that never answered is diagnosed as
+# malformed data -- the run then ends on a traceback naming neither the URL nor
+# the status. Takes the same arguments as `amisad_curl` and, on success, writes the
+# body to stdout unchanged, so callers pipe exactly as they did before.
+amisad_curl() { # <same args as curl -sf>
+    local out status body url='' arg
+    for arg in "$@"; do
+        case "$arg" in http://*|https://*) url="$arg" ;; esac
+    done
+    if ! out=$(curl -sS -w '\n%{http_code}' "$@"); then
+        printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   cause:  the request did not complete (curl reported it above)\n\n' \
+            "${url:-<no url among the arguments>}" >&2
+        return 1
+    fi
+    status=${out##*$'\n'}
+    body=${out%$'\n'*}
+    case "$status" in
+        2[0-9][0-9]) ;;
+        *)
+            printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   status: HTTP %s\n!!   body:   %s\n\n' \
+                "${url:-<no url among the arguments>}" "$status" "$(printf '%.400s' "${body:-<empty>}")" >&2
+            return 1
+            ;;
+    esac
+    # A 2xx with no body is normal for a POST and fatal for a caller about to
+    # parse it. Say so here rather than leave the parser to report a syntax
+    # error at line 1 of nothing.
+    if [ -z "$body" ]; then
+        printf '!! note: %s answered HTTP %s with an empty body\n' "$url" "$status" >&2
+    fi
+    printf '%s' "$body"
+}
+
 amisad_edge_addr() { # <edge-vm-name>
     local edge="$1" ip
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
@@ -88,21 +124,21 @@ export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}
 PSQL() { sudo -u postgres psql -d amisad -tAc "$1"; }
 
 echo "== Tom: allocation policy - two regions, region-b roomier, region-a sovereign =="
-curl -sf -X POST "${RESOURCE}/v1/edges" \
+amisad_curl -X POST "${RESOURCE}/v1/edges" \
     -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_A}\",\"capacity\":2}"
-curl -sf -X POST "${RESOURCE}/v1/edges" \
+amisad_curl -X POST "${RESOURCE}/v1/edges" \
     -d "{\"region\":\"region-b\",\"endpoint\":\"${SLICE_B}\",\"capacity\":10}"
-curl -sf -X POST "${RESOURCE}/v1/policies" \
+amisad_curl -X POST "${RESOURCE}/v1/policies" \
     -d '{"jurisdiction":"region-a","regions":["region-a"]}'
 
 echo "== TVP pre-assert: default placement is capacity-greedy; only the policy pins region-a =="
-curl -sf -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-unrestricted"}' | python3 -c "
+amisad_curl -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-unrestricted"}' | python3 -c "
 import sys, json
 p = json.load(sys.stdin)
 assert p['region'] == 'region-b', p  # roomier region wins without a policy
 print('ASSERT capacity-greedy default picks region-b OK')
 "
-curl -sf -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-a"}' | python3 -c "
+amisad_curl -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-a"}' | python3 -c "
 import sys, json
 p = json.load(sys.stdin)
 assert p['region'] == 'region-a', p  # sovereignty excludes the roomier region
@@ -110,11 +146,11 @@ print('ASSERT jurisdiction policy pins region-a OK')
 "
 
 echo "== seed Elena's offer =="
-curl -sf -X POST "${SELLER}/v1/offers" \
+amisad_curl -X POST "${SELLER}/v1/offers" \
     -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
 
 echo "== harness: arm TWO consecutive isolation faults on the compliant slice =="
-curl -sf -X POST "${SLICE_A}/v1/faults" -d '{"mode":"isolation","count":2}' | python3 -c "
+amisad_curl -X POST "${SLICE_A}/v1/faults" -d '{"mode":"isolation","count":2}' | python3 -c "
 import sys, json
 assert json.load(sys.stdin)['armed'] == 2
 print('ASSERT faults armed OK')
@@ -127,7 +163,7 @@ ENV_OK=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)
 echo "completed match ${MATCH_ID} in environment ${ENV_OK}"
 
 echo "== Tom's incident queue: both aborted slices, fault reason attached =="
-INCIDENTS=$(curl -sf "${RESOURCE}/v1/incidents")
+INCIDENTS=$(amisad_curl "${RESOURCE}/v1/incidents")
 ENV_ABORT_1=$(echo "$INCIDENTS" | python3 -c 'import sys,json;print(json.load(sys.stdin)["incidents"][0]["environment_id"])')
 ENV_ABORT_2=$(echo "$INCIDENTS" | python3 -c 'import sys,json;print(json.load(sys.stdin)["incidents"][1]["environment_id"])')
 echo "$INCIDENTS" | python3 -c "
@@ -142,7 +178,7 @@ print('ASSERT two isolation incidents queued OK')
 
 echo "== TVP: aborted lifecycles read created-attested-aborted-destroyed, no egress =="
 for env in "$ENV_ABORT_1" "$ENV_ABORT_2"; do
-    curl -sf "${LEDGER}/v1/attestations/env/${env}" | python3 -c "
+    amisad_curl "${LEDGER}/v1/attestations/env/${env}" | python3 -c "
 import sys, json
 entries = json.load(sys.stdin)['entries']
 states = [e['lifecycle'] for e in entries]
@@ -155,7 +191,7 @@ for marker in ['maya', 'budget_cents', 'deadline_days', 'context', 'envelope', '
 print('ASSERT aborted lifecycle + zero egress OK')
 "
 done
-curl -sf "${LEDGER}/v1/attestations/env/${ENV_OK}" | python3 -c "
+amisad_curl "${LEDGER}/v1/attestations/env/${ENV_OK}" | python3 -c "
 import sys, json
 states = [e['lifecycle'] for e in json.load(sys.stdin)['entries']]
 assert states == ['created', 'attested', 'executed', 'destroyed'], states
@@ -163,7 +199,7 @@ print('ASSERT completed lifecycle OK')
 "
 
 echo "== TVP: zero out-of-region attestation entries =="
-curl -sf "${LEDGER}/v1/attestations" | python3 -c "
+amisad_curl "${LEDGER}/v1/attestations" | python3 -c "
 import sys, json
 entries = json.load(sys.stdin)['entries']
 assert len(entries) == 12, len(entries)  # 3 environments x 4 lifecycle events
@@ -173,16 +209,16 @@ print('ASSERT every allocation stayed in the compliant region OK')
 "
 
 echo "== the completed match settles; hosting revenue for it ONLY =="
-curl -sf -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
-curl -sf -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
-curl -sf "${LEDGER}/v1/verify" | python3 -c "
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
+amisad_curl "${LEDGER}/v1/verify" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'], v
 assert v['settlement_len'] == 4, v  # exactly one settled match (4 splits)
 print('ASSERT exactly one settlement OK')
 "
-curl -sf "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
+amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['confirmed'] is True and s['total_cents'] == s['value_cents'] == 11000, s
@@ -192,10 +228,10 @@ print('ASSERT hosting revenue for the completed match only OK')
 "
 
 echo "== Tom escalates to Priya: cross-party case links both aborted lifecycles =="
-CASE_ID=$(curl -sf -X POST "${PLATFORM}/v1/incidents" \
+CASE_ID=$(amisad_curl -X POST "${PLATFORM}/v1/incidents" \
     -d "{\"summary\":\"systemic isolation faults in region-a\",\"from\":\"resource-ops\",\"environment_ids\":[\"${ENV_ABORT_1}\",\"${ENV_ABORT_2}\"]}" \
     | python3 -c 'import sys,json;print(json.load(sys.stdin)["case_id"])')
-curl -sf "${PLATFORM}/v1/incidents/${CASE_ID}" | python3 -c "
+amisad_curl "${PLATFORM}/v1/incidents/${CASE_ID}" | python3 -c "
 import sys, json
 case = json.load(sys.stdin)
 ids = case['environment_ids']

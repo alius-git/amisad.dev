@@ -39,6 +39,42 @@ SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-n
 # The published handoff file stays underneath, unchanged. Two of the three host
 # types this workload runs on have no libvirt network at all, so the rail is an
 # optimisation here and never a requirement.
+# --- REGION: a failed service call must name the service and what it answered
+# `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
+# pipe that is invisible: the parser downstream reads empty stdin and reports a
+# syntax error at line 1, so a service that never answered is diagnosed as
+# malformed data -- the run then ends on a traceback naming neither the URL nor
+# the status. Takes the same arguments as `amisad_curl` and, on success, writes the
+# body to stdout unchanged, so callers pipe exactly as they did before.
+amisad_curl() { # <same args as curl -sf>
+    local out status body url='' arg
+    for arg in "$@"; do
+        case "$arg" in http://*|https://*) url="$arg" ;; esac
+    done
+    if ! out=$(curl -sS -w '\n%{http_code}' "$@"); then
+        printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   cause:  the request did not complete (curl reported it above)\n\n' \
+            "${url:-<no url among the arguments>}" >&2
+        return 1
+    fi
+    status=${out##*$'\n'}
+    body=${out%$'\n'*}
+    case "$status" in
+        2[0-9][0-9]) ;;
+        *)
+            printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   status: HTTP %s\n!!   body:   %s\n\n' \
+                "${url:-<no url among the arguments>}" "$status" "$(printf '%.400s' "${body:-<empty>}")" >&2
+            return 1
+            ;;
+    esac
+    # A 2xx with no body is normal for a POST and fatal for a caller about to
+    # parse it. Say so here rather than leave the parser to report a syntax
+    # error at line 1 of nothing.
+    if [ -z "$body" ]; then
+        printf '!! note: %s answered HTTP %s with an empty body\n' "$url" "$status" >&2
+    fi
+    printf '%s' "$body"
+}
+
 amisad_edge_addr() { # <edge-vm-name>
     local edge="$1" ip
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
@@ -94,11 +130,11 @@ curl -sf "${SLICE_EP}/health" >/dev/null
 echo "slice-runtime at ${SLICE_EP}"
 
 echo "== register edge + seed Elena's offers =="
-curl -sf -X POST "${RESOURCE}/v1/edges" \
+amisad_curl -X POST "${RESOURCE}/v1/edges" \
     -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
-curl -sf -X POST "http://${NODE_IP}:30083/v1/offers" \
+amisad_curl -X POST "http://${NODE_IP}:30083/v1/offers" \
     -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
-curl -sf -X POST "http://${NODE_IP}:30083/v1/offers" \
+amisad_curl -X POST "http://${NODE_IP}:30083/v1/offers" \
     -d '{"offer_id":"crystal-vase-02","tenant":"elena-atelier","title":"Crystal vase","category":"housewares","region":"region-a","price_cents":15000,"deliver_by_days":5,"auto_close":true}'
 
 echo "== happy path: Maya's gift auto-closes =="
@@ -112,14 +148,14 @@ ENV_ID=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)
 PRICE=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["offer"]["price_cents"])')
 
 echo "== Elena ships =="
-curl -sf -X POST "http://${NODE_IP}:30083/v1/orders/advance" \
+amisad_curl -X POST "http://${NODE_IP}:30083/v1/orders/advance" \
     -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
-curl -sf -X POST "http://${NODE_IP}:30083/v1/orders/advance" \
+amisad_curl -X POST "http://${NODE_IP}:30083/v1/orders/advance" \
     -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
 target/release/buyer-client wait "$HANDLE"
 
 echo "== TVP assert 1: settlement splits sum to match value =="
-curl -sf "http://${NODE_IP}:30081/v1/settlements/match/${MATCH_ID}" | python3 -c "
+amisad_curl "http://${NODE_IP}:30081/v1/settlements/match/${MATCH_ID}" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['confirmed'] is True, 'settlement not confirmed'
@@ -130,7 +166,7 @@ print('ASSERT settlement OK')
 "
 
 echo "== TVP assert 2: buyer Delivered + seller Settled, one match ID =="
-curl -sf "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}" | python3 -c "
+amisad_curl "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 assert o['state'] == 'settled', o['state']
@@ -138,7 +174,7 @@ assert o['match_id'] == '${MATCH_ID}'
 assert 'buyer' not in json.dumps(o).lower(), 'seller order leaked buyer field'
 print('ASSERT seller order OK')
 "
-curl -sf "http://${NODE_IP}:30080/v1/orders/${HANDLE}" | python3 -c "
+amisad_curl "http://${NODE_IP}:30080/v1/orders/${HANDLE}" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['status'] == 'delivered', s
@@ -146,7 +182,7 @@ print('ASSERT buyer status OK')
 "
 
 echo "== TVP assert 3: attestation chain complete for the environment =="
-curl -sf "http://${NODE_IP}:30081/v1/attestations/env/${ENV_ID}" | python3 -c "
+amisad_curl "http://${NODE_IP}:30081/v1/attestations/env/${ENV_ID}" | python3 -c "
 import sys, json
 a = json.load(sys.stdin)
 states = [e['lifecycle'] for e in a['entries']]
@@ -154,7 +190,7 @@ for want in ['created', 'attested', 'executed', 'destroyed']:
     assert want in states, f'missing {want} in {states}'
 print('ASSERT attestation lifecycle OK')
 "
-curl -sf "http://${NODE_IP}:30081/v1/verify" | python3 -c "
+amisad_curl "http://${NODE_IP}:30081/v1/verify" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'], v
@@ -162,7 +198,7 @@ print('ASSERT hash chains OK')
 "
 
 echo "== TVP assert 4: zero need/identity egress from the environment =="
-curl -sf "${SLICE_EP}/v1/egress" | python3 -c "
+amisad_curl "${SLICE_EP}/v1/egress" | python3 -c "
 import sys, json
 text = json.dumps(json.load(sys.stdin)).lower()
 for marker in ['maya', 'token', 'budget_cents', 'deadline_days', 'subscriber']:
@@ -191,14 +227,14 @@ for _ in $(seq 1 60); do
 done
 curl -sf "http://${NODE_IP}:30081/health" >/dev/null || { echo "ledger-svc never came back after restart" >&2; exit 8; }
 curl -sf "http://${NODE_IP}:30083/health" >/dev/null || { echo "seller-svc never came back after restart" >&2; exit 8; }
-curl -sf "${LEDGER}/v1/verify" | python3 -c "
+amisad_curl "${LEDGER}/v1/verify" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'], v
 assert v['settlement_len'] >= 4 and v['attestation_len'] >= 4, v
 print('ASSERT ledgers reloaded after restart OK')
 "
-curl -sf "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}" | python3 -c "
+amisad_curl "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 assert o['state'] == 'settled', o

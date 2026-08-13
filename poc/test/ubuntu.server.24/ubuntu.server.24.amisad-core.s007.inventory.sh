@@ -38,6 +38,42 @@ SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-n
 # The published handoff file stays underneath, unchanged. Two of the three host
 # types this workload runs on have no libvirt network at all, so the rail is an
 # optimisation here and never a requirement.
+# --- REGION: a failed service call must name the service and what it answered
+# `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
+# pipe that is invisible: the parser downstream reads empty stdin and reports a
+# syntax error at line 1, so a service that never answered is diagnosed as
+# malformed data -- the run then ends on a traceback naming neither the URL nor
+# the status. Takes the same arguments as `amisad_curl` and, on success, writes the
+# body to stdout unchanged, so callers pipe exactly as they did before.
+amisad_curl() { # <same args as curl -sf>
+    local out status body url='' arg
+    for arg in "$@"; do
+        case "$arg" in http://*|https://*) url="$arg" ;; esac
+    done
+    if ! out=$(curl -sS -w '\n%{http_code}' "$@"); then
+        printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   cause:  the request did not complete (curl reported it above)\n\n' \
+            "${url:-<no url among the arguments>}" >&2
+        return 1
+    fi
+    status=${out##*$'\n'}
+    body=${out%$'\n'*}
+    case "$status" in
+        2[0-9][0-9]) ;;
+        *)
+            printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   status: HTTP %s\n!!   body:   %s\n\n' \
+                "${url:-<no url among the arguments>}" "$status" "$(printf '%.400s' "${body:-<empty>}")" >&2
+            return 1
+            ;;
+    esac
+    # A 2xx with no body is normal for a POST and fatal for a caller about to
+    # parse it. Say so here rather than leave the parser to report a syntax
+    # error at line 1 of nothing.
+    if [ -z "$body" ]; then
+        printf '!! note: %s answered HTTP %s with an empty body\n' "$url" "$status" >&2
+    fi
+    printf '%s' "$body"
+}
+
 amisad_edge_addr() { # <edge-vm-name>
     local edge="$1" ip
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
@@ -87,16 +123,16 @@ curl -sf "${SLICE_EP}/health" >/dev/null
 echo "slice-runtime at ${SLICE_EP}"
 
 export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
-curl -sf -X POST "${RESOURCE}/v1/edges" -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
+amisad_curl -X POST "${RESOURCE}/v1/edges" -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
 
 echo "== Alex registers + certifies a connector (sandbox only) =="
-PARTNER=$(curl -sf -X POST "${CONNECT}/v1/partners" -d '{"name":"alex-erp-connector"}')
+PARTNER=$(amisad_curl -X POST "${CONNECT}/v1/partners" -d '{"name":"alex-erp-connector"}')
 PARTNER_ID=$(echo "$PARTNER" | python3 -c 'import sys,json;print(json.load(sys.stdin)["partner_id"])')
 echo "$PARTNER" | python3 -c 'import sys,json;assert json.load(sys.stdin)["access"]=="sandbox";print("ASSERT sandbox access only OK")'
-curl -sf -X POST "${CONNECT}/v1/partners/certify" -d "{\"partner_id\":\"${PARTNER_ID}\"}" | python3 -c 'import sys,json;assert json.load(sys.stdin)["certified"] is True;print("ASSERT connector certified OK")'
+amisad_curl -X POST "${CONNECT}/v1/partners/certify" -d "{\"partner_id\":\"${PARTNER_ID}\"}" | python3 -c 'import sys,json;assert json.load(sys.stdin)["certified"] is True;print("ASSERT connector certified OK")'
 
 echo "== Elena grants scoped access (catalog, inventory, orders) =="
-GRANT=$(curl -sf -X POST "${CONNECT}/v1/grants" \
+GRANT=$(amisad_curl -X POST "${CONNECT}/v1/grants" \
     -d "{\"tenant\":\"elena-atelier\",\"partner_id\":\"${PARTNER_ID}\",\"scopes\":[\"catalog\",\"inventory\",\"orders\"]}")
 CRED=$(echo "$GRANT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["credential"])')
 echo "ASSERT scoped credential issued OK"
@@ -104,11 +140,11 @@ echo "ASSERT scoped credential issued OK"
 echo "== connector syncs the ERP catalog (scope catalog) =="
 # erp-lamp-01 is cheaper (would win on price) and is the unit that goes to
 # zero; erp-clock-02 is the in-stock alternative.
-curl -sf -X POST "${CONNECT}/v1/sync/catalog" -d "{\"credential\":\"${CRED}\",\"offers\":[
+amisad_curl -X POST "${CONNECT}/v1/sync/catalog" -d "{\"credential\":\"${CRED}\",\"offers\":[
   {\"offer_id\":\"erp-lamp-01\",\"tenant\":\"elena-atelier\",\"title\":\"ERP table lamp\",\"category\":\"housewares\",\"region\":\"region-a\",\"price_cents\":8000,\"deliver_by_days\":5,\"auto_close\":true},
   {\"offer_id\":\"erp-clock-02\",\"tenant\":\"elena-atelier\",\"title\":\"ERP wall clock\",\"category\":\"housewares\",\"region\":\"region-a\",\"price_cents\":9000,\"deliver_by_days\":5,\"auto_close\":true}
 ]}" | python3 -c 'import sys,json;assert json.load(sys.stdin)["synced"]==2;print("ASSERT catalog synced OK")'
-curl -sf "${SELLER}/v1/offers/region/region-a" | python3 -c "
+amisad_curl "${SELLER}/v1/offers/region/region-a" | python3 -c "
 import sys, json
 ids = {o['offer_id'] for o in json.load(sys.stdin)['offers']}
 assert {'erp-lamp-01','erp-clock-02'} <= ids, ids
@@ -117,10 +153,10 @@ print('ASSERT synced offers matchable OK')
 
 echo "== an external sale zeroes the last unit of erp-lamp-01 (scope inventory) =="
 DELTA_TS=$(date +%s)
-curl -sf -X POST "${CONNECT}/v1/sync/inventory" \
+amisad_curl -X POST "${CONNECT}/v1/sync/inventory" \
     -d "{\"credential\":\"${CRED}\",\"offer_id\":\"erp-lamp-01\",\"stock\":0,\"delta_ts\":${DELTA_TS}}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["stock"]==0;print("ASSERT inventory delta applied OK")'
-curl -sf "${SELLER}/v1/offers/region/region-a" | python3 -c "
+amisad_curl "${SELLER}/v1/offers/region/region-a" | python3 -c "
 import sys, json
 ids = {o['offer_id'] for o in json.load(sys.stdin)['offers']}
 assert 'erp-lamp-01' not in ids, ids  # zeroed -> not matchable
@@ -139,7 +175,7 @@ print('ASSERT match went to the in-stock alternative OK')
 "
 # The delta zeroed erp-lamp-01 before the match; assert the delta is recorded
 # with its timestamp and the match did not reference the zeroed item.
-curl -sf "${CONNECT}/v1/deltas" | python3 -c "
+amisad_curl "${CONNECT}/v1/deltas" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)['deltas']
 zeroed = [x for x in d if x['offer_id'] == 'erp-lamp-01' and x['stock'] == 0]
@@ -148,8 +184,8 @@ print('ASSERT inventory delta timestamped OK')
 "
 
 echo "== the in-stock match closes; order states mirror to the ERP =="
-curl -sf -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
-curl -sf -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
 # The order-event webhooks are async (detached thread); wait for the ERP
 # mirror to converge to the seller state.
 for _ in $(seq 1 15); do
@@ -157,7 +193,7 @@ for _ in $(seq 1 15); do
     if [ "$ERP" = "settled" ]; then break; fi
     sleep 2
 done
-SELLER_STATE=$(curl -sf "${SELLER}/v1/orders/match/${MATCH_ID}" | python3 -c 'import sys,json;print(json.load(sys.stdin)["state"])')
+SELLER_STATE=$(amisad_curl "${SELLER}/v1/orders/match/${MATCH_ID}" | python3 -c 'import sys,json;print(json.load(sys.stdin)["state"])')
 if [ "$ERP" != "settled" ] || [ "$SELLER_STATE" != "settled" ]; then
     echo "ERP mirror ($ERP) and seller ($SELLER_STATE) not both settled" >&2
     exit 9
@@ -175,7 +211,7 @@ if grep -q '"ok"' /tmp/oos.out; then
     echo "out-of-scope call returned data" >&2
     exit 9
 fi
-curl -sf "${CONNECT}/v1/audit" | python3 -c "
+amisad_curl "${CONNECT}/v1/audit" | python3 -c "
 import sys, json
 a = json.load(sys.stdin)['audit']
 assert any(e['scope'] == 'settlement' and e['event'] == 'out-of-scope' for e in a), a
@@ -183,11 +219,11 @@ print('ASSERT out-of-scope refused and logged OK')
 "
 
 echo "== TVP: a replayed webhook delivery produces no duplicate effect =="
-curl -sf -X POST "${CONNECT}/v1/webhooks/replay" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"settled\"}" \
+amisad_curl -X POST "${CONNECT}/v1/webhooks/replay" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"settled\"}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["duplicate"] is True;print("ASSERT replay is idempotent OK")'
 
 echo "== Elena revokes the integration grant -> credentials die =="
-curl -sf -X POST "${CONNECT}/v1/grants/revoke" -d "{\"credential\":\"${CRED}\"}" \
+amisad_curl -X POST "${CONNECT}/v1/grants/revoke" -d "{\"credential\":\"${CRED}\"}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["revoked"] is True'
 REVOKED_CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "${CONNECT}/v1/sync/inventory" \
     -d "{\"credential\":\"${CRED}\",\"offer_id\":\"erp-clock-02\",\"stock\":0,\"delta_ts\":$(date +%s)}")
@@ -196,7 +232,7 @@ if [ "$REVOKED_CODE" != "401" ]; then
     exit 9
 fi
 # The catalog remains intact and hand-editable (the clock is still there).
-curl -sf "${SELLER}/v1/offers/region/region-a" | python3 -c "
+amisad_curl "${SELLER}/v1/offers/region/region-a" | python3 -c "
 import sys, json
 ids = {o['offer_id'] for o in json.load(sys.stdin)['offers']}
 assert 'erp-clock-02' in ids, ids
@@ -205,7 +241,7 @@ print('ASSERT credentials die on revoke; catalog intact OK')
 
 echo "== TVP: no buyer identity or need content on the integration surface =="
 for ep in audit deltas; do
-    curl -sf "${CONNECT}/v1/${ep}" | python3 -c "
+    amisad_curl "${CONNECT}/v1/${ep}" | python3 -c "
 import sys, json
 text = json.dumps(json.load(sys.stdin)).lower()
 for marker in ['maya', 'wedding gift', 'budget_cents', 'deadline_days', 'envelope']:

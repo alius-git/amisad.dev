@@ -37,6 +37,42 @@ SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-n
 # The published handoff file stays underneath, unchanged. Two of the three host
 # types this workload runs on have no libvirt network at all, so the rail is an
 # optimisation here and never a requirement.
+# --- REGION: a failed service call must name the service and what it answered
+# `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
+# pipe that is invisible: the parser downstream reads empty stdin and reports a
+# syntax error at line 1, so a service that never answered is diagnosed as
+# malformed data -- the run then ends on a traceback naming neither the URL nor
+# the status. Takes the same arguments as `amisad_curl` and, on success, writes the
+# body to stdout unchanged, so callers pipe exactly as they did before.
+amisad_curl() { # <same args as curl -sf>
+    local out status body url='' arg
+    for arg in "$@"; do
+        case "$arg" in http://*|https://*) url="$arg" ;; esac
+    done
+    if ! out=$(curl -sS -w '\n%{http_code}' "$@"); then
+        printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   cause:  the request did not complete (curl reported it above)\n\n' \
+            "${url:-<no url among the arguments>}" >&2
+        return 1
+    fi
+    status=${out##*$'\n'}
+    body=${out%$'\n'*}
+    case "$status" in
+        2[0-9][0-9]) ;;
+        *)
+            printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   status: HTTP %s\n!!   body:   %s\n\n' \
+                "${url:-<no url among the arguments>}" "$status" "$(printf '%.400s' "${body:-<empty>}")" >&2
+            return 1
+            ;;
+    esac
+    # A 2xx with no body is normal for a POST and fatal for a caller about to
+    # parse it. Say so here rather than leave the parser to report a syntax
+    # error at line 1 of nothing.
+    if [ -z "$body" ]; then
+        printf '!! note: %s answered HTTP %s with an empty body\n' "$url" "$status" >&2
+    fi
+    printf '%s' "$body"
+}
+
 amisad_edge_addr() { # <edge-vm-name>
     local edge="$1" ip
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
@@ -89,12 +125,12 @@ export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}
 PSQL() { sudo -u postgres psql -d amisad -tAc "$1"; }
 
 echo "== register edge + seed Elena's household offers =="
-curl -sf -X POST "${RESOURCE}/v1/edges" \
+amisad_curl -X POST "${RESOURCE}/v1/edges" \
     -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
 # Under-cap staple, and a premium item only a 'premium' need selects.
-curl -sf -X POST "${SELLER}/v1/offers" \
+amisad_curl -X POST "${SELLER}/v1/offers" \
     -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":false}'
-curl -sf -X POST "${SELLER}/v1/offers" \
+amisad_curl -X POST "${SELLER}/v1/offers" \
     -d '{"offer_id":"premium-vase-06","tenant":"elena-atelier","title":"Premium crystal vase","category":"housewares","region":"region-a","price_cents":18000,"deliver_by_days":10,"auto_close":false,"attributes":["premium"]}'
 
 echo "== Maya grants Pat a household-goods mandate (per-item cap 14000) =="
@@ -122,7 +158,7 @@ assert r['status'] == 'committed' and r['via'] == 'delegate', r
 print('ASSERT in-scope under-cap closes on delegate authority OK')
 "
 ATTEST_AFTER_UNDER=$(PSQL "SELECT count(*) FROM ledger.attestation_ledger")
-ORDERS_AFTER_UNDER=$(curl -sf "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
+ORDERS_AFTER_UNDER=$(amisad_curl "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
 
 echo "== TVP: Maya's activity trail carries dual attribution =="
 target/release/buyer-client activity | python3 -c "
@@ -145,7 +181,7 @@ print('ASSERT over-cap held for approval OK')
 "
 HANDLE=$(echo "$HELD" | python3 -c 'import sys,json;print(json.load(sys.stdin)["handle"])')
 # TVP: the over-cap closing does NOT exist before the principal's approval.
-ORDERS_BEFORE_APPROVE=$(curl -sf "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
+ORDERS_BEFORE_APPROVE=$(amisad_curl "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
 if [ "$ORDERS_BEFORE_APPROVE" != "$ORDERS_AFTER_UNDER" ]; then
     echo "over-cap match committed before approval (${ORDERS_AFTER_UNDER} -> ${ORDERS_BEFORE_APPROVE})" >&2
     exit 9
@@ -159,7 +195,7 @@ r = json.load(sys.stdin)
 assert r['status'] == 'committed' and r['via'] == 'approval', r
 print('ASSERT over-cap closes via principal approval OK')
 "
-ORDERS_AFTER_APPROVE=$(curl -sf "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
+ORDERS_AFTER_APPROVE=$(amisad_curl "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
 python3 -c "assert int('${ORDERS_AFTER_APPROVE}') == int('${ORDERS_AFTER_UNDER}') + 1; print('ASSERT approved closing added one order OK')"
 
 echo "== TVP: an out-of-scope need is refused at submission (zero environments) =="
@@ -196,7 +232,7 @@ if [ "$MANDATE_ROWS" != "2" ]; then
     echo "expected 2 mandate consent rows (grant+revoke), got ${MANDATE_ROWS}" >&2
     exit 9
 fi
-curl -sf "${LEDGER}/v1/verify" | python3 -c "
+amisad_curl "${LEDGER}/v1/verify" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'] and v['consent_ok'], v
