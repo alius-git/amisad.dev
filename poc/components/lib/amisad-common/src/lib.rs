@@ -6,8 +6,9 @@
 //! the hash-chained ledgers, self-tested against the FIPS 180-4 vectors. A
 //! real web framework replaces these when the POC outgrows scenario work.
 
-use std::io::{BufRead, BufReader, Read, Write};
+use std::io::{BufRead, BufReader, ErrorKind, Read, Write};
 use std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use std::thread::sleep;
 use std::time::Duration;
 
 pub struct ServiceInfo {
@@ -146,6 +147,31 @@ pub fn serve(info: ServiceInfo) -> std::io::Result<()> {
     serve_app(info, (), |_, _| Response::error(404, "not found"))
 }
 
+/// How long to wait before the one retried dial. These services are reached
+/// through NodePorts, and a pod that moves leaves the DNAT rule aimed at an
+/// address that no longer answers; kube-proxy reprograms the rule about a sync
+/// interval later. Two seconds clears that gap without stretching a service
+/// that is genuinely down into a long wait.
+const CONNECT_RETRY_DELAY: Duration = Duration::from_secs(2);
+
+/// Connect failures another dial can plausibly cure: the address was
+/// unroutable, nothing was listening, or the handshake never completed. Each
+/// describes a peer that was momentarily absent rather than a wrong address.
+///
+/// The retry is confined to the connect because nothing has been written at
+/// that point. Re-sending a request whose bytes already reached the peer would
+/// duplicate the non-idempotent POSTs this client carries -- a second need, a
+/// second booking -- so a failure after the connect stays a failure.
+fn connect_is_worth_retrying(error: &std::io::Error) -> bool {
+    matches!(
+        error.kind(),
+        ErrorKind::HostUnreachable
+            | ErrorKind::NetworkUnreachable
+            | ErrorKind::ConnectionRefused
+            | ErrorKind::TimedOut
+    )
+}
+
 /// Minimal HTTP/1.1 client for plain-http service-to-service calls.
 /// Returns (status, body). Only `http://host[:port]/path` URLs.
 pub fn request(method: &str, url: &str, body: Option<&str>) -> Result<(u16, String), String> {
@@ -165,8 +191,24 @@ pub fn request(method: &str, url: &str, body: Option<&str>) -> Result<(u16, Stri
         .map_err(|e| format!("resolve {host_port}: {e}"))?
         .next()
         .ok_or_else(|| format!("no address for {host_port}"))?;
-    let stream = TcpStream::connect_timeout(&addr, Duration::from_secs(10))
-        .map_err(|e| format!("connect {host_port}: {e}"))?;
+    let mut retried = false;
+    let stream = loop {
+        match TcpStream::connect_timeout(&addr, Duration::from_secs(10)) {
+            Ok(stream) => break stream,
+            Err(e) if !retried && connect_is_worth_retrying(&e) => {
+                // Named on stderr so a cured gap leaves a trace: a run that
+                // passes after this line took the retry, and a run that fails
+                // after it was dialing an address that stayed unreachable.
+                eprintln!(
+                    "connect {host_port}: {e}; retrying once in {}s",
+                    CONNECT_RETRY_DELAY.as_secs()
+                );
+                sleep(CONNECT_RETRY_DELAY);
+                retried = true;
+            }
+            Err(e) => return Err(format!("connect {host_port}: {e}")),
+        }
+    };
     let _ = stream.set_read_timeout(Some(Duration::from_secs(30)));
     let body_text = body.unwrap_or("");
     let payload = format!(
@@ -627,6 +669,37 @@ mod tests {
             sha256::hex_digest(b""),
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         );
+    }
+
+    #[test]
+    fn connect_retries_only_where_another_dial_helps() {
+        // A pod that moved leaves the NodePort DNAT aimed at an address that
+        // no longer answers: EHOSTUNREACH, "No route to host".
+        assert!(connect_is_worth_retrying(&std::io::Error::from(
+            ErrorKind::HostUnreachable
+        )));
+        assert!(connect_is_worth_retrying(&std::io::Error::from(
+            ErrorKind::ConnectionRefused
+        )));
+        assert!(connect_is_worth_retrying(&std::io::Error::from(
+            ErrorKind::TimedOut
+        )));
+        // A malformed or forbidden address is not a timing problem, and
+        // dialing it again only spends the delay.
+        assert!(!connect_is_worth_retrying(&std::io::Error::from(
+            ErrorKind::InvalidInput
+        )));
+        assert!(!connect_is_worth_retrying(&std::io::Error::from(
+            ErrorKind::PermissionDenied
+        )));
+    }
+
+    #[test]
+    fn spent_retry_keeps_the_original_connect_error() {
+        // Nothing listens on port 1, so both dials are refused; the call costs
+        // CONNECT_RETRY_DELAY and must still report the failure verbatim.
+        let error = request("GET", "http://127.0.0.1:1/health", None).unwrap_err();
+        assert!(error.starts_with("connect 127.0.0.1:1: "), "{error}");
     }
 
     #[test]
