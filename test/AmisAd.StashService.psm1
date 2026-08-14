@@ -57,6 +57,14 @@ function Resolve-StashService {
         what keeps a lab working after its stash is rebuilt onto a new IP -- the
         service announces itself, and this host reads that back.
 
+        Both the discovery and the probe are re-asked over a short backoff
+        rather than answered once. A host whose link is briefly away -- a DHCP
+        renew is enough, even one that hands back the same address -- produces
+        an empty directory answer and a failed /healthz that are indistinguish-
+        able from having no stash at all, and this runs before any VM starts,
+        so a single unlucky instant would end the pass. A stash that is really
+        absent stays absent for the whole window and still stops it.
+
         Publishing the winner makes every later
         ${ext:stash-service.ResolveHost(...)} expansion return the address that
         was actually verified, instead of each sequence re-probing for a VM this
@@ -102,39 +110,83 @@ function Resolve-StashService {
         Import-Module $extensionModule -Force -Global -DisableNameChecking -ErrorAction SilentlyContinue
     }
 
-    $candidates = [System.Collections.Generic.List[hashtable]]::new()
-    if (-not [string]::IsNullOrWhiteSpace($Pin)) {
-        $candidates.Add(@{ Address = $Pin.Trim(); Source = 'pinned' })
-    } elseif (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_SERVICE_HOST)) {
-        $candidates.Add(@{ Address = $env:YURUNA_STASH_SERVICE_HOST.Trim(); Source = '$env:YURUNA_STASH_SERVICE_HOST' })
-    } elseif (Get-Command Get-ExtensionHostAddress -ErrorAction SilentlyContinue) {
-        # @(): a single discovered address unrolls to a scalar string, and
-        # iterating THAT walks its characters.
-        $discovered = @()
-        try { $discovered = @(Get-ExtensionHostAddress -HostType 'stash-service') } catch {
-            Write-Verbose "Get-ExtensionHostAddress stash-service: $($_.Exception.Message)"
-        }
-        foreach ($address in $discovered) {
-            $candidates.Add(@{ Address = $address; Source = 'discovered (this host, or the pool)' })
-        }
-    } else {
+    $lines.Add('== Resolving the stash service ==')
+
+    # Every leg of this resolution rides the host's link, and that link is not
+    # continuously up: a DHCP renew alone takes it away for a few seconds, and a
+    # renew that returns the SAME address still does, so nothing downstream even
+    # reports an address change. Inside that window the pool lookup answers with
+    # nothing and a perfectly healthy stash fails /healthz -- both shaped exactly
+    # like a stash that does not exist. Answering on the first attempt therefore
+    # converts a blip into a hard stop before any VM starts, and the pass dies
+    # for a condition that cured itself seconds later.
+    #
+    # So ask across a window that outlasts a renew rather than at one instant.
+    # Discovery is redone per attempt, not just the probe: the empty answer is
+    # the more common symptom, and a cached candidate list would keep replaying
+    # it. Only an environment still silent at the end of the window really has
+    # no stash, and that still stops the pass.
+    $retryDelaySeconds = @(2, 5, 10)
+    $attemptCount = $retryDelaySeconds.Count + 1
+    $canDiscover = [bool](Get-Command Get-ExtensionHostAddress -ErrorAction SilentlyContinue)
+    $hasPin = (-not [string]::IsNullOrWhiteSpace($Pin)) -or
+              (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_SERVICE_HOST))
+    if (-not $hasPin -and -not $canDiscover) {
+        # Nothing to retry: a missing framework verb is not a transient state,
+        # and sleeping through the window would only delay the same answer.
         Write-Warning "The framework at $YurunaRoot has no Get-ExtensionHostAddress, so nothing can discover a stash service. Upgrade the framework checkout, or pin an address with `$env:YURUNA_STASH_SERVICE_HOST."
+        $attemptCount = 1
     }
 
-    $lines.Add('== Resolving the stash service ==')
-    foreach ($candidate in $candidates) {
-        if (Test-StashServiceHost -Address $candidate.Address) {
-            $lines.Add(("  [PASS] {0} ({1}) answered /healthz" -f $candidate.Address, $candidate.Source))
-            $null = Publish-StashServiceHost -Address $candidate.Address
-            $lines.Add("Stash service: $($candidate.Address) -- published for this cycle.")
-            $result.Address = $candidate.Address
-            $result.Lines = $lines.ToArray()
-            return $result
+    for ($attempt = 1; $attempt -le $attemptCount; $attempt++) {
+        $candidates = [System.Collections.Generic.List[hashtable]]::new()
+        if (-not [string]::IsNullOrWhiteSpace($Pin)) {
+            $candidates.Add(@{ Address = $Pin.Trim(); Source = 'pinned' })
+        } elseif (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_SERVICE_HOST)) {
+            $candidates.Add(@{ Address = $env:YURUNA_STASH_SERVICE_HOST.Trim(); Source = '$env:YURUNA_STASH_SERVICE_HOST' })
+        } elseif ($canDiscover) {
+            # @(): a single discovered address unrolls to a scalar string, and
+            # iterating THAT walks its characters.
+            $discovered = @()
+            try { $discovered = @(Get-ExtensionHostAddress -HostType 'stash-service') } catch {
+                Write-Verbose "Get-ExtensionHostAddress stash-service: $($_.Exception.Message)"
+            }
+            foreach ($address in $discovered) {
+                $candidates.Add(@{ Address = $address; Source = 'discovered (this host, or the pool)' })
+            }
         }
-        $lines.Add(("  [FAIL] {0} ({1}) did not answer /healthz" -f $candidate.Address, $candidate.Source))
-    }
-    if ($candidates.Count -eq 0) {
-        $lines.Add('  [FAIL] no candidate at all: nothing pinned, and discovery (this host, the pool) found none.')
+
+        foreach ($candidate in $candidates) {
+            if (Test-StashServiceHost -Address $candidate.Address) {
+                $lines.Add(("  [PASS] {0} ({1}) answered /healthz" -f $candidate.Address, $candidate.Source))
+                $null = Publish-StashServiceHost -Address $candidate.Address
+                $lines.Add("Stash service: $($candidate.Address) -- published for this cycle.")
+                $result.Address = $candidate.Address
+                $result.Lines = $lines.ToArray()
+                return $result
+            }
+            $lines.Add(("  [FAIL] {0} ({1}) did not answer /healthz" -f $candidate.Address, $candidate.Source))
+        }
+        if ($candidates.Count -eq 0) {
+            # "found none" covers two very different situations and the operator
+            # acts differently on each: a pool that answered and knows no stash
+            # is a registration problem, one that could not be reached at all is
+            # this host's link. Name whichever it was.
+            $why = ''
+            if (Get-Command Get-PoolExtensionHostLastOutcome -ErrorAction SilentlyContinue) {
+                $poolOutcome = Get-PoolExtensionHostLastOutcome
+                $why = ' [pool: ' + $poolOutcome.Outcome
+                if ($poolOutcome.Detail) { $why += ' -- ' + $poolOutcome.Detail }
+                $why += ']'
+            }
+            $lines.Add('  [FAIL] no candidate at all: nothing pinned, and discovery (this host, the pool) found none.' + $why)
+        }
+
+        if ($attempt -lt $attemptCount) {
+            $delay = $retryDelaySeconds[$attempt - 1]
+            $lines.Add(("  .. nothing answered; re-asking in {0}s (attempt {1} of {2})." -f $delay, ($attempt + 1), $attemptCount))
+            Start-Sleep -Seconds $delay
+        }
     }
     # Nothing answered: clear any address a previous cycle left behind so the
     # sequences cannot resolve one this cycle never confirmed.
