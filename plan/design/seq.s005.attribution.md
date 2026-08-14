@@ -16,21 +16,23 @@ sequenceDiagram
     participant LedgerSvc as ledger-svc
 
     Note over Marcel,LedgerSvc: Seeded - Elena's summer collection live in seller-svc, aggregate demand published for the target region
-    InsightsSvc-->>AdsSvc: Aggregate demand view - where demand lives
-    Marcel->>AdsSvc: Create campaign - region, need category, budget, flight dates
+    InsightsSvc-->>AdsSvc: Published outlook - where demand lives
+    Marcel->>AdsSvc: Create campaign - region, need category, budget, per-match commitment
     Marcel->>AdsSvc: Issue creative brief
     AdsSvc->>Kai: Brief appears in demand queue
-    Kai->>AdsSvc: Produce asset - revisions through approval
+    Kai->>AdsSvc: Produce asset - approved creative
     Marcel->>AdsSvc: Place approved asset - campaign active, pacing begins
-    BuyerApp->>Coordinator: Need envelope in campaign category and region
-    Coordinator->>SliceRT: Environment + offers + campaign creative travel in
-    SliceRT->>SliceRT: Campaign qualifies the offer - creative rendered inside the environment
-    SliceRT-->>BuyerApp: Shortlist - offer carries the creative
-    BuyerApp->>Coordinator: Accept - match closes, environment destroyed
-    SliceRT->>LedgerSvc: Match record + credit assignments (campaign, asset)
-    LedgerSvc-->>AdsSvc: Agency and creator credit - aggregate figures only
-    AdsSvc->>AdsSvc: Budget decrements by match outcome, not impressions
-    Note over Marcel,LedgerSvc: Yuruna asserts - settlement includes non-zero ad-partner credit referencing campaign and asset IDs, dashboards match the ledger, creative in the ingress log, zero buyer signal campaign-side, decrement equals per-match commitment
+    BuyerApp->>Coordinator: Need envelope in campaign category and region, manual closing
+    Coordinator->>AdsSvc: Fetch the region's active campaigns
+    Coordinator->>SliceRT: Environment - envelope, offers, and campaigns travel in
+    SliceRT->>SliceRT: Campaign qualifies the offer - creative rendered inside the environment, logged on ingress
+    SliceRT-->>Coordinator: Shortlist - the offer carries the creative
+    Coordinator-->>BuyerApp: Shortlist delivered
+    BuyerApp->>Coordinator: Accept - the boosted match closes
+    Coordinator->>LedgerSvc: Five-way split - seller, network, platform funded by the price; agency and creator by the commitment on top
+    Coordinator->>AdsSvc: Credit assignment - campaign, asset, opaque match id
+    AdsSvc->>AdsSvc: Budget decrements by the per-match commitment, not impressions
+    Note over Marcel,LedgerSvc: Yuruna asserts - settlement includes non-zero ad-partner credit referencing campaign and asset IDs, dashboards match the ledger, creative in the ingress log, zero buyer signal campaign-side, decrement equals per-match commitment, seller revenue unchanged by the boost
 ```
 
 ---

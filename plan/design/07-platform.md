@@ -2,40 +2,44 @@
 
 > One sentence: platform-svc is the stewardship console — operations mode for Priya, zero-knowledge support desk for Sam — where the registry, settlement oversight, and dispute machinery live without any path into match content.
 
-See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadplatform).
+See [../design.md](../design.md#9-diagrams) · [../applications.md](../applications.md#amisadplatform). Dashed = designed, not built.
 
 ```mermaid
 flowchart TD
     subgraph svc["platform-svc (vm-core)"]
+        incidents["Cross-party incident cases<br/>linked by environment id"]
+        cases["Support case desk<br/>operational metadata only"]
+        disclosure["Disclosure flow<br/>request → grant → delivery → expiry"]
         registry["Participant registry<br/>all actor classes"]
-        oversight["Settlement oversight<br/>exceptions · reconciliation"]
-        anomaly["Anomaly detection<br/>metadata only"]
-        cases["Case management<br/>support desk + dispute desk"]
-        disclosure["Disclosure-request flow<br/>time-boxed grants"]
+        oversight["Settlement oversight<br/>reconciliation · anomaly detection"]
     end
+    escalations["Operator escalations<br/>resource-svc incidents · audit-svc findings"]
     spa["SPA · platform module<br/>operations mode / support mode"]
-    identity["identity-mock"]
+    coordinator["fabric-coordinator"]
     ledger["ledger-svc"]
 
-    spa --> registry
-    spa --> cases
-    registry -->|"verification states"| identity
-    ledger -->|"settlement entries · metadata"| oversight
-    oversight --> anomaly
-    cases -->|"adjustment proposals → compensating entries"| ledger
+    spa -.-> registry
+    spa -.-> cases
+    escalations -->|"summary + the environment ids it links"| incidents
     cases --> disclosure
-    disclosure -->|"grant recorded · artifact delivered · expiry enforced"| ledger
+    coordinator -->|"granted artifact + expiry, after recording the consent"| disclosure
+    ledger -.->|"settlement entries · metadata"| oversight
+    cases -.->|"adjustment proposals → compensating entries"| ledger
+
+    classDef planned stroke-dasharray: 5 5
+    class registry,oversight planned
 ```
 
 **POC notes**
 
-- **Two modes, one service:** operations routes (registry, policy, escalated disputes) require Priya's role claim; support routes (case queue, disclosures, adjustments) require Sam's. Every action in either mode is written to an operator action log.
-- **Zero-knowledge is structural:** case records reference orders and settlement entries by ID; there is no join path from a case to buyer identity — the schema doesn't contain one (s008.mediation asserts the case record is identity-free throughout).
-- **Disclosure grants** live in the consent ledger: request → grant → single artifact delivered read-only → automatic expiry; the POC enforces expiry by key invalidation and asserts the access path dies (s008.mediation step 8).
-- **Adjustments are proposals until accepted:** the counterparty accepts in their own application; only then does ledger-svc post the compensating entries referencing the case.
-- **Anomaly detection** in POC is rule-based over settlement and case metadata (rates, conflicts, repeat patterns) — enough for s008.mediation's recurring-pattern escalation; statistical models are a growth-path item.
+- **Two desks, one service:** the operations desk holds cross-party incident cases, the support desk holds buyer-reported cases and their disclosures. Both are separated by route today; scoping them to Priya's and Sam's role claims, and writing every action to an operator action log, is the growth-path step.
+- **Zero-knowledge is structural:** case records reference orders, environments, and settlement entries by ID; there is no join path from a case to buyer identity — the record has no such field (s008.mediation asserts the case record is identity-free throughout).
+- **Escalation is deliberately inbound.** Nothing in this service reaches into another: an abort pattern in Tom's queue and a certification finding from Ingrid both arrive as posted cases carrying only a summary and the environment ids they link, which is what keeps the stewardship console free of any path into match content.
+- **Disclosure is a two-service flow:** Sam requests it here, the buyer grants it through the coordinator, and the coordinator records the grant on the consent ledger under the buyer's pseudonymous subject before delivering the artifact here with its expiry. This service then serves that one artifact read-only until the expiry passes, after which the access path returns gone rather than forbidden (s008.mediation step 8).
+- **Adjustments are posted to ledger-svc** as compensating entries referencing the case, so history is never edited. Routing them as proposals the counterparty accepts in their own application — with the entries posted only on acceptance — is designed but not built.
+- **Anomaly detection** over settlement and case metadata (rates, conflicts, repeat patterns) is designed as rule-based, with statistical models on the growth path. In the POC the recurring pattern is spotted by the operator, who escalates it as a case.
 
-**Scenario coverage:** s004.failover, s007.inventory, s008.mediation, s010.certification.
+**Scenario coverage:** s004.failover, s008.mediation, s010.certification.
 
 ---
 

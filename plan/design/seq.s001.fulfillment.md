@@ -2,38 +2,38 @@
 
 > One sentence: a private need auto-closes against a standing offer inside a sealed edge environment and settles across all four parties — the golden path.
 
-See [../design.md](../design.md#9-diagrams) · [s001.fulfillment](../scenarios.md#s001fulfillment-intent-driven-edge-match-and-automated-fulfillment). Tom is folded into resource-svc (he observes its settlement report).
+See [../design.md](../design.md#9-diagrams) · [s001.fulfillment](../scenarios.md#s001fulfillment-intent-driven-edge-match-and-automated-fulfillment). Tom is folded into resource-svc (the carrier share he would read is a party in the recorded split).
 
 ```mermaid
 sequenceDiagram
     actor Maya
-    participant BuyerApp as Buyer app
+    participant BuyerApp as Buyer client
     participant Coordinator as fabric-coordinator
-    participant SliceRT as slice-runtime
-    participant SellerSvc as seller-svc
-    actor Elena
-    participant LedgerSvc as ledger-svc
     participant ResourceSvc as resource-svc
+    participant SellerSvc as seller-svc
+    participant SliceRT as slice-runtime
+    participant LedgerSvc as ledger-svc
+    actor Elena
 
-    Note over Maya,ResourceSvc: Seeded - Maya verified with active consent, Elena holds an auto-close standing deal
+    Note over Maya,Elena: Seeded - Maya verified with active consent, Elena holds an auto-close standing deal
     Maya->>BuyerApp: State need - gift, budget cap, city, deadline, auto-close policy
-    BuyerApp->>Coordinator: Encrypted need envelope
+    BuyerApp->>Coordinator: Sealed need envelope
     Coordinator->>ResourceSvc: Placement request for buyer jurisdiction
     ResourceSvc-->>Coordinator: Compliant slice allocation
-    Coordinator->>SliceRT: Create attested environment, route envelope
-    Coordinator->>SellerSvc: Fetch candidate offers
-    SellerSvc-->>SliceRT: Qualifying offers travel in
+    Coordinator->>SellerSvc: Fetch the jurisdiction's catalog
+    SellerSvc-->>Coordinator: Candidate offers
+    Coordinator->>SliceRT: Create attested environment - envelope and offers travel in
     SliceRT->>SliceRT: Match computed - both auto-close policies permit
-    SliceRT->>LedgerSvc: Attestation lifecycle + match record + settlement instruction
-    SliceRT-->>Coordinator: Environment destroyed on completion
+    SliceRT->>LedgerSvc: Attestation lifecycle + settlement instruction
+    SliceRT->>ResourceSvc: Lifecycle telemetry
+    SliceRT-->>Coordinator: Match record - environment destroyed on completion
+    Coordinator->>SellerSvc: Committed order - need context, no buyer identity
     Coordinator-->>BuyerApp: Match result with pseudonymous order handle
-    SellerSvc->>Elena: Committed order - need context, no buyer identity
-    Elena->>SellerSvc: Ship - order advances to fulfilled
-    SellerSvc-->>BuyerApp: Order status Delivered on pseudonymous channel
-    SellerSvc->>LedgerSvc: Fulfillment confirmed
-    LedgerSvc->>LedgerSvc: Four-way split recorded
-    LedgerSvc-->>ResourceSvc: Carrier share appears in settlement report
-    Note over Maya,ResourceSvc: Yuruna asserts - one settlement record summing to match value, Delivered/Settled states share one match ID, attestation chain complete, zero need or identity egress
+    Elena->>SellerSvc: Ship - order advances through provisioning to fulfilled
+    SellerSvc->>LedgerSvc: Fulfillment confirmed - four-way split recorded, order settles
+    BuyerApp->>Coordinator: Poll order status on the handle
+    Coordinator-->>BuyerApp: Delivered - read through from the seller order, pseudonymous
+    Note over Maya,Elena: Yuruna asserts - one settlement record summing to match value, Delivered/Settled states share one match ID, attestation chain complete, zero need or identity egress, and the ledger and order rows survive a pod restart
 ```
 
 ---

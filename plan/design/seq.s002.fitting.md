@@ -7,31 +7,31 @@ See [../design.md](../design.md#9-diagrams) · [s002.fitting](../scenarios.md#s0
 ```mermaid
 sequenceDiagram
     actor Maya
-    participant BuyerApp as Buyer app
+    participant BuyerApp as Buyer client
     participant Coordinator as fabric-coordinator
-    participant SliceRT as slice-runtime
     participant SellerSvc as seller-svc
-    actor Elena
+    participant SliceRT as slice-runtime
     participant LedgerSvc as ledger-svc
+    actor Elena
 
-    Note over Maya,LedgerSvc: Seeded - Elena's catalog includes a dusty blue dress and a Thursday slot, a second seller is out of range or past deadline
+    Note over Maya,Elena: Seeded - Elena's catalog includes a dusty blue dress and a Thursday slot, a second seller is out of range or past deadline
     Maya->>BuyerApp: State need - midi, sleeves, warm fabric, NOT dusty blue, fitting before Friday, manual closing
-    BuyerApp->>Coordinator: Encrypted need envelope
-    Coordinator->>SliceRT: Create attested environment, route envelope
-    Coordinator->>SellerSvc: Fetch candidate offers
-    SellerSvc-->>SliceRT: Offers travel into sealed environment
+    BuyerApp->>Coordinator: Sealed need envelope
+    Coordinator->>SellerSvc: Fetch the jurisdiction's catalog
+    SellerSvc-->>Coordinator: Candidate offers
+    Coordinator->>SliceRT: Create attested environment - envelope and offers travel in
     SliceRT->>SliceRT: Evaluate every constraint including exclusions
-    SliceRT-->>Coordinator: Shortlist - only fully fitting offers
+    SliceRT-->>Coordinator: Shortlist - only fully fitting offers, no match id
     Coordinator-->>BuyerApp: Shortlist delivered (notification 1)
-    Note over BuyerApp: Manual policy - zero commitments exist at this point
-    Maya->>BuyerApp: Select one dress, tap to book Thursday fitting
+    Note over Coordinator,SellerSvc: Manual policy - zero commitments exist at this point
+    Maya->>BuyerApp: Select one dress, book the Thursday fitting
     BuyerApp->>Coordinator: Accept offer and book slot
-    Coordinator->>SellerSvc: Commitment - dress requirements only, no buyer identity
-    SellerSvc-->>BuyerApp: Booking confirmed (notification 2)
-    SellerSvc->>Elena: Fitting appointment on the order board
-    Elena->>SellerSvc: Fitting fulfilled, sale closed
-    SellerSvc->>LedgerSvc: Order settles - split recorded
-    Note over Maya,LedgerSvc: Yuruna asserts - dusty blue and out-of-range offers absent from shortlist, no pre-decision commitment, appointment records consistent and identity-free, notification count is exactly two
+    Coordinator->>LedgerSvc: Settlement instruction for the booked match
+    Coordinator->>SellerSvc: Committed order - dress requirements and slot, no buyer identity
+    Coordinator-->>BuyerApp: Booking confirmed (notification 2)
+    Elena->>SellerSvc: Fitting appointment on the order board, fulfilled and closed
+    SellerSvc->>LedgerSvc: Fulfillment confirmed - split recorded, order settles
+    Note over Maya,Elena: Yuruna asserts - dusty blue and out-of-range offers absent from shortlist, no pre-decision commitment, appointment records consistent and identity-free, notification count is exactly two
 ```
 
 ---

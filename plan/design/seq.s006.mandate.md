@@ -14,32 +14,40 @@ sequenceDiagram
     participant Coordinator as fabric-coordinator
     participant SliceRT as slice-runtime
 
-    Note over Maya,SliceRT: Seeded - household-goods category, monthly cap, per-item closing limit, three-month expiry
+    Note over Maya,SliceRT: Seeded - household-goods category, per-item closing limit, expiry
     Maya->>BuyerApp: Grant mandate to Pat
-    BuyerApp->>LedgerSvc: Mandate recorded in consent ledger
-    BuyerApp->>IdentityMock: Pat verified as delegate bound to Maya
-    Pat->>BuyerApp: Open delegate workspace - scope, remaining cap, expiry visible
-    Pat->>BuyerApp: State in-scope need under per-item limit
-    BuyerApp->>Coordinator: Envelope with mandate reference
-    Coordinator->>SliceRT: Environment - mandate checked at match time
-    SliceRT->>LedgerSvc: Match closes - dual attribution (actor Pat, principal Maya, mandate)
+    BuyerApp->>Coordinator: Mandate - delegate, category, per-item cap, expiry
+    Coordinator->>LedgerSvc: Mandate recorded as a consent grant type
+    Note over Coordinator: Scope lives here; the immutable grant history lives on the chain
+    Pat->>BuyerApp: Open delegate workspace
+    BuyerApp->>IdentityMock: Pat's actor token
+    BuyerApp->>Coordinator: Workspace request
+    Coordinator-->>BuyerApp: Maya as principal, with the mandate's scope
+    Pat->>BuyerApp: State in-scope need under the per-item limit
+    BuyerApp->>Coordinator: Delegated need - principal named, envelope sealed
+    Coordinator->>Coordinator: Mandate scope checked BEFORE any dispatch
+    Coordinator->>SliceRT: Environment - envelope and offers travel in
+    SliceRT-->>Coordinator: Match within the cap
+    Coordinator->>LedgerSvc: Settlement instruction - closing on Pat's authority
+    Coordinator->>Coordinator: Dual attribution on Maya's activity trail (actor Pat, principal Maya, mandate)
     BuyerApp-->>Maya: Activity trail shows the delegated action
-    Pat->>BuyerApp: State second need - best match exceeds per-item limit
+    Pat->>BuyerApp: State second need - best match exceeds the per-item limit
     alt closing beyond delegated authority
-        SliceRT-->>BuyerApp: Match permitted, closing withheld
-        BuyerApp->>Maya: Approval handoff
+        Coordinator->>Coordinator: Match HELD - offer chosen, nothing committed
+        Coordinator-->>Maya: Approval handoff
         Maya->>BuyerApp: Approve
         BuyerApp->>Coordinator: Closing completes - attributed via principal approval
     end
     alt out-of-scope category
-        Pat->>BuyerApp: Attempt need outside mandated category
-        BuyerApp-->>Pat: Refused at submission - nothing reaches matching
+        Pat->>BuyerApp: Attempt need outside the mandated category
+        Coordinator-->>Pat: Refused at submission - zero environments, zero entries
     end
     Maya->>BuyerApp: Revoke mandate
-    BuyerApp->>LedgerSvc: Revocation recorded - principal view removed immediately
+    BuyerApp->>Coordinator: Revocation - delegate workspace cleared immediately
+    Coordinator->>LedgerSvc: Revocation recorded on the consent chain
     alt delegated attempt after revocation
         Pat->>BuyerApp: Attempt delegated action
-        BuyerApp-->>Pat: Mandate check fails
+        Coordinator-->>Pat: Mandate check fails
     end
     Note over Maya,SliceRT: Yuruna asserts - every delegated match carries dual attribution to a then-valid mandate, over-cap closing exists only after recorded approval, out-of-scope attempt produced zero environments and entries, nothing delegated exists after revocation
 ```

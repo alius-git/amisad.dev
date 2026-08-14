@@ -9,41 +9,35 @@ sequenceDiagram
     actor Alex
     actor Priya
     actor Elena
-    participant ERP as ERP connector (sim)
+    participant ERP as ERP connector (played by the scenario)
     participant ConnectSvc as connect-svc
     participant SellerSvc as seller-svc
     participant Coordinator as fabric-coordinator
 
     Note over Alex,Coordinator: Seeded - Elena's ERP catalog with one item at a single unit of stock
     Alex->>ConnectSvc: Register as integration partner
-    ConnectSvc->>Priya: Identity and standing check via participant registry
-    Priya-->>ConnectSvc: Verified - sandbox access only
-    Alex->>ConnectSvc: Build and certify connector in sandbox tenant
-    Elena->>SellerSvc: Grant scoped access - catalog, inventory, orders
-    SellerSvc-->>ConnectSvc: Grant defines credential ceiling
-    ConnectSvc-->>ERP: Scoped workload credentials issued
+    ConnectSvc-->>Alex: Registered - sandbox access only
+    Alex->>ConnectSvc: Certify the connector against the same contracts
+    Note over ConnectSvc,Priya: Promotion beyond sandbox belongs to Priya's participant registry - not built in the POC, so sandbox and certification are tracked in connect-svc
+    Elena->>ConnectSvc: Grant scoped access - catalog, inventory, orders
+    ConnectSvc-->>ERP: Credential capped to exactly that scope
     ERP->>ConnectSvc: Sync catalog into Elena's tenant
     ConnectSvc->>SellerSvc: Offers matchable
     Note over ERP: Counter sale in the shop - last unit of the item sells externally
     ERP->>ConnectSvc: Inventory delta
-    ConnectSvc->>SellerSvc: Item availability zero within the sync window
-    Coordinator->>SellerSvc: Fetch offers for seeded buyer need
-    alt item out of stock
-        SellerSvc-->>Coordinator: No offer returned for the zeroed item
-    else in-stock alternative
-        SellerSvc-->>Coordinator: Alternative matches and closes
-    end
-    SellerSvc->>ConnectSvc: Order state transitions on the orders stream
-    ConnectSvc-->>ERP: Webhooks - every state mirrored through settlement
+    ConnectSvc->>SellerSvc: Stock zero - the item leaves the matchable catalog
+    Coordinator->>SellerSvc: Fetch offers for the seeded buyer need
+    SellerSvc-->>Coordinator: Only the in-stock alternative, though the zeroed item was cheaper
+    SellerSvc->>ConnectSvc: Order state transitions, one detached notify each
+    ConnectSvc-->>ERP: Mirrored under an idempotency key, advancing monotonically
     alt out-of-scope call
         ERP->>ConnectSvc: Request beyond granted scope
         ConnectSvc-->>ERP: Refused on credential scope - attempt logged, nothing returned
     end
-    Note over ConnectSvc,ERP: Yuruna replays a dropped webhook - state converges, no duplicate effects
-    Elena->>SellerSvc: Revoke integration grant
-    SellerSvc-->>ConnectSvc: Credentials invalidated immediately
+    Note over ConnectSvc,ERP: Yuruna replays a delivery - the mirror converges, no duplicate effects
+    Elena->>ConnectSvc: Revoke the integration grant
     ERP->>ConnectSvc: Next sync attempt
-    ConnectSvc-->>ERP: Authentication fails - catalog intact and hand-editable
+    ConnectSvc-->>ERP: Credential invalid - Elena's catalog intact and hand-editable
     Note over Alex,Coordinator: Yuruna asserts - no match references externally zeroed inventory, ERP and seller order states identical at every transition, out-of-scope refused and logged, replay idempotent, zero buyer data in any integration payload or log
 ```
 

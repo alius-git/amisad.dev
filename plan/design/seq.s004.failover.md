@@ -15,27 +15,26 @@ sequenceDiagram
     participant PlatformSvc as platform-svc
     actor Priya
 
-    Note over Tom,Priya: Seeded - two regions with capacity, buyer needs carry a jurisdiction restriction satisfied only by region A
+    Note over Tom,Priya: Seeded - two regions with capacity, buyer needs carry a jurisdiction restriction satisfied only by region A, and Yuruna has armed two consecutive isolation faults
     Tom->>ResourceSvc: Configure allocation policy - regions, capacity, jurisdiction constraint
     Coordinator->>ResourceSvc: Placement request for restricted-jurisdiction buyer
     Note over SliceB: More free capacity - excluded by jurisdiction constraint at allocation time
     ResourceSvc-->>Coordinator: Allocate region A only
-    Coordinator->>SliceA: Create attested environment
-    alt Yuruna injects isolation fault mid-match
-        SliceA->>SliceA: Self-terminate - partial state destroyed with the environment
-        SliceA->>LedgerSvc: Abort recorded with fault reason - no match record emitted
-        SliceA-->>ResourceSvc: Telemetry - slice terminated
+    loop each armed fault
+        Coordinator->>SliceA: Create attested environment
+        SliceA->>SliceA: Self-terminate right after attestation, BEFORE the envelope is opened
+        SliceA->>LedgerSvc: created-attested-aborted-destroyed with the fault reason - no match record
+        SliceA->>ResourceSvc: Abort telemetry
         ResourceSvc->>Tom: Incident raised in queue
-    else automatic retry
-        Coordinator->>SliceA: Fresh environment, same compliant region
-        SliceA->>SliceA: Match completes
-        SliceA->>LedgerSvc: Match record + settlement recorded
     end
-    Note over SliceA: Yuruna injects a repeat fault - pattern is systemic
-    Tom->>PlatformSvc: Escalate cross-party incident
-    PlatformSvc->>Priya: Case opened, linked to both attestation entries
-    ResourceSvc-->>Tom: Settlement report - hosting revenue for the completed match only
-    Note over Tom,Priya: Yuruna asserts - zero out-of-region attestation entries, aborted lifecycle reads created-attested-aborted-destroyed with no egress, exactly one settlement record, incident case references both environment lifecycles
+    Coordinator->>SliceA: Automatic retry - fresh environment, same compliant placement
+    SliceA->>SliceA: Match completes
+    SliceA->>LedgerSvc: Match record + settlement instruction
+    Note over Tom,Priya: Two aborts in a row - the pattern is systemic
+    Tom->>PlatformSvc: Escalate cross-party incident, linking both environment ids
+    PlatformSvc->>Priya: Case opened, referencing both aborted lifecycles
+    LedgerSvc-->>Tom: Exactly one settlement - the aborted environments earned nothing
+    Note over Tom,Priya: Yuruna asserts - zero out-of-region attestation entries and the roomier region positively excluded, aborted lifecycle reads created-attested-aborted-destroyed with nothing need-derived in it, exactly one settlement record, incident case references both environment lifecycles
 ```
 
 ---

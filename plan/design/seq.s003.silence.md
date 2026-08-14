@@ -7,32 +7,36 @@ See [../design.md](../design.md#9-diagrams) · [s003.silence](../scenarios.md#s0
 ```mermaid
 sequenceDiagram
     actor Maya
-    participant BuyerApp as Buyer app
-    participant LedgerSvc as ledger-svc
+    participant BuyerApp as Buyer client
     participant Coordinator as fabric-coordinator
+    participant LedgerSvc as ledger-svc
     participant SellerSvc as seller-svc
+    participant InsightsSvc as insights-svc
     actor Elena
 
-    Note over Maya,Elena: Seeded - one committed order in flight, two open needs still matching
+    Note over Maya,Elena: Seeded - one committed order in flight, two needs open on the coordinator and still matching
     Maya->>BuyerApp: Pause participation
-    BuyerApp->>LedgerSvc: Revocation recorded with timestamp - enforcement immediate
-    Coordinator->>LedgerSvc: Consent check for next matching cycle
-    alt consent revoked
-        LedgerSvc-->>Coordinator: Refused - no environment created for her needs
-    end
+    BuyerApp->>Coordinator: Revoke participation
+    Coordinator->>LedgerSvc: Revocation appended under her pseudonymous subject
     Elena->>SellerSvc: Publish new offer that would perfectly fit an open need
-    Note over BuyerApp: Silence - no match, no notification, nothing happens
+    SellerSvc->>Coordinator: Offer-published event - re-run the open needs
+    Coordinator->>LedgerSvc: Consent check for this matching cycle
+    LedgerSvc-->>Coordinator: Revoked - no environment created for her needs
+    Note over Coordinator,Elena: Silence - no match, no notification, nothing happens
     Elena->>SellerSvc: Fulfill the in-flight order
     SellerSvc->>LedgerSvc: Pre-revocation commitment settles normally
-    SellerSvc-->>BuyerApp: Order status Delivered on pseudonymous channel
+    BuyerApp->>Coordinator: Poll order status on the handle
+    Coordinator-->>BuyerApp: Delivered - pseudonymous, unaffected by the revocation
     Maya->>BuyerApp: Withdraw entirely
-    BuyerApp->>LedgerSvc: Aggregate-contribution permission ends
-    Note over LedgerSvc: Subsequent aggregation cycles carry no contribution derived from her needs
+    BuyerApp->>Coordinator: Revoke aggregate contribution
+    Coordinator->>LedgerSvc: Second revocation recorded
+    InsightsSvc->>Coordinator: Aggregation cycle - count of contributing open needs
+    Coordinator-->>InsightsSvc: Nothing of hers counted
     Maya->>BuyerApp: Resume participation
-    BuyerApp->>LedgerSvc: New grant recorded
-    Coordinator->>LedgerSvc: Next cycle consent check
-    LedgerSvc-->>Coordinator: Permitted - open needs served again
-    Note over Maya,Elena: Yuruna asserts - zero match events and zero environments for this buyer between revocation and resumption, in-flight order reaches Settled, full grant-revoke-regrant history immutable, zero notifications in the paused window
+    BuyerApp->>Coordinator: Re-grant contribution and participation
+    Coordinator->>LedgerSvc: New grants recorded
+    Coordinator->>Coordinator: Open needs immediately re-served
+    Note over Maya,Elena: Yuruna asserts - zero match events and zero environments for this buyer between revocation and resumption, in-flight order reaches Settled, full grant-revoke-regrant history immutable on the verifying consent chain and in PostgreSQL, zero notifications in the paused window
 ```
 
 ---
