@@ -20,7 +20,7 @@ the demo by hand instead, see [demo.md](demo.md).
    Edit `test/test.config.yml`:
    - `repositories.projectUrl`: `https://github.com/alius-git/amisad.dev.git`
      (or a local clone path) — sequences are discovered under `poc/test/`.
-   - `repositories.GH_TOKEN`: a GitHub PAT with read access (host-side clone).
+   - `repositories.ghToken`: a GitHub PAT with read access (host-side clone).
    - `guestSequence`: trim to `- guest.ubuntu.server.24`.
 
 3. **Seed the vault.** From the `yuruna` folder in `pwsh`:
@@ -57,7 +57,7 @@ the demo by hand instead, see [demo.md](demo.md).
    lab's, and a literal here would go stale the first time the service moved.
    Any one of these is enough:
 
-   - run one on this host: `test/Start-StashServiceVM.ps1` from the `yuruna`
+   - run one on this host: `test/service/Start-StashServiceVM.ps1` from the `yuruna`
      folder;
    - join a pool that runs one — the service announces itself to the
      pool-aggregator and this host reads the address back (nothing to
