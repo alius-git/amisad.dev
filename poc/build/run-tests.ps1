@@ -42,10 +42,10 @@
     KVM/UTM, where the framework deliberately uses libvirt group membership and
     the invoking user's utmctl session instead.
 .PARAMETER YurunaRoot
-    Yuruna framework checkout that holds test/Invoke-TestSequence.ps1. Optional
+    Yuruna framework checkout that holds test/Debug-TestSequence.ps1. Optional
     -- see Resolve-YurunaRoot for the discovery order.
 .PARAMETER LogDir
-    Per-stage Invoke-TestSequence logs. Default: <temp>/amisad-tests.
+    Per-stage Debug-TestSequence logs. Default: <temp>/amisad-tests.
 .PARAMETER NoConfigGate
     Forwarded to each stage (skip the pre-cycle Test-Config.ps1 gate).
 .EXAMPLE
@@ -80,8 +80,8 @@ Write-Information "Test driver on '$HostType' (framework: $YurunaRoot)."
 # names the computer but not the fix.
 if (-not (Test-HostRequirement -HostType $HostType)) { exit 1 }
 
-$ts = Join-Path $YurunaRoot 'test/Invoke-TestSequence.ps1'
-if (-not (Test-Path -LiteralPath $ts)) { Write-Error "Invoke-TestSequence.ps1 not found at $ts"; exit 1 }
+$ts = Join-Path $YurunaRoot 'test/Debug-TestSequence.ps1'
+if (-not (Test-Path -LiteralPath $ts)) { Write-Error "Debug-TestSequence.ps1 not found at $ts"; exit 1 }
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 # Ordered scenario registry: append here as scenarios are implemented (test.md).
