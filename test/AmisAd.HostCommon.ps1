@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 2026.08.19
-.GUID 4283c1d7-2a94-4e60-b8d1-3c7e6a09f452
+.GUID 42db3be5-9299-4386-ab00-b638128e3389
 .AUTHOR Alisson Sol et al.
 .COPYRIGHT (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc lab host portability

@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 2026.07.27
-.GUID 420cee7b-fef0-4a20-987b-4f61363be543
+.GUID 42c943f7-5e9b-4ffc-b5f2-bdac82550e11
 .AUTHOR Alisson Sol et al.
 .COPYRIGHT (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc lab stash discovery

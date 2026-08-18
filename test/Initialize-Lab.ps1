@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 2026.08.19
-.GUID 42b4e8da-6f32-4c9e-ad57-8b1c3f74d2e6
+.GUID 42fa58fd-5d9d-4319-8816-8b5fe971bdbe
 .AUTHOR Alisson Sol et al.
 .COPYRIGHT (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc lab build warmup

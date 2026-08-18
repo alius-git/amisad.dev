@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 2026.08.19
-.GUID 42a2eacb-2a3b-4355-b2b9-cb0661aadd16
+.GUID 4225655c-d88f-4930-8ec3-2289c3674595
 .AUTHOR Alisson Sol et al.
 .COPYRIGHT (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc docker images

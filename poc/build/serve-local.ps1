@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 2026.08.19
-.GUID 42f28106-215e-4fc9-8c1c-5cfcc18afd53
+.GUID 4293d062-596a-48e4-adf5-92844ed6854c
 .AUTHOR Alisson Sol et al.
 .COPYRIGHT (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc lab serve

@@ -1,6 +1,6 @@
 <#PSScriptInfo
 .VERSION 2026.08.19
-.GUID 42ece3f0-71f7-49a5-b325-387b1c3c98ca
+.GUID 42e65f7e-5360-4e88-88af-67fa7c3b5d6f
 .AUTHOR Alisson Sol et al.
 .COPYRIGHT (c) 2026 by Alisson Sol et al.
 .TAGS amisad poc demo host serve
