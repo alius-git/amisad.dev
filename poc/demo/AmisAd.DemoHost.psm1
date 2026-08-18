@@ -336,5 +336,101 @@ function Test-DemoStopKey {
     return $false
 }
 
+
+# --- REGION: HTTP request/response helpers shared by the demo servers
+# These were duplicated verbatim in serve-by-act.ps1 and serve-data-view.ps1.
+# Write-Json keeps the -Depth parameter the data-view copy grew: its default of
+# 8 is exactly what the other copy hardcoded, so both callers keep their
+# behaviour. Send-StaticFile and Invoke-Proxy deliberately stay per-server --
+# their differences are the app's own routing and proxy policy, not drift.
+
+function Resolve-VmIp([string]$Name) {
+    <#
+    .SYNOPSIS
+    Resolve the demo VM's reachable IP, preferring an explicit value over discovery.
+    #>
+    if (Get-Command -Name 'Get-VMIp' -ErrorAction SilentlyContinue) {
+        try {
+            $ip = Get-VMIp -VMName $Name
+            if ($ip) { return [string]$ip }
+        } catch {
+            Write-Verbose "Get-VMIp '$Name' failed: $($_.Exception.Message); trying the handoff file."
+        }
+    }
+    $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR }
+               elseif ($YurunaRoot)     { Join-Path $YurunaRoot 'test/status/log' }
+               else                     { '' }
+    if (-not $logRoot) { return '' }
+    $ipFile = Join-Path $logRoot "handoff/$Name.ip.txt"
+    if (Test-Path -LiteralPath $ipFile) { return (Get-Content -LiteralPath $ipFile -Raw).Trim() }
+    return ''
+}
+
+function Get-PersonaSecret {
+    <#
+    .SYNOPSIS
+    The demo personas and their shared secrets, read once from the Yuruna
+    authentication vault.
+    .DESCRIPTION
+    Reads $YurunaRoot from the CALLING script. That works because an
+    unqualified variable lookup walks the caller's scope chain, so the
+    server's -YurunaRoot parameter is visible here without being passed;
+    the cache below is $script:-scoped and therefore lives in this module
+    rather than the caller, which is the same once-per-process lifetime it
+    had when both servers declared their own copy.
+    #>
+    if ($null -ne $script:personaCache) { return $script:personaCache }
+    $vaultError = ''
+    if (-not $YurunaRoot) {
+        $vaultError = 'framework checkout not located; pass -YurunaRoot or set YURUNA_ROOT'
+    } else {
+        try { Import-Module (Join-Path $YurunaRoot 'test/extension/authentication/default.psm1') -Force }
+        catch { $vaultError = $_.Exception.Message }
+    }
+    $list = foreach ($u in $personaUsers) {
+        $pw = ''
+        if ($vaultError) { $pw = "<vault error: $vaultError>" }
+        else { try { $pw = Get-Password -Username $u } catch { $pw = "<vault error: $($_.Exception.Message)>" } }
+        [ordered]@{ username = $u; password = $pw }
+    }
+    $script:personaCache = @($list)
+    return $script:personaCache
+}
+
+function Test-LoopbackClient($Request) {
+    <#
+    .SYNOPSIS
+    Whether a request arrived from this machine, so loopback-only routes can refuse the rest.
+    #>
+    $addr = $Request.RemoteEndPoint.Address
+    # A dual-stack listener reports IPv4 peers as ::ffff:127.0.0.1, which
+    # IsLoopback does not recognize in its mapped form.
+    if ($addr.IsIPv4MappedToIPv6) { $addr = $addr.MapToIPv4() }
+    return [System.Net.IPAddress]::IsLoopback($addr)
+}
+
+function Write-Body($Response, [int]$Status, [byte[]]$Bytes, [string]$ContentType) {
+    <#
+    .SYNOPSIS
+    Write a byte payload to an HttpListener response and close it.
+    #>
+    $Response.StatusCode = $Status
+    $Response.ContentType = $ContentType
+    $Response.ContentLength64 = $Bytes.Length
+    $Response.OutputStream.Write($Bytes, 0, $Bytes.Length)
+    $Response.OutputStream.Close()
+}
+
+function Write-Json($Response, [int]$Status, $Object, [int]$Depth = 8) {
+    <#
+    .SYNOPSIS
+    Write an object as a JSON response body. -Depth defaults to 8, the value both demo servers used.
+    #>
+    $Response.Headers['Cache-Control'] = 'no-store'
+    $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $Object -Depth $Depth))
+    Write-Body -Response $Response -Status $Status -Bytes $bytes -ContentType 'application/json'
+}
+
 Export-ModuleMember -Function Get-DemoHostIp, Get-DemoHostIpList, Test-DemoAdministrator,
-    Add-DemoFirewallRule, New-DemoListener, Enable-DemoStopKey, Disable-DemoStopKey, Test-DemoStopKey
+    Add-DemoFirewallRule, New-DemoListener, Enable-DemoStopKey, Disable-DemoStopKey, Test-DemoStopKey, `
+    Resolve-VmIp, Get-PersonaSecret, Test-LoopbackClient, Write-Body, Write-Json

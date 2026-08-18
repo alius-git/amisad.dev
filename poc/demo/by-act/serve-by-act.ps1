@@ -69,23 +69,6 @@ if ($YurunaRoot) {
 # VM IP resolution: explicit param -> the host driver's guest report -> the
 # status service's handoff file (the edges' boot-time IP reporter posts
 # <hostname>.ip.txt there; see poc/usernames.md "Core->edge access").
-function Resolve-VmIp([string]$Name) {
-    if (Get-Command -Name 'Get-VMIp' -ErrorAction SilentlyContinue) {
-        try {
-            $ip = Get-VMIp -VMName $Name
-            if ($ip) { return [string]$ip }
-        } catch {
-            Write-Verbose "Get-VMIp '$Name' failed: $($_.Exception.Message); trying the handoff file."
-        }
-    }
-    $logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR }
-               elseif ($YurunaRoot)     { Join-Path $YurunaRoot 'test/status/log' }
-               else                     { '' }
-    if (-not $logRoot) { return '' }
-    $ipFile = Join-Path $logRoot "handoff/$Name.ip.txt"
-    if (Test-Path -LiteralPath $ipFile) { return (Get-Content -LiteralPath $ipFile -Raw).Trim() }
-    return ''
-}
 if (-not $CoreIp) { $CoreIp = Resolve-VmIp 'amisad-core' }
 if (-not $EdgeAIp) { $EdgeAIp = Resolve-VmIp 'amisad-edge-a' }
 if (-not $EdgeBIp) { $EdgeBIp = Resolve-VmIp 'amisad-edge-b' }
@@ -96,37 +79,10 @@ if (-not $EdgeBIp) { $EdgeBIp = Resolve-VmIp 'amisad-edge-b' }
 # VM account never got that password either.
 $personaUsers = 'maya', 'elena', 'tom', 'marcel', 'kai', 'priya', 'ingrid', 'dana', 'alex', 'sam', 'pat'
 $script:personaCache = $null
-function Get-PersonaSecret {
-    if ($null -ne $script:personaCache) { return $script:personaCache }
-    $vaultError = ''
-    if (-not $YurunaRoot) {
-        $vaultError = 'framework checkout not located; pass -YurunaRoot or set YURUNA_ROOT'
-    } else {
-        try { Import-Module (Join-Path $YurunaRoot 'test/extension/authentication/default.psm1') -Force }
-        catch { $vaultError = $_.Exception.Message }
-    }
-    $list = foreach ($u in $personaUsers) {
-        $pw = ''
-        if ($vaultError) { $pw = "<vault error: $vaultError>" }
-        else { try { $pw = Get-Password -Username $u } catch { $pw = "<vault error: $($_.Exception.Message)>" } }
-        [ordered]@{ username = $u; password = $pw }
-    }
-    $script:personaCache = @($list)
-    return $script:personaCache
-}
-
 # The vault passwords are the one thing here that must not travel further than
 # the operator intends, so they are gated per REQUEST, not per binding: opening
 # the console to the network still leaves the host's own browser fully
 # featured, and remote viewers see the cards without the secrets.
-function Test-LoopbackClient($Request) {
-    $addr = $Request.RemoteEndPoint.Address
-    # A dual-stack listener reports IPv4 peers as ::ffff:127.0.0.1, which
-    # IsLoopback does not recognize in its mapped form.
-    if ($addr.IsIPv4MappedToIPv6) { $addr = $addr.MapToIPv4() }
-    return [System.Net.IPAddress]::IsLoopback($addr)
-}
-
 $mime = @{
     '.html' = 'text/html; charset=utf-8'
     '.js'   = 'text/javascript; charset=utf-8'
@@ -139,19 +95,6 @@ $mime = @{
 }
 $http = [System.Net.Http.HttpClient]::new()
 $http.Timeout = [TimeSpan]::FromSeconds(60)
-
-function Write-Body($Response, [int]$Status, [byte[]]$Bytes, [string]$ContentType) {
-    $Response.StatusCode = $Status
-    $Response.ContentType = $ContentType
-    $Response.ContentLength64 = $Bytes.Length
-    $Response.OutputStream.Write($Bytes, 0, $Bytes.Length)
-    $Response.OutputStream.Close()
-}
-function Write-Json($Response, [int]$Status, $Object) {
-    $Response.Headers['Cache-Control'] = 'no-store'
-    $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $Object -Depth 8))
-    Write-Body -Response $Response -Status $Status -Bytes $bytes -ContentType 'application/json'
-}
 
 # Forward one browser request to a lab endpoint, body and method intact,
 # and relay the upstream status + body verbatim (non-2xx included: refusal
