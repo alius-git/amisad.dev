@@ -19,57 +19,57 @@ var AD = (function () {
 
   var PERSONAS = {
     maya:   { name: "Maya",   role: "The Buyer",                   app: "AmisAd/buyer",
-              blurb: "States a need once, in her own words. Nothing about her leaves — not to the seller, not to anyone." },
+              blurb: "States a need once, in her own words. Nothing about her leaves -- not to the seller, not to anyone." },
     elena:  { name: "Elena",  role: "The Seller",                  app: "AmisAd/seller",
               blurb: "A dress atelier meeting real intent, not audiences. She never touches anyone's data." },
     tom:    { name: "Tom",    role: "The Telco Administrator",     app: "AmisAd/resource",
-              blurb: "Runs the sealed slices close to the buyer, inside the law — and books the network's share." },
+              blurb: "Runs the sealed slices close to the buyer, inside the law -- and books the network's share." },
     marcel: { name: "Marcel", role: "The Ad Agency Administrator", app: "AmisAd/ads",
               blurb: "Campaigns that reach real needs, measured on the only number that matters: did it fit?" },
     kai:    { name: "Kai",    role: "The Creative Partner",        app: "AmisAd/ads (studio)",
               blurb: "Sells creative talent: briefs in, assets out, and proof the work performed." },
     priya:  { name: "Priya",  role: "The Platform Operator",       app: "AmisAd/platform",
-              blurb: "Steward of the marketplace nobody can see into — precisely because nobody can see into it." },
+              blurb: "Steward of the marketplace nobody can see into -- precisely because nobody can see into it." },
     ingrid: { name: "Ingrid", role: "The Trust Auditor",           app: "AmisAd/audit",
               blurb: "Independently verifies the central claim: nothing about the buyer leaves. Evidence, not assurances." },
     dana:   { name: "Dana",   role: "The Demand Analyst",          app: "AmisAd/insights",
               blurb: "Works the one window that exists: aggregate demand above the anonymity threshold." },
     alex:   { name: "Alex",   role: "The Integration Partner",     app: "AmisAd/connect",
-              blurb: "Connects the seller's ERP so external truth governs matching — under scopes that are a hard ceiling." },
+              blurb: "Connects the seller's ERP so external truth governs matching -- under scopes that are a hard ceiling." },
     sam:    { name: "Sam",    role: "The Support Agent",           app: "AmisAd/platform (support)",
               blurb: "Mediates from metadata alone. Support and surveillance stay permanently different things." },
     pat:    { name: "Pat",    role: "The Buyer-Side Delegate",     app: "AmisAd/buyer (delegate)",
-              blurb: "Acts for Maya under a scoped, capped, expiring mandate — every action on her trail." }
+              blurb: "Acts for Maya under a scoped, capped, expiring mandate -- every action on her trail." }
   };
   var PERSONA_ORDER = ["maya", "elena", "tom", "marcel", "kai", "priya", "ingrid", "dana", "alex", "sam", "pat"];
 
   var ACTS = {
-    I: "Act I — The Buyer Loop",
-    II: "Act II — The Economy",
-    III: "Act III — Trust & Operations"
+    I: "Act I -- The Buyer Loop",
+    II: "Act II -- The Economy",
+    III: "Act III -- Trust & Operations"
   };
 
   var SCENARIOS = [
-    { id: "s001", act: "I", name: "s001.fulfillment — The gift",
-      tagline: "Maya's auto-close happy path: matched in a sealed slice, settled four ways, delivered — and no trace of her anywhere." },
-    { id: "s002", act: "I", name: "s002.fitting — The dress",
+    { id: "s001", act: "I", name: "s001.fulfillment -- The gift",
+      tagline: "Maya's auto-close happy path: matched in a sealed slice, settled four ways, delivered -- and no trace of her anywhere." },
+    { id: "s002", act: "I", name: "s002.fitting -- The dress",
       tagline: "Manual control: a shortlist that honors every constraint, nothing commits until she books." },
-    { id: "s003", act: "I", name: "s003.silence — The kill switch",
+    { id: "s003", act: "I", name: "s003.silence -- The kill switch",
       tagline: "Pause participation and a perfect offer produces nothing; commitments made before still complete." },
-    { id: "s005", act: "II", name: "s005.attribution — The campaign",
+    { id: "s005", act: "II", name: "s005.attribution -- The campaign",
       tagline: "Advertising without surveillance: the boost happens inside the sealed environment; credit needs no tracking." },
-    { id: "s006", act: "II", name: "s006.mandate — The delegate",
+    { id: "s006", act: "II", name: "s006.mandate -- The delegate",
       tagline: "Pat acts for Maya under a scoped, capped mandate; over-cap routes back to Maya." },
-    { id: "s007", act: "II", name: "s007.inventory — The stockroom",
+    { id: "s007", act: "II", name: "s007.inventory -- The stockroom",
       tagline: "Alex's connector makes the ERP the truth; a zeroed item silently leaves the matchable catalog." },
-    { id: "s009", act: "II", name: "s009.suppression — The forecast",
+    { id: "s009", act: "II", name: "s009.suppression -- The forecast",
       tagline: "Dana publishes demand; anything below the anonymity threshold is indistinguishable from nothing." },
-    { id: "s004", act: "III", name: "s004.failover — The sovereign slice",
+    { id: "s004", act: "III", name: "s004.failover -- The sovereign slice",
       tagline: "Policy pins the match to the compliant region; injected faults abort BEFORE the envelope opens." },
-    { id: "s008", act: "III", name: "s008.mediation — The dispute",
+    { id: "s008", act: "III", name: "s008.mediation -- The dispute",
       tagline: "Sam refunds Maya's gift without ever learning who she is; access to the evidence expires." },
-    { id: "s010", act: "III", name: "s010.certification — The audit",
-      tagline: "Ingrid certifies the very demo you just watched — and catches a deliberate tamper." }
+    { id: "s010", act: "III", name: "s010.certification -- The audit",
+      tagline: "Ingrid certifies the very demo you just watched -- and catches a deliberate tamper." }
   ];
 
   // --- notebook state ---------------------------------------------------
@@ -188,7 +188,7 @@ var AD = (function () {
   var STEPS = [
     // --- s001.fulfillment ------------------------------------------------
     { scenario: "s001", persona: "elena", label: "Publish the standing offer",
-      explain: "Ceramic serving set, standing terms, closes automatically — Elena's catalog, her words.",
+      explain: "Ceramic serving set, standing terms, closes automatically -- Elena's catalog, her words.",
       touches: ["seller.catalog.a"],
       run: async function () {
         return [mk("publish offer", await post("core/30083/v1/offers",
@@ -207,13 +207,13 @@ var AD = (function () {
       },
       capture: function (rs) { state.s001_handle = deepFind(rs, "handle"); state.s001_match = deepFind(rs, "match_id"); } },
     { scenario: "s001", persona: "elena", label: "Ship it (provisioning)", needs: ["s001_match"],
-      explain: "Elena's order board: a match that fits, an appointment-free delivery — and no buyer identity anywhere on it.",
+      explain: "Elena's order board: a match that fits, an appointment-free delivery -- and no buyer identity anywhere on it.",
       touches: ["seller.orders"],
       run: async function () {
         return [mk("advance", await post("core/30083/v1/orders/advance",
           { match_id: state.s001_match, state: "provisioning" }))];
       } },
-    { scenario: "s001", persona: "elena", label: "Confirm fulfilled → settled", needs: ["s001_match"],
+    { scenario: "s001", persona: "elena", label: "Confirm fulfilled -> settled", needs: ["s001_match"],
       explain: "Fulfillment triggers the four-way settlement: seller, network, platform, ad partners.",
       touches: ["seller.orders", "ledger.verify", "ledger.settlement.last"],
       run: async function () {
@@ -227,13 +227,13 @@ var AD = (function () {
         return [mk("order status", await get("core/30080/v1/orders/" + state.s001_handle))];
       } },
     { scenario: "s001", persona: "maya", label: "Proof: the receipt is a hash chain",
-      explain: "Both ledgers verify end to end — the receipt survives restarts and cannot be quietly edited.",
+      explain: "Both ledgers verify end to end -- the receipt survives restarts and cannot be quietly edited.",
       touches: [],
       run: async function () { return [mk("ledger verify", await get("core/30081/v1/verify"))]; } },
 
     // --- s002.fitting ----------------------------------------------------
     { scenario: "s002", persona: "elena", label: "Publish the dress rack",
-      explain: "Five dresses across two sellers — one dusty blue, one missing attributes, one past deadline, one out of region.",
+      explain: "Five dresses across two sellers -- one dusty blue, one missing attributes, one past deadline, one out of region.",
       touches: ["seller.catalog.a", "seller.catalog.b"],
       run: async function () {
         var dress = function (id, tenant, title, price, days, attrs, slots, region) {
@@ -275,7 +275,7 @@ var AD = (function () {
       },
       capture: function (rs) { state.s002_handle = deepFind(rs, "handle"); } },
     { scenario: "s002", persona: "maya", label: "Book the Thursday fitting", needs: ["s002_handle"],
-      explain: "Her explicit choice is the commitment — the appointment is a slot id and a day, never a person.",
+      explain: "Her explicit choice is the commitment -- the appointment is a slot id and a day, never a person.",
       touches: ["seller.orders"],
       run: async function () {
         return [mk("book", await post("core/30080/v1/bookings",
@@ -283,7 +283,7 @@ var AD = (function () {
       },
       capture: function (rs) { state.s002_match = deepFind(rs, "match_id"); } },
     { scenario: "s002", persona: "maya", label: "Notifications: exactly two", needs: ["s002_handle"],
-      explain: "Quiet by default — the shortlist and the booking confirmation. Nothing else, ever.",
+      explain: "Quiet by default -- the shortlist and the booking confirmation. Nothing else, ever.",
       touches: [],
       run: async function () {
         return [mk("notifications", await get("core/30080/v1/notifications/" + state.s002_handle))];
@@ -300,7 +300,7 @@ var AD = (function () {
 
     // --- s003.silence ----------------------------------------------------
     { scenario: "s003", persona: "maya", label: "Sign up (consent grants)",
-      explain: "Participation and contribution, granted on the consent ledger under a pseudonymous subject — never a name.",
+      explain: "Participation and contribution, granted on the consent ledger under a pseudonymous subject -- never a name.",
       touches: ["ledger.consent.maya", "ledger.verify"],
       run: async function () {
         return [
@@ -311,7 +311,7 @@ var AD = (function () {
         ];
       } },
     { scenario: "s003", persona: "maya", label: "Open a need nothing fits yet",
-      explain: "A crystal decanter, modest budget. No offer fits — the need stays open on the coordinator.",
+      explain: "A crystal decanter, modest budget. No offer fits -- the need stays open on the coordinator.",
       touches: ["coordinator.contributions", "ledger.verify", "resource.telemetry", "edge-a.egress"],
       run: async function () {
         return [mk("open need", await post("core/30080/v1/needs", {
@@ -330,13 +330,13 @@ var AD = (function () {
           { token: await token("maya"), grant_type: "participation", action: "revoke" }))];
       } },
     { scenario: "s003", persona: "elena", label: "Publish a PERFECT decanter offer",
-      explain: "Fits the open need on every axis. Publishing re-runs matching over open needs — watch what does not happen.",
+      explain: "Fits the open need on every axis. Publishing re-runs matching over open needs -- watch what does not happen.",
       touches: ["seller.catalog.a"],
       run: async function () {
         return [mk("publish offer", await post("core/30083/v1/offers",
           offer("demo-crystal-decanter-09", "Crystal decanter", "glassware", 8500, { deliver_by_days: 5 })))];
       } },
-    { scenario: "s003", persona: "maya", label: "…silence", needs: ["s003_handle"],
+    { scenario: "s003", persona: "maya", label: "...silence", needs: ["s003_handle"],
       explain: "No environment, no match, no notification. The consent gate sits inside the matching cycle itself.",
       touches: [],
       run: async function () {
@@ -346,10 +346,10 @@ var AD = (function () {
         var d = rs[0].data;
         var list = d && d.notifications ? d.notifications : d;
         return (Array.isArray(list) && list.length === 0)
-          ? { ok: true, note: "Empty — a perfect offer produced nothing." }
+          ? { ok: true, note: "Empty -- a perfect offer produced nothing." }
           : { ok: false, note: "Expected an empty notification list." };
       } },
-    { scenario: "s003", persona: "maya", label: "Resume — served immediately",
+    { scenario: "s003", persona: "maya", label: "Resume -- served immediately",
       explain: "Re-granting brings the open needs back to life; the decanter matches now (look for \"rematched\").",
       touches: ["ledger.consent.maya", "ledger.verify", "seller.orders", "coordinator.contributions", "resource.telemetry", "edge-a.egress"],
       run: async function () {
@@ -360,8 +360,8 @@ var AD = (function () {
             { token: await token("maya"), grant_type: "participation", action: "grant" }))
         ];
       } },
-    { scenario: "s003", persona: "maya", label: "Consent history: grant → revoke → re-grant",
-      explain: "The full history on the verifying consent chain — revocation is recorded, honored, and auditable.",
+    { scenario: "s003", persona: "maya", label: "Consent history: grant -> revoke -> re-grant",
+      explain: "The full history on the verifying consent chain -- revocation is recorded, honored, and auditable.",
       touches: [],
       run: async function () {
         return [mk("consent state", await post("core/30080/v1/consents/state",
@@ -370,7 +370,7 @@ var AD = (function () {
 
     // --- s005.attribution ------------------------------------------------
     { scenario: "s005", persona: "marcel", label: "Create the campaign",
-      explain: "Aggregate targeting only: a region and a need category. 2000¢ committed per match on top of the price.",
+      explain: "Aggregate targeting only: a region and a need category. 2000c committed per match on top of the price.",
       touches: ["ads.campaign"],
       run: async function () {
         return [mk("create campaign", await post("core/30087/v1/campaigns",
@@ -404,7 +404,7 @@ var AD = (function () {
           { campaign_id: state.s005_campaign, asset_id: state.s005_asset }))];
       } },
     { scenario: "s005", persona: "elena", label: "Publish the summer offer",
-      explain: "The offer the campaign will boost — Elena's price is untouched by the ad economics.",
+      explain: "The offer the campaign will boost -- Elena's price is untouched by the ad economics.",
       touches: ["seller.catalog.a"],
       run: async function () {
         return [mk("publish offer", await post("core/30083/v1/offers",
@@ -412,7 +412,7 @@ var AD = (function () {
             { deliver_by_days: 14, auto_close: false })))];
       } },
     { scenario: "s005", persona: "maya", label: "State the summer need",
-      explain: "The boost happens INSIDE the sealed environment — the creative renders in the shortlist, never outside.",
+      explain: "The boost happens INSIDE the sealed environment -- the creative renders in the shortlist, never outside.",
       touches: ["ledger.verify", "resource.telemetry", "edge-a.ingress", "edge-a.egress"],
       run: async function () {
         return [mk("submit manual need", await post("core/30080/v1/needs", {
@@ -424,7 +424,7 @@ var AD = (function () {
       },
       capture: function (rs) { state.s005_handle = deepFind(rs, "handle"); } },
     { scenario: "s005", persona: "maya", label: "Accept the boosted offer", needs: ["s005_handle"],
-      explain: "Look for \"boosted\": true — and remember the campaign never saw her.",
+      explain: "Look for \"boosted\": true -- and remember the campaign never saw her.",
       touches: ["seller.orders"],
       run: async function () {
         return [mk("accept", await post("core/30080/v1/bookings",
@@ -432,7 +432,7 @@ var AD = (function () {
       },
       capture: function (rs) { state.s005_match = deepFind(rs, "match_id"); } },
     { scenario: "s005", persona: "elena", label: "Fulfil the order", needs: ["s005_match"],
-      explain: "Provisioning, then fulfilled — the settlement fires on completion.",
+      explain: "Provisioning, then fulfilled -- the settlement fires on completion.",
       touches: ["seller.orders", "ledger.verify", "ledger.settlement.last", "ads.attributions", "ads.campaign"],
       run: async function () {
         return [
@@ -441,13 +441,13 @@ var AD = (function () {
         ];
       } },
     { scenario: "s005", persona: "marcel", label: "The five-way split", needs: ["s005_match"],
-      explain: "Seller, network, platform from the price — agency and creator credit on top, funded by the campaign.",
+      explain: "Seller, network, platform from the price -- agency and creator credit on top, funded by the campaign.",
       touches: [],
       run: async function () {
         return [mk("settlement", await get("core/30081/v1/settlements/match/" + state.s005_match))];
       } },
     { scenario: "s005", persona: "kai", label: "Performance view: credit without tracking",
-      explain: "Aggregate attribution referencing campaign and asset ids — zero buyer signal on the campaign side.",
+      explain: "Aggregate attribution referencing campaign and asset ids -- zero buyer signal on the campaign side.",
       touches: [],
       run: async function () { return [mk("attributions", await get("core/30087/v1/attributions"))]; } },
 
@@ -465,21 +465,21 @@ var AD = (function () {
         ];
       } },
     { scenario: "s006", persona: "maya", label: "Grant Pat a scoped mandate",
-      explain: "Category: homegoods. Per-item cap: 140.00. Recorded on the consent ledger as a mandate grant — the scope itself stays private.",
+      explain: "Category: homegoods. Per-item cap: 140.00. Recorded on the consent ledger as a mandate grant -- the scope itself stays private.",
       touches: ["ledger.consent.maya", "ledger.verify"],
       run: async function () {
         return [mk("grant mandate", await post("core/30080/v1/mandates",
           { token: await token("maya"), delegate: "pat", category: "homegoods", per_item_cents: 14000 }))];
       } },
     { scenario: "s006", persona: "pat", label: "Open the delegate workspace",
-      explain: "One view per principal, strictly separated — Pat sees Maya, the scope, and what remains of the cap.",
+      explain: "One view per principal, strictly separated -- Pat sees Maya, the scope, and what remains of the cap.",
       touches: [],
       run: async function () {
         return [mk("workspace", await post("core/30080/v1/delegate/workspace",
           { token: await token("pat") }))];
       } },
     { scenario: "s006", persona: "pat", label: "Buy under the cap",
-      explain: "In scope, under cap — closes on Pat's authority with dual attribution: actor Pat, principal Maya.",
+      explain: "In scope, under cap -- closes on Pat's authority with dual attribution: actor Pat, principal Maya.",
       touches: ["seller.orders", "ledger.verify", "resource.telemetry", "edge-a.egress"],
       run: async function () {
         return [mk("delegated need", await post("core/30080/v1/delegate/needs", {
@@ -489,7 +489,7 @@ var AD = (function () {
         }))];
       } },
     { scenario: "s006", persona: "pat", label: "Try the premium vase (over cap)",
-      explain: "Over the cap: the closing is HELD — it will exist only after Maya's recorded approval.",
+      explain: "Over the cap: the closing is HELD -- it will exist only after Maya's recorded approval.",
       touches: ["ledger.verify", "resource.telemetry", "edge-a.egress"],
       run: async function () {
         return [mk("delegated need (premium)", await post("core/30080/v1/delegate/needs", {
@@ -501,7 +501,7 @@ var AD = (function () {
       },
       capture: function (rs) { state.s006_held = deepFind(rs, "handle"); } },
     { scenario: "s006", persona: "maya", label: "Approve the held closing", needs: ["s006_held"],
-      explain: "The principal's confirmation — now, and only now, the commitment exists.",
+      explain: "The principal's confirmation -- now, and only now, the commitment exists.",
       touches: ["seller.orders"],
       run: async function () {
         return [mk("approve", await post("core/30080/v1/mandates/approve",
@@ -533,7 +533,7 @@ var AD = (function () {
 
     // --- s007.inventory --------------------------------------------------
     { scenario: "s007", persona: "alex", label: "Register + certify the connector",
-      explain: "Sandbox first — no production tenant before partner verification. Partner records stay private: no endpoint lists them.",
+      explain: "Sandbox first -- no production tenant before partner verification. Partner records stay private: no endpoint lists them.",
       touches: [],
       run: async function () {
         var reg = await post("core/30088/v1/partners", { name: "alex-erp" });
@@ -551,7 +551,7 @@ var AD = (function () {
       },
       capture: function (rs) { state.s007_cred = deepFind(rs, "credential"); } },
     { scenario: "s007", persona: "alex", label: "Sync the ERP catalog", needs: ["s007_cred"],
-      explain: "Two lamps from the ERP become matchable offers in Elena's tenant — nobody retypes anything.",
+      explain: "Two lamps from the ERP become matchable offers in Elena's tenant -- nobody retypes anything.",
       touches: ["seller.catalog.a"],
       run: async function () {
         return [mk("sync catalog", await post("core/30088/v1/sync/catalog", {
@@ -570,7 +570,7 @@ var AD = (function () {
             delta_ts: Math.floor(Date.now() / 1000) }))];
       } },
     { scenario: "s007", persona: "maya", label: "Need a lamp",
-      explain: "The match lands on the in-stock clock — not the cheaper lamp the ERP says is gone.",
+      explain: "The match lands on the in-stock clock -- not the cheaper lamp the ERP says is gone.",
       touches: ["seller.orders", "ledger.verify", "resource.telemetry", "edge-a.egress", "connect.erp"],
       run: async function () {
         return [mk("submit need", await post("core/30080/v1/needs", {
@@ -581,7 +581,7 @@ var AD = (function () {
       },
       capture: function (rs) { state.s007_match = deepFind(rs, "match_id"); } },
     { scenario: "s007", persona: "alex", label: "The ERP mirror agrees", needs: ["s007_match"],
-      explain: "Order lifecycle mirrored back idempotently — both sides agree on every order's state.",
+      explain: "Order lifecycle mirrored back idempotently -- both sides agree on every order's state.",
       touches: [],
       run: async function () {
         return [mk("erp order", await get("core/30088/v1/erp/orders/" + state.s007_match))];
@@ -597,7 +597,7 @@ var AD = (function () {
 
     // --- s009.suppression ------------------------------------------------
     { scenario: "s009", persona: "dana", label: "Record the week's demand",
-      explain: "Six picnicware needs in region-a, one in region-b — counts, never content.",
+      explain: "Six picnicware needs in region-a, one in region-b -- counts, never content.",
       touches: ["insights.workbench", "insights.unmet"],
       run: async function () {
         var out = [];
@@ -610,11 +610,11 @@ var AD = (function () {
         return out;
       } },
     { scenario: "s009", persona: "dana", label: "The workbench suppresses",
-      explain: "region-a shows. region-b, below the anonymity threshold, is ABSENT — not zeroed, absent.",
+      explain: "region-a shows. region-b, below the anonymity threshold, is ABSENT -- not zeroed, absent.",
       touches: [],
       run: async function () { return [mk("workbench", await get("core/30085/v1/workbench"))]; } },
     { scenario: "s009", persona: "dana", label: "Publish the outlook",
-      explain: "An immutable, versioned publication — every downstream view reads this exact version.",
+      explain: "An immutable, versioned publication -- every downstream view reads this exact version.",
       touches: [],
       run: async function () {
         state.s009_version = "demo-" + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "");
@@ -622,13 +622,13 @@ var AD = (function () {
           await post("core/30085/v1/outlooks", { version: state.s009_version }))];
       } },
     { scenario: "s009", persona: "elena", label: "Elena's demand outlook", needs: ["s009_version"], optional: true,
-      explain: "What to stock, where to expand — identical by construction to what agencies see.",
+      explain: "What to stock, where to expand -- identical by construction to what agencies see.",
       touches: [],
       run: async function () {
         return [mk("seller outlook", await get("core/30083/v1/demand-outlook/" + state.s009_version))];
       } },
     { scenario: "s009", persona: "marcel", label: "Marcel's demand view", needs: ["s009_version"], optional: true,
-      explain: "Same version, same figures — campaigns land where the need already was.",
+      explain: "Same version, same figures -- campaigns land where the need already was.",
       touches: [],
       run: async function () {
         return [mk("ads view", await get("core/30087/v1/demand-view/" + state.s009_version))];
@@ -646,15 +646,15 @@ var AD = (function () {
             { region: "region-b", endpoint: "http://" + topo.edgeB + ":8080", capacity: 10 }))
         ];
       } },
-    { scenario: "s004", persona: "tom", label: "Unrestricted placement → region-b",
+    { scenario: "s004", persona: "tom", label: "Unrestricted placement -> region-b",
       explain: "Capacity-greedy by default: with no policy, the roomier region wins. Remember this answer.",
       touches: [],
       run: async function () {
         return [mk("placement (anywhere)", await post("core/30082/v1/placements",
           { jurisdiction: "anywhere" }))];
       } },
-    { scenario: "s004", persona: "tom", label: "Pin sovereignty → region-a",
-      explain: "The jurisdiction policy is the ONLY thing excluding region-b — and now placement answers region-a.",
+    { scenario: "s004", persona: "tom", label: "Pin sovereignty -> region-a",
+      explain: "The jurisdiction policy is the ONLY thing excluding region-b -- and now placement answers region-a.",
       touches: [],
       run: async function () {
         return [
@@ -678,7 +678,7 @@ var AD = (function () {
         return [mk("arm faults", await post("edge-a/v1/faults", { mode: "isolation", count: 2 }))];
       } },
     { scenario: "s004", persona: "maya", label: "Submit the ceramics need",
-      explain: "Abort, abort, then the clean match — three attempts, same compliant placement, exactly one settlement.",
+      explain: "Abort, abort, then the clean match -- three attempts, same compliant placement, exactly one settlement.",
       touches: ["resource.incidents", "resource.telemetry", "ledger.verify", "seller.orders", "edge-a.egress"],
       run: async function () {
         return [mk("submit need", await post("core/30080/v1/needs", {
@@ -689,18 +689,18 @@ var AD = (function () {
       },
       capture: function (rs) { state.s004_match = deepFind(rs, "match_id"); } },
     { scenario: "s004", persona: "tom", label: "The incident queue",
-      explain: "Two isolation incidents, raised by abort telemetry — fault reason attested, nothing need-derived.",
+      explain: "Two isolation incidents, raised by abort telemetry -- fault reason attested, nothing need-derived.",
       touches: [],
       run: async function () { return [mk("incidents", await get("core/30082/v1/incidents"))]; },
       capture: function (rs) { state.s004_envs = deepFindAll(rs, "environment_id").slice(-2); } },
     { scenario: "s004", persona: "tom", label: "An aborted environment's attestation", needs: ["s004_envs"],
-      explain: "created → attested → aborted → destroyed. No match record; the abort trail contains nothing need-derived.",
+      explain: "created -> attested -> aborted -> destroyed. No match record; the abort trail contains nothing need-derived.",
       touches: [],
       run: async function () {
         return [mk("attestation trail", await get("core/30081/v1/attestations/env/" + state.s004_envs[0]))];
       } },
     { scenario: "s004", persona: "tom", label: "Escalate the systemic pattern", needs: ["s004_envs"],
-      explain: "Tom hands Priya a cross-party case linking both aborted lifecycles — by environment id only.",
+      explain: "Tom hands Priya a cross-party case linking both aborted lifecycles -- by environment id only.",
       touches: ["platform.incidents"],
       run: async function () {
         return [mk("escalate", await post("core/30086/v1/incidents",
@@ -717,7 +717,7 @@ var AD = (function () {
 
     // --- s008.mediation --------------------------------------------------
     { scenario: "s008", persona: "sam", label: "Open the case (metadata only)", needs: ["s001_match"],
-      explain: "Maya reports the Act I gift never arrived. The case carries order state and settlement — no identity ever reaches it.",
+      explain: "Maya reports the Act I gift never arrived. The case carries order state and settlement -- no identity ever reaches it.",
       touches: ["platform.disclosure"],
       run: async function () {
         return [mk("open case", await post("core/30086/v1/support/cases",
@@ -731,7 +731,7 @@ var AD = (function () {
         return [mk("request disclosure", await post("core/30086/v1/support/cases/disclosure/request",
           { case_id: state.s008_case }))];
       } },
-    { scenario: "s008", persona: "maya", label: "Grant it — minimal and time-boxed", needs: ["s008_case"],
+    { scenario: "s008", persona: "maya", label: "Grant it -- minimal and time-boxed", needs: ["s008_case"],
       explain: "One artifact, 20 seconds, logged immutably on the consent ledger under her pseudonym. The countdown starts now.",
       touches: ["ledger.consent.maya", "ledger.verify", "platform.disclosure"],
       run: async function () {
@@ -742,13 +742,13 @@ var AD = (function () {
         return [mk("grant disclosure", r)];
       } },
     { scenario: "s008", persona: "sam", label: "Read exactly what was granted", needs: ["s008_case"],
-      explain: "The artifact is readable in the case — for as long as the grant lives, and not a second more.",
+      explain: "The artifact is readable in the case -- for as long as the grant lives, and not a second more.",
       touches: [],
       run: async function () {
         return [mk("disclosure", await get("core/30086/v1/support/cases/" + state.s008_case + "/disclosure"))];
       } },
     { scenario: "s008", persona: "sam", label: "Post the refund", needs: ["s001_match", "s008_case"],
-      explain: "Compensating entries referencing the case — history is never edited, the chains still verify, the net reflects the refund.",
+      explain: "Compensating entries referencing the case -- history is never edited, the chains still verify, the net reflects the refund.",
       touches: ["ledger.verify", "ledger.settlement.last"],
       run: async function () {
         return [
@@ -758,7 +758,7 @@ var AD = (function () {
         ];
       } },
     { scenario: "s008", persona: "sam", label: "After expiry: 410", needs: ["s008_case"], refusal: true,
-      explain: "Wait for the notebook countdown to hit zero, then click — the access path itself is gone.",
+      explain: "Wait for the notebook countdown to hit zero, then click -- the access path itself is gone.",
       touches: ["platform.disclosure"],
       run: async function () {
         return [mk("disclosure after expiry",
@@ -767,10 +767,10 @@ var AD = (function () {
 
     // --- s010.certification ----------------------------------------------
     { scenario: "s010", persona: "ingrid", label: "Certify the evidence trail",
-      explain: "Four dimensions over everything this demo just did — attestation continuity, residency, consent, settlement conservation — recomputing the chains from raw dumps, trusting no self-report.",
+      explain: "Four dimensions over everything this demo just did -- attestation continuity, residency, consent, settlement conservation -- recomputing the chains from raw dumps, trusting no self-report.",
       touches: ["audit.accesslog"],
       run: async function () { return [mk("certify", await post("core/30089/v1/certify"))]; } },
-    { scenario: "s010", persona: "ingrid", label: "Tamper with one record — get caught",
+    { scenario: "s010", persona: "ingrid", label: "Tamper with one record -- get caught",
       explain: "We fetch the attestation dump, flip one lifecycle field, and resubmit. Certification localizes the exact modified record.",
       touches: [],
       run: async function () {
@@ -791,7 +791,7 @@ var AD = (function () {
         return [mk("fetch dump", dump), mk("certify tampered dump", verdict)];
       } },
     { scenario: "s010", persona: "ingrid", label: "The auditor's own access log",
-      explain: "Every certification access was a read. No writes, no personal-data scope — verified about the verifier.",
+      explain: "Every certification access was a read. No writes, no personal-data scope -- verified about the verifier.",
       touches: [],
       run: async function () { return [mk("access log", await get("core/30089/v1/access-log"))]; } }
   ];
@@ -845,7 +845,7 @@ var AD = (function () {
     var last = results[results.length - 1];
     if (step.refusal) {
       return (last && last.status >= 400 && last.status < 500)
-        ? { ok: true, refused: true, note: "Refused (" + last.status + ") — the boundary held. That IS the pass." }
+        ? { ok: true, refused: true, note: "Refused (" + last.status + ") -- the boundary held. That IS the pass." }
         : { ok: false, note: "Expected a 4xx refusal, got " + (last ? last.status : "nothing") + "." };
     }
     for (var i = 0; i < results.length; i++) {
@@ -865,7 +865,7 @@ var AD = (function () {
   function n(v) { return (v === undefined || v === null) ? 0 : v; }
   function len(v) { return Array.isArray(v) ? v.length : 0; }
   function money(cents) {
-    if (cents === undefined || cents === null) return "—";
+    if (cents === undefined || cents === null) return "--";
     return (cents / 100).toFixed(2);
   }
   function tally(list, field) {
@@ -903,18 +903,18 @@ var AD = (function () {
       title: "Hash chains", tier: "fast", url: "core/30081/v1/verify",
       note: "Three append-only chains, re-verified end to end on every poll.",
       pick: function (d) {
-        return [["attestation", n(d.attestation_len) + (d.attestation_ok ? " ✓" : " ✗")],
-                ["settlement", n(d.settlement_len) + (d.settlement_ok ? " ✓" : " ✗")],
-                ["consent", n(d.consent_len) + (d.consent_ok ? " ✓" : " ✗")]];
+        return [["attestation", n(d.attestation_len) + (d.attestation_ok ? " [OK]" : " [X]")],
+                ["settlement", n(d.settlement_len) + (d.settlement_ok ? " [OK]" : " [X]")],
+                ["consent", n(d.consent_len) + (d.consent_ok ? " [OK]" : " [X]")]];
       } },
 
     { id: "ledger.consent.maya", vm: "core", svc: "ledger-svc", port: 30081,
-      title: "Consent · buyer pseudonym", tier: "fast",
+      title: "Consent - buyer pseudonym", tier: "fast",
       url: function () { return subjects.maya ? "core/30081/v1/consents/subject/" + subjects.maya : null; },
-      note: "Mandate and disclosure grants land on this chain too — the events are public, their scopes are not.",
+      note: "Mandate and disclosure grants land on this chain too -- the events are public, their scopes are not.",
       pick: function (d) {
-        return [["participation", d.participation || "—"],
-                ["contribution", d.contribution || "—"],
+        return [["participation", d.participation || "--"],
+                ["contribution", d.contribution || "--"],
                 ["history", len(d.history)]];
       } },
 
@@ -925,7 +925,7 @@ var AD = (function () {
         for (var i = 0; i < keys.length; i++) { if (keys[i] && state[keys[i]]) return "core/30081/v1/settlements/match/" + state[keys[i]]; }
         return null;
       },
-      note: "Split across seller, network, platform — and the ad parties when a campaign funded the match.",
+      note: "Split across seller, network, platform -- and the ad parties when a campaign funded the match.",
       pick: function (d) {
         return [["value", money(d.value_cents)],
                 ["confirmed", d.confirmed ? "yes" : "no"],
@@ -935,19 +935,19 @@ var AD = (function () {
 
     { id: "seller.orders", vm: "core", svc: "seller-svc", port: 30083,
       title: "Order board", tier: "fast", url: "core/30083/v1/orders",
-      note: "Every order carries a match id and the context line the buyer chose to share — never who she is.",
+      note: "Every order carries a match id and the context line the buyer chose to share -- never who she is.",
       pick: function (d) {
         var rows = [["orders", n(d.count)]];
         return rows.concat(rowsFromTally(tally(d.orders, "state")));
       } },
 
     { id: "seller.catalog.a", vm: "core", svc: "seller-svc", port: 30083,
-      title: "Matchable catalog · region-a", tier: "fast", url: "core/30083/v1/offers/region/region-a",
-      note: "Zero-stock offers are filtered out here — the ERP's truth, applied silently.",
+      title: "Matchable catalog - region-a", tier: "fast", url: "core/30083/v1/offers/region/region-a",
+      note: "Zero-stock offers are filtered out here -- the ERP's truth, applied silently.",
       pick: function (d) { return [["offers", len(d.offers)]]; } },
 
     { id: "seller.catalog.b", vm: "core", svc: "seller-svc", port: 30083,
-      title: "Matchable catalog · region-b", tier: "slow", url: "core/30083/v1/offers/region/region-b",
+      title: "Matchable catalog - region-b", tier: "slow", url: "core/30083/v1/offers/region/region-b",
       pick: function (d) { return [["offers", len(d.offers)]]; } },
 
     { id: "resource.edges", vm: "core", svc: "resource-svc", port: 30082,
@@ -960,7 +960,7 @@ var AD = (function () {
 
     { id: "resource.telemetry", vm: "core", svc: "resource-svc", port: 30082,
       title: "Slice lifecycle telemetry", tier: "fast", url: "core/30082/v1/telemetry",
-      note: "Mirrored from the sealed slices: created, attested, executed, destroyed — and aborted.",
+      note: "Mirrored from the sealed slices: created, attested, executed, destroyed -- and aborted.",
       pick: function (d) {
         var list = d.entries || [];
         var rows = [["events", list.length]];
@@ -973,11 +973,11 @@ var AD = (function () {
 
     { id: "insights.workbench", vm: "core", svc: "insights-svc", port: 30085,
       title: "Demand workbench", tier: "fast", url: "core/30085/v1/workbench",
-      note: "Cells below the anonymity threshold are ABSENT here, not zeroed — suppression you can see by what is missing.",
+      note: "Cells below the anonymity threshold are ABSENT here, not zeroed -- suppression you can see by what is missing.",
       pick: function (d) {
         var rows = [["threshold", n(d.threshold)]], cells = d.aggregates || [];
         for (var i = 0; i < cells.length; i++) {
-          rows.push([(cells[i].category || "?") + " · " + (cells[i].region || "?"), n(cells[i].needs)]);
+          rows.push([(cells[i].category || "?") + " - " + (cells[i].region || "?"), n(cells[i].needs)]);
         }
         if (!cells.length) rows.push(["cells above it", 0]);
         return rows;
@@ -988,7 +988,7 @@ var AD = (function () {
       pick: function (d) {
         return [["cycles", n(d.cycles)],
                 ["last contributions", d.latest_contributions === null || d.latest_contributions === undefined
-                  ? "—" : d.latest_contributions]];
+                  ? "--" : d.latest_contributions]];
       } },
 
     { id: "insights.unmet", vm: "core", svc: "insights-svc", port: 30085,
@@ -1002,7 +1002,7 @@ var AD = (function () {
     { id: "platform.disclosure", vm: "core", svc: "platform-svc", port: 30086,
       title: "Support disclosure", tier: "lazy",
       url: function () { return state.s008_case ? "core/30086/v1/support/cases/" + state.s008_case + "/disclosure" : null; },
-      note: "The status IS the story: 404 not requested · 200 granted · 410 the access path is gone.",
+      note: "The status IS the story: 404 not requested - 200 granted - 410 the access path is gone.",
       statusIsValue: true,
       pick: function (d, status) {
         var label = status === 410 ? "EXPIRED (410)"
@@ -1028,7 +1028,7 @@ var AD = (function () {
       url: function () { return state.s005_campaign ? "core/30087/v1/campaigns/" + state.s005_campaign : null; },
       note: "Targeting is a region and a category. No individual was ever addressable.",
       pick: function (d) {
-        return [["state", d.state || "—"],
+        return [["state", d.state || "--"],
                 ["budget left", money(n(d.budget_cents) - n(d.spent_cents))],
                 ["per match", money(d.ad_cents_per_match)]];
       } },
@@ -1054,7 +1054,7 @@ var AD = (function () {
     { id: "connect.erp", vm: "core", svc: "connect-svc", port: 30088,
       title: "ERP mirror", tier: "lazy",
       url: function () { return state.s007_match ? "core/30088/v1/erp/orders/" + state.s007_match : null; },
-      pick: function (d) { return [["state", d.state || "—"]]; } },
+      pick: function (d) { return [["state", d.state || "--"]]; } },
 
     { id: "audit.accesslog", vm: "core", svc: "audit-svc", port: 30089,
       title: "Auditor access log", tier: "fast", url: "core/30089/v1/access-log",
@@ -1063,40 +1063,40 @@ var AD = (function () {
         var list = d.access || [];
         var allGet = true;
         for (var i = 0; i < list.length; i++) { if (list[i].method !== "GET") allGet = false; }
-        return [["accesses", list.length], ["all reads", list.length ? (allGet ? "yes" : "NO") : "—"]];
+        return [["accesses", list.length], ["all reads", list.length ? (allGet ? "yes" : "NO") : "--"]];
       } },
 
     { id: "identity.presence", vm: "core", svc: "identity-mock", port: 30084,
       title: "Identity service", tier: "slow", url: "core/30084/health",
-      note: "Knows the login — by design, and nothing downstream does. Issued tokens are deliberately not listable.",
+      note: "Knows the login -- by design, and nothing downstream does. Issued tokens are deliberately not listable.",
       pick: function (d) { return [["status", (d && d.status) || "up"]]; } },
 
     { id: "edge-a.runtime", vm: "edge-a", svc: "slice-runtime", port: 8080,
       title: "Slice runtime", tier: "fast", url: "edge-a/v1/egress", presence: true,
-      note: "The sealed environment host: creates, attests, opens, destroys — per match.",
+      note: "The sealed environment host: creates, attests, opens, destroys -- per match.",
       pick: function (d) { return [["reachable", "yes"]]; } },
 
     { id: "edge-a.egress", vm: "edge-a", svc: "slice-runtime", port: 8080,
-      title: "Egress · what left the seal", tier: "fast", url: "edge-a/v1/egress",
+      title: "Egress - what left the seal", tier: "fast", url: "edge-a/v1/egress",
       note: "Attestations, telemetry, settlement instructions, and match records carrying her chosen context line.",
       pick: function (d) { return egressRows(d); } },
 
     { id: "edge-a.ingress", vm: "edge-a", svc: "slice-runtime", port: 8080,
-      title: "Ingress · what entered the seal", tier: "fast", url: "edge-a/v1/ingress",
-      note: "Campaign creatives only. Her envelope is never logged here — it exists in flight and inside the environment, nowhere else.",
+      title: "Ingress - what entered the seal", tier: "fast", url: "edge-a/v1/ingress",
+      note: "Campaign creatives only. Her envelope is never logged here -- it exists in flight and inside the environment, nowhere else.",
       pick: function (d) { return [["records", len(d.entries)]]; } },
 
     { id: "edge-b.runtime", vm: "edge-b", svc: "slice-runtime", port: 8080,
       title: "Slice runtime", tier: "slow", url: "edge-b/v1/egress", presence: true,
-      note: "Registered, standing by — sovereignty means this jurisdiction's traffic never arrives here.",
+      note: "Registered, standing by -- sovereignty means this jurisdiction's traffic never arrives here.",
       pick: function (d) { return [["reachable", "yes"]]; } },
 
     { id: "edge-b.egress", vm: "edge-b", svc: "slice-runtime", port: 8080,
-      title: "Egress · what left the seal", tier: "slow", url: "edge-b/v1/egress",
+      title: "Egress - what left the seal", tier: "slow", url: "edge-b/v1/egress",
       pick: function (d) { return egressRows(d); } },
 
     { id: "edge-b.ingress", vm: "edge-b", svc: "slice-runtime", port: 8080,
-      title: "Ingress · what entered the seal", tier: "slow", url: "edge-b/v1/ingress",
+      title: "Ingress - what entered the seal", tier: "slow", url: "edge-b/v1/ingress",
       pick: function (d) { return [["records", len(d.entries)]]; } }
   ];
 
@@ -1278,7 +1278,7 @@ var AD = (function () {
           if (step.optional) cls.push("opt");
           if (current === step.id) cls.push("cur");
           if (selected === step.id) cls.push("sel");
-          cell.title = step.scenario + " · " + PERSONAS[key].name + " · " + step.label +
+          cell.title = step.scenario + " - " + PERSONAS[key].name + " - " + step.label +
             (step.optional ? " (optional)" : "") +
             (opts.times && opts.times[step.id] ? "\n" + opts.times[step.id] : "");
           if (!mini) {

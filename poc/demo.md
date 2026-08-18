@@ -8,7 +8,7 @@ and then drive the demo manually. Full test automation lives in
 ## Prebuild
 
 With the [one-time setup](test.md#one-time-setup) done, run the automation once
-from `pwsh` (**elevated** on a Hyper-V host — see [test.md](test.md#run)):
+from `pwsh` (**elevated** on a Hyper-V host -- see [test.md](test.md#run)):
 
 ```powershell
 pwsh poc/build/serve-local.ps1
@@ -27,7 +27,7 @@ Console logins on `amisad-core` ([usernames.md](usernames.md)):
 Passwords are in the host vault,
 `<yuruna-root>/test/status/extension/authentication/vault.yml`.
 
-The last scenario's state is still live after a run — you can inspect it, or
+The last scenario's state is still live after a run -- you can inspect it, or
 re-arm below for a fresh walkthrough.
 
 ## Driving the demo
@@ -38,7 +38,7 @@ ads `30087`, connect `30088`, audit `30089`. The same APIs answer from the host
 or LAN at `http://<vm-ip>:<nodeport>`.
 
 **Re-arm (only after a VM restart).** A reboot of `amisad-core` loses the
-in-memory state (coordinator routing, identity tokens, the registered edge) —
+in-memory state (coordinator routing, identity tokens, the registered edge) --
 but the ledgers, offers, and orders come back from PostgreSQL, chains intact.
 Run the command steps below as **`amisad-core-admin`**: the repo and
 `target/release/` binaries live under its home, which the non-admin personas
@@ -56,10 +56,10 @@ Then either re-run a scenario script end to end
 on the edge, registers it, and seeds offers), or register the edge + seed by
 hand using the curls below. Note the scenario scripts assert against a fresh
 database (the automation restores the `amisad-core` snapshot before each
-one) — with durable orders on the board, s002's "zero commitments" check will
+one) -- with durable orders on the board, s002's "zero commitments" check will
 fail on a reused database; restore the snapshot for a clean walkthrough.
 
-**s001.fulfillment** — Maya's need auto-closes against Elena's standing offer,
+**s001.fulfillment** -- Maya's need auto-closes against Elena's standing offer,
 Elena ships, Maya sees delivery:
 
 ```bash
@@ -72,18 +72,18 @@ target/release/buyer-client wait <handle>   # -> status: delivered
 ```
 
 The settlement is now a durable record: `curl -s http://$NODE_IP:30081/v1/verify`
-shows both hash chains verifying, and the same rows are on disk —
+shows both hash chains verifying, and the same rows are on disk --
 `sudo -u postgres psql -d amisad -c "TABLE ledger.settlement_ledger"` (as the
 admin). They survive pod restarts and VM reboots; the app role cannot UPDATE or
 DELETE ledger rows.
 
-**s002.fitting** — you play Maya: a manual-policy dress need returns a
+**s002.fitting** -- you play Maya: a manual-policy dress need returns a
 shortlist (note the dusty blue and out-of-range dresses are absent), nothing
 commits until you choose, then one tap books the Thursday fitting:
 
 ```bash
 # Elena's dresses (one dusty blue, one missing required attributes) + a second
-# seller's misfits (past deadline; out of range) + fitting slots — the same
+# seller's misfits (past deadline; out of range) + fitting slots -- the same
 # seed set the automated run uses:
 curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"linen-midi-04","tenant":"elena-atelier","title":"Linen midi dress","category":"dresses","region":"region-a","price_cents":18000,"deliver_by_days":3,"auto_close":false,"attributes":["midi","sleeves","warm-fabric"],"fitting_slots":[{"slot_id":"thu-1","day":"thursday","day_ordinal":4},{"slot_id":"sat-1","day":"saturday","day_ordinal":6}]}'
 curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"dusty-blue-02","tenant":"elena-atelier","title":"Dusty blue midi dress","category":"dresses","region":"region-a","price_cents":16000,"deliver_by_days":3,"auto_close":false,"attributes":["midi","sleeves","warm-fabric","dusty-blue"],"fitting_slots":[{"slot_id":"thu-2","day":"thursday","day_ordinal":4}]}'
@@ -100,12 +100,12 @@ curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<match_id>
 target/release/buyer-client notifications <handle>    # exactly two: shortlist, booking-confirmed
 ```
 
-**s003.silence** — the kill switch: pause participation and the network goes
+**s003.silence** -- the kill switch: pause participation and the network goes
 silent for you; commitments made before still complete; resuming brings your
 open needs back to life. `buyer-client` runs as the admin; every step is
 observable via curl. Fresh snapshot required: after an automated run,
 `linen-wrap-09` is already in the durable catalog, so `open dress` would
-match immediately instead of staying open — restore the `amisad-core`
+match immediately instead of staying open -- restore the `amisad-core`
 snapshot first (as with s002's zero-state checks):
 
 ```bash
@@ -135,7 +135,7 @@ target/release/buyer-client consents                         # full grant-revoke
 curl -s http://$NODE_IP:30081/v1/verify                      # all three chains verify
 ```
 
-**s004.failover** — you play Tom (and then Priya): sovereignty pins the
+**s004.failover** -- you play Tom (and then Priya): sovereignty pins the
 match to the compliant region although region-b is roomier, two injected
 isolation faults abort safely and retry clean, and the systemic pattern
 becomes a cross-party case. Fresh snapshot recommended (attestation counts
@@ -167,7 +167,7 @@ curl -s -X POST http://$NODE_IP:30086/v1/incidents -d '{"summary":"systemic isol
 curl -s http://$NODE_IP:30086/v1/incidents/<case_id>                # links both aborted lifecycles
 ```
 
-**s005.attribution** — Marcel (agency) and Kai (creator) run the ad economy;
+**s005.attribution** -- Marcel (agency) and Kai (creator) run the ad economy;
 Maya's need matches Elena's offer boosted with Kai's creative, and attribution
 splits between agency and creator without any buyer tracking. Fresh snapshot
 recommended (settlement/attribution totals assume a clean ledger):
@@ -189,7 +189,7 @@ curl -s http://$NODE_IP:30081/v1/settlements/match/<id>              # agency 12
 curl -s http://$NODE_IP:30087/v1/attributions                        # aggregate agency/creator totals, no buyer data
 ```
 
-**s006.mandate** — Maya delegates household buying to Pat under a scoped
+**s006.mandate** -- Maya delegates household buying to Pat under a scoped
 mandate; in-scope closes on Pat's authority, over-cap routes to Maya, and
 revocation is instant:
 
@@ -206,7 +206,7 @@ target/release/buyer-client delegate-need pat dresses 20000          # out of sc
 target/release/buyer-client revoke-mandate pat                       # revoke -> workspace clears, next attempt fails
 ```
 
-**s007.inventory** — Alex (integration partner) connects Elena's ERP;
+**s007.inventory** -- Alex (integration partner) connects Elena's ERP;
 inventory truth governs matching, order state mirrors to the ERP, and the
 credential scope is a hard ceiling:
 
@@ -222,7 +222,7 @@ curl -s -X POST http://$NODE_IP:30088/v1/query -d '{"credential":"<cred>","resou
 curl -s -X POST http://$NODE_IP:30088/v1/grants/revoke -d '{"credential":"<cred>"}'                  # revoke -> next sync 401
 ```
 
-**s008.mediation** — a delivery dispute resolved without ever learning who
+**s008.mediation** -- a delivery dispute resolved without ever learning who
 Maya is: a metadata-only case, a scoped time-boxed disclosure, a refund as
 compensating ledger entries, and access that vanishes at expiry. Fresh
 snapshot recommended:
@@ -243,7 +243,7 @@ curl -s http://$NODE_IP:30081/v1/settlements/match/<id>                 # origin
 sleep 5; curl -s -o /dev/null -w '%{http_code}\n' http://$NODE_IP:30086/v1/support/cases/<case_id>/disclosure   # 410: expired
 ```
 
-**s009.suppression** — Dana publishes demand aggregates that suppress anything
+**s009.suppression** -- Dana publishes demand aggregates that suppress anything
 below the anonymity threshold; Elena and Marcel read identical figures:
 
 ```bash
@@ -256,7 +256,7 @@ curl -s http://$NODE_IP:30087/v1/demand-view/2026-Q3                # Marcel's v
 curl -s http://$NODE_IP:30085/v1/unmet-demand                        # gap flagged: category + region only
 ```
 
-**s010.certification** — Ingrid independently certifies the evidence trail and
+**s010.certification** -- Ingrid independently certifies the evidence trail and
 catches a tamper. This needs a corpus, so run the s010 script (it self-seeds a
 completed match, an abort, consent, a mandate, and a disclosure+adjustment):
 

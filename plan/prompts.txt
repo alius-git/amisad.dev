@@ -9,7 +9,7 @@ Your task is to generate two distinct, comprehensive Markdown files for amisad.d
 1. Define Personas (personas.md)
 Create a profiles document identifying the distinct user types served by AmisAd applications. Each persona should capture their core motivations, responsibilities, and primary interaction points with our ecosystem. Include the following essential roles and identify any missing gaps in the lifecycle:
 
-Maya (The Buyer): Uses the AmisAd/buyer application. Focused entirely on personal consumption—discovering, managing, and fulfillment tracking of "my needs and wants."
+Maya (The Buyer): Uses the AmisAd/buyer application. Focused entirely on personal consumption--discovering, managing, and fulfillment tracking of "my needs and wants."
 
 Elena (The Seller): Uses the AmisAd/seller application. Responsible for defining products or services, managing inventory, tracking orders, and monitoring provisioning or payment statuses.
 
@@ -50,7 +50,7 @@ Move the existing files into the `plan/` directory and expand them to include th
 
 #### 2. Create the Verification Framework (`plan/scenarios.md`)
 
-Generate a definitive document containing **10 prioritized end-to-end test sequences**. These scenarios must map out the complete lifecycle of a transaction—from intent discovery to edge matching, network slice allocation, creative ad serving, and multi-party settlement.
+Generate a definitive document containing **10 prioritized end-to-end test sequences**. These scenarios must map out the complete lifecycle of a transaction--from intent discovery to edge matching, network slice allocation, creative ad serving, and multi-party settlement.
 
 Design these sequences to serve as the ultimate functional blueprint for an end-to-end automated system demo using the **Yuruna** verification framework.
 
@@ -73,12 +73,12 @@ Act as the Principal Systems Architect for AmisAd. Based on the planning files (
 
 POC environment: everything runs in local virtual machines, plus test mobile devices side-loading the POC mobile app. VM provisioning, deployment, and end-to-end verification are driven by the Yuruna framework, executing the sequences in plan/scenarios.md against synthetic data.
 
-Deliverables: a master plan/design.md, plus Mermaid diagrams under plan/design/ — one overall POC architecture diagram and one per application (for the format, see [https://github.com/alissonsol/yuruna/tree/main/docs/design](https://github.com/alissonsol/yuruna/tree/main/docs/design)). Before writing, ask only the design questions the principles below do not already settle.
+Deliverables: a master plan/design.md, plus Mermaid diagrams under plan/design/ -- one overall POC architecture diagram and one per application (for the format, see [https://github.com/alissonsol/yuruna/tree/main/docs/design](https://github.com/alissonsol/yuruna/tree/main/docs/design)). Before writing, ask only the design questions the principles below do not already settle.
 
 Design principles:
 
 - Server-side applications run in K8s clusters and stay cloud-agnostic: no managed cloud services; every dependency must run in-cluster.
-- PostgreSQL is the only database. Implement the ledgers (consent, settlement, attestation) as append-only, hash-chained tables — no blockchain.
+- PostgreSQL is the only database. Implement the ledgers (consent, settlement, attestation) as append-only, hash-chained tables -- no blockchain.
 - Telco-local "slice VMs" stay light and stateless: matches run in ephemeral, confidential-computing environments. Where POC hardware lacks TEE support, simulate attestation behind the same interface, so production hardware is a drop-in replacement.
 - Simulate what the lab lacks (SIM-anchored identity, carrier slice control, payments) but preserve production contracts: every mock implements the real interface, and swapping it must not change any caller.
 - POC scope is scenario-driven: include exactly the applications and foundations needed to execute SCENARIO-001 through SCENARIO-010 end to end; stub nothing a scenario asserts against.
@@ -89,26 +89,26 @@ Design principles:
 
 ==== Design - Part 2
 
-Act as the Principal Systems Architect for AmisAd. Create Mermaid sequence diagrams for all ten verification scenarios in plan/scenarios.md — one file per scenario under plan/design/ (seq-001.md … seq-010.md), each following the existing design-doc conventions ("One sentence:" header, links back to 00-index.md (now plan/design.md) and scenarios.md).
+Act as the Principal Systems Architect for AmisAd. Create Mermaid sequence diagrams for all ten verification scenarios in plan/scenarios.md -- one file per scenario under plan/design/ (seq-001.md ... seq-010.md), each following the existing design-doc conventions ("One sentence:" header, links back to 00-index.md (now plan/design.md) and scenarios.md).
 
 Integration:
 
 - Add the ten files to the document table in plan/design/00-index.md (now plan/design.md).
-- Link the set from plan/design.md §9 (Diagrams).
+- Link the set from plan/design.md section 9 (Diagrams).
 - Verify README.md still links to plan/design.md; fix it if it does not.
 
 Diagram principles:
 
-- GitHub-first Mermaid: plain sequenceDiagram syntax only — participant/actor declarations, solid and dashed arrows, alt/opt/loop/par blocks, and Notes. Avoid box grouping, create/destroy, critical/break, themes, custom config, and HTML beyond <br />, so GitHub.com rendering is never at risk.
-- Participants are the POC components from plan/design.md (buyer app, fabric-coordinator, slice-runtime, seller-svc, ledger-svc, identity-mock, …) with personas declared as actors. Use identical participant names across all ten diagrams; cap each diagram at 8 participants, folding minor components into their nearest neighbor rather than exceeding the cap.
-- Fidelity to scenarios.md: messages follow the scenario's numbered steps in order — one message or small group per step; render fault injections, refusals, and tamper checks (scenarios 004, 006, 007, 010) as alt blocks; open each diagram with a Note stating the seeded preconditions and close with a Note stating the Target Verification Point Yuruna asserts.
+- GitHub-first Mermaid: plain sequenceDiagram syntax only -- participant/actor declarations, solid and dashed arrows, alt/opt/loop/par blocks, and Notes. Avoid box grouping, create/destroy, critical/break, themes, custom config, and HTML beyond <br />, so GitHub.com rendering is never at risk.
+- Participants are the POC components from plan/design.md (buyer app, fabric-coordinator, slice-runtime, seller-svc, ledger-svc, identity-mock, ...) with personas declared as actors. Use identical participant names across all ten diagrams; cap each diagram at 8 participants, folding minor components into their nearest neighbor rather than exceeding the cap.
+- Fidelity to scenarios.md: messages follow the scenario's numbered steps in order -- one message or small group per step; render fault injections, refusals, and tamper checks (scenarios 004, 006, 007, 010) as alt blocks; open each diagram with a Note stating the seeded preconditions and close with a Note stating the Target Verification Point Yuruna asserts.
 - Keep each diagram readable: roughly 20 messages; if a scenario needs more, group steps rather than drop them.
 
 ==== Code skeletons
 
 Act as the Principal Systems Architect for AmisAd. Based on the amisad.com content (brand assets) and the amisad.dev plan/ documents (applications, scenarios, design), create the POC code skeletons under poc/, mirroring the yuruna-project layout so the Yuruna runner can discover and drive them.
 
-Layout (yuruna-project convention; update design.md §6 to match, and note the change in README.md if it describes the layout):
+Layout (yuruna-project convention; update design.md section 6 to match, and note the change in README.md if it describes the layout):
   poc/
     MODULE.bazel  .bazelversion  BUILD.bazel    # Bazel root, bzlmod, pinned via bazelisk
     build/                                      # doctor + helper scripts (PowerShell)
@@ -134,12 +134,12 @@ Layout (yuruna-project convention; update design.md §6 to match, and note the c
 
 Build rules:
 
-- Bazel is the single entry point: `bazel build //...` must succeed on the first try on a machine with bazelisk, rustup, Node, and the Flutter SDK installed (all three toolchains are REQUIRED — build/doctor.ps1 checks versions and fails fast with a clear message before any build starts).
+- Bazel is the single entry point: `bazel build //...` must succeed on the first try on a machine with bazelisk, rustup, Node, and the Flutter SDK installed (all three toolchains are REQUIRED -- build/doctor.ps1 checks versions and fails fast with a clear message before any build starts).
 - Rust: rules_rust with a pinned toolchain and crate_universe lockfile; one library + binary target per service; a shared crate for common config/health plumbing.
-- Flutter and web-spa: Bazel targets that wrap the flutter/Vite CLIs (genrule or sh_binary) — Bazel orchestrates, the native toolchains do the work.
-- Container images are built by a script target (build/images.ps1), not part of the `bazel build //...` gate — Docker may be absent on dev machines.
+- Flutter and web-spa: Bazel targets that wrap the flutter/Vite CLIs (genrule or sh_binary) -- Bazel orchestrates, the native toolchains do the work.
+- Container images are built by a script target (build/images.ps1), not part of the `bazel build //...` gate -- Docker may be absent on dev machines.
 
-Skeleton depth — deployable, not just compilable:
+Skeleton depth -- deployable, not just compilable:
 
 - Each Rust service: GET /health and GET /version, config from environment variables, multi-stage Dockerfile, and a minimal Helm chart under workloads/ that deploys it with a liveness probe on /health.
 - buyer-flutter and web-spa: placeholder screens using the art/ brand assets; the SPA shell routes to six empty role modules (seller, resource, ads, insights, platform, audit, connect share the shell per design).
@@ -150,7 +150,7 @@ Test skeletons:
 - Each test/gui/ sequence must validate against yuruna/test/schemas/sequence.schema.yml: unique sequenceGuid, sequenceRevision 1, description naming its SCENARIO, baseline chain to the k3s+PostgreSQL+NATS baseline sequence, and steps that fetch-and-execute guest scripts which currently deploy the skeletons, curl /health, and end with a TODO block enumerating the scenario's real steps from plan/scenarios.md.
 - Guest scripts: bash, set -euo pipefail, one per sequence plus shared bring-up, modeled on the yuruna-project text-to-sql example.
 
-Done when: build/doctor.ps1 passes; `bazel build //...` is green; every Helm chart passes `helm lint`; every sequence YAML validates against the schema; design.md §6 reflects this layout; nothing references paths that do not exist.
+Done when: build/doctor.ps1 passes; `bazel build //...` is green; every Helm chart passes `helm lint`; every sequence YAML validates against the schema; design.md section 6 reflects this layout; nothing references paths that do not exist.
 
 ==== Coding - Scenario-001
 
@@ -160,20 +160,20 @@ skeletons, then create the Yuruna sequences that build and test it in VMs.
 References: plan/scenarios.md (steps + Target Verification Point), plan/design/
 seq-001.md (message flow), plan/design.md (contracts and foundations).
 
-1. Code — fill in what SCENARIO-001 traverses, nothing more:
+1. Code -- fill in what SCENARIO-001 traverses, nothing more:
 
 - fabric-coordinator: accept an encrypted need envelope, get a placement from resource-svc, dispatch envelope + qualifying offers to slice-runtime on the edge VM, relay match results and pseudonymous order status.
 - resource-svc: minimal allocation API (register edge endpoints per region, answer placement requests, record slice lifecycle telemetry).
-- slice-runtime: per-match ephemeral environment — evaluate constraints against offers, honor both auto-close policies, emit match record + settlement\ instruction, write created→attested→executed→destroyed to the attestation ledger, destroy itself; keep an egress log proving no need/identity leaves.
-- seller-svc: catalog with standing auto-close deals; order state machine matched→committed→provisioning→fulfilled→settled with events on NATS.
+- slice-runtime: per-match ephemeral environment -- evaluate constraints against offers, honor both auto-close policies, emit match record + settlement\ instruction, write created->attested->executed->destroyed to the attestation ledger, destroy itself; keep an egress log proving no need/identity leaves.
+- seller-svc: catalog with standing auto-close deals; order state machine matched->committed->provisioning->fulfilled->settled with events on NATS.
 - ledger-svc: real hash-chained appends (attestation + settlement four-way split), read APIs, and chain-head verification.
 - identity-mock: tokens for the buyer and seller actors in this flow.
-- buyer-client (new Rust CLI in components/apps/): submit Maya's gift need with auto-close, wait for the match, follow status to Delivered — the automated buyer driver.
+- buyer-client (new Rust CLI in components/apps/): submit Maya's gift need with auto-close, wait for the match, follow status to Delivered -- the automated buyer driver.
 - buyer-flutter: wire the needs-list screen to the same APIs (submit a need, see match and order status) for manual demo; UI automation stays out of scope.
 - db/seed/scenario-001.sql: Elena's catalog + standing deal, Maya's consent.
 - cargo tests: ledger hash-chaining, constraint matching, auto-close policy, order state transitions. `bazel build //...` and `cargo test --workspace` stay green.
 
-2. Baseline sequence "build VM" (test/gui/...build.amisad.baseline.yml): Chain from the existing k8s.amisad baseline (Kubernetes + PostgreSQL + NATS); add the build requirements — rustup + stable toolchain, bazelisk, git — via a new guest script; saveDiskSnapshot id "build.amisad".
+2. Baseline sequence "build VM" (test/gui/...build.amisad.baseline.yml): Chain from the existing k8s.amisad baseline (Kubernetes + PostgreSQL + NATS); add the build requirements -- rustup + stable toolchain, bazelisk, git -- via a new guest script; saveDiskSnapshot id "build.amisad".
 
 3. Sequence build-scenario-001 (test/gui/...build.amisad.scenario-001.yml): requiresSnapshot build.amisad, then:
 
@@ -195,7 +195,7 @@ Environment:
 - Project: C:\git\alius-git\amisad.dev (change freely).
 - GitHub PAT: ask user if not already in test.config.yml repositories.GH_TOKEN. Store copy in the auth vault (amisad-pat). NEVER write it into any file under amisad.dev, any commit, log, or report.
 
-Decisions (locked — do not re-ask):
+Decisions (locked -- do not re-ask):
 
 - Point repositories.projectUrl at the LOCAL repo (C:\git\alius-git\amisad.dev).
 - Guest source: adapt the scenario-001 sequence so the guest obtains the repo from the freshest host-served copy (investigate how fetch-and-execute serves project files and use that path or a host-reachable URL) instead of cloning GitHub. Keep the credential-store steps working; the PAT stays exercised host-side via GH_TOKEN.
@@ -205,7 +205,7 @@ Decisions (locked — do not re-ask):
 Iteration playbook:
 
 - Shorten the loop before the first cycle: trim guestSequence to guest.ubuntu.server.24; park every poc/test/gui sequence except the build.amisad pair (move the scenario-002..010 skeletons and the old k8s.amisad set to poc/test/gui-parked/ in a local commit); consider shouldStopOnFailure: true and a short cycleDelaySeconds while iterating.
-- You may install host-side toolchains (rustup, etc. via winget) to run cargo test locally and catch compile errors in minutes instead of burning a VM cycle per fix. Expect the first cargo/bazel run to surface small fixes in the new Rust code — that is normal; fix, commit, rerun.
+- You may install host-side toolchains (rustup, etc. via winget) to run cargo test locally and catch compile errors in minutes instead of burning a VM cycle per fix. Expect the first cargo/bazel run to surface small fixes in the new Rust code -- that is normal; fix, commit, rerun.
 - Diagnose from http://localhost:8080/status/, the cycle logs, and test/status/log diagnostics. The first cold chain (start.guest -> k8s.amisad -> build.amisad -> scenario-001) takes 1h+; start it early and do other verification while it runs.
 - Success: the cycle log shows all TVP asserts and "SCENARIO-001 HAPPY PATH PASSED", and a second cycle warm-paths from the build.amisad snapshot.
 

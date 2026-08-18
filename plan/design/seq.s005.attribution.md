@@ -1,8 +1,8 @@
 # s005.attribution sequence — Campaign-Boosted Match, Edge Creative Serving, and Attribution Credit
 
-> One sentence: brief becomes creative, creative rides into the sealed environment with the qualified offer, and closing yields agency and creator credit computed in the fabric — attribution without tracking.
+> One sentence: brief becomes creative, creative rides into the sealed environment with the qualified offer, and closing yields agency and creator credit computed in the fabric -- attribution without tracking.
 
-See [../design.md](../design.md#9-diagrams) · [s005.attribution](../scenarios.md#s005attribution-campaign-boosted-match-edge-creative-serving-and-attribution-credit). Maya is folded into the buyer app; Elena's offer arrives via the coordinator's seller-svc fetch.
+See [../design.md](../design.md#9-diagrams) - [s005.attribution](../scenarios.md#s005attribution-campaign-boosted-match-edge-creative-serving-and-attribution-credit). Maya is folded into the buyer app; Elena's offer arrives via the coordinator's seller-svc fetch.
 
 ```mermaid
 sequenceDiagram

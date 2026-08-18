@@ -240,7 +240,7 @@ pub fn request(method: &str, url: &str, body: Option<&str>) -> Result<(u16, Stri
 }
 
 /// Four-way settlement split: network 5%, platform 5%, ads 0 (campaign-free
-/// scenarios), seller the remainder — sums exactly by construction. Shared so
+/// scenarios), seller the remainder -- sums exactly by construction. Shared so
 /// the sealed auto-close path (slice-runtime) and the manual booking
 /// commitment (fabric-coordinator) cannot drift apart.
 pub fn splits_for(value_cents: i64) -> (i64, i64, i64, i64) {
@@ -251,7 +251,7 @@ pub fn splits_for(value_cents: i64) -> (i64, i64, i64, i64) {
     (seller, network, platform, ads)
 }
 
-/// Ad credit split (s005.attribution): agency 60%, creator the remainder —
+/// Ad credit split (s005.attribution): agency 60%, creator the remainder --
 /// sums to ad_cents exactly. Shared so the ledger money (coordinator) and the
 /// attribution dashboard (ads-svc) cannot drift apart, like splits_for.
 pub fn ad_split(ad_cents: i64) -> (i64, i64) {

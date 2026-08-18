@@ -1,8 +1,8 @@
 # s006.mandate sequence — Delegated Procurement Under a Scoped Mandate
 
-> One sentence: a mandate grants Pat bounded authority that the fabric enforces at match time — in-scope closes with dual attribution, over-cap routes to Maya, out-of-scope never reaches matching, and revocation is instant.
+> One sentence: a mandate grants Pat bounded authority that the fabric enforces at match time -- in-scope closes with dual attribution, over-cap routes to Maya, out-of-scope never reaches matching, and revocation is instant.
 
-See [../design.md](../design.md#9-diagrams) · [s006.mandate](../scenarios.md#s006mandate-delegated-procurement-under-a-scoped-mandate). Elena's standing offer is folded into the coordinator's offer fetch.
+See [../design.md](../design.md#9-diagrams) - [s006.mandate](../scenarios.md#s006mandate-delegated-procurement-under-a-scoped-mandate). Elena's standing offer is folded into the coordinator's offer fetch.
 
 ```mermaid
 sequenceDiagram

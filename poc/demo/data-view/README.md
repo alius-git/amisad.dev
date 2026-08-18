@@ -8,24 +8,24 @@ persona buttons, this demo adds the thing the audience actually wonders about:
 
 | Window | URL | What |
 |--------|-----|------|
-| Actions | `http://<host-ip>:8092/` | All ten scenarios as a persona swimlane chart — the whole 30 minutes visible as ghost slots from the first second — plus the runner that executes the selected step |
+| Actions | `http://<host-ip>:8092/` | All ten scenarios as a persona swimlane chart -- the whole 30 minutes visible as ghost slots from the first second -- plus the runner that executes the selected step |
 | Data | `http://<host-ip>:8092/data` | Live processes and data structures on `amisad-core`, `amisad-edge-a`, `amisad-edge-b`, flashing as steps change them, with the privacy strip on top |
 | Deck | `http://<host-ip>:8092/slides.html` | 18 slides, at most three short bullets each; the narration lives in the presenter notes (**S**) |
 
-Both demos can coexist — they use different ports and different browser
-storage — but do not drive both against the same lab during a presentation, or
+Both demos can coexist -- they use different ports and different browser
+storage -- but do not drive both against the same lab during a presentation, or
 the timeline will show only half the story.
 
 ## Prerequisites
 
 - The end-to-end run finished green and the machines are still up:
-  `amisad-core` (services on NodePorts 30080–30089) and both edges running
+  `amisad-core` (services on NodePorts 30080-30089) and both edges running
   `slice-runtime`. If a VM rebooted since, re-arm per
   [demo.md](../../demo.md#driving-the-demo) first.
-- A Yuruna checkout — the persona passwords are read from its authentication
+- A Yuruna checkout -- the persona passwords are read from its authentication
   vault, and VM power state and IPs come from its host driver. It is discovered
-  automatically (`-YurunaRoot` → `YURUNA_ROOT` → `YURUNA_CONFIG_PATH` → the
-  `<root>/project` clone layout → `~/git/yuruna`, where the bootstrap
+  automatically (`-YurunaRoot` -> `YURUNA_ROOT` -> `YURUNA_CONFIG_PATH` -> the
+  `<root>/project` clone layout -> `~/git/yuruna`, where the bootstrap
   installers clone on every platform); pass `-YurunaRoot` for anything else.
   Without it the windows, the
   proxy and the deck all still work; only the passwords and the VM power states
@@ -60,7 +60,7 @@ working). The server handles the host-side plumbing itself:
 so they are gated on the **client**, not the binding: loopback requests (the
 host's own browser) always get them, everyone else sees
 `<withheld: remote viewer>`. Add `-SharePersonaPasswords` to serve them to
-remote viewers too — on a trusted network, since anything that can reach the
+remote viewers too -- on a trusted network, since anything that can reach the
 port then gets them.
 
 ## Stage setup
@@ -85,13 +85,13 @@ and it:
 
 - clears the timeline, captured ids and check-marks in **every open window**
   (it goes through the server journal, not just local storage);
-- **re-arms the buyer's participation consent** — the coordinator refuses a need
+- **re-arms the buyer's participation consent** -- the coordinator refuses a need
   with `403 participation revoked` whenever the newest consent entry for her
   subject is a revoke, and that state is durable, so a pause left behind by an
   earlier run (or by `s003`) would otherwise refuse her very first step. Only
   the grant types that actually read `revoked` are re-granted, keeping the
-  grant → revoke → re-grant history that `s003` puts on screen clean;
-- leaves the lab's own records — offers, orders, ledgers — untouched.
+  grant -> revoke -> re-grant history that `s003` puts on screen clean;
+- leaves the lab's own records -- offers, orders, ledgers -- untouched.
 
 The action window also re-runs that consent check at load, and reports it in the
 header.
@@ -101,29 +101,29 @@ header.
 The three cells across the top of the data window answer the question the
 audience is really asking, continuously and by machine:
 
-1. **The buyer on the wire** — the pseudonymous subject
+1. **The buyer on the wire** -- the pseudonymous subject
    `sha256("maya|person|subject")[:16]`. That is the only handle the
    coordinator, the ledger and every box on screen have for her.
-2. **Her identity, anywhere** — a scanner over every lab response the window
+2. **Her identity, anywhere** -- a scanner over every lab response the window
    receives, looking for her login (whole-word, so `participation` never trips
    `pat`) and for personal-data field names. It should read `0 hits` for the
    whole demo. Supply-side names are excluded deliberately: `elena-atelier` is a
-   public tenant id and `kai` a public creator credit — catalog data, not buyer
+   public tenant id and `kai` a public creator credit -- catalog data, not buyer
    data. If this cell ever goes red, that is a real finding; do not explain it
    away.
-3. **What she chose to share** — the one-line context she wrote *does* travel:
+3. **What she chose to share** -- the one-line context she wrote *does* travel:
    the seller's order board and the slice's egress log both carry it, because
    that half of the envelope is hers to share. Counting where it appears, next
    to an identity count of zero, is the whole thesis.
 
-The private half of the envelope — budget, deadline, constraints — is logged
+The private half of the envelope -- budget, deadline, constraints -- is logged
 nowhere at all. It exists in flight and inside the sealed environment, which is
 why no box can show it.
 
 ## What the boxes can and cannot show
 
 Every box reads exactly one **GET** endpoint. The data window never issues a
-POST to the lab — not even the state-reporting ones, because several of those
+POST to the lab -- not even the state-reporting ones, because several of those
 write (an aggregation cycle records itself, certification appends to the
 auditor's access log, minting a token accumulates one). A dashboard must not
 change what it observes.
@@ -144,13 +144,13 @@ it. Slide 15 turns that empty column into the point.
 
 | Segment | Scenes | Budget |
 |---------|--------|--------|
-| Intro (slides 1–4) | windows tour, cast | 3 min |
-| Act I — The Buyer Loop | s001 3′ · s002 2.5′ · s003 3′ | 9 min |
-| Act II — The Economy | s005 3.5′ · s006 2′ · s007 1.5′ · s009 1′ | 8 min |
-| Act III — Trust & Operations | s004 3.5′ · s008 2.5′ · s010 2′ | 8 min |
+| Intro (slides 1-4) | windows tour, cast | 3 min |
+| Act I -- The Buyer Loop | s001 3' - s002 2.5' - s003 3' | 9 min |
+| Act II -- The Economy | s005 3.5' - s006 2' - s007 1.5' - s009 1' | 8 min |
+| Act III -- Trust & Operations | s004 3.5' - s008 2.5' - s010 2' | 8 min |
 | Close (slide 18) | the strip, the timeline | 2 min |
 
-Steps marked *(optional)* are the schedule buffer — skip them freely, except
+Steps marked *(optional)* are the schedule buffer -- skip them freely, except
 `s007`'s out-of-scope refusal, which slide 12 points at.
 
 ## Rehearsing
@@ -164,21 +164,21 @@ you want the count-drop moments to land visibly.
 
 ## Troubleshooting
 
-- **"amisad-core unresolved" in a header** — restart with `-CoreIp <ip>` (find
+- **"amisad-core unresolved" in a header** -- restart with `-CoreIp <ip>` (find
   it on the VM with `hostname -I`).
-- **Every buyer step returns 403 `participation revoked`** — press **Reset
+- **Every buyer step returns 403 `participation revoked`** -- press **Reset
   demo**, which re-arms the consent; the header chip reports the result.
-- **502/503 from a step, or a box marked stale** — the proxy could not reach
+- **502/503 from a step, or a box marked stale** -- the proxy could not reach
   that VM. Check `/api/topology` and the VM cards; a red service dot on the core
   card is that NodePort not answering.
-- **The timeline is empty after a server restart** — the journal is in-memory
+- **The timeline is empty after a server restart** -- the journal is in-memory
   by design. Open windows detect the restart within a second and rebuild
   themselves; the lab's own state is unaffected, and the notebook ids are
   recaptured by re-running the steps (or read from the still-live lab).
-- **A laptop cannot reach `http://<host ip>:8092/`** — confirm the banner lists
+- **A laptop cannot reach `http://<host ip>:8092/`** -- confirm the banner lists
   the host IP; if it does, it is the host firewall (rerun without
   `-SkipFirewall`, or open inbound TCP 8092 manually).
-- **s004 placement answers oddly** — a rebooted core lost the in-memory edge
+- **s004 placement answers oddly** -- a rebooted core lost the in-memory edge
   registry; `s004`'s first step rebuilds it (that is why it is step 1).
 
 ---

@@ -28,8 +28,8 @@ presentation muddies both stories.
 either demo, so the two behave identically:
 
 - **They serve the network by default.** The banner leads with
-  `http://<host-ip>:<port>/` — the address to type on a laptop, tablet or
-  projector — and also lists any other interface plus the local `localhost`
+  `http://<host-ip>:<port>/` -- the address to type on a laptop, tablet or
+  projector -- and also lists any other interface plus the local `localhost`
   URL. `-BindAddress localhost` restricts a server to this machine;
   `-BindAddress 10.0.0.5` binds one NIC (localhost stays bound too).
 - **They open the port.** On Ubuntu that is `ufw allow <port>/tcp` or
@@ -44,7 +44,7 @@ either demo, so the two behave identically:
   `GetContext`, which would leave a server killable only by closing the
   terminal.
 - **They gate the vault passwords per client, not per binding.** `/api/personas`
-  serves real persona passwords to loopback requests — the host's own browser —
+  serves real persona passwords to loopback requests -- the host's own browser --
   and `<withheld: remote viewer>` to everyone else. `-SharePersonaPasswords`
   opts in for remote viewers, on a trusted network.
 
@@ -54,10 +54,10 @@ Shared parameters: `-Port`, `-YurunaRoot`, `-CoreIp`, `-EdgeAIp`, `-EdgeBIp`,
 ## Prerequisites
 
 - The end-to-end run finished green and the machines are still up:
-  `amisad-core` (services on NodePorts 30080–30089) and both edges running
+  `amisad-core` (services on NodePorts 30080-30089) and both edges running
   `slice-runtime`. If a VM rebooted since, re-arm per
   [demo.md](../demo.md#driving-the-demo) first.
-- A Yuruna checkout, discovered automatically — it supplies the persona vault
+- A Yuruna checkout, discovered automatically -- it supplies the persona vault
   passwords and the VM power states. Everything else works without it.
 
 ---

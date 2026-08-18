@@ -8,7 +8,7 @@ added as **non-administrators** (`adduser`, no sudo) on the VM that hosts
 their scenarios.
 
 **Vault seeding (required once per username).** Auto-generated vault passwords
-can contain characters (`@`, `^`, …) the GUI keystroke path mistypes at first
+can contain characters (`@`, `^`, ...) the GUI keystroke path mistypes at first
 login. Seed every username keystroke-safe (letters+digits) before its first
 cold run, from the Yuruna checkout root in `pwsh`:
 
@@ -55,7 +55,7 @@ in sudoers.
 
 | Account | Where | Purpose |
 |---------|-------|---------|
-| `amisad` | PostgreSQL role on `amisad-core` | App role for ledger-svc and seller-svc (`DATABASE_URL`). INSERT+SELECT only on ledger tables — append-only is database-enforced. Fixed lab password `amisadpoc2026` (inside a URL, so alphanumeric); not vault-managed, provisioned by the db step. |
+| `amisad` | PostgreSQL role on `amisad-core` | App role for ledger-svc and seller-svc (`DATABASE_URL`). INSERT+SELECT only on ledger tables -- append-only is database-enforced. Fixed lab password `amisadpoc2026` (inside a URL, so alphanumeric); not vault-managed, provisioned by the db step. |
 | `amisad_audit_ro` | PostgreSQL role (NOLOGIN) | Read-only ledger access reserved for audit-svc; independence is architectural. |
 
 ## Core→edge access

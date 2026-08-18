@@ -2,7 +2,7 @@
 
 > One sentence: jurisdiction rules pick the compliant region over the roomier one, an injected isolation fault destroys the environment safely and retries clean, and the systemic pattern escalates across party lines.
 
-See [../design.md](../design.md#9-diagrams) · [s004.failover](../scenarios.md#s004failover-sovereign-slice-allocation-isolation-fault-and-attested-failover).
+See [../design.md](../design.md#9-diagrams) - [s004.failover](../scenarios.md#s004failover-sovereign-slice-allocation-isolation-fault-and-attested-failover).
 
 ```mermaid
 sequenceDiagram

@@ -1,7 +1,7 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
 // AmisAd demo console. One dropdown switches the persona; each scenario
-// panel lists its steps in demo order with the acting persona on each row —
+// panel lists its steps in demo order with the acting persona on each row --
 // only the selected persona's buttons are live, which is what walks the
 // operator through the switches. Every button is a real API call against the
 // deployed topology, sent through serve-by-act.ps1's same-origin proxy
@@ -17,27 +17,27 @@
 
 const PERSONAS = {
   maya:   { name: "Maya",   role: "The Buyer",                  app: "AmisAd/buyer",
-            blurb: "States a need once, in her own words. Nothing about her leaves — not to the seller, not to anyone." },
+            blurb: "States a need once, in her own words. Nothing about her leaves -- not to the seller, not to anyone." },
   elena:  { name: "Elena",  role: "The Seller",                 app: "AmisAd/seller",
             blurb: "A dress atelier meeting real intent, not audiences. She never touches anyone's data." },
   tom:    { name: "Tom",    role: "The Telco Administrator",    app: "AmisAd/resource",
-            blurb: "Runs the sealed slices close to the buyer, inside the law — and books the network's share." },
+            blurb: "Runs the sealed slices close to the buyer, inside the law -- and books the network's share." },
   marcel: { name: "Marcel", role: "The Ad Agency Administrator", app: "AmisAd/ads",
             blurb: "Campaigns that reach real needs, measured on the only number that matters: did it fit?" },
   kai:    { name: "Kai",    role: "The Creative Partner",       app: "AmisAd/ads (studio)",
             blurb: "Sells creative talent: briefs in, assets out, and proof the work performed." },
   priya:  { name: "Priya",  role: "The Platform Operator",      app: "AmisAd/platform",
-            blurb: "Steward of the marketplace nobody can see into — precisely because nobody can see into it." },
+            blurb: "Steward of the marketplace nobody can see into -- precisely because nobody can see into it." },
   ingrid: { name: "Ingrid", role: "The Trust Auditor",          app: "AmisAd/audit",
             blurb: "Independently verifies the central claim: nothing about the buyer leaves. Evidence, not assurances." },
   dana:   { name: "Dana",   role: "The Demand Analyst",         app: "AmisAd/insights",
             blurb: "Works the one window that exists: aggregate demand above the anonymity threshold." },
   alex:   { name: "Alex",   role: "The Integration Partner",    app: "AmisAd/connect",
-            blurb: "Connects the seller's ERP so external truth governs matching — under scopes that are a hard ceiling." },
+            blurb: "Connects the seller's ERP so external truth governs matching -- under scopes that are a hard ceiling." },
   sam:    { name: "Sam",    role: "The Support Agent",          app: "AmisAd/platform (support)",
             blurb: "Mediates from metadata alone. Support and surveillance stay permanently different things." },
   pat:    { name: "Pat",    role: "The Buyer-Side Delegate",    app: "AmisAd/buyer (delegate)",
-            blurb: "Acts for Maya under a scoped, capped, expiring mandate — every action on her trail." },
+            blurb: "Acts for Maya under a scoped, capped, expiring mandate -- every action on her trail." },
 };
 
 // --- state --------------------------------------------------------------
@@ -145,38 +145,38 @@ function offer(id, title, category, price, extra) {
 // whose PASS is a 4xx from the platform.
 
 const ACTS = {
-  I: "Act I — The Buyer Loop",
-  II: "Act II — The Economy",
-  III: "Act III — Trust & Operations",
+  I: "Act I -- The Buyer Loop",
+  II: "Act II -- The Economy",
+  III: "Act III -- Trust & Operations",
 };
 
 const SCENARIOS = [
-  { id: "s001", act: "I", name: "s001.fulfillment — The gift",
-    tagline: "Maya's auto-close happy path: matched in a sealed slice, settled four ways, delivered — and no trace of her anywhere." },
-  { id: "s002", act: "I", name: "s002.fitting — The dress",
+  { id: "s001", act: "I", name: "s001.fulfillment -- The gift",
+    tagline: "Maya's auto-close happy path: matched in a sealed slice, settled four ways, delivered -- and no trace of her anywhere." },
+  { id: "s002", act: "I", name: "s002.fitting -- The dress",
     tagline: "Manual control: a shortlist that honors every constraint, nothing commits until she books." },
-  { id: "s003", act: "I", name: "s003.silence — The kill switch",
+  { id: "s003", act: "I", name: "s003.silence -- The kill switch",
     tagline: "Pause participation and a perfect offer produces nothing; commitments made before still complete." },
-  { id: "s005", act: "II", name: "s005.attribution — The campaign",
+  { id: "s005", act: "II", name: "s005.attribution -- The campaign",
     tagline: "Advertising without surveillance: the boost happens inside the sealed environment; credit needs no tracking." },
-  { id: "s006", act: "II", name: "s006.mandate — The delegate",
+  { id: "s006", act: "II", name: "s006.mandate -- The delegate",
     tagline: "Pat acts for Maya under a scoped, capped mandate; over-cap routes back to Maya." },
-  { id: "s007", act: "II", name: "s007.inventory — The stockroom",
+  { id: "s007", act: "II", name: "s007.inventory -- The stockroom",
     tagline: "Alex's connector makes the ERP the truth; a zeroed item silently leaves the matchable catalog." },
-  { id: "s009", act: "II", name: "s009.suppression — The forecast",
+  { id: "s009", act: "II", name: "s009.suppression -- The forecast",
     tagline: "Dana publishes demand; anything below the anonymity threshold is indistinguishable from nothing." },
-  { id: "s004", act: "III", name: "s004.failover — The sovereign slice",
+  { id: "s004", act: "III", name: "s004.failover -- The sovereign slice",
     tagline: "Policy pins the match to the compliant region; injected faults abort BEFORE the envelope opens." },
-  { id: "s008", act: "III", name: "s008.mediation — The dispute",
+  { id: "s008", act: "III", name: "s008.mediation -- The dispute",
     tagline: "Sam refunds Maya's gift without ever learning who she is; access to the evidence expires." },
-  { id: "s010", act: "III", name: "s010.certification — The audit",
-    tagline: "Ingrid certifies the very demo you just watched — and catches a deliberate tamper." },
+  { id: "s010", act: "III", name: "s010.certification -- The audit",
+    tagline: "Ingrid certifies the very demo you just watched -- and catches a deliberate tamper." },
 ];
 
 const STEPS = [
   // --- s001.fulfillment -------------------------------------------------
   { scenario: "s001", persona: "elena", label: "Publish the standing offer",
-    explain: "Ceramic serving set, standing terms, closes automatically — Elena's catalog, her words.",
+    explain: "Ceramic serving set, standing terms, closes automatically -- Elena's catalog, her words.",
     run: async () => [mk("publish offer", await post("core/30083/v1/offers",
       offer("demo-serving-set-01", "Ceramic serving set", "giftware", 11000)))] },
   { scenario: "s001", persona: "maya", label: "Submit the gift need",
@@ -189,10 +189,10 @@ const STEPS = [
     }))],
     capture: (rs) => { state.s001_handle = deepFind(rs, "handle"); state.s001_match = deepFind(rs, "match_id"); } },
   { scenario: "s001", persona: "elena", label: "Ship it (provisioning)", needs: ["s001_match"],
-    explain: "Elena's order board: a match that fits, an appointment-free delivery — and no buyer identity anywhere on it.",
+    explain: "Elena's order board: a match that fits, an appointment-free delivery -- and no buyer identity anywhere on it.",
     run: async () => [mk("advance", await post("core/30083/v1/orders/advance",
       { match_id: state.s001_match, state: "provisioning" }))] },
-  { scenario: "s001", persona: "elena", label: "Confirm fulfilled → settled", needs: ["s001_match"],
+  { scenario: "s001", persona: "elena", label: "Confirm fulfilled -> settled", needs: ["s001_match"],
     explain: "Fulfillment triggers the four-way settlement: seller, network, platform, ad partners.",
     run: async () => [mk("advance", await post("core/30083/v1/orders/advance",
       { match_id: state.s001_match, state: "fulfilled" }))] },
@@ -200,12 +200,12 @@ const STEPS = [
     explain: "Maya's only surface: her handle. Status: delivered.",
     run: async () => [mk("order status", await get("core/30080/v1/orders/" + state.s001_handle))] },
   { scenario: "s001", persona: "maya", label: "Proof: the receipt is a hash chain",
-    explain: "Both ledgers verify end to end — the receipt survives restarts and cannot be quietly edited.",
+    explain: "Both ledgers verify end to end -- the receipt survives restarts and cannot be quietly edited.",
     run: async () => [mk("ledger verify", await get("core/30081/v1/verify"))] },
 
   // --- s002.fitting -----------------------------------------------------
   { scenario: "s002", persona: "elena", label: "Publish the dress rack",
-    explain: "Five dresses across two sellers — one dusty blue, one missing attributes, one past deadline, one out of region.",
+    explain: "Five dresses across two sellers -- one dusty blue, one missing attributes, one past deadline, one out of region.",
     run: async () => {
       const dress = (id, tenant, title, price, days, attrs, slots, region) => ({
         offer_id: id, tenant, title, category: "dresses", region: region || "region-a",
@@ -240,12 +240,12 @@ const STEPS = [
     }))],
     capture: (rs) => { state.s002_handle = deepFind(rs, "handle"); } },
   { scenario: "s002", persona: "maya", label: "Book the Thursday fitting", needs: ["s002_handle"],
-    explain: "Her explicit choice is the commitment — the appointment is a slot id and a day, never a person.",
+    explain: "Her explicit choice is the commitment -- the appointment is a slot id and a day, never a person.",
     run: async () => [mk("book", await post("core/30080/v1/bookings",
       { handle: state.s002_handle, offer_id: "demo-linen-midi-04", slot_id: "thu-1" }))],
     capture: (rs) => { state.s002_match = deepFind(rs, "match_id"); } },
   { scenario: "s002", persona: "maya", label: "Notifications: exactly two", needs: ["s002_handle"],
-    explain: "Quiet by default — the shortlist and the booking confirmation. Nothing else, ever.",
+    explain: "Quiet by default -- the shortlist and the booking confirmation. Nothing else, ever.",
     run: async () => [mk("notifications", await get("core/30080/v1/notifications/" + state.s002_handle))] },
   { scenario: "s002", persona: "elena", label: "Fulfil the fitting order", needs: ["s002_match"], optional: true,
     explain: "Advancing to fulfilled settles the split exactly as in s001.",
@@ -256,7 +256,7 @@ const STEPS = [
 
   // --- s003.silence -----------------------------------------------------
   { scenario: "s003", persona: "maya", label: "Sign up (consent grants)",
-    explain: "Participation and contribution, granted on the consent ledger under a pseudonymous subject — never a name.",
+    explain: "Participation and contribution, granted on the consent ledger under a pseudonymous subject -- never a name.",
     run: async () => [
       mk("grant contribution", await post("core/30080/v1/consents",
         { token: await token("maya"), grant_type: "contribution", action: "grant" })),
@@ -264,7 +264,7 @@ const STEPS = [
         { token: await token("maya"), grant_type: "participation", action: "grant" })),
     ] },
   { scenario: "s003", persona: "maya", label: "Open a need nothing fits yet",
-    explain: "A crystal decanter, modest budget. No offer fits — the need stays open on the coordinator.",
+    explain: "A crystal decanter, modest budget. No offer fits -- the need stays open on the coordinator.",
     run: async () => [mk("open need", await post("core/30080/v1/needs", {
       token: await token("maya"), jurisdiction: "region-a",
       envelope: JSON.stringify({ category: "glassware", budget_cents: 9000, region: "region-a",
@@ -277,16 +277,16 @@ const STEPS = [
     run: async () => [mk("revoke participation", await post("core/30080/v1/consents",
       { token: await token("maya"), grant_type: "participation", action: "revoke" }))] },
   { scenario: "s003", persona: "elena", label: "Publish a PERFECT decanter offer",
-    explain: "Fits the open need on every axis. Publishing re-runs matching over open needs — watch what does not happen.",
+    explain: "Fits the open need on every axis. Publishing re-runs matching over open needs -- watch what does not happen.",
     run: async () => [mk("publish offer", await post("core/30083/v1/offers",
       offer("demo-crystal-decanter-09", "Crystal decanter", "glassware", 8500, { deliver_by_days: 5 })))] },
-  { scenario: "s003", persona: "maya", label: "…silence", needs: ["s003_handle"],
+  { scenario: "s003", persona: "maya", label: "...silence", needs: ["s003_handle"],
     explain: "No environment, no match, no notification. The consent gate sits inside the matching cycle itself.",
     run: async () => [mk("notifications", await get("core/30080/v1/notifications/" + state.s003_handle))],
     check: (rs) => (Array.isArray(rs[0].data) && rs[0].data.length === 0)
-      ? { ok: true, note: "Empty — a perfect offer produced nothing." }
+      ? { ok: true, note: "Empty -- a perfect offer produced nothing." }
       : { ok: false, note: "Expected an empty notification list." } },
-  { scenario: "s003", persona: "maya", label: "Resume — served immediately",
+  { scenario: "s003", persona: "maya", label: "Resume -- served immediately",
     explain: "Re-granting brings the open needs back to life; the decanter matches now (look for \"rematched\").",
     run: async () => [
       mk("grant contribution", await post("core/30080/v1/consents",
@@ -294,14 +294,14 @@ const STEPS = [
       mk("grant participation", await post("core/30080/v1/consents",
         { token: await token("maya"), grant_type: "participation", action: "grant" })),
     ] },
-  { scenario: "s003", persona: "maya", label: "Consent history: grant → revoke → re-grant",
-    explain: "The full history on the verifying consent chain — revocation is recorded, honored, and auditable.",
+  { scenario: "s003", persona: "maya", label: "Consent history: grant -> revoke -> re-grant",
+    explain: "The full history on the verifying consent chain -- revocation is recorded, honored, and auditable.",
     run: async () => [mk("consent state", await post("core/30080/v1/consents/state",
       { token: await token("maya") }))] },
 
   // --- s005.attribution -------------------------------------------------
   { scenario: "s005", persona: "marcel", label: "Create the campaign",
-    explain: "Aggregate targeting only: a region and a need category. 2000¢ committed per match on top of the price.",
+    explain: "Aggregate targeting only: a region and a need category. 2000c committed per match on top of the price.",
     run: async () => [mk("create campaign", await post("core/30087/v1/campaigns",
       { tenant: "elena-atelier", region: "region-a", category: "tableware",
         ad_cents_per_match: 2000, budget_cents: 10000 }))],
@@ -322,12 +322,12 @@ const STEPS = [
     run: async () => [mk("activate", await post("core/30087/v1/campaigns/activate",
       { campaign_id: state.s005_campaign, asset_id: state.s005_asset }))] },
   { scenario: "s005", persona: "elena", label: "Publish the summer offer",
-    explain: "The offer the campaign will boost — Elena's price is untouched by the ad economics.",
+    explain: "The offer the campaign will boost -- Elena's price is untouched by the ad economics.",
     run: async () => [mk("publish offer", await post("core/30083/v1/offers",
       offer("demo-summer-set-02", "Summer entertaining set", "tableware", 11000,
         { deliver_by_days: 14, auto_close: false })))] },
   { scenario: "s005", persona: "maya", label: "State the summer need",
-    explain: "The boost happens INSIDE the sealed environment — the creative renders in the shortlist, never outside.",
+    explain: "The boost happens INSIDE the sealed environment -- the creative renders in the shortlist, never outside.",
     run: async () => [mk("submit manual need", await post("core/30080/v1/needs", {
       token: await token("maya"), jurisdiction: "region-a",
       envelope: JSON.stringify({ category: "tableware", budget_cents: 20000, region: "region-a",
@@ -336,21 +336,21 @@ const STEPS = [
     }))],
     capture: (rs) => { state.s005_handle = deepFind(rs, "handle"); } },
   { scenario: "s005", persona: "maya", label: "Accept the boosted offer", needs: ["s005_handle"],
-    explain: "Look for \"boosted\": true — and remember the campaign never saw her.",
+    explain: "Look for \"boosted\": true -- and remember the campaign never saw her.",
     run: async () => [mk("accept", await post("core/30080/v1/bookings",
       { handle: state.s005_handle, offer_id: "demo-summer-set-02" }))],
     capture: (rs) => { state.s005_match = deepFind(rs, "match_id"); } },
   { scenario: "s005", persona: "elena", label: "Fulfil the order", needs: ["s005_match"],
-    explain: "Provisioning, then fulfilled — the settlement fires on completion.",
+    explain: "Provisioning, then fulfilled -- the settlement fires on completion.",
     run: async () => [
       mk("provisioning", await post("core/30083/v1/orders/advance", { match_id: state.s005_match, state: "provisioning" })),
       mk("fulfilled", await post("core/30083/v1/orders/advance", { match_id: state.s005_match, state: "fulfilled" })),
     ] },
   { scenario: "s005", persona: "marcel", label: "The five-way split", needs: ["s005_match"],
-    explain: "Seller, network, platform from the price — agency and creator credit on top, funded by the campaign.",
+    explain: "Seller, network, platform from the price -- agency and creator credit on top, funded by the campaign.",
     run: async () => [mk("settlement", await get("core/30081/v1/settlements/match/" + state.s005_match))] },
   { scenario: "s005", persona: "kai", label: "Performance view: credit without tracking",
-    explain: "Aggregate attribution referencing campaign and asset ids — zero buyer signal on the campaign side.",
+    explain: "Aggregate attribution referencing campaign and asset ids -- zero buyer signal on the campaign side.",
     run: async () => [mk("attributions", await get("core/30087/v1/attributions"))] },
 
   // --- s006.mandate -----------------------------------------------------
@@ -368,18 +368,18 @@ const STEPS = [
     run: async () => [mk("grant mandate", await post("core/30080/v1/mandates",
       { token: await token("maya"), delegate: "pat", category: "homegoods", per_item_cents: 14000 }))] },
   { scenario: "s006", persona: "pat", label: "Open the delegate workspace",
-    explain: "One view per principal, strictly separated — Pat sees Maya, the scope, and what remains of the cap.",
+    explain: "One view per principal, strictly separated -- Pat sees Maya, the scope, and what remains of the cap.",
     run: async () => [mk("workspace", await post("core/30080/v1/delegate/workspace",
       { token: await token("pat") }))] },
   { scenario: "s006", persona: "pat", label: "Buy under the cap",
-    explain: "In scope, under cap — closes on Pat's authority with dual attribution: actor Pat, principal Maya.",
+    explain: "In scope, under cap -- closes on Pat's authority with dual attribution: actor Pat, principal Maya.",
     run: async () => [mk("delegated need", await post("core/30080/v1/delegate/needs", {
       token: await token("pat"), principal: "maya", category: "homegoods", jurisdiction: "region-a",
       envelope: JSON.stringify({ category: "homegoods", budget_cents: 12000, region: "region-a",
         deadline_days: 30, auto_close: false, context: "Delegated household purchase" }),
     }))] },
   { scenario: "s006", persona: "pat", label: "Try the premium vase (over cap)",
-    explain: "Over the cap: the closing is HELD — it will exist only after Maya's recorded approval.",
+    explain: "Over the cap: the closing is HELD -- it will exist only after Maya's recorded approval.",
     run: async () => [mk("delegated need (premium)", await post("core/30080/v1/delegate/needs", {
       token: await token("pat"), principal: "maya", category: "homegoods", jurisdiction: "region-a",
       envelope: JSON.stringify({ category: "homegoods", budget_cents: 20000, region: "region-a",
@@ -388,7 +388,7 @@ const STEPS = [
     }))],
     capture: (rs) => { state.s006_held = deepFind(rs, "handle"); } },
   { scenario: "s006", persona: "maya", label: "Approve the held closing", needs: ["s006_held"],
-    explain: "The principal's confirmation — now, and only now, the commitment exists.",
+    explain: "The principal's confirmation -- now, and only now, the commitment exists.",
     run: async () => [mk("approve", await post("core/30080/v1/mandates/approve",
       { token: await token("maya"), handle: state.s006_held }))] },
   { scenario: "s006", persona: "maya", label: "Her activity trail",
@@ -409,7 +409,7 @@ const STEPS = [
 
   // --- s007.inventory ---------------------------------------------------
   { scenario: "s007", persona: "alex", label: "Register + certify the connector",
-    explain: "Sandbox first — no production tenant before partner verification.",
+    explain: "Sandbox first -- no production tenant before partner verification.",
     run: async () => {
       const reg = await post("core/30088/v1/partners", { name: "alex-erp" });
       state.s007_partner = deepFind(reg.data, "partner_id");
@@ -423,7 +423,7 @@ const STEPS = [
         scopes: ["catalog", "inventory", "orders"] }))],
     capture: (rs) => { state.s007_cred = deepFind(rs, "credential"); } },
   { scenario: "s007", persona: "alex", label: "Sync the ERP catalog", needs: ["s007_cred"],
-    explain: "Two lamps from the ERP become matchable offers in Elena's tenant — nobody retypes anything.",
+    explain: "Two lamps from the ERP become matchable offers in Elena's tenant -- nobody retypes anything.",
     run: async () => [mk("sync catalog", await post("core/30088/v1/sync/catalog", {
       credential: state.s007_cred,
       offers: [
@@ -436,7 +436,7 @@ const STEPS = [
       { credential: state.s007_cred, offer_id: "demo-erp-lamp-01", stock: 0,
         delta_ts: Math.floor(Date.now() / 1000) }))] },
   { scenario: "s007", persona: "maya", label: "Need a lamp",
-    explain: "The match lands on the in-stock clock — not the cheaper lamp the ERP says is gone.",
+    explain: "The match lands on the in-stock clock -- not the cheaper lamp the ERP says is gone.",
     run: async () => [mk("submit need", await post("core/30080/v1/needs", {
       token: await token("maya"), jurisdiction: "region-a",
       envelope: JSON.stringify({ category: "lighting", budget_cents: 10000, region: "region-a",
@@ -444,7 +444,7 @@ const STEPS = [
     }))],
     capture: (rs) => { state.s007_match = deepFind(rs, "match_id"); } },
   { scenario: "s007", persona: "alex", label: "The ERP mirror agrees", needs: ["s007_match"],
-    explain: "Order lifecycle mirrored back idempotently — both sides agree on every order's state.",
+    explain: "Order lifecycle mirrored back idempotently -- both sides agree on every order's state.",
     run: async () => [mk("erp order", await get("core/30088/v1/erp/orders/" + state.s007_match))] },
   { scenario: "s007", persona: "alex", label: "Try an out-of-scope query", needs: ["s007_cred"],
     optional: true, refusal: true,
@@ -454,7 +454,7 @@ const STEPS = [
 
   // --- s009.suppression -------------------------------------------------
   { scenario: "s009", persona: "dana", label: "Record the week's demand",
-    explain: "Six picnicware needs in region-a, one in region-b — counts, never content.",
+    explain: "Six picnicware needs in region-a, one in region-b -- counts, never content.",
     run: async () => {
       const out = [];
       for (let i = 0; i < 6; i++) out.push(mk("record region-a #" + (i + 1),
@@ -464,20 +464,20 @@ const STEPS = [
       return out;
     } },
   { scenario: "s009", persona: "dana", label: "The workbench suppresses",
-    explain: "region-a shows. region-b, below the anonymity threshold, is ABSENT — not zeroed, absent.",
+    explain: "region-a shows. region-b, below the anonymity threshold, is ABSENT -- not zeroed, absent.",
     run: async () => [mk("workbench", await get("core/30085/v1/workbench"))] },
   { scenario: "s009", persona: "dana", label: "Publish the outlook",
-    explain: "An immutable, versioned publication — every downstream view reads this exact version.",
+    explain: "An immutable, versioned publication -- every downstream view reads this exact version.",
     run: async () => {
       state.s009_version = "demo-" + new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "");
       return [mk("publish " + state.s009_version,
         await post("core/30085/v1/outlooks", { version: state.s009_version }))];
     } },
   { scenario: "s009", persona: "elena", label: "Elena's demand outlook", needs: ["s009_version"], optional: true,
-    explain: "What to stock, where to expand — identical by construction to what agencies see.",
+    explain: "What to stock, where to expand -- identical by construction to what agencies see.",
     run: async () => [mk("seller outlook", await get("core/30083/v1/demand-outlook/" + state.s009_version))] },
   { scenario: "s009", persona: "marcel", label: "Marcel's demand view", needs: ["s009_version"], optional: true,
-    explain: "Same version, same figures — campaigns land where the need already was.",
+    explain: "Same version, same figures -- campaigns land where the need already was.",
     run: async () => [mk("ads view", await get("core/30087/v1/demand-view/" + state.s009_version))] },
 
   // --- s004.failover ----------------------------------------------------
@@ -489,12 +489,12 @@ const STEPS = [
       mk("region-b", await post("core/30082/v1/edges",
         { region: "region-b", endpoint: "http://" + topo.edgeB + ":8080", capacity: 10 })),
     ] },
-  { scenario: "s004", persona: "tom", label: "Unrestricted placement → region-b",
+  { scenario: "s004", persona: "tom", label: "Unrestricted placement -> region-b",
     explain: "Capacity-greedy by default: with no policy, the roomier region wins. Remember this answer.",
     run: async () => [mk("placement (anywhere)", await post("core/30082/v1/placements",
       { jurisdiction: "anywhere" }))] },
-  { scenario: "s004", persona: "tom", label: "Pin sovereignty → region-a",
-    explain: "The jurisdiction policy is the ONLY thing excluding region-b — and now placement answers region-a.",
+  { scenario: "s004", persona: "tom", label: "Pin sovereignty -> region-a",
+    explain: "The jurisdiction policy is the ONLY thing excluding region-b -- and now placement answers region-a.",
     run: async () => [
       mk("set policy", await post("core/30082/v1/policies",
         { jurisdiction: "region-a", regions: ["region-a"] })),
@@ -509,7 +509,7 @@ const STEPS = [
     explain: "The next two environments on the compliant slice will self-terminate BEFORE the envelope is opened.",
     run: async () => [mk("arm faults", await post("edge-a/v1/faults", { mode: "isolation", count: 2 }))] },
   { scenario: "s004", persona: "maya", label: "Submit the ceramics need",
-    explain: "Abort, abort, then the clean match — three attempts, same compliant placement, exactly one settlement.",
+    explain: "Abort, abort, then the clean match -- three attempts, same compliant placement, exactly one settlement.",
     run: async () => [mk("submit need", await post("core/30080/v1/needs", {
       token: await token("maya"), jurisdiction: "region-a",
       envelope: JSON.stringify({ category: "ceramics", budget_cents: 12000, region: "region-a",
@@ -517,15 +517,15 @@ const STEPS = [
     }))],
     capture: (rs) => { state.s004_match = deepFind(rs, "match_id"); } },
   { scenario: "s004", persona: "tom", label: "The incident queue",
-    explain: "Two isolation incidents, raised by abort telemetry — fault reason attested, nothing need-derived.",
+    explain: "Two isolation incidents, raised by abort telemetry -- fault reason attested, nothing need-derived.",
     run: async () => [mk("incidents", await get("core/30082/v1/incidents"))],
     capture: (rs) => { state.s004_envs = deepFindAll(rs, "environment_id").slice(-2); } },
   { scenario: "s004", persona: "tom", label: "An aborted environment's attestation", needs: ["s004_envs"],
-    explain: "created → attested → aborted → destroyed. No match record; the abort trail contains nothing need-derived.",
+    explain: "created -> attested -> aborted -> destroyed. No match record; the abort trail contains nothing need-derived.",
     run: async () => [mk("attestation trail",
       await get("core/30081/v1/attestations/env/" + state.s004_envs[0]))] },
   { scenario: "s004", persona: "tom", label: "Escalate the systemic pattern", needs: ["s004_envs"],
-    explain: "Tom hands Priya a cross-party case linking both aborted lifecycles — by environment id only.",
+    explain: "Tom hands Priya a cross-party case linking both aborted lifecycles -- by environment id only.",
     run: async () => [mk("escalate", await post("core/30086/v1/incidents",
       { summary: "systemic isolation faults in region-a", from: "resource-ops",
         environment_ids: state.s004_envs }))],
@@ -536,7 +536,7 @@ const STEPS = [
 
   // --- s008.mediation ---------------------------------------------------
   { scenario: "s008", persona: "sam", label: "Open the case (metadata only)", needs: ["s001_match"],
-    explain: "Maya reports the Act I gift never arrived. The case carries order state and settlement — no identity ever reaches it.",
+    explain: "Maya reports the Act I gift never arrived. The case carries order state and settlement -- no identity ever reaches it.",
     run: async () => [mk("open case", await post("core/30086/v1/support/cases",
       { match_id: state.s001_match, metadata: { order_state: "settled" } }))],
     capture: (rs) => { state.s008_case = deepFind(rs, "case_id"); } },
@@ -544,7 +544,7 @@ const STEPS = [
     explain: "Metadata cannot resolve it. Sam asks; only the data's owner can answer.",
     run: async () => [mk("request disclosure", await post("core/30086/v1/support/cases/disclosure/request",
       { case_id: state.s008_case }))] },
-  { scenario: "s008", persona: "maya", label: "Grant it — minimal and time-boxed", needs: ["s008_case"],
+  { scenario: "s008", persona: "maya", label: "Grant it -- minimal and time-boxed", needs: ["s008_case"],
     explain: "One artifact, 20 seconds, logged immutably on the consent ledger under her pseudonym. The countdown starts now.",
     run: async () => {
       const r = await post("core/30080/v1/disclosures",
@@ -554,25 +554,25 @@ const STEPS = [
       return [mk("grant disclosure", r)];
     } },
   { scenario: "s008", persona: "sam", label: "Read exactly what was granted", needs: ["s008_case"],
-    explain: "The artifact is readable in the case — for as long as the grant lives, and not a second more.",
+    explain: "The artifact is readable in the case -- for as long as the grant lives, and not a second more.",
     run: async () => [mk("disclosure", await get("core/30086/v1/support/cases/" + state.s008_case + "/disclosure"))] },
   { scenario: "s008", persona: "sam", label: "Post the refund", needs: ["s001_match", "s008_case"],
-    explain: "Compensating entries referencing the case — history is never edited, the chains still verify, the net reflects the refund.",
+    explain: "Compensating entries referencing the case -- history is never edited, the chains still verify, the net reflects the refund.",
     run: async () => [
       mk("adjust", await post("core/30081/v1/settlements/adjust",
         { match_id: state.s001_match, case_id: state.s008_case })),
       mk("settlement after", await get("core/30081/v1/settlements/match/" + state.s001_match)),
     ] },
   { scenario: "s008", persona: "sam", label: "After expiry: 410", needs: ["s008_case"], refusal: true,
-    explain: "Wait for the notebook countdown to hit zero, then click — the access path itself is gone.",
+    explain: "Wait for the notebook countdown to hit zero, then click -- the access path itself is gone.",
     run: async () => [mk("disclosure after expiry",
       await get("core/30086/v1/support/cases/" + state.s008_case + "/disclosure"))] },
 
   // --- s010.certification -----------------------------------------------
   { scenario: "s010", persona: "ingrid", label: "Certify the evidence trail",
-    explain: "Four dimensions over everything this demo just did — attestation continuity, residency, consent, settlement conservation — recomputing the chains from raw dumps, trusting no self-report.",
+    explain: "Four dimensions over everything this demo just did -- attestation continuity, residency, consent, settlement conservation -- recomputing the chains from raw dumps, trusting no self-report.",
     run: async () => [mk("certify", await post("core/30089/v1/certify"))] },
-  { scenario: "s010", persona: "ingrid", label: "Tamper with one record — get caught",
+  { scenario: "s010", persona: "ingrid", label: "Tamper with one record -- get caught",
     explain: "We fetch the attestation dump, flip one lifecycle field, and resubmit. Certification localizes the exact modified record.",
     run: async () => {
       const dump = await get("core/30081/v1/attestations");
@@ -591,7 +591,7 @@ const STEPS = [
       return [mk("fetch dump", dump), mk("certify tampered dump", verdict)];
     } },
   { scenario: "s010", persona: "ingrid", label: "The auditor's own access log",
-    explain: "Every certification access was a read. No writes, no personal-data scope — verified about the verifier.",
+    explain: "Every certification access was a read. No writes, no personal-data scope -- verified about the verifier.",
     run: async () => [mk("access log", await get("core/30089/v1/access-log"))] },
 ];
 
@@ -606,7 +606,7 @@ const stepResults = {}; // step.id -> { results, verdict } (session only)
 function logLine(method, url, status) {
   const el = document.createElement("div");
   el.className = "s" + String(status)[0];
-  el.textContent = new Date().toTimeString().slice(0, 8) + "  " + method + " " + url + " → " + status;
+  el.textContent = new Date().toTimeString().slice(0, 8) + "  " + method + " " + url + " -> " + status;
   const log = $("#log");
   log.prepend(el);
   while (log.childElementCount > 200) log.lastChild.remove();
@@ -624,7 +624,7 @@ function renderNotebook() {
     }
     if (Array.isArray(v)) v = v.join(", ");
     v = String(v);
-    if (v.length > 26) v = v.slice(0, 12) + "…" + v.slice(-10);
+    if (v.length > 26) v = v.slice(0, 12) + "..." + v.slice(-10);
     const chip = document.createElement("span");
     chip.className = "chip";
     chip.innerHTML = "<b>" + label + "</b> " + v;
@@ -643,7 +643,7 @@ function renderIdentity() {
   const box = $("#identity");
   if (!currentPersona) {
     box.innerHTML = '<div class="card"><h2>Overview</h2><p class="blurb">Pick a persona to act as them. ' +
-      "The slides (top right) drive the order; each scenario panel shows every step with who performs it — " +
+      "The slides (top right) drive the order; each scenario panel shows every step with who performs it -- " +
       "only the selected persona's buttons are live.</p></div>";
     return;
   }
@@ -655,15 +655,15 @@ function renderIdentity() {
     '<div class="app">' + p.app + "</div>" +
     '<p class="blurb">' + p.blurb + "</p>" +
     '<div class="cred"><span>console login</span></div>' +
-    '<div class="cred"><b>' + currentPersona + "</b><span>·</span>" +
-    '<span id="pw" data-shown="0">••••••••</span>' +
-    '<button id="pw-toggle" title="show/hide vault password">👁</button></div>' +
-    '<p class="hint">Password from the host authentication vault — the same one the VM account was provisioned with.</p>' +
+    '<div class="cred"><b>' + currentPersona + "</b><span>-</span>" +
+    '<span id="pw" data-shown="0">********</span>' +
+    '<button id="pw-toggle" title="show/hide vault password">o</button></div>' +
+    '<p class="hint">Password from the host authentication vault -- the same one the VM account was provisioned with.</p>' +
     "</div>";
   $("#pw-toggle").onclick = () => {
     const el = $("#pw");
     const shown = el.dataset.shown === "1";
-    el.textContent = shown ? "••••••••" : (pw ?? "<unavailable>");
+    el.textContent = shown ? "********" : (pw ?? "<unavailable>");
     el.dataset.shown = shown ? "0" : "1";
   };
 }
@@ -673,7 +673,7 @@ function verdictFor(step, results) {
   if (step.check) return step.check(results);
   if (step.refusal) {
     return last.status >= 400 && last.status < 500
-      ? { ok: true, note: "Refused (" + last.status + ") — the boundary held. That IS the pass." }
+      ? { ok: true, note: "Refused (" + last.status + ") -- the boundary held. That IS the pass." }
       : { ok: false, note: "Expected a 4xx refusal, got " + last.status + "." };
   }
   const bad = results.find((r) => r.status >= 400);
@@ -685,7 +685,7 @@ function verdictFor(step, results) {
 async function runStep(step, btn) {
   btn.disabled = true;
   btn.classList.add("busy");
-  btn.textContent = "…";
+  btn.textContent = "...";
   try {
     const results = await step.run();
     if (step.capture) step.capture(results.map((r) => r.data));
@@ -713,7 +713,7 @@ function renderStep(step, idx) {
     '<span class="num">' + idx + "</span>" +
     '<span class="who' + (active ? " active" : "") + '">' + PERSONAS[step.persona].name + "</span>" +
     '<span class="what"><span class="label">' + step.label +
-    (done[step.id] ? '<span class="done">✓</span>' : "") + "</span>" +
+    (done[step.id] ? '<span class="done">[OK]</span>' : "") + "</span>" +
     '<div class="explain">' + step.explain + "</div>" +
     (missing.length && active
       ? '<div class="missing">needs: ' + missing.map((k) => NOTEBOOK[k] || k).join(", ") + "</div>" : "") +
@@ -746,7 +746,7 @@ function renderStep(step, idx) {
     if (res.verdict.note) {
       const v = document.createElement("div");
       v.className = "verdict " + (res.verdict.ok ? "ok" : "bad");
-      v.textContent = (res.verdict.ok ? "✔ " : "✘ ") + res.verdict.note;
+      v.textContent = (res.verdict.ok ? "[OK] " : "[X] ") + res.verdict.note;
       box.appendChild(v);
     }
     row.appendChild(box);
@@ -782,7 +782,7 @@ function renderSteps() {
     if (!steps.some((s) => s.persona === currentPersona)) continue;
     const panel = document.createElement("div");
     panel.className = "panel scenario";
-    const actLabel = sc.act !== lastAct ? ACTS[sc.act] + " · " : "";
+    const actLabel = sc.act !== lastAct ? ACTS[sc.act] + " - " : "";
     lastAct = sc.act;
     panel.innerHTML = '<div class="act">' + actLabel + "scenario</div><h2>" + sc.name +
       '</h2><p class="tagline">' + sc.tagline + "</p>";
@@ -809,7 +809,7 @@ async function boot() {
   for (const [key, p] of Object.entries(PERSONAS)) {
     const opt = document.createElement("option");
     opt.value = key;
-    opt.textContent = p.name + " — " + p.role;
+    opt.textContent = p.name + " -- " + p.role;
     sel.appendChild(opt);
   }
   sel.onchange = () => selectPersona(sel.value);
@@ -825,9 +825,9 @@ async function boot() {
     topo = t;
     const el = $("#topology");
     if (t.core) {
-      el.textContent = "core " + t.core + " · edge-a " + (t.edgeA || "?") + " · edge-b " + (t.edgeB || "?");
+      el.textContent = "core " + t.core + " - edge-a " + (t.edgeA || "?") + " - edge-b " + (t.edgeB || "?");
     } else {
-      el.textContent = "amisad-core unresolved — restart serve-by-act.ps1 with -CoreIp";
+      el.textContent = "amisad-core unresolved -- restart serve-by-act.ps1 with -CoreIp";
       el.classList.add("bad");
     }
   } catch {

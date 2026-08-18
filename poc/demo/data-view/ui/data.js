@@ -53,7 +53,7 @@
   }
 
   function renderStrip() {
-    $("#subject-hash").textContent = AD.subjects.maya || "…";
+    $("#subject-hash").textContent = AD.subjects.maya || "...";
 
     var idCell = $("#sc-identity");
     var idBig = $("#identity-count");
@@ -64,13 +64,13 @@
     } else {
       idCell.className = "sc green";
       idBig.textContent = "0 hits";
-      $("#identity-sub").textContent = scan.responses + " responses · " +
+      $("#identity-sub").textContent = scan.responses + " responses - " +
         Math.round(scan.bytes / 1024) + " KB scanned";
     }
 
     $("#context-count").textContent = scan.contextHits + " place" + (scan.contextHits === 1 ? "" : "s");
     $("#context-sub").textContent = scan.contextHits
-      ? Object.keys(scan.contextWhere).join(" · ")
+      ? Object.keys(scan.contextWhere).join(" - ")
       : "nothing shared yet";
   }
 
@@ -213,14 +213,14 @@
       if (ev.kind !== "step" || !ev.step) continue;
       var s = ev.step;
       statuses[s.id] = s.status;
-      times[s.id] = AD.hhmmss(ev.ts) + " · " + (s.duration_ms || 0) + "ms";
+      times[s.id] = AD.hhmmss(ev.ts) + " - " + (s.duration_ms || 0) + "ms";
       if (s.captured) {
         for (var k in s.captured) {
           if (Object.prototype.hasOwnProperty.call(s.captured, k)) AD.state[k] = s.captured[k];
         }
       }
       var who = (AD.PERSONAS[s.persona] || { name: s.persona }).name;
-      ticker.unshift(AD.hhmmss(ev.ts) + "  " + s.id + "  " + who + " — " + s.label +
+      ticker.unshift(AD.hhmmss(ev.ts) + "  " + s.id + "  " + who + " -- " + s.label +
         (s.status === "fail" ? "  [FAILED]" : s.status === "refused-pass" ? "  [refused, as designed]" : ""));
       // Fast-poll exactly what this step can have changed, and hold the
       // attribution until the value actually moves - so the line always names
@@ -228,7 +228,7 @@
       var touches = s.touches || [];
       for (var t = 0; t < touches.length; t++) {
         var bs = boxState[touches[t]] || (boxState[touches[t]] = { rows: [], attribution: "", flashUntil: 0 });
-        bs.pendingAttribution = who + " — " + s.label;
+        bs.pendingAttribution = who + " -- " + s.label;
         if (pending.indexOf(touches[t]) < 0) pending.push(touches[t]);
       }
     }
@@ -270,7 +270,7 @@
       var led = vmState === "running" ? "up" : (vmState === "unknown" ? "" : "down");
       html += '<div class="vm"><div class="vm-top"><span class="led ' + led + '"></span>' +
         '<span class="vm-name">' + name + "</span>" +
-        '<span class="vm-ip">' + ((vm && vm.ip) || "—") + "</span>" +
+        '<span class="vm-ip">' + ((vm && vm.ip) || "--") + "</span>" +
         '<span class="vm-ip">' + vmState + "</span></div>";
       html += '<div class="dots">';
       if (byName[name] === "core") {
@@ -287,7 +287,7 @@
         html += "</div><div class=\"vm-cap\">" +
           (byName[name] === "edge-a"
             ? "sealed environments run here"
-            : "registered, standing by — sovereignty keeps this jurisdiction's traffic away") +
+            : "registered, standing by -- sovereignty keeps this jurisdiction's traffic away") +
           "</div>";
       }
       html += "</div>";
@@ -296,9 +296,9 @@
   }
 
   var GROUPS = [
-    { title: "amisad-core · the marketplace", vm: "core" },
-    { title: "amisad-edge-a · the sealed slice", vm: "edge-a" },
-    { title: "amisad-edge-b · the other jurisdiction", vm: "edge-b" }
+    { title: "amisad-core - the marketplace", vm: "core" },
+    { title: "amisad-edge-a - the sealed slice", vm: "edge-a" },
+    { title: "amisad-edge-b - the other jurisdiction", vm: "edge-b" }
   ];
 
   function renderBoxes() {
@@ -315,10 +315,10 @@
         if (st.flashUntil > now) cls += " flash";
         if (st.stale) cls += " stale";
         html += '<div class="' + cls + '"><h4>' + AD.escapeHtml(box.title) + "</h4>" +
-          '<div class="src">' + box.svc + " · " + box.port + (st.stale ? " · " + st.stale : "") + "</div>";
+          '<div class="src">' + box.svc + " - " + box.port + (st.stale ? " - " + st.stale : "") + "</div>";
         var rows = st.rows || [];
         if (!rows.length) {
-          html += '<div class="kv"><span>' + (urlFor(box) ? "waiting…" : "not yet in play") + "</span><span>—</span></div>";
+          html += '<div class="kv"><span>' + (urlFor(box) ? "waiting..." : "not yet in play") + "</span><span>--</span></div>";
         }
         for (var r = 0; r < rows.length; r++) {
           var d = st.deltas && st.deltas[rows[r][0]];
@@ -346,7 +346,7 @@
   function renderTicker() {
     var html = "";
     for (var i = 0; i < ticker.length; i++) html += "<div>" + AD.escapeHtml(ticker[i]) + "</div>";
-    $("#ticker").innerHTML = html || "<div>waiting for the first step…</div>";
+    $("#ticker").innerHTML = html || "<div>waiting for the first step...</div>";
   }
 
   async function resetDemo() {
@@ -366,9 +366,9 @@
     var el = $("#topology");
     if (t && t.core) {
       AD.topo.core = t.core; AD.topo.edgeA = t.edgeA; AD.topo.edgeB = t.edgeB;
-      el.textContent = "core " + t.core + " · a " + (t.edgeA || "?") + " · b " + (t.edgeB || "?");
+      el.textContent = "core " + t.core + " - a " + (t.edgeA || "?") + " - b " + (t.edgeB || "?");
     } else {
-      el.textContent = "amisad-core unresolved — restart with -CoreIp";
+      el.textContent = "amisad-core unresolved -- restart with -CoreIp";
       el.className = "chip bad";
     }
     var subj = await AD.fetchJson("/api/subjects");

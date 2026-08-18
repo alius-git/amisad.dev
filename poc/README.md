@@ -2,7 +2,7 @@
 
 Code skeletons for the AmisAd proof of concept, laid out in the
 **yuruna-project convention** so the Yuruna runner discovers and drives them.
-Design: [../plan/design.md](../plan/design.md) · scenarios:
+Design: [../plan/design.md](../plan/design.md) - scenarios:
 [../plan/scenarios.md](../plan/scenarios.md).
 
 ## Layout
@@ -11,21 +11,21 @@ Design: [../plan/design.md](../plan/design.md) · scenarios:
 |------|----------|
 | `MODULE.bazel`, `.bazelversion`, `BUILD.bazel` | Bazel root (bzlmod, pinned via bazelisk) |
 | `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `run-tests.ps1` (the scenario driver), `serve-local.ps1` (lab-mode guest source, served from HEAD) |
-| `contracts/` | OpenAPI specs per service — real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest — + event-schema placeholders |
+| `contracts/` | OpenAPI specs per service -- real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest -- + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
-| `components/apps/buyer-client/` | Headless buyer (Rust CLI) — drives the s001–s010 buyer, delegate, campaign, and disclosure paths |
+| `components/apps/buyer-client/` | Headless buyer (Rust CLI) -- drives the s001-s010 buyer, delegate, campaign, and disclosure paths |
 | `components/apps/buyer-flutter/` | Flutter buyer app (Android side-loaded) |
 | `components/apps/web-spa/` | React + TS + Vite shell, 7 role-scoped module routes |
 | `components/lib/amisad-common/` | Shared config/health plumbing crate |
 | `components/art/` | Brand assets from amisad.com + palette tokens (canonical) |
-| `config/localhost/` | Three-phase deploy skeletons (resources → components → workloads) |
+| `config/localhost/` | Three-phase deploy skeletons (resources -> components -> workloads) |
 | `workloads/services/` | Minimal Helm chart per service (liveness probe on `/health`) |
 | `db/` | `schema.sql` (schemas + hash-chained ledger tables) + per-scenario seed skeletons |
-| `test/workload.guest.*.yml` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment … s010.certification |
+| `test/workload.guest.*.yml` | Active Yuruna sequences: the topology chains (amisad-build, -core k8s/deploy, -edge-a/b) + s001.fulfillment ... s010.certification |
 | `test/ubuntu.server.24/` | Guest scripts the sequences fetch-and-execute |
 | `demo/` | Two browser-driven 30-minute demos (`by-act`, `data-view`) on the topology a green run leaves live |
-| `demo.md` / `test.md` / `usernames.md` | Running the demo by hand · test automation · guest username map |
+| `demo.md` / `test.md` / `usernames.md` | Running the demo by hand - test automation - guest username map |
 
 ## Building
 
@@ -36,7 +36,7 @@ build/images.ps1        # docker images (optional; Docker required)
 ```
 
 `bazel build //...` builds the entire Rust workspace via rules_rust. Cargo
-works directly too (`cargo build --workspace`) — the two share the same
+works directly too (`cargo build --workspace`) -- the two share the same
 sources.
 
 ## Deliberate skeleton choices
@@ -45,7 +45,7 @@ sources.
   the std-only responder in `amisad-common`; the first external dependency is
   the PostgreSQL client for the durable ledger/catalog stores, wired through
   **crate_universe** in `MODULE.bazel` with the committed `Cargo.lock`. (Actix
-  replaces the responder when the surface outgrows it — plan/design.md §1.)
+  replaces the responder when the surface outgrows it -- plan/design.md section 1.)
 - **App builds are `bazel run` wrappers.** Flutter and Vite have no mature
   Bazel rules, and their toolchains fight sandboxing (Gradle/pub/npm caches).
   `sh_binary` wrappers keep Bazel as the single entry point without lying
@@ -53,14 +53,14 @@ sources.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.
-- **All ten scenarios (s001–s010) are implemented and asserted end to end**
+- **All ten scenarios (s001-s010) are implemented and asserted end to end**
   against the design topology. Each restores the `amisad-core` snapshot as its
   state reset and drives the full Target Verification Point over SSH
   ([test.md](test.md)).
 
 ## Running it
 
-- **Test automation** (clean machine → build the design topology → every
+- **Test automation** (clean machine -> build the design topology -> every
   implemented scenario against `amisad-core`): [test.md](test.md).
 - **Demo by hand** (prebuild once, then drive the deployed topology manually,
   including the mobile app): [demo.md](demo.md). For the browser-driven
@@ -88,12 +88,12 @@ topology (see "Running it" above), asserting the full Target Verification
 Point at the end.
 
 Deviations from the target design, deliberate and to be retired in later
-scenarios — the wire contracts (`contracts/openapi/`) are unchanged by all of
+scenarios -- the wire contracts (`contracts/openapi/`) are unchanged by all of
 them:
 
 - **PostgreSQL for the ledgers and the seller; in-memory for the rest.**
   ledger-svc and seller-svc write through to the vm-core PostgreSQL
-  (`DATABASE_URL` from the helm values; `db/schema.sql`) and reload on start —
+  (`DATABASE_URL` from the helm values; `db/schema.sql`) and reload on start --
   chains, orders, and offers survive pod restarts, and the app role has no
   UPDATE/DELETE on ledger tables, so append-only is database-enforced.
   Without `DATABASE_URL` the same binaries run in-memory (that is how
@@ -108,7 +108,7 @@ them:
   single-threaded services cannot deadlock). The JetStream wiring stays a
   later step.
 - **Logical ephemeral environments.** `slice-runtime` is a persistent edge
-  process; each request runs one attested created→attested→executed→destroyed
+  process; each request runs one attested created->attested->executed->destroyed
   environment whose state drops at response time.
 - **Real edge, degraded fallback.** slice-runtime runs on `amisad-edge-a`
   per the design topology (resolved via its status-server IP report); if the
@@ -120,13 +120,13 @@ them:
 s002.fitting adds the manual-policy path on the same services: the sealed
 environment evaluates the extended constraints (required attributes,
 exclusions, fitting availability) and, for a manual need, returns a
-**shortlist** and commits nothing — no match id, no settlement instruction.
+**shortlist** and commits nothing -- no match id, no settlement instruction.
 The buyer's explicit booking (`buyer-client book`) is the commitment: the
 coordinator posts the settlement instruction (splits shared with the sealed
 auto path via `amisad-common`), creates the seller order with an
 **identity-free appointment** (slot id + day), and delivers the second of
 exactly two notifications (`shortlist`, `booking-confirmed`) on its per-handle
-log — the buyer's only surface. Elena advancing the order to fulfilled settles
+log -- the buyer's only surface. Elena advancing the order to fulfilled settles
 the split as in s001.
 
 ## s003.silence implementation notes
@@ -134,16 +134,16 @@ the split as in s001.
 s003.silence makes consent the third hash-chained ledger and the fabric's
 execution-time gate. A need with no fitting offer now stays **open** on the
 coordinator; publishing an offer fires an offer-published event that re-runs
-matching over the open needs — and the consent check inside that cycle is
+matching over the open needs -- and the consent check inside that cycle is
 what makes revocation *silent*: `buyer-client pause` appends a participation
 revocation (keyed by a pseudonymous subject hash, never a name), after which
 a perfectly fitting new offer produces no environment, no match, and no
 notification, while the pre-revocation order still settles normally.
 `withdraw` ends aggregate contribution (insights-svc's minimal aggregation
-cycle counts only consent-contributing open needs — counts, never content);
+cycle counts only consent-contributing open needs -- counts, never content);
 `resume` re-grants and the coordinator immediately re-serves the open needs.
 The TVP asserts zero attestation-ledger growth across the paused window, the
-full grant → revoke → re-grant history on the verifying consent chain, and
+full grant -> revoke -> re-grant history on the verifying consent chain, and
 its rows in PostgreSQL.
 
 s003-specific deviations, deliberate: the coordinator's open needs are
@@ -151,21 +151,21 @@ in-memory (a pod restart drops them while the consent chain persists);
 bookings still ride the handle as bearer and are not consent-gated (the
 booking step's consent check is future work); and the subject pseudonym is an
 unsalted hash of the verified actor with a world-readable per-subject consent
-history — pseudonymous, not anonymous.
+history -- pseudonymous, not anonymous.
 
 ## s004.failover implementation notes
 
 s004.failover proves the fabric fails *safe*. Both edges now run
 `slice-runtime` with an attested **region identity**; resource-svc's default
 placement is capacity-greedy across regions, and Tom's jurisdiction policy is
-what pins the restricted jurisdiction to its compliant region — the roomier
+what pins the restricted jurisdiction to its compliant region -- the roomier
 region-b is excluded at allocation time (both facts positively asserted). The
 harness arms two consecutive **isolation faults**: each armed environment
-self-terminates BEFORE the envelope is opened (created → attested → aborted
-→ destroyed, fault reason attested, no match record, nothing need-derived in
+self-terminates BEFORE the envelope is opened (created -> attested -> aborted
+-> destroyed, fault reason attested, no match record, nothing need-derived in
 the abort trail), the abort telemetry raises incidents in Tom's queue, and
 the coordinator's automatic retry (three attempts, same compliant placement)
-completes the match with exactly one settlement — hosting revenue for the
+completes the match with exactly one settlement -- hosting revenue for the
 completed environment only. Tom escalates the systemic pattern to Priya:
 platform-svc's first real surface, a cross-party incident case linking both
 aborted lifecycles by environment id only.

@@ -2,12 +2,12 @@
 
 > One sentence: sealed environments emit only aggregates, the threshold gate suppresses the small region into indistinguishable absence, and one published outlook drives both stocking and campaign decisions.
 
-See [../design.md](../design.md#9-diagrams) · [s009.suppression](../scenarios.md#s009suppression-aggregate-insight-publication-and-the-demand-planning-loop).
+See [../design.md](../design.md#9-diagrams) - [s009.suppression](../scenarios.md#s009suppression-aggregate-insight-publication-and-the-demand-planning-loop).
 
 ```mermaid
 sequenceDiagram
-    participant RegionA as Match activity · region A (above threshold)
-    participant RegionB as Match activity · region B (below threshold)
+    participant RegionA as Match activity - region A (above threshold)
+    participant RegionB as Match activity - region B (below threshold)
     participant InsightsSvc as insights-svc
     actor Dana
     participant SellerSvc as seller-svc

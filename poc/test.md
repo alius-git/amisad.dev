@@ -7,7 +7,7 @@ the demo by hand instead, see [demo.md](demo.md).
 ## One-time setup
 
 1. **Get the framework.** Use the OS one-liner from the Yuruna repo's
-   `install/README.md` (Remote one-liners) — it installs dependencies and
+   `install/README.md` (Remote one-liners) -- it installs dependencies and
    clones the framework to `~/git/yuruna` (`%USERPROFILE%\git\yuruna` on
    Windows).
 
@@ -19,7 +19,7 @@ the demo by hand instead, see [demo.md](demo.md).
 
    Edit `test/test.config.yml`:
    - `repositories.projectUrl`: `https://github.com/alius-git/amisad.dev.git`
-     (or a local clone path) — sequences are discovered under `poc/test/`.
+     (or a local clone path) -- sequences are discovered under `poc/test/`.
    - `repositories.ghToken`: a GitHub PAT with read access (host-side clone).
    - `guestSequence`: trim to `- guest.ubuntu.server.24`.
 
@@ -30,7 +30,7 @@ the demo by hand instead, see [demo.md](demo.md).
    # Guest PAT for the production clone path (lab mode does not use it):
    Set-UserVaultKey -LogicalUser amisad-pat -VaultKey amisad-pat
    Set-Password -Username amisad-pat -NewPassword '<the PAT>'
-   # One keystroke-safe (alphanumeric) password per username — see usernames.md:
+   # One keystroke-safe (alphanumeric) password per username -- see usernames.md:
    Set-Password -Username amisad-build-admin  -NewPassword '<alnum>'
    Set-Password -Username amisad-core-admin   -NewPassword '<alnum>'
    Set-Password -Username amisad-edge-a-admin -NewPassword '<alnum>'
@@ -53,13 +53,13 @@ the demo by hand instead, see [demo.md](demo.md).
 
 4. **Provide a stash service.** `amisad-build` uploads its binaries to it and
    `amisad-core` downloads them, so a run without one has nothing to deploy.
-   This project ships **no stash address** — a lab's stash address is that
+   This project ships **no stash address** -- a lab's stash address is that
    lab's, and a literal here would go stale the first time the service moved.
    Any one of these is enough:
 
    - run one on this host: `test/service/Start-StashServiceVM.ps1` from the `yuruna`
      folder;
-   - join a pool that runs one — the service announces itself to the
+   - join a pool that runs one -- the service announces itself to the
      pool-aggregator and this host reads the address back (nothing to
      configure beyond the caching proxy this host already uses);
    - state it: `$env:YURUNA_STASH_SERVICE_HOST = '<address>'`, or
@@ -68,7 +68,7 @@ the demo by hand instead, see [demo.md](demo.md).
 
    The pre-flight probes `/healthz` on each candidate before anything long
    starts, publishes the one that answered for the rest of the cycle, and
-   **stops the run immediately** when none does — it never guesses an address.
+   **stops the run immediately** when none does -- it never guesses an address.
 
 5. **Validate.** `test/Test-Config.ps1` from the `yuruna` folder.
 
@@ -76,7 +76,7 @@ the demo by hand instead, see [demo.md](demo.md).
 
 The driver builds the design topology
 ([plan/design/01-overview.md](../plan/design/01-overview.md)) and runs every
-scenario against the same `amisad-core` — each scenario's opening restore of
+scenario against the same `amisad-core` -- each scenario's opening restore of
 the `amisad-core` snapshot **is** its state reset, so scenarios stay
 independent without per-scenario VMs. Hostnames are set with the framework's
 `hostname` variable; each VM's admin is `<hostname>-admin`
@@ -111,7 +111,7 @@ SSH with the harness key and passwordless sudo.
 
 ## Run
 
-From `pwsh` — on a Hyper-V host it must be **elevated** (KVM and UTM drive the
+From `pwsh` -- on a Hyper-V host it must be **elevated** (KVM and UTM drive the
 hypervisor as the invoking user, so they need no elevation; the driver asserts
 whichever applies to the detected host before it touches a VM):
 
@@ -121,7 +121,7 @@ pwsh poc/build/run-tests.ps1 -NoConfigGate
 ```
 
 `run-tests.ps1` removes every amisad lab VM and leftover `test-*` VM
-(enforcing the clean start), generates the core→edge demo keypair if missing,
+(enforcing the clean start), generates the core->edge demo keypair if missing,
 resolves the stash service and stops at once if none answers (see
 [one-time setup](#one-time-setup) step 4), builds the topology, then runs each
 scenario from its registry in order. Green ends with `ALL SCENARIOS PASSED`,
@@ -136,19 +136,19 @@ is painting. For unattended runs, opt into the framework's virtual display once
 otherwise keep an active console/RDP session on the host during provisioning.
 
 **Repo delivery.** In lab iteration mode (current), guests fetch the repo as a
-tarball of `amisad.dev` HEAD from the host status service — rerun
+tarball of `amisad.dev` HEAD from the host status service -- rerun
 `poc\build\serve-local.ps1` after every commit. The guest scripts pull
 `/yuruna-project-archive.tar.gz`, the framework's project-tarball endpoint: a
-fresh tar of `<RepoRoot>/project` with the project tree (`poc/`, `test/`, …)
+fresh tar of `<RepoRoot>/project` with the project tree (`poc/`, `test/`, ...)
 at the top level, exactly what their extract step expects. Not
-`/yuruna-repo/project-poc.tar.gz` — `/yuruna-repo/*` serves the working tree
+`/yuruna-repo/project-poc.tar.gz` -- `/yuruna-repo/*` serves the working tree
 file-by-file and no such file exists, so that path 404s, `wget` exits 8, and
 the scripts' `set -euo pipefail` aborts the run before anything is built or
 deployed. The production path (kept for later) git-clones with the vault PAT
 in a `sensitive: true` step.
 
 **Durable stores.** The db step provisions the `amisad` database with the app
-role `amisad` (fixed lab password `amisadpoc2026` — it rides inside a URL, so
+role `amisad` (fixed lab password `amisadpoc2026` -- it rides inside a URL, so
 alphanumeric on purpose), opens `listen_addresses`/pg_hba to the pod and node
 networks, and grants the role INSERT+SELECT only on ledger tables: append-only
 is enforced by the database itself. `deploy.sh` passes `DATABASE_URL` (node
@@ -161,7 +161,7 @@ attestation rows; s005 the boosted 5-way settlement; s006 the mandate
 grant+revoke consent rows; s007 the delta-zeroed offer leaving the catalog;
 s008 the compensating adjustment entries + disclosure grant; s010 the
 independent four-dimension certification and tamper localization. An empty
-`databaseUrl` (the chart default) keeps a service in-memory — how `cargo test`
+`databaseUrl` (the chart default) keeps a service in-memory -- how `cargo test`
 and skeleton services run.
 
 ## Snapshot page-cache flush
@@ -169,9 +169,9 @@ and skeleton services run.
 Guest steps that end in a snapshot finish with `sync`. The host freezes the
 VM's disk for the snapshot as soon as the step exits, and it does not ask the
 guest to write back first; whatever is still in the page cache at that
-instant is not in the snapshot. The failure is silent and deferred —
+instant is not in the snapshot. The failure is silent and deferred --
 the file stays readable for the rest of the SSH session and is missing only
-once the snapshot is restored — so it surfaces far from its cause, in
+once the snapshot is restored -- so it surfaces far from its cause, in
 whichever later sequence first needs the lost write: a dropped tool is a bare
 "command not found", a dropped service binary or unit file means a restored
 VM whose dependents start against a service that is not there, and a dropped
@@ -191,7 +191,7 @@ matching its own architecture. The stash is one shared service for the whole
 lab, so the artifact name has to say which machine code it holds: were every
 host to upload under one label, the newest upload would answer every request,
 and a guest handed another architecture's build gets binaries its kernel
-cannot run — every pod then dies with "exec format error" and the deploy only
+cannot run -- every pod then dies with "exec format error" and the deploy only
 reports a rollout timeout, far from the cause.
 
 The architecture sits in the middle of the name on purpose. The stash matches
@@ -205,10 +205,10 @@ foreign build.
 
 1. Implement the guest run script under `poc/test/ubuntu.server.24/`
    (`ubuntu.server.24.amisad-core.sNNN.<word>.sh`) and the sequence under
-   `poc/test/`. Start from the s001–s004 set: chain to
+   `poc/test/`. Start from the s001-s004 set: chain to
    `...amisad-core.deploy`, `requiresSnapshot`/`loadDiskSnapshot`
    `amisad-core`, `username: amisad-core-admin`, `hostname: amisad-core`.
-   `component:` is a single `retry` block — `loadDiskSnapshot`,
+   `component:` is a single `retry` block -- `loadDiskSnapshot`,
    `sshWaitReady`, then `sshFetchAndExecute` of
    `...amisad-core.ready.sh`, which restarts the deployed services onto pods
    that exist now and waits for every NodePort to answer. `workload:` is
@@ -216,7 +216,7 @@ foreign build.
    outside the retry on purpose: putting the cluster in position is
    idempotent and worth a second attempt, while a scenario that passes only
    on a replay is reporting a defect. The scenario script therefore assumes a
-   live cluster and starts at its first call — no readiness gate of its own.
+   live cluster and starts at its first call -- no readiness gate of its own.
 2. Append the sequence name to the `$Scenarios` registry in
    `poc/build/run-tests.ps1`.
 3. Both edges are started by the driver and stay live; resolve either from

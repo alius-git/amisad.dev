@@ -28,7 +28,7 @@
     var s = ev.step;
     statuses[s.id] = s.status;
     if (s.status !== "fail") AD.done[s.id] = true;
-    times[s.id] = AD.hhmmss(ev.ts) + " · " + (s.duration_ms || 0) + "ms";
+    times[s.id] = AD.hhmmss(ev.ts) + " - " + (s.duration_ms || 0) + "ms";
     if (s.captured) {
       for (var k in s.captured) {
         if (Object.prototype.hasOwnProperty.call(s.captured, k)) AD.state[k] = s.captured[k];
@@ -78,7 +78,7 @@
     running = true;
     btn.disabled = true;
     btn.className = "busy";
-    btn.textContent = "Running…";
+    btn.textContent = "Running...";
 
     var calls = [];
     var unhook = AD.hooks.onCall;
@@ -117,7 +117,7 @@
     stepResults[step.id] = { results: results, verdict: verdict };
     statuses[step.id] = status;
     if (status !== "fail") AD.done[step.id] = true;
-    times[step.id] = AD.hhmmss(Date.now()) + " · " + duration + "ms";
+    times[step.id] = AD.hhmmss(Date.now()) + " - " + duration + "ms";
     AD.save();
 
     await AD.journal.append({
@@ -140,7 +140,7 @@
   function logLine(method, url, status) {
     var el = document.createElement("div");
     el.className = "s" + String(status).charAt(0);
-    el.textContent = AD.hhmmss(Date.now()) + "  " + method + " " + url + " → " + status;
+    el.textContent = AD.hhmmss(Date.now()) + "  " + method + " " + url + " -> " + status;
     var log = $("#log");
     log.insertBefore(el, log.firstChild);
     while (log.childElementCount > 200) log.removeChild(log.lastChild);
@@ -196,13 +196,13 @@
       "<div><div style=\"font-weight:650\">" + p.name + '</div><div class="role">' + p.role + "</div></div></div>" +
       '<p class="hint">' + AD.escapeHtml(p.blurb) + "</p>" +
       '<div class="cred"><b>' + currentPersona + "</b>" +
-      '<span id="pw" data-shown="0">••••••••</span>' +
+      '<span id="pw" data-shown="0">********</span>' +
       '<button id="pw-toggle" type="button">show</button></div>' +
-      '<p class="hint">Vault password for the VM account — the console login this persona would really use.</p>';
+      '<p class="hint">Vault password for the VM account -- the console login this persona would really use.</p>';
     $("#pw-toggle").onclick = function () {
       var el = $("#pw");
       var shown = el.getAttribute("data-shown") === "1";
-      el.textContent = shown ? "••••••••" : (pw === undefined ? "<unavailable>" : pw);
+      el.textContent = shown ? "********" : (pw === undefined ? "<unavailable>" : pw);
       el.setAttribute("data-shown", shown ? "0" : "1");
       this.textContent = shown ? "show" : "hide";
     };
@@ -211,7 +211,7 @@
   function renderRunner() {
     var host = $("#runner");
     if (!currentPersona) {
-      var html = "<h2>The cast</h2><p class=\"hint\">Eleven people, one loop. Tap anyone to act as them — " +
+      var html = "<h2>The cast</h2><p class=\"hint\">Eleven people, one loop. Tap anyone to act as them -- " +
         "or open the <a href=\"/data\" target=\"_blank\" rel=\"noopener\">data view</a> on the projector first.</p>" +
         '<div class="cast">';
       for (var i = 0; i < AD.PERSONA_ORDER.length; i++) {
@@ -239,7 +239,7 @@
     var res = stepResults[step.id];
     var runnable = canRun(step);
 
-    var h = "<h2>" + AD.ACTS[sc.act] + " · " + AD.escapeHtml(sc.name) + "</h2>" +
+    var h = "<h2>" + AD.ACTS[sc.act] + " - " + AD.escapeHtml(sc.name) + "</h2>" +
       '<div class="step-head"><span class="step-num">' + step.id + "</span>" +
       '<span class="step-label">' + AD.escapeHtml(step.label) + "</span>" +
       (step.optional ? '<span class="pill">optional</span>' : "") +
@@ -257,12 +257,12 @@
         h += '<span class="missing">needs: ' + missing.map(function (k) { return AD.NOTEBOOK[k] || k; }).join(", ") + "</span>";
       }
     }
-    h += '<button type="button" class="ghost" id="next-step" style="color:var(--ink);border-color:var(--line)">Next ▸</button>';
+    h += '<button type="button" class="ghost" id="next-step" style="color:var(--ink);border-color:var(--line)">Next ></button>';
     h += "</div>";
 
     if (res) {
       h += '<div class="verdict ' + (res.verdict.ok ? "ok" : "bad") + '">' +
-        (res.verdict.ok ? "✔ " : "✘ ") + AD.escapeHtml(res.verdict.note || "Done.") + "</div>";
+        (res.verdict.ok ? "[OK] " : "[X] ") + AD.escapeHtml(res.verdict.note || "Done.") + "</div>";
       h += '<div class="res">';
       for (var r = 0; r < res.results.length; r++) {
         var row = res.results[r];
@@ -273,7 +273,7 @@
       }
       h += "</div>";
     } else if (statuses[step.id]) {
-      h += '<p class="hint">Ran in another window — the chart carries the outcome; response bodies stay local to the ' +
+      h += '<p class="hint">Ran in another window -- the chart carries the outcome; response bodies stay local to the ' +
         "window that clicked.</p>";
     }
     host.innerHTML = h;
@@ -317,7 +317,7 @@
       }
       nb.appendChild(el);
     }
-    if (!any) nb.innerHTML = '<p class="hint">Empty — ids appear here as steps capture them.</p>';
+    if (!any) nb.innerHTML = '<p class="hint">Empty -- ids appear here as steps capture them.</p>';
   }
 
   function render() {
@@ -353,7 +353,7 @@
   async function runPreflight() {
     var el = $("#consents");
     el.className = "chip";
-    el.textContent = "checking consents…";
+    el.textContent = "checking consents...";
     if (!AD.topo.core) { el.textContent = ""; return; }
     try {
       var r = await ensureBuyerConsents();
@@ -378,7 +378,7 @@
       "The lab's own records (offers, orders, ledgers) are left untouched.")) return;
     var btn = $("#reset-demo");
     btn.disabled = true;
-    btn.textContent = "Resetting…";
+    btn.textContent = "Resetting...";
     AD.clearLocal();
     statuses = {};
     times = {};
@@ -400,7 +400,7 @@
       var k = AD.PERSONA_ORDER[i];
       var opt = document.createElement("option");
       opt.value = k;
-      opt.textContent = AD.PERSONAS[k].name + " — " + AD.PERSONAS[k].role;
+      opt.textContent = AD.PERSONAS[k].name + " -- " + AD.PERSONAS[k].role;
       sel.appendChild(opt);
     }
     sel.onchange = function () { currentPersona = sel.value; selectedId = null; render(); };
@@ -410,9 +410,9 @@
     var el = $("#topology");
     if (t && t.core) {
       AD.topo.core = t.core; AD.topo.edgeA = t.edgeA; AD.topo.edgeB = t.edgeB;
-      el.textContent = "core " + t.core + " · a " + (t.edgeA || "?") + " · b " + (t.edgeB || "?");
+      el.textContent = "core " + t.core + " - a " + (t.edgeA || "?") + " - b " + (t.edgeB || "?");
     } else {
-      el.textContent = "amisad-core unresolved — restart with -CoreIp";
+      el.textContent = "amisad-core unresolved -- restart with -CoreIp";
       el.className = "chip bad";
     }
 
