@@ -261,7 +261,7 @@ automatically if it appears.
   `poc/build/serve-local.ps1` republishes from HEAD after every commit
   (currently published).
 - **Sequences**: `build.amisad` pair + two chained baselines active; ten
-  skeleton scenario sequences parked in `poc/test/gui-parked/`.
+  skeleton scenario sequences parked in `poc/test/`.
 - Notification `transports.yml` bootstrapped (warning silenced).
 
 ## Runner forensics (why it isn't already running)
