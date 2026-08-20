@@ -15,6 +15,11 @@ framework that can deploy it.
   `poc/demo/AmisAd.DemoHost.psm1`, which both already imported.
 - PowerShell now has the same PSScriptAnalyzer rule set as the framework repo,
   so a finding is caught here rather than on the machine running the demo.
+- The lab driver writes its per-stage logs into the running cycle's folder
+  instead of the system temp dir, so the only record of each stage's
+  provisioning half -- base-image check, VM creation, first boot, none of which
+  reach a sequence transcript -- ships with the cycle's other artifacts. A run
+  outside a cycle still uses `<temp>/amisad-tests`.
 
 ---
 

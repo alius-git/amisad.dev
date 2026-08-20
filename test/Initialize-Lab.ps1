@@ -64,7 +64,9 @@
     Yuruna framework checkout that holds test/Debug-TestSequence.ps1. Optional --
     see Resolve-YurunaRoot for the discovery order.
 .PARAMETER LogDir
-    Per-stage Debug-TestSequence logs. Default: <temp>/amisad-tests.
+    Per-stage Debug-TestSequence logs. Defaults to a folder inside the running
+    cycle so the logs travel with the cycle's other artifacts, and to
+    <temp>/amisad-tests when this runs outside a cycle.
 .PARAMETER NoConfigGate
     Forwarded to each guest build (skip the pre-cycle Test-Config.ps1 gate).
 .PARAMETER StashServiceHost
@@ -77,7 +79,7 @@
 
 param(
     [string]$YurunaRoot,
-    [string]$LogDir = (Join-Path ([IO.Path]::GetTempPath()) 'amisad-tests'),
+    [string]$LogDir = '',
     [switch]$NoConfigGate,
     [string]$StashServiceHost = ''
 )
@@ -106,7 +108,46 @@ if (-not (Test-HostRequirement -HostType $HostType)) { exit 1 }
 
 $ts = Join-Path $YurunaRoot 'test/Debug-TestSequence.ps1'
 if (-not (Test-Path -LiteralPath $ts)) { Write-Error "Debug-TestSequence.ps1 not found at $ts"; exit 1 }
+
+function Resolve-StageLogDir {
+    <#
+        Where a stage's stdout/stderr are written. A stage log is the only
+        record of the provisioning half of that stage -- base-image check, VM
+        creation, first boot -- because the sequence transcript a guest run
+        writes begins at the sequence banner, after all of it. That evidence
+        decides guest-side boot and media failures, so it has to survive to
+        wherever the cycle's artifacts are read: a system temp dir is not part
+        of what an operator ships when a cycle fails, and is the first thing
+        gone when the machine reboots.
+
+        The cycle folder comes from the YURUNA_CYCLE_CONTEXT handle the
+        framework publishes to the child processes of a host action; its
+        absence means this is a standalone run with no cycle to write into, so
+        the temp dir stands as the fallback. The cycle's own manifest
+        enumerates the folder recursively, so nothing has to be registered.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([string]$Explicit)
+    if (-not [string]::IsNullOrWhiteSpace($Explicit)) { return $Explicit }
+    if (-not [string]::IsNullOrWhiteSpace($env:YURUNA_CYCLE_CONTEXT)) {
+        try {
+            $root = ($env:YURUNA_CYCLE_CONTEXT | ConvertFrom-Json -AsHashtable).rootCycleFolder
+            # A cycle folder recorded but no longer on disk means the cycle is
+            # over; writing it back would recreate a folder nothing collects.
+            if (-not [string]::IsNullOrWhiteSpace($root) -and (Test-Path -LiteralPath $root -PathType Container)) {
+                return (Join-Path $root 'initialize-lab.stage-logs')
+            }
+        } catch {
+            Write-Verbose "Resolve-StageLogDir: unreadable cycle context, falling back to temp: $($_.Exception.Message)"
+        }
+    }
+    return (Join-Path ([IO.Path]::GetTempPath()) 'amisad-tests')
+}
+
+$LogDir = Resolve-StageLogDir -Explicit $LogDir
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+Write-Information "Per-stage logs: $LogDir"
 
 function Invoke-Stage {
     # Write-Information (not Write-Output) for progress: the function's OUTPUT
