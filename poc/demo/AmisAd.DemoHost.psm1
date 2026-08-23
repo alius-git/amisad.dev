@@ -341,7 +341,7 @@ function Test-DemoStopKey {
 # These were duplicated verbatim in serve-by-act.ps1 and serve-data-view.ps1.
 # Write-Json keeps the -Depth parameter the data-view copy grew: its default of
 # 8 is exactly what the other copy hardcoded, so both callers keep their
-# behaviour. Send-StaticFile and Invoke-Proxy deliberately stay per-server --
+# behavior. Send-StaticFile and Invoke-Proxy deliberately stay per-server --
 # their differences are the app's own routing and proxy policy, not drift.
 
 function Resolve-VmIp([string]$Name) {

@@ -288,7 +288,7 @@ var AD = (function () {
       run: async function () {
         return [mk("notifications", await get("core/30080/v1/notifications/" + state.s002_handle))];
       } },
-    { scenario: "s002", persona: "elena", label: "Fulfil the fitting order", needs: ["s002_match"], optional: true,
+    { scenario: "s002", persona: "elena", label: "Fulfill the fitting order", needs: ["s002_match"], optional: true,
       explain: "Advancing to fulfilled settles the split exactly as in s001.",
       touches: ["seller.orders", "ledger.verify", "ledger.settlement.last"],
       run: async function () {
@@ -431,7 +431,7 @@ var AD = (function () {
           { handle: state.s005_handle, offer_id: "demo-summer-set-02" }))];
       },
       capture: function (rs) { state.s005_match = deepFind(rs, "match_id"); } },
-    { scenario: "s005", persona: "elena", label: "Fulfil the order", needs: ["s005_match"],
+    { scenario: "s005", persona: "elena", label: "Fulfill the order", needs: ["s005_match"],
       explain: "Provisioning, then fulfilled -- the settlement fires on completion.",
       touches: ["seller.orders", "ledger.verify", "ledger.settlement.last", "ads.attributions", "ads.campaign"],
       run: async function () {

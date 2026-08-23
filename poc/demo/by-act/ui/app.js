@@ -247,7 +247,7 @@ const STEPS = [
   { scenario: "s002", persona: "maya", label: "Notifications: exactly two", needs: ["s002_handle"],
     explain: "Quiet by default -- the shortlist and the booking confirmation. Nothing else, ever.",
     run: async () => [mk("notifications", await get("core/30080/v1/notifications/" + state.s002_handle))] },
-  { scenario: "s002", persona: "elena", label: "Fulfil the fitting order", needs: ["s002_match"], optional: true,
+  { scenario: "s002", persona: "elena", label: "Fulfill the fitting order", needs: ["s002_match"], optional: true,
     explain: "Advancing to fulfilled settles the split exactly as in s001.",
     run: async () => [
       mk("provisioning", await post("core/30083/v1/orders/advance", { match_id: state.s002_match, state: "provisioning" })),
@@ -340,7 +340,7 @@ const STEPS = [
     run: async () => [mk("accept", await post("core/30080/v1/bookings",
       { handle: state.s005_handle, offer_id: "demo-summer-set-02" }))],
     capture: (rs) => { state.s005_match = deepFind(rs, "match_id"); } },
-  { scenario: "s005", persona: "elena", label: "Fulfil the order", needs: ["s005_match"],
+  { scenario: "s005", persona: "elena", label: "Fulfill the order", needs: ["s005_match"],
     explain: "Provisioning, then fulfilled -- the settlement fires on completion.",
     run: async () => [
       mk("provisioning", await post("core/30083/v1/orders/advance", { match_id: state.s005_match, state: "provisioning" })),

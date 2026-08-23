@@ -29,16 +29,6 @@ if [ -r /etc/yuruna/host.env ]; then
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
 # --- REGION: https://yuruna.link/network#defining-the-guest-to-guest-rail
-# Where a peer edge answers. The rail is tried first: on a host that has one,
-# both guests hold a second address on a network the site DHCP server cannot
-# move, and libvirt's resolver answers the peer's reserved name -- so there is
-# nothing to publish and nothing to go stale. The answer is accepted only from
-# the rail subnet, because these VM names also resolve on the LAN and that is
-# precisely the answer that can be out of date.
-#
-# The published handoff file stays underneath, unchanged. Two of the three host
-# types this workload runs on have no libvirt network at all, so the rail is an
-# optimisation here and never a requirement.
 # --- REGION: a failed service call must name the service and what it answered
 # `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
 # pipe that is invisible: the parser downstream reads empty stdin and reports a
@@ -100,14 +90,6 @@ if [ -n "${EDGE_HOST:-}" ]; then
     SLICE_EP="http://${EDGE_IP}:8080"
 else
     # --- REGION: https://yuruna.link/network#why-the-single-vm-fallback-is-gated
-    # Refuse rather than degrade. This branch runs the whole scenario against
-    # this one VM and then asserts the full Target Verification Point over it,
-    # printing PASSED -- so a cycle in which the edge was simply unreachable
-    # reports the same result as one in which the distributed topology worked.
-    # On a host whose address moves, an unreachable edge is a routine event, so
-    # that is the difference between a green cycle that means something and one
-    # that means the scenario quietly stopped testing what it exists to test.
-    # Set AMISAD_ALLOW_SINGLE_VM=1 to run the degraded shape deliberately.
     if [ "${AMISAD_ALLOW_SINGLE_VM:-0}" != "1" ]; then
         echo "edge unresolved, and AMISAD_ALLOW_SINGLE_VM is not set: refusing to assert a distributed scenario against a single-VM topology." >&2
         exit 4

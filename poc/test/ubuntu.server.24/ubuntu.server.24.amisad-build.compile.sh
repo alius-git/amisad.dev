@@ -27,13 +27,6 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
 fi
 
 # --- REGION: https://yuruna.link/network#why-host-coordinates-are-re-read-per-use
-# The coordinates above are read once, and this script then runs for minutes on
-# a host whose DHCP lease moves under it. yuruna-host-locate.timer refreshes
-# /etc/yuruna/host.env every 60s, so re-reading immediately before each fetch
-# follows the host rather than freezing where it was at startup. A failed fetch
-# additionally earns one forced refresh: the file can be up to a refresh
-# interval behind the very move that broke the fetch, so retrying without it
-# would just re-dial the address that already failed.
 amisad_host_fetch() {
     local dest="$1" path="$2" attempt
     for attempt in 1 2; do

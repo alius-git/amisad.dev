@@ -417,7 +417,7 @@ rule, and `/api/vms` plus the twelve VM-card health probes ride the pump at
   body) against the previous poll; on change, flash the box (terracotta
   fade ~1.6s, `prefers-reduced-motion` disables) and show a `+n` delta
   badge on counter rows.
-- Failures mark the box stale (grey badge with the HTTP/transport error) and
+- Failures mark the box stale (gray badge with the HTTP/transport error) and
   never clear the last good values.
 - The data window issues **no** journal writes and **no** lab POSTs, ever.
 
@@ -487,7 +487,7 @@ read (timeline shows the bar; no box flashes). Steps are listed as
 | s002-02 | Ask for the shortlist | `ledger.verify` `resource.telemetry` `edge-a.egress` |
 | s002-03 | Book the Thursday fitting | `seller.orders` |
 | s002-04 | Notifications: exactly two | [] |
-| s002-05 | Fulfil the fitting order (opt) | `seller.orders` `ledger.verify` `ledger.settlement.last` |
+| s002-05 | Fulfill the fitting order (opt) | `seller.orders` `ledger.verify` `ledger.settlement.last` |
 | s003-01 | Sign up (consent grants) | `ledger.consent.maya` `ledger.verify` |
 | s003-02 | Open a need nothing fits | `coordinator.contributions` `ledger.verify` `resource.telemetry` `edge-a.egress` |
 | s003-03 | Pause participation | `ledger.consent.maya` `ledger.verify` |
@@ -503,7 +503,7 @@ read (timeline shows the bar; no box flashes). Steps are listed as
 | s005-06 | Publish the summer offer | `seller.catalog.a` |
 | s005-07 | State the summer need | `ledger.verify` `resource.telemetry` `edge-a.ingress` `edge-a.egress` |
 | s005-08 | Accept the boosted offer | `seller.orders` |
-| s005-09 | Fulfil the order | `seller.orders` `ledger.verify` `ledger.settlement.last` `ads.attributions` `ads.campaign` |
+| s005-09 | Fulfill the order | `seller.orders` `ledger.verify` `ledger.settlement.last` `ads.attributions` `ads.campaign` |
 | s005-10 | The five-way split | [] |
 | s005-11 | Performance view | [] |
 | s006-01 | Publish household offers | `seller.catalog.a` |

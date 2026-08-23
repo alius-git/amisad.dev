@@ -34,16 +34,6 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
 # --- REGION: https://yuruna.link/network#defining-the-guest-to-guest-rail
-# Where a peer edge answers. The rail is tried first: on a host that has one,
-# both guests hold a second address on a network the site DHCP server cannot
-# move, and libvirt's resolver answers the peer's reserved name -- so there is
-# nothing to publish and nothing to go stale. The answer is accepted only from
-# the rail subnet, because these VM names also resolve on the LAN and that is
-# precisely the answer that can be out of date.
-#
-# The published handoff file stays underneath, unchanged. Two of the three host
-# types this workload runs on have no libvirt network at all, so the rail is an
-# optimisation here and never a requirement.
 # --- REGION: a failed service call must name the service and what it answered
 # `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
 # pipe that is invisible: the parser downstream reads empty stdin and reports a
