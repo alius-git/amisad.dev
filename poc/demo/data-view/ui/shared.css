@@ -2,7 +2,7 @@
 /* Copyright (c) 2026 by Alisson Sol et al. */
 /* AmisAd data-view demo styling, shared by the action window (light) and the
    data window (dark, .theme-dark on body). Brand tokens copied from
-   ../components/art/palette.css (canonical - do not fork the values).
+   ../../../components/art/palette.css (canonical - do not fork the values).
 
    Baseline is Safari 13.1 / iPadOS 13: no flexbox `gap` (grid-gap only), no
    :is()/:where()/:has(), no container queries, no logical properties. Spacing

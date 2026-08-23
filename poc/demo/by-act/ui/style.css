@@ -1,7 +1,7 @@
 /* LICENSEURI https://yuruna.link/license */
 /* Copyright (c) 2026 by Alisson Sol et al. */
 /* AmisAd demo console styling. Brand tokens copied from
-   ../components/art/palette.css (canonical - do not fork the values).
+   ../../../components/art/palette.css (canonical - do not fork the values).
 
    Baseline is Safari 13.1 / iPadOS 13, same as the data-view demo: no flexbox
    `gap` (grid falls back to `grid-gap`, flex rows space with margins), no

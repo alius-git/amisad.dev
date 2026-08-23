@@ -85,7 +85,7 @@ questions.
 - **JavaScript:** plain ES2020, no build step, no external requests (all
   same-origin). `node --check` must pass on every `.js` file.
 - **Brand:** re-mount `/art/` from `poc/components/art` exactly as
-  `serve-by-act.ps1` does (path `../components/art` relative to the script --
+  `serve-by-act.ps1` does (path `../../components/art` relative to the script --
   the same relative depth holds from `poc/demo/data-view/`). Use palette
   tokens (`--amisad-navy #2B3A67`, `--amisad-terracotta #E2725B`); do not
   fork values.
