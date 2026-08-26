@@ -1,4 +1,4 @@
-# poc/demo/data-view — implementation prompt
+# poc/demo/data-view -- implementation prompt
 
 <!-- LICENSEURI https://yuruna.link/license -->
 <!-- Copyright (c) 2026 by Alisson Sol et al. -->
@@ -90,7 +90,7 @@ questions.
   tokens (`--amisad-navy #2B3A67`, `--amisad-terracotta #E2725B`); do not
   fork values.
 
-## 3. Deliverables — file layout
+## 3. Deliverables -- file layout
 
 ```
 poc/demo/data-view/
@@ -110,7 +110,7 @@ poc/demo/data-view/
 No other files. `slides.html` is self-contained (inline CSS/JS) like the
 existing deck.
 
-## 4. Server — `serve-data-view.ps1`
+## 4. Server -- `serve-data-view.ps1`
 
 Copy-adapt from `poc/demo/by-act/serve-by-act.ps1` (do not dot-source it). Carry over
 verbatim-in-behavior:
@@ -232,7 +232,7 @@ Consumer rules (both windows):
   machines; localStorage is only a boot-time seed used when the journal is
   empty (single-machine reload before any server restart).
 
-## 6. Actions window — `/` (`ui/actions.html` + `actions.js`)
+## 6. Actions window -- `/` (`ui/actions.html` + `actions.js`)
 
 ### 6.1 The step script
 
@@ -318,7 +318,7 @@ An EasyTimeline-style swimlane chart, rendered as DOM (no canvas):
   `POST /api/journal/reset`, re-render. (The lab itself is untouched, as
   today.)
 
-## 7. Data window — `/data` (`ui/data.html` + `data.js`)
+## 7. Data window -- `/data` (`ui/data.html` + `data.js`)
 
 ### 7.1 Layout
 
@@ -469,7 +469,7 @@ half (budget, deadline, constraints) exists only in flight and inside the
 environment, and is never logged anywhere -- which is why no box can show
 it, and the `edge-a.ingress` box caption says so.
 
-## 8. Step → touches table
+## 8. Step -> touches table
 
 The authoritative mapping from executed step to flashed boxes. `[]` = pure
 read (timeline shows the bar; no box flashes). Steps are listed as
@@ -582,7 +582,7 @@ other; they must not run on the same port and must not be open against the
 same lab *simultaneously during a presentation* (double consent-preflights
 and duplicate `demo-` upserts are harmless but muddy the timeline).
 
-## 11. The deck — `slides.html`
+## 11. The deck -- `slides.html`
 
 Self-contained single file. Carry over from `poc/demo/by-act/slides.html`: the vh
 typography scale, navy/terracotta/paper tokens, divider styling (+
@@ -603,7 +603,7 @@ the s008 countdown talk-over).
 
 | # | kind | title | bullets | stage direction / note anchor |
 |---|---|---|---|---|
-| 1 | divider | AmisAd | Buyer served, seller found - Network rewarded, platform credited - Not one secret spent | notes: pre-flight checklist -- server running, three surfaces open, journal reset, identity cell green-zero |
+| 1 | divider | AmisAd | Buyer served, seller found - Network rewarded, platform credited - Not one secret spent | notes: preflight checklist -- server running, three surfaces open, journal reset, identity cell green-zero |
 | 2 | content | The promise | Nothing about her leaves - Matched in sealed environments - Silence when nothing fits | notes: the only pure-narrative minute |
 | 3 | content | How to read the room | Left: the people - Right: the machine - Everything live, nothing staged | watch: data -- VM cards green; privacy strip: identity 0, her words 0 (so far) |
 | 4 | content | Eleven people, one loop | Eleven personas, one loop - Three trust-boundary roles - One auditor reads everything | watch: data -- mini-timeline: eleven empty lanes, the whole script in ghost |

@@ -20,7 +20,7 @@ variables:
   hostname: amisad-build
   # Stash-service VM the binaries are dropped into (yuruna-stash-service).
   # Discovered live at run time (Get-VMIp) instead of a hard-coded literal;
-  # the guest .compile.sh keeps a degraded-mode default if this resolves empty.
+  # the guest .compile.sh aborts before building if this resolves empty.
   stashHost: "${ext:stash-service.ResolveHost(yuruna-stash-service)}"
 
 component:

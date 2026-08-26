@@ -1,4 +1,4 @@
-# AmisAd — the demos
+# AmisAd -- the demos
 
 Two ways to show the same live system, on the topology a green
 [`test/amisad.end-to-end.yml`](../../test/amisad.end-to-end.yml) run leaves

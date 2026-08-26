@@ -1,4 +1,4 @@
-# s001.fulfillment unattended run — status
+# s001.fulfillment unattended run -- status
 
 **Updated:** 2026-07-19 ~08:35 local - **Result: [OK] GREEN -- clean COLD START passes under Yuruna end-to-end (cycle 002404, user `yamisad-s001`); durable fix in place**
 
@@ -34,7 +34,7 @@ slice-runtime -> happy path -> **full TVP**) marked OK and the cycle ending
 `FETCHED AND EXECUTED:`, which the guest script prints solely after
 `s001.fulfillment HAPPY PATH PASSED`. Cold chain ran ~16 min.
 
-### The SECOND blocker — also a framework issue, now fixed
+### The SECOND blocker -- also a framework issue, now fixed
 
 After the pkill fix (below), cold cycles still failed at `start.guest` step
 6/9 with `credential_expired`. OCR of the guest console showed **`Login
@@ -82,7 +82,7 @@ cluster (VM 192.168.7.129, left up for demo):
 
 Full passing log: `scratchpad/scenario-001-PASS.log` (operator machine).
 
-### The one bug that was blocking it — fixed
+### The one bug that was blocking it -- fixed
 
 `4d77984` -- **s001.fulfillment `pkill -f slice-runtime` self-SIGTERM (exit 143).**
 fetch-and-execute runs the guest script via `/bin/bash -c "<script text>"`, so
@@ -106,7 +106,7 @@ VM (`yamisad@192.168.7.129`, framework key), reproducing the exact
 fetch-tarball -> build -> deploy -> run path in ~2 min. That is the run that went
 green above.
 
-### Confirming runner-cycle (formality) — BLOCKED by a framework provisioning bug
+### Confirming runner-cycle (formality) -- BLOCKED by a framework provisioning bug
 
 The scenario itself is proven. A framework-driven cycle-log line is blocked
 **before** it can reach the scenario, by a systematic guest-provisioning
@@ -238,7 +238,7 @@ green ends with `s001.fulfillment HAPPY PATH PASSED` in the cycle log. A watcher
 in the automation session polls for runner activity and resumes monitoring
 automatically if it appears.
 
-## Host-side verification — all green
+## Host-side verification -- all green
 
 | Gate | Result |
 |------|--------|

@@ -47,10 +47,10 @@ fi
 cargo --version
 rustc --version
 
-# Retried for the same reason the rustup install above is, and it was the one
-# download here that was not: a single "empty reply from server" through the lab
-# proxy -- a transient this cycle has produced -- exited the script under
-# `set -e` and cost the whole cycle, after rust had already installed cleanly.
+# Retried for the same reason the rustup install above is: a single "empty
+# reply from server" through the lab proxy -- a transient the lab does
+# produce -- would exit the script under `set -e` and cost the whole cycle,
+# after rust had already installed cleanly.
 #
 # The fetch is unprivileged and the install is the only privileged step. sudo
 # inside the retried unit would put the privilege where the retry cannot see

@@ -1,4 +1,4 @@
-# AmisAd — the data-view demo
+# AmisAd -- the data-view demo
 
 Two synchronized browser windows and a slide deck, served by one PowerShell
 script, on the topology a green [`test/amisad.end-to-end.yml`](../../../test/amisad.end-to-end.yml)

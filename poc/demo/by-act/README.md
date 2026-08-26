@@ -1,4 +1,4 @@
-# AmisAd POC — the 30-minute guided demo (by act)
+# AmisAd POC -- the 30-minute guided demo (by act)
 
 A persona-switching **mock UI** plus a **slide deck** that walk all ten
 scenarios in half an hour, on the topology a green

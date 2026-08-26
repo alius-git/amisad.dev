@@ -76,7 +76,7 @@ Description=Keep this edge VM's reported IP current
 # Boot-only reporting publishes the address this VM had when it started, and
 # amisad-core reads that file to find the edge for the whole cycle. Under a
 # short DHCP lease neither end stays put for a cycle, so a report that is never
-# repeated is a report that goes stale and strands the scenario -- which now
+# repeated is a report that goes stale and strands the scenario -- which
 # refuses to degrade to a single-VM run rather than quietly pretending it
 # passed. Re-reporting is one small PUT; the interval is well inside the gap
 # between a renumber and the next scenario needing the address.

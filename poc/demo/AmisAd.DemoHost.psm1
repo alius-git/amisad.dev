@@ -338,11 +338,10 @@ function Test-DemoStopKey {
 
 
 # --- REGION: HTTP request/response helpers shared by the demo servers
-# These were duplicated verbatim in serve-by-act.ps1 and serve-data-view.ps1.
-# Write-Json keeps the -Depth parameter the data-view copy grew: its default of
-# 8 is exactly what the other copy hardcoded, so both callers keep their
-# behavior. Send-StaticFile and Invoke-Proxy deliberately stay per-server --
-# their differences are the app's own routing and proxy policy, not drift.
+# Shared by serve-by-act.ps1 and serve-data-view.ps1. Write-Json's -Depth
+# default of 8 is the depth both servers rely on. Send-StaticFile and
+# Invoke-Proxy deliberately stay per-server -- their differences are each
+# app's own routing and proxy policy, not drift.
 
 function Resolve-VmIp([string]$Name) {
     <#
@@ -424,7 +423,7 @@ function Write-Body($Response, [int]$Status, [byte[]]$Bytes, [string]$ContentTyp
 function Write-Json($Response, [int]$Status, $Object, [int]$Depth = 8) {
     <#
     .SYNOPSIS
-    Write an object as a JSON response body. -Depth defaults to 8, the value both demo servers used.
+    Write an object as a JSON response body. -Depth defaults to 8, the depth both demo servers rely on.
     #>
     $Response.Headers['Cache-Control'] = 'no-store'
     $bytes = [Text.Encoding]::UTF8.GetBytes((ConvertTo-Json -InputObject $Object -Depth $Depth))

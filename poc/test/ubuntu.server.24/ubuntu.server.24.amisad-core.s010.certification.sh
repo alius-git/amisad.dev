@@ -32,12 +32,12 @@ fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
 # --- REGION: https://yuruna.link/network#defining-the-guest-to-guest-rail
 # --- REGION: a failed service call must name the service and what it answered
-# `amisad_curl` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
+# `curl -sf` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
 # pipe that is invisible: the parser downstream reads empty stdin and reports a
 # syntax error at line 1, so a service that never answered is diagnosed as
 # malformed data -- the run then ends on a traceback naming neither the URL nor
-# the status. Takes the same arguments as `amisad_curl` and, on success, writes the
-# body to stdout unchanged, so callers pipe exactly as they did before.
+# the status. Takes the same arguments as `curl -sf` and, on success, writes the
+# body to stdout unchanged, so callers can pipe it exactly like `curl -sf`.
 amisad_curl() { # <same args as curl -sf>
     local out status body url='' arg
     for arg in "$@"; do

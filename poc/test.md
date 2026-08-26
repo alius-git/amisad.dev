@@ -1,4 +1,4 @@
-# AmisAd POC — test automation
+# AmisAd POC -- test automation
 
 Full automation from a **clean machine** (no pre-built VMs): build the design
 topology, then run each implemented scenario in order against it. For running
@@ -61,12 +61,12 @@ the demo by hand instead, see [demo.md](demo.md).
      folder;
    - join a pool that runs one -- the service announces itself to the
      pool-aggregator and this host reads the address back (nothing to
-     configure beyond the caching proxy this host already uses);
+     configure beyond the caching-proxy-service this host already uses);
    - state it: `$env:YURUNA_STASH_SERVICE_HOST = '<address>'`, or
      `pwsh test/Initialize-Lab.ps1 -StashServiceHost '<address>'` from this
      repository.
 
-   The pre-flight probes `/healthz` on each candidate before anything long
+   The preflight probes `/healthz` on each candidate before anything long
    starts, publishes the one that answered for the rest of the cycle, and
    **stops the run immediately** when none does -- it never guesses an address.
 

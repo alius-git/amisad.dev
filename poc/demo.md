@@ -1,4 +1,4 @@
-# AmisAd POC — running the demo by hand
+# AmisAd POC -- running the demo by hand
 
 How to get the deployed AmisAd topology ("prebuild", via the Yuruna framework)
 and then drive the demo manually. Full test automation lives in
