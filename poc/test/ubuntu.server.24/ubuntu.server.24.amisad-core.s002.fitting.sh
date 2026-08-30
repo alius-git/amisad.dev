@@ -141,7 +141,8 @@ print('ASSERT shortlist constraint fidelity OK')
 "
 
 echo "== TVP assert 2: zero commitments before the buyer's explicit action =="
-amisad_curl "${SELLER}/v1/orders" | python3 -c "
+RESP=$(amisad_curl "${SELLER}/v1/orders")
+echo "$RESP" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 assert o['count'] == 0, f'commitment exists before booking: {o}'
@@ -160,7 +161,8 @@ echo "booking: ${BOOKING}"
 MATCH_ID=$(echo "$BOOKING" | python3 -c 'import sys,json;print(json.load(sys.stdin)["match_id"])')
 
 echo "== TVP assert 3: consistent, identity-free appointment records =="
-amisad_curl "${SELLER}/v1/orders/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "${SELLER}/v1/orders/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 booking = json.loads('''${BOOKING}''')
 o = json.load(sys.stdin)
@@ -175,7 +177,8 @@ print('ASSERT appointment records OK')
 echo "== Elena: fitting fulfilled, sale closed -> settled with split =="
 amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
 amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
-amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['confirmed'] is True, 'settlement not confirmed'

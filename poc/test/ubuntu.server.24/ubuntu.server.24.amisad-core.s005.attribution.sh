@@ -119,7 +119,8 @@ CAMP=$(amisad_curl -X POST "${ADS}/v1/campaigns" \
 CAMPAIGN_ID=$(echo "$CAMP" | python3 -c 'import sys,json;print(json.load(sys.stdin)["campaign_id"])')
 amisad_curl -X POST "${ADS}/v1/briefs" -d "{\"campaign_id\":\"${CAMPAIGN_ID}\"}"
 # Kai sees the brief in the demand queue, then produces the asset.
-amisad_curl "${ADS}/v1/briefs" | python3 -c "
+RESP=$(amisad_curl "${ADS}/v1/briefs")
+echo "$RESP" | python3 -c "
 import sys, json
 b = json.load(sys.stdin)['briefs']
 assert any(x['campaign_id'] == '${CAMPAIGN_ID}' for x in b), b
@@ -150,7 +151,8 @@ print('ASSERT offer boosted with the creative OK')
 "
 
 echo "== TVP: the creative appears in the environment ingress log =="
-amisad_curl "${SLICE_EP}/v1/ingress" | python3 -c "
+RESP=$(amisad_curl "${SLICE_EP}/v1/ingress")
+echo "$RESP" | python3 -c "
 import sys, json
 entries = json.load(sys.stdin)['entries']
 assert any('summer-hero-01' in e for e in entries), entries
@@ -165,7 +167,8 @@ amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID
 amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
 
 echo "== TVP: settlement includes non-zero agency + creator credit =="
-amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['confirmed'] is True, s
@@ -178,7 +181,8 @@ print('ASSERT agency + creator credit in settlement OK')
 "
 
 echo "== TVP: aggregate dashboards match the ledger; budget decremented by the commitment =="
-amisad_curl "${ADS}/v1/attributions" | python3 -c "
+RESP=$(amisad_curl "${ADS}/v1/attributions")
+echo "$RESP" | python3 -c "
 import sys, json
 a = json.load(sys.stdin)
 assert a['closed_matches'] == 1, a
@@ -187,7 +191,8 @@ attr = a['attributions'][0]
 assert attr['campaign_id'] == '${CAMPAIGN_ID}' and attr['asset_id'] == '${ASSET_ID}', attr
 print('ASSERT aggregate attribution consistent with ledger OK')
 "
-amisad_curl "${ADS}/v1/campaigns/${CAMPAIGN_ID}" | python3 -c "
+RESP=$(amisad_curl "${ADS}/v1/campaigns/${CAMPAIGN_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
 assert c['spent_cents'] == 2000, c  # per-match commitment, not impressions
@@ -195,7 +200,8 @@ print('ASSERT campaign budget decrement OK')
 "
 
 echo "== TVP: no buyer signal on the campaign side =="
-amisad_curl "${ADS}/v1/attributions" | python3 -c "
+RESP=$(amisad_curl "${ADS}/v1/attributions")
+echo "$RESP" | python3 -c "
 import sys, json
 text = json.dumps(json.load(sys.stdin)).lower()
 for marker in ['maya', 'budget_cents', 'deadline_days', 'summer entertaining', 'envelope']:

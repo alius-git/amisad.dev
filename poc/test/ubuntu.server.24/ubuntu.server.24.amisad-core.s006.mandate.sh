@@ -140,7 +140,8 @@ assert r['status'] == 'committed' and r['via'] == 'delegate', r
 print('ASSERT in-scope under-cap closes on delegate authority OK')
 "
 ATTEST_AFTER_UNDER=$(PSQL "SELECT count(*) FROM ledger.attestation_ledger")
-ORDERS_AFTER_UNDER=$(amisad_curl "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
+RESP=$(amisad_curl "${SELLER}/v1/orders")
+ORDERS_AFTER_UNDER=$(echo "$RESP" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
 
 echo "== TVP: Maya's activity trail carries dual attribution =="
 target/release/buyer-client activity | python3 -c "
@@ -163,7 +164,8 @@ print('ASSERT over-cap held for approval OK')
 "
 HANDLE=$(echo "$HELD" | python3 -c 'import sys,json;print(json.load(sys.stdin)["handle"])')
 # TVP: the over-cap closing does NOT exist before the principal's approval.
-ORDERS_BEFORE_APPROVE=$(amisad_curl "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
+RESP=$(amisad_curl "${SELLER}/v1/orders")
+ORDERS_BEFORE_APPROVE=$(echo "$RESP" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
 if [ "$ORDERS_BEFORE_APPROVE" != "$ORDERS_AFTER_UNDER" ]; then
     echo "over-cap match committed before approval (${ORDERS_AFTER_UNDER} -> ${ORDERS_BEFORE_APPROVE})" >&2
     exit 9
@@ -177,7 +179,8 @@ r = json.load(sys.stdin)
 assert r['status'] == 'committed' and r['via'] == 'approval', r
 print('ASSERT over-cap closes via principal approval OK')
 "
-ORDERS_AFTER_APPROVE=$(amisad_curl "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
+RESP=$(amisad_curl "${SELLER}/v1/orders")
+ORDERS_AFTER_APPROVE=$(echo "$RESP" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
 python3 -c "assert int('${ORDERS_AFTER_APPROVE}') == int('${ORDERS_AFTER_UNDER}') + 1; print('ASSERT approved closing added one order OK')"
 
 echo "== TVP: an out-of-scope need is refused at submission (zero environments) =="
@@ -214,7 +217,8 @@ if [ "$MANDATE_ROWS" != "2" ]; then
     echo "expected 2 mandate consent rows (grant+revoke), got ${MANDATE_ROWS}" >&2
     exit 9
 fi
-amisad_curl "${LEDGER}/v1/verify" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/verify")
+echo "$RESP" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'] and v['consent_ok'], v

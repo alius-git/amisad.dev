@@ -141,7 +141,8 @@ curl -sf -X POST "${LEDGER}/v1/settlements/adjust" -d "{\"match_id\":\"${MATCH_I
 echo "corpus seeded"
 
 echo "== Ingrid runs the certification: all four dimensions, zero violations =="
-amisad_curl -X POST "${AUDIT}/v1/certify" | python3 -c "
+RESP=$(amisad_curl -X POST "${AUDIT}/v1/certify")
+echo "$RESP" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
 for dim in ['attestation','residency','consent','settlement']:
@@ -151,7 +152,8 @@ print('ASSERT four-dimension certification clean OK')
 "
 
 echo "== TVP: a deliberate tamper is detected and localized to the exact record =="
-amisad_curl "${LEDGER}/v1/attestations" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/attestations")
+echo "$RESP" | python3 -c "
 import sys, json
 entries = json.load(sys.stdin)['entries']
 # Modify one record's payload after the fact (index 5 of the corpus).
@@ -161,7 +163,8 @@ print(json.dumps({'entries': entries, 'expected': idx}))
 " > /tmp/tamper.json
 EXPECTED=$(python3 -c "import json;print(json.load(open('/tmp/tamper.json'))['expected'])")
 python3 -c "import json;d=json.load(open('/tmp/tamper.json'));json.dump({'entries':d['entries']},open('/tmp/tamper-body.json','w'))"
-amisad_curl -X POST "${AUDIT}/v1/certify/tamper" --data-binary @/tmp/tamper-body.json | python3 -c "
+RESP=$(amisad_curl -X POST "${AUDIT}/v1/certify/tamper" --data-binary @/tmp/tamper-body.json)
+echo "$RESP" | python3 -c "
 import sys, json
 r = json.load(sys.stdin)
 assert r['detected'] is True, r
@@ -175,7 +178,8 @@ amisad_curl -X POST "${PLATFORM}/v1/incidents" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["case_id"];print("ASSERT findings delivered to the platform OK")'
 
 echo "== TVP: the auditor only ever READ - no writes, no personal data =="
-amisad_curl "${AUDIT}/v1/access-log" | python3 -c "
+RESP=$(amisad_curl "${AUDIT}/v1/access-log")
+echo "$RESP" | python3 -c "
 import sys, json
 a = json.load(sys.stdin)['access']
 assert len(a) >= 3, a

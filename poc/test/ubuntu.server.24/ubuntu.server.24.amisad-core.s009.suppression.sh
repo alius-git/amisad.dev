@@ -68,7 +68,8 @@ for _ in $(seq 1 2); do
 done
 
 echo "== Dana's workbench: high-volume region visible, below-threshold SUPPRESSED =="
-amisad_curl "${INSIGHTS}/v1/workbench" | python3 -c "
+RESP=$(amisad_curl "${INSIGHTS}/v1/workbench")
+echo "$RESP" | python3 -c "
 import sys, json
 w = json.load(sys.stdin)
 assert w['threshold'] == 5, w
@@ -79,7 +80,8 @@ print('ASSERT below-threshold region suppressed from the workbench OK')
 "
 
 echo "== Dana publishes a versioned outlook =="
-amisad_curl -X POST "${INSIGHTS}/v1/outlooks" -d '{"version":"2026-Q3"}' | python3 -c "
+RESP=$(amisad_curl -X POST "${INSIGHTS}/v1/outlooks" -d '{"version":"2026-Q3"}')
+echo "$RESP" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 regions = {a['region'] for a in o['aggregates']}
@@ -102,7 +104,8 @@ print('ASSERT seller view == ads view == published outlook OK')
 "
 
 echo "== unmet-demand flags the seeded gap, category+region only =="
-amisad_curl "${INSIGHTS}/v1/unmet-demand" | python3 -c "
+RESP=$(amisad_curl "${INSIGHTS}/v1/unmet-demand")
+echo "$RESP" | python3 -c "
 import sys, json
 u = json.load(sys.stdin)['unmet']
 flags = {(f['category'], f['region']) for f in u}

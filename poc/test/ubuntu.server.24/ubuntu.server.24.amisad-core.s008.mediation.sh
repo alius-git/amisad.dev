@@ -123,7 +123,8 @@ CASE=$(amisad_curl -X POST "${PLATFORM}/v1/support/cases" \
     -d "{\"match_id\":\"${MATCH_ID}\",\"metadata\":{\"order_state\":\"settled\",\"carrier_confirmation\":\"delivered\",\"value_cents\":11000}}")
 CASE_ID=$(echo "$CASE" | python3 -c 'import sys,json;print(json.load(sys.stdin)["case_id"])')
 echo "support case: ${CASE_ID}"
-amisad_curl "${PLATFORM}/v1/support/cases/${CASE_ID}" | python3 -c "
+RESP=$(amisad_curl "${PLATFORM}/v1/support/cases/${CASE_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
 text = json.dumps(c).lower()
@@ -144,7 +145,8 @@ print('ASSERT disclosure granted, scoped to the case OK')
 "
 
 echo "== Sam receives exactly the granted artifact, read-only =="
-amisad_curl "${PLATFORM}/v1/support/cases/${CASE_ID}/disclosure" | python3 -c "
+RESP=$(amisad_curl "${PLATFORM}/v1/support/cases/${CASE_ID}/disclosure")
+echo "$RESP" | python3 -c "
 import sys, json
 a = json.load(sys.stdin)
 assert a['artifact'] == 'delivery-photo-ref-77', a
@@ -165,7 +167,8 @@ print('ASSERT disclosure grant scoped + time-boxed on the consent ledger OK')
 echo "== refund posts as compensating entries; original history untouched =="
 amisad_curl -X POST "${LEDGER}/v1/settlements/adjust" -d "{\"match_id\":\"${MATCH_ID}\",\"case_id\":\"${CASE_ID}\"}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["adjustment_entries"]==4;print("ASSERT compensating entries posted OK")'
-amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 entries = s['entries']
@@ -195,7 +198,8 @@ fi
 echo "ASSERT post-expiry access fails OK"
 
 echo "== TVP: all three chains verify (nothing edited) =="
-amisad_curl "${LEDGER}/v1/verify" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/verify")
+echo "$RESP" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'] and v['consent_ok'], v

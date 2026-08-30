@@ -111,7 +111,8 @@ echo "== Alex registers + certifies a connector (sandbox only) =="
 PARTNER=$(amisad_curl -X POST "${CONNECT}/v1/partners" -d '{"name":"alex-erp-connector"}')
 PARTNER_ID=$(echo "$PARTNER" | python3 -c 'import sys,json;print(json.load(sys.stdin)["partner_id"])')
 echo "$PARTNER" | python3 -c 'import sys,json;assert json.load(sys.stdin)["access"]=="sandbox";print("ASSERT sandbox access only OK")'
-amisad_curl -X POST "${CONNECT}/v1/partners/certify" -d "{\"partner_id\":\"${PARTNER_ID}\"}" | python3 -c 'import sys,json;assert json.load(sys.stdin)["certified"] is True;print("ASSERT connector certified OK")'
+RESP=$(amisad_curl -X POST "${CONNECT}/v1/partners/certify" -d "{\"partner_id\":\"${PARTNER_ID}\"}")
+echo "$RESP" | python3 -c 'import sys,json;assert json.load(sys.stdin)["certified"] is True;print("ASSERT connector certified OK")'
 
 echo "== Elena grants scoped access (catalog, inventory, orders) =="
 GRANT=$(amisad_curl -X POST "${CONNECT}/v1/grants" \
@@ -126,7 +127,8 @@ amisad_curl -X POST "${CONNECT}/v1/sync/catalog" -d "{\"credential\":\"${CRED}\"
   {\"offer_id\":\"erp-lamp-01\",\"tenant\":\"elena-atelier\",\"title\":\"ERP table lamp\",\"category\":\"housewares\",\"region\":\"region-a\",\"price_cents\":8000,\"deliver_by_days\":5,\"auto_close\":true},
   {\"offer_id\":\"erp-clock-02\",\"tenant\":\"elena-atelier\",\"title\":\"ERP wall clock\",\"category\":\"housewares\",\"region\":\"region-a\",\"price_cents\":9000,\"deliver_by_days\":5,\"auto_close\":true}
 ]}" | python3 -c 'import sys,json;assert json.load(sys.stdin)["synced"]==2;print("ASSERT catalog synced OK")'
-amisad_curl "${SELLER}/v1/offers/region/region-a" | python3 -c "
+RESP=$(amisad_curl "${SELLER}/v1/offers/region/region-a")
+echo "$RESP" | python3 -c "
 import sys, json
 ids = {o['offer_id'] for o in json.load(sys.stdin)['offers']}
 assert {'erp-lamp-01','erp-clock-02'} <= ids, ids
@@ -138,7 +140,8 @@ DELTA_TS=$(date +%s)
 amisad_curl -X POST "${CONNECT}/v1/sync/inventory" \
     -d "{\"credential\":\"${CRED}\",\"offer_id\":\"erp-lamp-01\",\"stock\":0,\"delta_ts\":${DELTA_TS}}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["stock"]==0;print("ASSERT inventory delta applied OK")'
-amisad_curl "${SELLER}/v1/offers/region/region-a" | python3 -c "
+RESP=$(amisad_curl "${SELLER}/v1/offers/region/region-a")
+echo "$RESP" | python3 -c "
 import sys, json
 ids = {o['offer_id'] for o in json.load(sys.stdin)['offers']}
 assert 'erp-lamp-01' not in ids, ids  # zeroed -> not matchable
@@ -157,7 +160,8 @@ print('ASSERT match went to the in-stock alternative OK')
 "
 # The delta zeroed erp-lamp-01 before the match; assert the delta is recorded
 # with its timestamp and the match did not reference the zeroed item.
-amisad_curl "${CONNECT}/v1/deltas" | python3 -c "
+RESP=$(amisad_curl "${CONNECT}/v1/deltas")
+echo "$RESP" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)['deltas']
 zeroed = [x for x in d if x['offer_id'] == 'erp-lamp-01' and x['stock'] == 0]
@@ -175,7 +179,8 @@ for _ in $(seq 1 15); do
     if [ "$ERP" = "settled" ]; then break; fi
     sleep 2
 done
-SELLER_STATE=$(amisad_curl "${SELLER}/v1/orders/match/${MATCH_ID}" | python3 -c 'import sys,json;print(json.load(sys.stdin)["state"])')
+RESP=$(amisad_curl "${SELLER}/v1/orders/match/${MATCH_ID}")
+SELLER_STATE=$(echo "$RESP" | python3 -c 'import sys,json;print(json.load(sys.stdin)["state"])')
 if [ "$ERP" != "settled" ] || [ "$SELLER_STATE" != "settled" ]; then
     echo "ERP mirror ($ERP) and seller ($SELLER_STATE) not both settled" >&2
     exit 9
@@ -193,7 +198,8 @@ if grep -q '"ok"' /tmp/oos.out; then
     echo "out-of-scope call returned data" >&2
     exit 9
 fi
-amisad_curl "${CONNECT}/v1/audit" | python3 -c "
+RESP=$(amisad_curl "${CONNECT}/v1/audit")
+echo "$RESP" | python3 -c "
 import sys, json
 a = json.load(sys.stdin)['audit']
 assert any(e['scope'] == 'settlement' and e['event'] == 'out-of-scope' for e in a), a
@@ -214,7 +220,8 @@ if [ "$REVOKED_CODE" != "401" ]; then
     exit 9
 fi
 # The catalog remains intact and hand-editable (the clock is still there).
-amisad_curl "${SELLER}/v1/offers/region/region-a" | python3 -c "
+RESP=$(amisad_curl "${SELLER}/v1/offers/region/region-a")
+echo "$RESP" | python3 -c "
 import sys, json
 ids = {o['offer_id'] for o in json.load(sys.stdin)['offers']}
 assert 'erp-clock-02' in ids, ids
@@ -223,7 +230,8 @@ print('ASSERT credentials die on revoke; catalog intact OK')
 
 echo "== TVP: no buyer identity or need content on the integration surface =="
 for ep in audit deltas; do
-    amisad_curl "${CONNECT}/v1/${ep}" | python3 -c "
+    RESP=$(amisad_curl "${CONNECT}/v1/${ep}")
+    echo "$RESP" | python3 -c "
 import sys, json
 text = json.dumps(json.load(sys.stdin)).lower()
 for marker in ['maya', 'wedding gift', 'budget_cents', 'deadline_days', 'envelope']:

@@ -137,7 +137,8 @@ amisad_curl -X POST "http://${NODE_IP}:30083/v1/orders/advance" \
 target/release/buyer-client wait "$HANDLE"
 
 echo "== TVP assert 1: settlement splits sum to match value =="
-amisad_curl "http://${NODE_IP}:30081/v1/settlements/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "http://${NODE_IP}:30081/v1/settlements/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['confirmed'] is True, 'settlement not confirmed'
@@ -148,7 +149,8 @@ print('ASSERT settlement OK')
 "
 
 echo "== TVP assert 2: buyer Delivered + seller Settled, one match ID =="
-amisad_curl "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 assert o['state'] == 'settled', o['state']
@@ -156,7 +158,8 @@ assert o['match_id'] == '${MATCH_ID}'
 assert 'buyer' not in json.dumps(o).lower(), 'seller order leaked buyer field'
 print('ASSERT seller order OK')
 "
-amisad_curl "http://${NODE_IP}:30080/v1/orders/${HANDLE}" | python3 -c "
+RESP=$(amisad_curl "http://${NODE_IP}:30080/v1/orders/${HANDLE}")
+echo "$RESP" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['status'] == 'delivered', s
@@ -164,7 +167,8 @@ print('ASSERT buyer status OK')
 "
 
 echo "== TVP assert 3: attestation chain complete for the environment =="
-amisad_curl "http://${NODE_IP}:30081/v1/attestations/env/${ENV_ID}" | python3 -c "
+RESP=$(amisad_curl "http://${NODE_IP}:30081/v1/attestations/env/${ENV_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 a = json.load(sys.stdin)
 states = [e['lifecycle'] for e in a['entries']]
@@ -172,7 +176,8 @@ for want in ['created', 'attested', 'executed', 'destroyed']:
     assert want in states, f'missing {want} in {states}'
 print('ASSERT attestation lifecycle OK')
 "
-amisad_curl "http://${NODE_IP}:30081/v1/verify" | python3 -c "
+RESP=$(amisad_curl "http://${NODE_IP}:30081/v1/verify")
+echo "$RESP" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'], v
@@ -180,7 +185,8 @@ print('ASSERT hash chains OK')
 "
 
 echo "== TVP assert 4: zero need/identity egress from the environment =="
-amisad_curl "${SLICE_EP}/v1/egress" | python3 -c "
+RESP=$(amisad_curl "${SLICE_EP}/v1/egress")
+echo "$RESP" | python3 -c "
 import sys, json
 text = json.dumps(json.load(sys.stdin)).lower()
 for marker in ['maya', 'token', 'budget_cents', 'deadline_days', 'subscriber']:
@@ -209,14 +215,16 @@ for _ in $(seq 1 60); do
 done
 curl -sf "http://${NODE_IP}:30081/health" >/dev/null || { echo "ledger-svc never came back after restart" >&2; exit 8; }
 curl -sf "http://${NODE_IP}:30083/health" >/dev/null || { echo "seller-svc never came back after restart" >&2; exit 8; }
-amisad_curl "${LEDGER}/v1/verify" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/verify")
+echo "$RESP" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'], v
 assert v['settlement_len'] >= 4 and v['attestation_len'] >= 4, v
 print('ASSERT ledgers reloaded after restart OK')
 "
-amisad_curl "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "http://${NODE_IP}:30083/v1/orders/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 assert o['state'] == 'settled', o

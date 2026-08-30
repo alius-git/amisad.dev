@@ -122,13 +122,15 @@ amisad_curl -X POST "${RESOURCE}/v1/policies" \
     -d '{"jurisdiction":"region-a","regions":["region-a"]}'
 
 echo "== TVP pre-assert: default placement is capacity-greedy; only the policy pins region-a =="
-amisad_curl -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-unrestricted"}' | python3 -c "
+RESP=$(amisad_curl -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-unrestricted"}')
+echo "$RESP" | python3 -c "
 import sys, json
 p = json.load(sys.stdin)
 assert p['region'] == 'region-b', p  # roomier region wins without a policy
 print('ASSERT capacity-greedy default picks region-b OK')
 "
-amisad_curl -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-a"}' | python3 -c "
+RESP=$(amisad_curl -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-a"}')
+echo "$RESP" | python3 -c "
 import sys, json
 p = json.load(sys.stdin)
 assert p['region'] == 'region-a', p  # sovereignty excludes the roomier region
@@ -140,7 +142,8 @@ amisad_curl -X POST "${SELLER}/v1/offers" \
     -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
 
 echo "== harness: arm TWO consecutive isolation faults on the compliant slice =="
-amisad_curl -X POST "${SLICE_A}/v1/faults" -d '{"mode":"isolation","count":2}' | python3 -c "
+RESP=$(amisad_curl -X POST "${SLICE_A}/v1/faults" -d '{"mode":"isolation","count":2}')
+echo "$RESP" | python3 -c "
 import sys, json
 assert json.load(sys.stdin)['armed'] == 2
 print('ASSERT faults armed OK')
@@ -168,7 +171,8 @@ print('ASSERT two isolation incidents queued OK')
 
 echo "== TVP: aborted lifecycles read created-attested-aborted-destroyed, no egress =="
 for env in "$ENV_ABORT_1" "$ENV_ABORT_2"; do
-    amisad_curl "${LEDGER}/v1/attestations/env/${env}" | python3 -c "
+    RESP=$(amisad_curl "${LEDGER}/v1/attestations/env/${env}")
+    echo "$RESP" | python3 -c "
 import sys, json
 entries = json.load(sys.stdin)['entries']
 states = [e['lifecycle'] for e in entries]
@@ -181,7 +185,8 @@ for marker in ['maya', 'budget_cents', 'deadline_days', 'context', 'envelope', '
 print('ASSERT aborted lifecycle + zero egress OK')
 "
 done
-amisad_curl "${LEDGER}/v1/attestations/env/${ENV_OK}" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/attestations/env/${ENV_OK}")
+echo "$RESP" | python3 -c "
 import sys, json
 states = [e['lifecycle'] for e in json.load(sys.stdin)['entries']]
 assert states == ['created', 'attested', 'executed', 'destroyed'], states
@@ -189,7 +194,8 @@ print('ASSERT completed lifecycle OK')
 "
 
 echo "== TVP: zero out-of-region attestation entries =="
-amisad_curl "${LEDGER}/v1/attestations" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/attestations")
+echo "$RESP" | python3 -c "
 import sys, json
 entries = json.load(sys.stdin)['entries']
 assert len(entries) == 12, len(entries)  # 3 environments x 4 lifecycle events
@@ -201,14 +207,16 @@ print('ASSERT every allocation stayed in the compliant region OK')
 echo "== the completed match settles; hosting revenue for it ONLY =="
 amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
 amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
-amisad_curl "${LEDGER}/v1/verify" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/verify")
+echo "$RESP" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'], v
 assert v['settlement_len'] == 4, v  # exactly one settled match (4 splits)
 print('ASSERT exactly one settlement OK')
 "
-amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['confirmed'] is True and s['total_cents'] == s['value_cents'] == 11000, s
@@ -221,7 +229,8 @@ echo "== Tom escalates to Priya: cross-party case links both aborted lifecycles 
 CASE_ID=$(amisad_curl -X POST "${PLATFORM}/v1/incidents" \
     -d "{\"summary\":\"systemic isolation faults in region-a\",\"from\":\"resource-ops\",\"environment_ids\":[\"${ENV_ABORT_1}\",\"${ENV_ABORT_2}\"]}" \
     | python3 -c 'import sys,json;print(json.load(sys.stdin)["case_id"])')
-amisad_curl "${PLATFORM}/v1/incidents/${CASE_ID}" | python3 -c "
+RESP=$(amisad_curl "${PLATFORM}/v1/incidents/${CASE_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 case = json.load(sys.stdin)
 ids = case['environment_ids']

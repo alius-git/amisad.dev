@@ -130,7 +130,8 @@ echo "$DRESS" | python3 -c 'import sys,json;assert json.load(sys.stdin)["status"
 target/release/buyer-client open decanter | python3 -c 'import sys,json;assert json.load(sys.stdin)["status"]=="open";print("ASSERT decanter need open OK")'
 
 echo "== baseline aggregation: both open needs contribute =="
-amisad_curl -X POST "${INSIGHTS}/v1/aggregation/cycle" | python3 -c "
+RESP=$(amisad_curl -X POST "${INSIGHTS}/v1/aggregation/cycle")
+echo "$RESP" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
 assert c['contributions'] == 2, c
@@ -146,13 +147,15 @@ echo "== silence: a perfectly fitting offer appears - and NOTHING happens =="
 amisad_curl -X POST "${SELLER}/v1/offers" \
     -d '{"offer_id":"linen-wrap-09","tenant":"brisa-outlet","title":"Linen wrap dress","category":"dresses","region":"region-a","price_cents":13000,"deliver_by_days":2,"auto_close":true,"attributes":["midi","sleeves","warm-fabric"]}'
 sleep 5   # the offer-published event is asynchronous; give the cycle time to (not) act
-amisad_curl "${COORDINATOR_URL}/v1/notifications/${DRESS_HANDLE}" | python3 -c "
+RESP=$(amisad_curl "${COORDINATOR_URL}/v1/notifications/${DRESS_HANDLE}")
+echo "$RESP" | python3 -c "
 import sys, json
 n = json.load(sys.stdin)['notifications']
 assert n == [], f'paused buyer was notified: {n}'
 print('ASSERT zero notifications while paused OK')
 "
-amisad_curl "${SELLER}/v1/orders" | python3 -c "
+RESP=$(amisad_curl "${SELLER}/v1/orders")
+echo "$RESP" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 assert o['count'] == 1, o
@@ -162,7 +165,8 @@ print('ASSERT no new order while paused OK')
 echo "== even an explicit cycle is a no-op at the consent gate =="
 # Poke the cycle endpoint directly: this proves a cycle DEFINITELY ran while
 # paused and matched nothing - independent of the seller's async event.
-amisad_curl -X POST "${COORDINATOR_URL}/v1/offers/published" | python3 -c "
+RESP=$(amisad_curl -X POST "${COORDINATOR_URL}/v1/offers/published")
+echo "$RESP" | python3 -c "
 import sys, json
 r = json.load(sys.stdin)
 assert r['rematched'] == 0, r
@@ -180,7 +184,8 @@ echo "ASSERT refusal while paused OK"
 echo "== the in-flight order proceeds: pre-revocation commitments are honored =="
 amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
 amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
-amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
 import sys, json
 s = json.load(sys.stdin)
 assert s['confirmed'] is True, 'settlement not confirmed'
@@ -190,7 +195,8 @@ print('ASSERT in-flight order settled normally OK')
 
 echo "== Maya withdraws entirely: aggregation loses her contribution =="
 target/release/buyer-client withdraw
-amisad_curl -X POST "${INSIGHTS}/v1/aggregation/cycle" | python3 -c "
+RESP=$(amisad_curl -X POST "${INSIGHTS}/v1/aggregation/cycle")
+echo "$RESP" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
 assert c['contributions'] == 0, c
@@ -213,13 +219,15 @@ r = json.load(sys.stdin)
 assert r['rematched'] == 1, r
 print('ASSERT resumption rematched the dress need OK')
 "
-amisad_curl "${COORDINATOR_URL}/v1/notifications/${DRESS_HANDLE}" | python3 -c "
+RESP=$(amisad_curl "${COORDINATOR_URL}/v1/notifications/${DRESS_HANDLE}")
+echo "$RESP" | python3 -c "
 import sys, json
 n = [e['kind'] for e in json.load(sys.stdin)['notifications']]
 assert n == ['match'], n
 print('ASSERT match notification after resume OK')
 "
-amisad_curl "${SELLER}/v1/orders" | python3 -c "
+RESP=$(amisad_curl "${SELLER}/v1/orders")
+echo "$RESP" | python3 -c "
 import sys, json
 o = json.load(sys.stdin)
 assert o['count'] == 2, o
@@ -227,7 +235,8 @@ dress = [x for x in o['orders'] if x['offer_id'] == 'linen-wrap-09']
 assert len(dress) == 1 and dress[0]['state'] == 'committed', o
 print('ASSERT dress order committed after resume OK')
 "
-amisad_curl -X POST "${INSIGHTS}/v1/aggregation/cycle" | python3 -c "
+RESP=$(amisad_curl -X POST "${INSIGHTS}/v1/aggregation/cycle")
+echo "$RESP" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
 assert c['contributions'] == 1, c
@@ -253,7 +262,8 @@ echo "== event path proved end to end: a fitting offer now matches on its own ==
 amisad_curl -X POST "${SELLER}/v1/offers" \
     -d '{"offer_id":"crystal-decanter-10","tenant":"elena-atelier","title":"Crystal decanter","category":"housewares","region":"region-a","price_cents":8500,"deliver_by_days":7,"auto_close":true}'
 for _ in $(seq 1 15); do
-    COUNT=$(amisad_curl "${SELLER}/v1/orders" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
+    RESP=$(amisad_curl "${SELLER}/v1/orders")
+    COUNT=$(echo "$RESP" | python3 -c 'import sys,json;print(json.load(sys.stdin)["count"])')
     if [ "$COUNT" = "3" ]; then break; fi
     sleep 2
 done
@@ -278,7 +288,8 @@ assert history == [
 assert 'maya' not in json.dumps(c).lower(), 'consent history leaked identity'
 print('ASSERT consent history grant-revoke-regrant OK')
 "
-amisad_curl "${LEDGER}/v1/verify" | python3 -c "
+RESP=$(amisad_curl "${LEDGER}/v1/verify")
+echo "$RESP" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'] and v['consent_ok'], v
