@@ -105,5 +105,3 @@ CREATE TABLE IF NOT EXISTS seller.orders (
     created_at   timestamptz NOT NULL DEFAULT now(),
     updated_at   timestamptz NOT NULL DEFAULT now()
 );
-
--- TODO: remaining per-service tables land with their scenarios (see db/seed/*.sql).
