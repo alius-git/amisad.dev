@@ -9,7 +9,7 @@ Versions track the framework release the material was last exercised against,
 not an independent release line -- the POC is only meaningful paired with a
 framework that can deploy it.
 
-## 2026.09.01
+## 2026.09.04
 
 - Shared HTTP helpers moved out of the two demo servers into
   `poc/demo/AmisAd.DemoHost.psm1`, which both already imported.
@@ -27,6 +27,6 @@ LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2019-2026 by Alisson Sol et al.
 
-Last review: 2026.09.01
+Last review: 2026.09.04
 
 Back to [Yuruna](https://yuruna.com)
