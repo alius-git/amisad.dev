@@ -60,9 +60,14 @@ POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
 
 echo "== stash reachability (fail fast, before the ~20-min build) =="
-# HTTP :80 reachability is a proxy for scp :22 reachability (same host). The
-# stash is on the bridged LAN; if this guest (NAT) cannot reach it, stop now
-# instead of building and then failing at the scp upload.
+# What this establishes: the address is populated and the host answers on the
+# bridged LAN from this guest's NAT. That is the failure worth catching before
+# a ~20-minute build -- a wrong or unroutable address costs the whole build.
+# What it does NOT establish: /healthz is served by the HTTP listener alone and
+# says nothing about sshd on :22, the share the drop lands on, or the metadata
+# index that records it. A few-byte GET is also nowhere near a multi-megabyte
+# transfer. A green probe here still leaves the upload able to fail, which is
+# why the upload carries its own retry rather than trusting this result.
 # No default address: the caller supplies one it already verified, and guessing
 # here would send a build's binaries at whatever answers on someone's network.
 if [ -z "${STASH_HOST:-}" ]; then
@@ -117,10 +122,48 @@ echo "== upload binaries to the stash service =="
 # The stash records the upload (username=amisad-poc, filename=amisad-<arch>-binaries.tgz)
 # for later investigation; amisad-core locates it by that label. scp only (the
 # stash SSH server accepts the drop); no key needed - it is a write-only sink.
-# STASH_HOST was required and proven reachable by the pre-flight above.
-scp -O -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-    -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 \
-    "$TARBALL" "amisad-poc@${STASH_HOST}:/amisad/amisad-${ARCH}-binaries.tgz"
+# STASH_HOST was reachable at the pre-flight above, which is weaker than it
+# sounds: that was an HTTP GET, not this transfer.
+#
+# Bounded retry, in the shape amisad_host_fetch above already uses. Every way
+# this drop can fail reaches the client as scp's generic "lost connection" --
+# the server closes the channel without stating a reason, so a transport drop
+# and a server-side refusal of the upload are indistinguishable from here.
+# A retry is the right answer to both: it gets a fresh connection, and the
+# server allocates a fresh identifier for the new session. Bounded at three so
+# a sink that is genuinely gone still fails the step instead of looping.
+#
+# scp's stderr is captured per attempt and replayed under the attempt label
+# because the cycle transcript interleaves several guests: a bare
+# "lost connection" in that stream cannot be traced to the attempt that
+# emitted it, and a silent retry reads as a hang.
+SCP_LOG=/tmp/scp-upload.log
+SCP_ATTEMPTS=3
+SCP_BACKOFF=5
+SCP_TRY=1
+SCP_RC=0
+while [ "$SCP_TRY" -le "$SCP_ATTEMPTS" ]; do
+    echo "scp upload attempt ${SCP_TRY}/${SCP_ATTEMPTS}: ${TARBALL} -> amisad-poc@${STASH_HOST}"
+    SCP_RC=0
+    scp -O -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+        -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20 \
+        "$TARBALL" "amisad-poc@${STASH_HOST}:/amisad/amisad-${ARCH}-binaries.tgz" \
+        2>"$SCP_LOG" || SCP_RC=$?
+    if [ "$SCP_RC" -eq 0 ]; then
+        break
+    fi
+    echo "scp upload attempt ${SCP_TRY}/${SCP_ATTEMPTS} failed (rc=${SCP_RC}); scp reported:" >&2
+    sed 's/^/    /' "$SCP_LOG" >&2
+    if [ "$SCP_TRY" -lt "$SCP_ATTEMPTS" ]; then
+        echo "scp upload: retrying in ${SCP_BACKOFF}s" >&2
+        sleep "$SCP_BACKOFF"
+    fi
+    SCP_TRY=$((SCP_TRY + 1))
+done
+if [ "$SCP_RC" -ne 0 ]; then
+    echo "scp upload failed after ${SCP_ATTEMPTS} attempts; the binaries never reached stash ${STASH_HOST} and amisad-core has nothing to deploy." >&2
+    exit 6
+fi
 echo "uploaded amisad-${ARCH}-binaries.tgz to stash ${STASH_HOST} (label amisad-poc)"
 
 echo "amisad-build COMPILE+UPLOAD PASSED"
