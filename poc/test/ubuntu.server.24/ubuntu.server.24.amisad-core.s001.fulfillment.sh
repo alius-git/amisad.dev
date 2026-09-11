@@ -7,7 +7,7 @@
 # Target Verification Point. The ten services are already deployed (amisad-core
 # snapshot); the prebuilt binaries are on disk from the deploy step.
 # EDGE_HOST (optional override): ssh target for slice-runtime; unset -> resolve
-# amisad-edge-a; unresolvable -> single-VM degraded fallback on this VM.
+# amisad-edge-a; unresolved requires AMISAD_ALLOW_SINGLE_VM=1 for local execution.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"

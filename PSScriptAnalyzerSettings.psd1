@@ -24,7 +24,7 @@
     # discovered by path and cannot include another across repositories.
     #
     # Auto-discovered by `Invoke-ScriptAnalyzer -Path . -Recurse`
-    # (see CONTRIBUTING.md). Findings of every severity are reported:
+    # (see ../yuruna/CONTRIBUTING.md). Findings of every severity are reported:
     # Information-severity results (missing comment help, undeclared
     # output types, positional-parameter calls) are NOT filtered out, so
     # they surface alongside Errors and Warnings.

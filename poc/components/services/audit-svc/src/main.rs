@@ -107,7 +107,6 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(r) => return r,
             };
 
-            // Attestation: chain integrity + complete lifecycles.
             let attestation_v = chain_violations(&attest) + lifecycle_violations(&attest);
             // Residency: every environment attests a region satisfying its
             // jurisdiction (POC: region present and equal to jurisdiction).

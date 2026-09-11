@@ -116,7 +116,6 @@ hypervisor as the invoking user, so they need no elevation; the driver asserts
 whichever applies to the detected host before it touches a VM):
 
 ```powershell
-pwsh poc/build/serve-local.ps1         # lab mode: publish HEAD to the status service
 pwsh poc/build/run-tests.ps1 -NoConfigGate
 ```
 
@@ -135,17 +134,14 @@ is painting. For unattended runs, opt into the framework's virtual display once
 (`[Environment]::SetEnvironmentVariable('YURUNA_VIRTUAL_DISPLAY','1','User')`);
 otherwise keep an active console/RDP session on the host during provisioning.
 
-**Repo delivery.** In lab iteration mode (current), guests fetch the repo as a
-tarball of `amisad.dev` HEAD from the host status service -- rerun
-`poc\build\serve-local.ps1` after every commit. The guest scripts pull
-`/yuruna-project-archive.tar.gz`, the framework's project-tarball endpoint: a
-fresh tar of `<RepoRoot>/project` with the project tree (`poc/`, `test/`, ...)
-at the top level, exactly what their extract step expects. Not
-`/yuruna-repo/project-poc.tar.gz` -- `/yuruna-repo/*` serves the working tree
-file-by-file and no such file exists, so that path 404s, `wget` exits 8, and
-the scripts' `set -euo pipefail` aborts the run before anything is built or
-deployed. The production path (kept for later) git-clones with the vault PAT
-in a `sensitive: true` step.
+**Repo delivery.** Guests fetch `/yuruna-project-archive.tar.gz` from the host
+status service. It archives HEAD of the framework's `<RepoRoot>/project` clone,
+with `poc/`, `test/`, and the rest of the project at the archive root. The
+runner populates that clone from `repositories.projectUrl`; uncommitted edits
+are excluded. Both the [compile script](test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh)
+and the [deploy script](test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh)
+use this endpoint. The production path (kept for later) git-clones with the
+vault PAT in a `sensitive: true` step.
 
 **Durable stores.** The db step provisions the `amisad` database with the app
 role `amisad` (fixed lab password `amisadpoc2026` -- it rides inside a URL, so
@@ -163,6 +159,15 @@ s008 the compensating adjustment entries + disclosure grant; s010 the
 independent four-dimension certification and tamper localization. An empty
 `databaseUrl` (the chart default) keeps a service in-memory -- how `cargo test`
 and skeleton services run.
+
+## Project archive helper
+
+[build/serve-local.ps1](build/serve-local.ps1) publishes this checkout's committed
+HEAD to `<yuruna-root>/project-poc.tar.gz`, served at
+`/yuruna-repo/project-poc.tar.gz`. Republish after a commit when using this
+manual archive; it excludes uncommitted changes. The active guest scripts use
+the project-archive endpoint described above, so normal test and demo runs
+do not need this helper.
 
 ## Snapshot page-cache flush
 

@@ -14,10 +14,7 @@
 .PRIVATEDATA
 #>
 
-# Lab helper: publish the committed amisad.dev tree to the Yuruna status
-# server as /yuruna-repo/project-poc.tar.gz (the guest fetches it in lab
-# iteration mode - see the s001.fulfillment sequence header). Run after every
-# commit; serves HEAD, so uncommitted changes never reach the guest.
+# Publish a manual HEAD archive; see ../test.md#project-archive-helper.
 #
 # .PARAMETER YurunaRoot
 #   Yuruna framework checkout to publish into. Optional -- see

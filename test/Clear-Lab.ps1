@@ -104,7 +104,6 @@ if (-not $env:YURUNA_CYCLE_CONTEXT) {
     }
 }
 
-# --- 3) Close lab consoles ---------------------------------------------------
 Stop-LabConsole -HostType $HostType
 
 # --- 4) Remove every lab VM, then the orphaned files it left behind ---------

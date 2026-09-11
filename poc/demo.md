@@ -11,7 +11,6 @@ With the [one-time setup](test.md#one-time-setup) done, run the automation once
 from `pwsh` (**elevated** on a Hyper-V host -- see [test.md](test.md#run)):
 
 ```powershell
-pwsh poc/build/serve-local.ps1
 pwsh poc/build/run-tests.ps1 -NoConfigGate
 ```
 

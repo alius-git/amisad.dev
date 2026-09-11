@@ -375,8 +375,7 @@ function Get-PersonaSecret {
     unqualified variable lookup walks the caller's scope chain, so the
     server's -YurunaRoot parameter is visible here without being passed;
     the cache below is $script:-scoped and therefore lives in this module
-    rather than the caller, which is the same once-per-process lifetime it
-    had when both servers declared their own copy.
+    rather than the caller, giving it a once-per-process lifetime.
     #>
     if ($null -ne $script:personaCache) { return $script:personaCache }
     $vaultError = ''

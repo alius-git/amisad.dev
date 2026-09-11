@@ -10,7 +10,7 @@ Design: [../plan/design.md](../plan/design.md) - scenarios:
 | Path | Contents |
 |------|----------|
 | `MODULE.bazel`, `.bazelversion`, `BUILD.bazel` | Bazel root (bzlmod, pinned via bazelisk) |
-| `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `run-tests.ps1` (the scenario driver), `serve-local.ps1` (lab-mode guest source, served from HEAD) |
+| `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `run-tests.ps1` (the scenario driver), `serve-local.ps1` (optional manual HEAD archive) |
 | `contracts/` | OpenAPI specs per service -- real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest -- + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
@@ -110,10 +110,10 @@ them:
 - **Logical ephemeral environments.** `slice-runtime` is a persistent edge
   process; each request runs one attested created->attested->executed->destroyed
   environment whose state drops at response time.
-- **Real edge, degraded fallback.** slice-runtime runs on `amisad-edge-a`
-  per the design topology (resolved via its status-server IP report); if the
-  edge is unreachable the scenario falls back to running it on vm-core and
-  says so.
+- **Real edge required by default.** slice-runtime runs on `amisad-edge-a`
+  (resolved from its host name or status-server IP report). An unresolved edge
+  stops the scenario unless `AMISAD_ALLOW_SINGLE_VM=1` explicitly permits
+  running it on vm-core. A resolved but unreachable edge still fails.
 
 ## s002.fitting implementation notes
 
