@@ -26,7 +26,7 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
     exit 2
 fi
 
-# --- REGION: https://yuruna.link/network#why-host-coordinates-are-re-read-per-use
+# --- REGION: https://yuruna.link/4220a755-004d
 amisad_host_fetch() {
     local dest="$1" path="$2" attempt
     for attempt in 1 2; do

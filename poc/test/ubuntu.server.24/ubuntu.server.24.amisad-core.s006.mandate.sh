@@ -26,7 +26,7 @@ if [ -r /etc/yuruna/host.env ]; then
     . /etc/yuruna/host.env
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
-# --- REGION: https://yuruna.link/network#defining-the-guest-to-guest-rail
+# --- REGION: https://yuruna.link/4220a755-0019
 # --- REGION: a failed service call must name the service and what it answered
 # `curl -sf` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
 # pipe that is invisible: the parser downstream reads empty stdin and reports a
@@ -84,7 +84,7 @@ if [ -n "${EDGE_HOST:-}" ]; then
     EDGE_IP=$(ssh "${SSH_OPTS[@]}" "$EDGE_HOST" "hostname -I | awk '{print \$1}'")
     SLICE_EP="http://${EDGE_IP}:8080"
 else
-    # --- REGION: https://yuruna.link/network#why-the-single-vm-fallback-is-gated
+    # --- REGION: https://yuruna.link/4220a755-004e
     if [ "${AMISAD_ALLOW_SINGLE_VM:-0}" != "1" ]; then
         echo "edge unresolved, and AMISAD_ALLOW_SINGLE_VM is not set: refusing to assert a distributed scenario against a single-VM topology." >&2
         exit 4
