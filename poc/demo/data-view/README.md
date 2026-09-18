@@ -63,6 +63,20 @@ host's own browser) always get them, everyone else sees
 remote viewers too -- on a trusted network, since anything that can reach the
 port then gets them.
 
+## How it works
+
+- `serve-data-view.ps1` serves both windows and the deck, answers
+  `/api/personas` (vault via the Yuruna authentication module) and
+  `/api/topology` (VM IPs from the framework's per-hypervisor host driver),
+  and proxies `/api/core/<nodeport>/...` and `/api/edge-a|b/...` to the lab --
+  the POC services send no CORS headers, so the browser goes same-origin
+  through the proxy. It changes nothing on the VMs beyond the API calls the
+  action window makes.
+- `/api/journal` is the synchronization bus: the action window appends step
+  events, every window polls them, so any number of viewers on any machine
+  reconstruct the same timeline. It is in-memory only -- a restart clears it,
+  and clients detect that from a sequence number going backwards.
+
 ## Stage setup
 
 Projector on **`/data`**; laptop or tablet on **`/`** with the deck beside it,
@@ -127,6 +141,10 @@ POST to the lab -- not even the state-reporting ones, because several of those
 write (an aggregation cycle records itself, certification appends to the
 auditor's access log, minting a token accumulates one). A dashboard must not
 change what it observes.
+
+Requests are serialized through one pump: the demo server handles them one at
+a time, and the action window's step POSTs share that same queue. The 1s
+journal poll is the only concurrent request, and it never touches the lab.
 
 Some state is deliberately unreachable, and the demo says so rather than faking
 it: the coordinator's open-need contents and handles (only a consent-gated

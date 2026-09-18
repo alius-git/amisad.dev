@@ -14,18 +14,9 @@
 .PRIVATEDATA
 #>
 
-# AmisAd by-act demo console server (host-side). Serves the scenario-at-a-time
-# mock UI and slide deck, exposes the demo persona passwords from the Yuruna
-# authentication vault, and proxies browser API calls to the amisad-core
-# NodePorts and the edge slice-runtimes (the POC services send no CORS
-# headers, so the browser cannot call them cross-origin; same-origin via this
-# proxy needs none). It changes nothing on the VMs beyond the API calls the
-# operator clicks in the UI, and it requires no change to the deployed
-# topology left live by amisad.end-to-end.yml.
-#
-# Serves the network by default so the console can be driven from a laptop or
-# tablet; the vault passwords on /api/personas stay loopback-only regardless,
-# until -SharePersonaPasswords says otherwise (see Get-PersonaSecret).
+# AmisAd by-act demo console server (host-side): serves the mock UI and slide
+# deck and proxies browser calls to the lab. Full behavior, including the
+# CORS/proxy design and vault password gating: README.md#how-it-works
 param(
     [int]$Port = 8091,
     [string]$YurunaRoot,

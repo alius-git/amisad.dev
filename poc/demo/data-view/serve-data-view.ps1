@@ -14,23 +14,10 @@
 .PRIVATEDATA
 #>
 
-# AmisAd data-view demo server (host-side). Serves two synchronized browser
-# windows - the persona action timeline and the live backend data view - plus
-# the slide deck, and proxies browser API calls to the amisad-core NodePorts
-# and the edge slice-runtimes (the POC services send no CORS headers, so the
-# browser cannot call them cross-origin; same-origin via this proxy needs
-# none). It changes nothing on the VMs beyond the API calls the operator
-# clicks, and requires no change to the deployed topology.
-#
-# The journal (/api/journal) is the synchronization bus: the action window
-# appends step events, every window polls them, so any number of viewers on
-# any machine reconstruct the same timeline. It is in-memory only - a restart
-# clears it, and clients detect that from a sequence number going backwards.
-#
-# Serves the network by default so the lab host can drive a console shown on a
-# projector while the presenter works from a laptop or tablet; the vault
-# passwords on /api/personas stay loopback-only regardless, until
-# -SharePersonaPasswords says otherwise.
+# AmisAd data-view demo server (host-side): serves both synchronized browser
+# windows and the deck, and proxies browser calls to the lab. Full behavior,
+# including the journal sync bus and vault password gating:
+# README.md#how-it-works
 param(
     [int]$Port = 8092,
     [string]$YurunaRoot,

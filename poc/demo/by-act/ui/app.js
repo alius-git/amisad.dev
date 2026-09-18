@@ -1,15 +1,8 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
-// AmisAd demo console. One dropdown switches the persona; each scenario
-// panel lists its steps in demo order with the acting persona on each row --
-// only the selected persona's buttons are live, which is what walks the
-// operator through the switches. Every button is a real API call against the
-// deployed topology, sent through serve-by-act.ps1's same-origin proxy
-// (/api/core/<nodeport>/..., /api/edge-a/...). Request bodies mirror
-// poc/demo.md and buyer-client, with demo- prefixed ids and demo-only
-// categories so the walkthrough is deterministic on top of whatever durable
-// state the amisad.end-to-end.yml run left behind (no snapshot restore
-// needed mid-demo).
+// AmisAd demo console: persona dropdown drives per-scenario step buttons,
+// each a real API call through serve-by-act.ps1's same-origin proxy. Full
+// behavior: ../README.md#how-it-works
 
 "use strict";
 

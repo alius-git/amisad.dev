@@ -1,16 +1,7 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
-// The data window: the live state of the three lab VMs while the scenarios
-// run. Strictly read-only against the lab - it issues GET requests only, never
-// a POST, not even the state-reporting ones, because several of those write
-// (an aggregation cycle records itself, certification appends to the auditor's
-// access log, minting a token accumulates one). A dashboard must not change
-// what it observes.
-//
-// One sequential pump issues a single lab request at a time: the demo server
-// handles requests one by one, and the action window's step POSTs share it.
-// The 1s journal poll is the only concurrent request, and it never touches the
-// lab.
+// The data window: read-only live state of the three lab VMs while the
+// scenarios run. Full behavior: ../README.md#what-the-boxes-can-and-cannot-show
 
 "use strict";
 
