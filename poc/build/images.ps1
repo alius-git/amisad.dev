@@ -49,7 +49,10 @@ try {
     $tag = "$Registry/amisad/slice-runtime:latest"
     docker build -f 'components/edge/slice-runtime/Dockerfile' -t $tag .
     if ($LASTEXITCODE -ne 0) { throw 'docker build failed for slice-runtime' }
-    if ($Push) { docker push $tag }
+    if ($Push) {
+        docker push $tag
+        if ($LASTEXITCODE -ne 0) { throw 'docker push failed for slice-runtime' }
+    }
 
     Write-Information "images OK - 11 images built$(if ($Push) { ' and pushed' })" -InformationAction Continue
 }

@@ -107,7 +107,7 @@
       rows = [["parse", "unreadable"]];
     }
 
-    var before = JSON.stringify(st.rows || []);
+    var before = st.serializedRows || "[]";
     var after = JSON.stringify(rows);
     if (before !== "[]" && before !== after) {
       st.flashUntil = Date.now() + 1600;
@@ -118,6 +118,7 @@
       }
     }
     st.rows = rows;
+    st.serializedRows = after;
   }
 
   function deltasBetween(oldRows, newRows) {
@@ -146,13 +147,16 @@
       box = AD.boxById(id);
     }
     if (!box) {
-      var candidates = [];
+      var oldest = Infinity;
       for (var i = 0; i < AD.BOXES.length; i++) {
-        if (due(AD.BOXES[i], now) && urlFor(AD.BOXES[i])) candidates.push(AD.BOXES[i]);
+        var candidate = AD.BOXES[i];
+        var last = lastRun[candidate.id] || 0;
+        // Strict comparison preserves the first box on ties, matching the stable sort.
+        if (last < oldest && due(candidate, now) && urlFor(candidate)) {
+          oldest = last;
+          box = candidate;
+        }
       }
-      // Oldest first, so nothing starves behind the fast tier.
-      candidates.sort(function (a, b) { return (lastRun[a.id] || 0) - (lastRun[b.id] || 0); });
-      box = candidates[0];
     }
     if (box) {
       await pollBox(box);

@@ -60,16 +60,15 @@ if ($YurunaRoot) {
 # VM IP resolution: explicit param -> the host driver's guest report -> the
 # status service's handoff file (the edges' boot-time IP reporter posts
 # <hostname>.ip.txt there; see poc/usernames.md "Core->edge access").
-if (-not $CoreIp) { $CoreIp = Resolve-VmIp 'amisad-core' }
-if (-not $EdgeAIp) { $EdgeAIp = Resolve-VmIp 'amisad-edge-a' }
-if (-not $EdgeBIp) { $EdgeBIp = Resolve-VmIp 'amisad-edge-b' }
+if (-not $CoreIp) { $CoreIp = Resolve-VmIp -Name 'amisad-core' -YurunaRoot $YurunaRoot }
+if (-not $EdgeAIp) { $EdgeAIp = Resolve-VmIp -Name 'amisad-edge-a' -YurunaRoot $YurunaRoot }
+if (-not $EdgeBIp) { $EdgeBIp = Resolve-VmIp -Name 'amisad-edge-b' -YurunaRoot $YurunaRoot }
 
 # Persona passwords come from the same vault the deploy chain rendered into
 # chpasswd (poc/usernames.md). After a green end-to-end run every entry
 # exists, so Get-Password is a pure read here; a missing entry would mean the
 # VM account never got that password either.
 $personaUsers = 'maya', 'elena', 'tom', 'marcel', 'kai', 'priya', 'ingrid', 'dana', 'alex', 'sam', 'pat'
-$script:personaCache = $null
 # The vault passwords are the one thing here that must not travel further than
 # the operator intends, so they are gated per REQUEST, not per binding: opening
 # the console to the network still leaves the host's own browser fully
@@ -94,12 +93,13 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
     $uri = $TargetBase + $Rest + $Request.Url.Query
     $msg = [System.Net.Http.HttpRequestMessage]::new(
         [System.Net.Http.HttpMethod]::new($Request.HttpMethod), $uri)
-    if ($Request.HasEntityBody) {
-        $reader = [IO.StreamReader]::new($Request.InputStream, $Request.ContentEncoding)
-        $body = $reader.ReadToEnd()
-        $msg.Content = [System.Net.Http.StringContent]::new($body, [Text.Encoding]::UTF8, 'application/json')
-    }
+    $up = $null
     try {
+        if ($Request.HasEntityBody) {
+            $reader = [IO.StreamReader]::new($Request.InputStream, $Request.ContentEncoding)
+            try { $body = $reader.ReadToEnd() } finally { $reader.Dispose() }
+            $msg.Content = [System.Net.Http.StringContent]::new($body, [Text.Encoding]::UTF8, 'application/json')
+        }
         $up = $http.SendAsync($msg).GetAwaiter().GetResult()
         $text = $up.Content.ReadAsStringAsync().GetAwaiter().GetResult()
         $ct = if ($up.Content.Headers.ContentType) { $up.Content.Headers.ContentType.ToString() } else { 'application/json' }
@@ -108,6 +108,9 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
         Write-Body -Response $Response -Status ([int]$up.StatusCode) -Bytes $bytes -ContentType $ct
     } catch {
         Write-Json -Response $Response -Status 502 -Object @{ error = $_.Exception.Message; target = $uri }
+    } finally {
+        if ($up) { $up.Dispose() }
+        $msg.Dispose()
     }
 }
 
@@ -183,7 +186,7 @@ try {
             $path = $req.Url.AbsolutePath
             if ($path -eq '/api/personas') {
                 if ($SharePersonaPasswords -or (Test-LoopbackClient $req)) {
-                    Write-Json -Response $res -Status 200 -Object (Get-PersonaSecret)
+                    Write-Json -Response $res -Status 200 -Object (Get-PersonaSecret -YurunaRoot $YurunaRoot -Usernames $personaUsers)
                 } else {
                     Write-Json -Response $res -Status 200 -Object @($personaUsers | ForEach-Object {
                         [ordered]@{ username = $_; password = '<withheld: remote viewer>' } })

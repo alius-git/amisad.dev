@@ -29,9 +29,8 @@ keyboard.
 Imported with -Force by each serve script; nothing here touches the lab.
 #>
 
-# No Set-StrictMode here: it propagates to the scripts that import this module
-# and would change how their own code treats unset variables, which is not this
-# module's call to make.
+$script:personaCache = $null
+$script:personaCacheKey = ''
 
 function Get-DemoHostIp {
     <#
@@ -343,10 +342,10 @@ function Test-DemoStopKey {
 # Invoke-Proxy deliberately stay per-server -- their differences are each
 # app's own routing and proxy policy, not drift.
 
-function Resolve-VmIp([string]$Name) {
+function Resolve-VmIp([string]$Name, [string]$YurunaRoot) {
     <#
     .SYNOPSIS
-    Resolve the demo VM's reachable IP, preferring an explicit value over discovery.
+    Resolve the demo VM's reachable IP, then try the explicitly supplied root's handoff file.
     #>
     if (Get-Command -Name 'Get-VMIp' -ErrorAction SilentlyContinue) {
         try {
@@ -371,28 +370,34 @@ function Get-PersonaSecret {
     The demo personas and their shared secrets, read once from the Yuruna
     authentication vault.
     .DESCRIPTION
-    Reads $YurunaRoot from the CALLING script. That works because an
-    unqualified variable lookup walks the caller's scope chain, so the
-    server's -YurunaRoot parameter is visible here without being passed;
-    the cache below is $script:-scoped and therefore lives in this module
-    rather than the caller, giving it a once-per-process lifetime.
+    The root and usernames are explicit because a module cannot read the
+    importing script's local variables. Cache only matching inputs in this
+    module; another root or persona set must resolve its own values.
     #>
-    if ($null -ne $script:personaCache) { return $script:personaCache }
+    [CmdletBinding()]
+    [OutputType([object[]])]
+    param(
+        [AllowEmptyString()][string]$YurunaRoot,
+        [Parameter(Mandatory)][string[]]$Usernames
+    )
+    $cacheKey = ConvertTo-Json -InputObject ([ordered]@{ root = $YurunaRoot; users = @($Usernames) }) -Compress
+    if ($null -ne $script:personaCache -and $script:personaCacheKey -ceq $cacheKey) { return ,$script:personaCache }
     $vaultError = ''
     if (-not $YurunaRoot) {
         $vaultError = 'framework checkout not located; pass -YurunaRoot or set YURUNA_ROOT'
     } else {
-        try { Import-Module (Join-Path $YurunaRoot 'test/extension/authentication/default.psm1') -Force }
+        try { Import-Module (Join-Path $YurunaRoot 'test/extension/authentication/default.psm1') -Force -ErrorAction Stop }
         catch { $vaultError = $_.Exception.Message }
     }
-    $list = foreach ($u in $personaUsers) {
+    $list = foreach ($u in $Usernames) {
         $pw = ''
         if ($vaultError) { $pw = "<vault error: $vaultError>" }
         else { try { $pw = Get-Password -Username $u } catch { $pw = "<vault error: $($_.Exception.Message)>" } }
         [ordered]@{ username = $u; password = $pw }
     }
     $script:personaCache = @($list)
-    return $script:personaCache
+    $script:personaCacheKey = $cacheKey
+    return ,$script:personaCache
 }
 
 function Test-LoopbackClient($Request) {

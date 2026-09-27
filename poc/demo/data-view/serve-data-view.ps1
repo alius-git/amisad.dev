@@ -64,9 +64,9 @@ $vmNames = 'amisad-core', 'amisad-edge-a', 'amisad-edge-b'
 # VM IP resolution: explicit param -> the host driver's guest report -> the
 # status service's handoff file (the edges' boot-time IP reporter posts
 # <hostname>.ip.txt there).
-if (-not $CoreIp) { $CoreIp = Resolve-VmIp 'amisad-core' }
-if (-not $EdgeAIp) { $EdgeAIp = Resolve-VmIp 'amisad-edge-a' }
-if (-not $EdgeBIp) { $EdgeBIp = Resolve-VmIp 'amisad-edge-b' }
+if (-not $CoreIp) { $CoreIp = Resolve-VmIp -Name 'amisad-core' -YurunaRoot $YurunaRoot }
+if (-not $EdgeAIp) { $EdgeAIp = Resolve-VmIp -Name 'amisad-edge-a' -YurunaRoot $YurunaRoot }
+if (-not $EdgeBIp) { $EdgeBIp = Resolve-VmIp -Name 'amisad-edge-b' -YurunaRoot $YurunaRoot }
 
 # Power state comes from the host driver contract, which reports the same four
 # values (absent/stopped/running/unknown) on KVM, Hyper-V and UTM - so the VM
@@ -111,7 +111,6 @@ function Get-SubjectHash([string]$Actor) {
 # a pure read here; a missing entry would mean the VM account never got that
 # password either.
 $personaUsers = 'maya', 'elena', 'tom', 'marcel', 'kai', 'priya', 'ingrid', 'dana', 'alex', 'sam', 'pat'
-$script:personaCache = $null
 # The vault passwords are the one thing here that must not travel further than
 # the operator intends, so they are gated per REQUEST, not per binding: opening
 # the console to the network still leaves the host's own browser fully
@@ -138,7 +137,7 @@ $http.Timeout = [TimeSpan]::FromSeconds(30)
 function Read-RequestBody($Request) {
     if (-not $Request.HasEntityBody) { return '' }
     $reader = [IO.StreamReader]::new($Request.InputStream, $Request.ContentEncoding)
-    return $reader.ReadToEnd()
+    try { return $reader.ReadToEnd() } finally { $reader.Dispose() }
 }
 
 # Forward one browser request to a lab endpoint, body and method intact, and
@@ -150,12 +149,13 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
     $uri = $TargetBase + $Rest + $Request.Url.Query
     $msg = [System.Net.Http.HttpRequestMessage]::new(
         [System.Net.Http.HttpMethod]::new($Request.HttpMethod), $uri)
-    $body = Read-RequestBody $Request
-    if ($body) {
-        $msg.Content = [System.Net.Http.StringContent]::new($body, [Text.Encoding]::UTF8, 'application/json')
-    }
+    $up = $null
     $cts = $null
     try {
+        $body = Read-RequestBody $Request
+        if ($body) {
+            $msg.Content = [System.Net.Http.StringContent]::new($body, [Text.Encoding]::UTF8, 'application/json')
+        }
         if ($Request.HttpMethod -eq 'GET') {
             $cts = [System.Threading.CancellationTokenSource]::new([TimeSpan]::FromSeconds(8))
             $up = $http.SendAsync($msg, $cts.Token).GetAwaiter().GetResult()
@@ -171,6 +171,8 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
         Write-Json -Response $Response -Status 502 -Object @{ error = $_.Exception.Message; target = $uri }
     } finally {
         if ($cts) { $cts.Dispose() }
+        if ($up) { $up.Dispose() }
+        $msg.Dispose()
     }
 }
 
@@ -249,7 +251,7 @@ try {
             $path = $req.Url.AbsolutePath
             if ($path -eq '/api/personas') {
                 if ($SharePersonaPasswords -or (Test-LoopbackClient $req)) {
-                    Write-Json -Response $res -Status 200 -Object (Get-PersonaSecret)
+                    Write-Json -Response $res -Status 200 -Object (Get-PersonaSecret -YurunaRoot $YurunaRoot -Usernames $personaUsers)
                 } else {
                     Write-Json -Response $res -Status 200 -Object @($personaUsers | ForEach-Object {
                         [ordered]@{ username = $_; password = '<withheld: remote viewer>' } })

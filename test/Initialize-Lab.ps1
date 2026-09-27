@@ -86,7 +86,7 @@ param(
 
 $ErrorActionPreference = 'Continue'
 # Progress goes to the information stream (displayed via InformationPreference),
-# never the success stream -- Invoke-Stage returns an exit code the caller checks.
+# never the success stream -- Invoke-AmisAdStage returns an exit code the caller checks.
 $InformationPreference = 'Continue'
 
 . (Join-Path $PSScriptRoot 'AmisAd.HostCommon.ps1')
@@ -94,10 +94,10 @@ $InformationPreference = 'Continue'
 # the same pre-flight, and the address a pass uploads its binaries to must not
 # depend on which entry point started it.
 Import-Module (Join-Path $PSScriptRoot 'AmisAd.StashService.psm1') -Force -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot 'AmisAd.Lab.psm1') -Force -DisableNameChecking
 
 $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
-$IsHyperV   = ($HostType -eq 'host.windows.hyper-v')
 Write-Information "Warm-up on '$HostType' (framework: $YurunaRoot)."
 
 # Fail fast on a host that cannot drive its own hypervisor (Administrator on
@@ -147,122 +147,8 @@ function Resolve-StageLogDir {
 
 $LogDir = Resolve-StageLogDir -Explicit $LogDir
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+$stageContext = @{ HostType = $HostType; SequenceScript = $ts; LogDir = $LogDir; NoProjectClone = $true }
 Write-Information "Per-stage logs: $LogDir"
-
-function Invoke-Stage {
-    # Write-Information (not Write-Output) for progress: the function's OUTPUT
-    # stream is its return value, and a polluted return would break the caller's
-    # -ne 0 check. -NoProjectClone: the orchestration run (Debug-TestSequence) already
-    # refreshed <RepoRoot>/project once before invoking initialize-lab.
-    param([string]$Name, [string]$Sequence, [switch]$NoConfigGate)
-    Stop-LabConsole -HostType $HostType
-    $out = Join-Path $LogDir "$Name.out.log"
-    $err = Join-Path $LogDir "$Name.err.log"
-    $stageArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $ts, $Sequence, '-NoProjectClone')
-    if ($NoConfigGate) { $stageArgs += '-NoConfigGate' }
-    Write-Information "===== [$Name] $Sequence  $([DateTime]::Now.ToString('s'))  (log: $out) ====="
-    # -WindowStyle is a Windows-only concept; passing it on Linux/macOS throws
-    # "not supported on this platform" and would fail every stage before it ran.
-    $spArgs = @{
-        FilePath               = 'pwsh'
-        PassThru               = $true
-        RedirectStandardOutput = $out
-        RedirectStandardError  = $err
-        ArgumentList           = $stageArgs
-    }
-    if ($IsWindows) { $spArgs['WindowStyle'] = 'Hidden' }
-    $p = Start-Process @spArgs
-    $p.WaitForExit()
-    Write-Information "===== [$Name] exited $($p.ExitCode)  $([DateTime]::Now.ToString('s')) ====="
-    if ($p.ExitCode -ne 0) {
-        Get-Content -LiteralPath $out -Tail 25 -ErrorAction SilentlyContinue | Out-Host
-        Get-Content -LiteralPath $err -Tail 10 -ErrorAction SilentlyContinue | Out-Host
-    }
-    return $p.ExitCode
-}
-
-function Remove-InstallMedia {
-    <#
-        Hyper-V only -- see the PORTABILITY note in the file header for why the
-        other hosts need no equivalent. Autoinstall DVDs (install ISO + per-VM
-        seed.iso) are only needed to build. A renamed/restored VM keeps ABSOLUTE
-        refs into that dir; later cycles overwrite it with files ACL'd to a newer
-        VM, so starting the older VM fails with 0x80070005. Strip media, then
-        RETAKE the checkpoint so the restored config is DVD-free too (the
-        checkpoint re-attaches DVDs otherwise).
-    #>
-    [CmdletBinding(SupportsShouldProcess)]
-    param([string]$Name, [string]$SnapshotId)
-    if (-not $IsHyperV) {
-        Write-Verbose "Remove-InstallMedia: not applicable on '$HostType'."
-        return
-    }
-    if (-not $PSCmdlet.ShouldProcess($Name, 'Remove install media + retake checkpoint')) { return }
-    Hyper-V\Get-VMDvdDrive -VMName $Name -ErrorAction SilentlyContinue |
-        Hyper-V\Remove-VMDvdDrive -ErrorAction SilentlyContinue
-    if ($SnapshotId) {
-        $cp = Hyper-V\Get-VMCheckpoint -VMName $Name -Name $SnapshotId -ErrorAction SilentlyContinue
-        if ($cp) {
-            Hyper-V\Remove-VMCheckpoint -VMName $Name -Name $SnapshotId -Confirm:$false
-            Hyper-V\Checkpoint-VM -Name $Name -SnapshotName $SnapshotId -Confirm:$false
-            Write-Information "Retook checkpoint '$SnapshotId' on $Name without install media."
-        }
-    }
-}
-
-function Set-EdgeMemory {
-    <#
-        Hyper-V only. The framework provisions every ubuntu guest at 12GB; edges
-        only run the small slice-runtime. At s004 BOTH edges are live while
-        amisad-core (12GB) restores - 3 x 12GB exceeds host RAM (0x800705AA).
-        Shrink before the checkpoint retake so the restored config is small too.
-        On KVM/UTM the guest size is fixed at provisioning time (the sequence's
-        memoryStartupBytes variable), so there is no post-hoc resize to do.
-    #>
-    [CmdletBinding(SupportsShouldProcess)]
-    param([string]$Name)
-    if (-not $IsHyperV) {
-        Write-Verbose "Set-EdgeMemory: guest memory is a provisioning-time property on '$HostType'; leaving $Name as built."
-        return
-    }
-    if (-not $PSCmdlet.ShouldProcess($Name, 'Set static memory to 4GB')) { return }
-    Hyper-V\Set-VM -Name $Name -StaticMemory -MemoryStartupBytes 4GB
-    Write-Information "$Name memory set to 4GB (slice-runtime only)."
-}
-
-function Start-VMConfirmed {
-    <#
-        Start a VM and answer whether it is actually running, or the reason it
-        is not. A start request accepted by the hypervisor is not a started VM:
-        the guest process can die on its own resources (a port it cannot bind,
-        a disk it cannot open) after the request has been acknowledged, so the
-        state has to be observed rather than inferred from the request.
-        Returns a { started; reason } record.
-    #>
-    [CmdletBinding(SupportsShouldProcess)]
-    [OutputType([hashtable])]
-    param([string]$Name, [int]$RunningTimeoutSeconds = 60)
-    if (-not $PSCmdlet.ShouldProcess($Name, 'Start VM and confirm running')) {
-        return @{ started = $false; reason = 'WhatIf' }
-    }
-    $record = $null
-    try {
-        # Start-VM answers with a status record on the success stream rather
-        # than throwing, so the record is the only signal; take the last item
-        # in case anything else reached the stream alongside it.
-        $record = @(Start-VM -VMName $Name -ErrorAction Stop) | Select-Object -Last 1
-    } catch {
-        return @{ started = $false; reason = $_.Exception.Message }
-    }
-    if ($record -isnot [hashtable]) { return @{ started = $false; reason = 'Start-VM returned no status record' } }
-    if (-not $record.success) { return @{ started = $false; reason = "$($record.errorMessage)" } }
-    $deadline = (Get-Date).AddSeconds($RunningTimeoutSeconds)
-    while ((Get-Date) -lt $deadline) {
-        if ((Get-VMState -VMName $Name) -eq 'running') { return @{ started = $true; reason = $null } }
-        Start-Sleep -Seconds 2
-    }
-    return @{ started = $false; reason = "start reported success but the VM is '$(Get-VMState -VMName $Name)' after ${RunningTimeoutSeconds}s" }
-}
 
 # Opt-in virtual display for headless keystroke/OCR reliability on the cold
 # provisioning chains (no-op unless YURUNA_VIRTUAL_DISPLAY is truthy). The host
@@ -296,30 +182,30 @@ if (-not $stash.Address) {
 }
 
 # --- [2] build once: compile + upload binaries to the stash ---
-if ((Invoke-Stage -Name 'amisad-build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
+if ((Invoke-AmisAdStage @stageContext -Name 'amisad-build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "Build stage failed; no binaries in the stash - stopping."
     exit 1
 }
 try { $null = Stop-VMForce -VMName 'amisad-build' } catch { Write-Verbose "Stop-VMForce amisad-build: $($_.Exception.Message)" }
-Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build'
+Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build' -HostType $HostType
 Write-Information "amisad-build stopped (kept on disk)."
 
 # --- [3] edge VMs: provision + snapshot, one at a time (chains end stopped) ---
 foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
-    if ((Invoke-Stage -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline" -NoConfigGate:$NoConfigGate) -ne 0) {
+    if ((Invoke-AmisAdStage @stageContext -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline" -NoConfigGate:$NoConfigGate) -ne 0) {
         Write-Error "$edge provisioning failed - stopping."
         exit 1
     }
-    Set-EdgeMemory -Name $edge
-    Remove-InstallMedia -Name $edge -SnapshotId $edge
+    Set-EdgeMemory -Name $edge -HostType $HostType
+    Remove-InstallMedia -Name $edge -SnapshotId $edge -HostType $HostType
 }
 
 # --- [4] vm-core: k8s + deploy + demo users (cold chain, solo) ---
-if ((Invoke-Stage -Name 'amisad-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
+if ((Invoke-AmisAdStage @stageContext -Name 'amisad-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
     Write-Error "amisad-core deploy failed - stopping."
     exit 1
 }
-Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core'
+Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core' -HostType $HostType
 
 # --- [5] start BOTH region edges and wait for their IP reports ---
 # The scenarios resolve amisad-edge-a/-b from these boot-time reports; a stale
