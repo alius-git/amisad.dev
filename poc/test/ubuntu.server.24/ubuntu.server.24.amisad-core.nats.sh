@@ -10,7 +10,7 @@ set -euo pipefail
 
 # Pinned (not 'latest'): resolving latest needs the unauthenticated GitHub
 # releases API, which 403s behind the shared NAT egress. Bump by editing this line.
-NATS_VERSION=v2.14.3
+NATS_VERSION=v2.15.0
 ARCH=$(uname -m)
 case "$ARCH" in
     x86_64) NARCH=amd64 ;;
