@@ -41,7 +41,9 @@ paths:
           application/json:
             schema: { type: object }
       responses:
-        "200": { description: "per-dimension findings, certified" }
+        "200": { description: "per-dimension findings, certified; explicit empty chains require the genesis head" }
+        "502": { description: "Malformed ledger dump, missing row fields, or inconsistent head" }
+        "503": { description: "Ledger unavailable" }
   /v1/certify/tamper:
     post:
       summary: "Detect and localize a tampered attestation record (body: entries[])"

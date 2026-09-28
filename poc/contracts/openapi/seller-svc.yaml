@@ -25,6 +25,7 @@ paths:
       responses:
         "201": { description: "Offer stored" }
         "400": { description: "Missing field" }
+        "403": { description: "Existing offer belongs to another tenant; ownership is immutable" }
   /v1/offers/region/{region}:
     get:
       summary: "Offers available in a region"
@@ -42,7 +43,8 @@ paths:
             schema: { type: object }
       responses:
         "201": { description: "Order committed" }
-        "409": { description: "Order exists" }
+        "200": { description: "Identical order replay; returns the current order without another event" }
+        "409": { description: "Existing match_id has different offer, tenant, context, or appointment" }
     get:
       summary: "The order board: every order, appointments included (also how the harness asserts zero pre-booking commitments)"
       responses:
@@ -59,6 +61,7 @@ paths:
         "200": { description: "New state" }
         "404": { description: "No order" }
         "409": { description: "Illegal transition" }
+        "503": { description: "Settlement confirmation failed; order remains retryable" }
   /v1/orders/match/{matchId}:
     get:
       summary: "Order by match id (need context only; no buyer identity field exists)"
@@ -69,7 +72,7 @@ paths:
         "404": { description: "No order" }
   /v1/offers/inventory:
     post:
-      summary: "Set an offer's stock; 0 removes it from the matchable catalog (s007; body: offer_id, stock)"
+      summary: "Set an offer's stock; 0 removes it from the matchable catalog (s007; body: offer_id, tenant, stock; tenant must own the offer)"
       requestBody:
         required: true
         content:
@@ -78,6 +81,7 @@ paths:
       responses:
         "200": { description: "offer_id, stock" }
         "404": { description: "unknown offer_id" }
+        "403": { description: "Missing tenant or tenant does not own the offer" }
   /v1/demand-outlook/{version}:
     get:
       summary: "s009: Elena's demand-outlook view (a read of the published insights outlook)"

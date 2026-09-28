@@ -207,11 +207,15 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 return Response::error(400, "price_cents required");
             }
             let offer_id = body.str_of("offer_id").unwrap().to_string();
+            if state.offers.iter().any(|offer| offer.str_of("offer_id") == Some(&offer_id)
+                && offer.str_of("tenant") != body.str_of("tenant")) {
+                return Response::problem(403, "tenant_mismatch");
+            }
             if let Some(db) = state.db.as_mut() {
-                if let Err(e) = db.execute(
+                match db.execute(
                     "INSERT INTO seller.offers (offer_id, tenant, title, category, region, price_cents, deliver_by_days, auto_close, document) \
                      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \
-                     ON CONFLICT (offer_id) DO UPDATE SET tenant = $2, title = $3, category = $4, region = $5, price_cents = $6, deliver_by_days = $7, auto_close = $8, document = $9",
+                     ON CONFLICT (offer_id) DO UPDATE SET tenant = $2, title = $3, category = $4, region = $5, price_cents = $6, deliver_by_days = $7, auto_close = $8, document = $9 WHERE seller.offers.tenant = EXCLUDED.tenant",
                     &[
                         &offer_id,
                         &body.str_of("tenant").unwrap_or(""),
@@ -224,7 +228,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
                         &body.dump(),
                     ],
                 ) {
-                    return store_error(db, "catalog store", e);
+                    Ok(0) => return Response::problem(403, "tenant_mismatch"),
+                    Ok(_) => {},
+                    Err(e) => return store_error(db, "catalog store", e),
                 }
             }
             // Upsert in memory too, matching the database's primary key.
@@ -253,7 +259,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 (Some(m), Some(o), Some(t)) => (m.to_string(), o.to_string(), t.to_string()),
                 _ => return Response::error(400, "match_id, offer_id, tenant required"),
             };
-            if state.orders.iter().any(|o| o.match_id == match_id) {
+            if let Some(order) = state.orders.iter().find(|o| o.match_id == match_id) {
+                if order.offer_id == offer_id && order.tenant == tenant
+                    && order.need_context == body.str_of("need_context").unwrap_or("")
+                    && order.slot_id == body.str_of("slot_id").unwrap_or("")
+                    && order.slot_day == body.str_of("slot_day").unwrap_or("") {
+                    return Response::json(200, &order_json(order));
+                }
                 return Response::error(409, "order exists for match_id");
             }
             // Validated here so both storage modes agree; the database FK
@@ -261,7 +273,8 @@ fn handle(state: &mut State, req: &Request) -> Response {
             if !state
                 .offers
                 .iter()
-                .any(|o| o.str_of("offer_id") == Some(offer_id.as_str()))
+                .any(|o| o.str_of("offer_id") == Some(offer_id.as_str())
+                    && o.str_of("tenant") == Some(tenant.as_str()))
             {
                 return Response::error(400, "unknown offer_id");
             }
@@ -325,7 +338,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(i) => i,
                 None => return Response::error(404, "no order for match_id"),
             };
-            if !next_state(&state.orders[index].state, &requested) {
+            if requested == "fulfilled" && state.orders[index].state == "settled" {
+                return Response::json(200, &order_json(&state.orders[index]));
+            }
+            if !next_state(&state.orders[index].state, &requested)
+                && !(state.orders[index].state == "fulfilled" && requested == "fulfilled") {
                 return Response::error(
                     409,
                     &format!("illegal transition {} -> {requested}", state.orders[index].state),
@@ -344,7 +361,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     &format!("{}/v1/settlements/confirm", ledger_url()),
                     Some(&confirm_body),
                 ) {
-                    Ok((201, _)) => final_state = String::from("settled"),
+                    Ok((200 | 201, _)) => final_state = String::from("settled"),
                     // A previous attempt already confirmed (crash or 503
                     // between confirm and persist): converge to settled
                     // instead of wedging at fulfilled.
@@ -353,8 +370,12 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     }
                     Ok((status, body)) => {
                         eprintln!("settlement confirm returned {status}: {body}");
+                        return Response::problem(503, "settlement_unavailable");
                     }
-                    Err(e) => eprintln!("settlement confirm failed: {e}"),
+                    Err(e) => {
+                        eprintln!("settlement confirm failed: {e}");
+                        return Response::problem(503, "settlement_unavailable");
+                    }
                 }
             }
             if let Some(db) = state.db.as_mut() {
@@ -393,6 +414,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
             };
             if !state.offers.iter().any(|o| o.str_of("offer_id") == Some(offer_id.as_str())) {
                 return Response::error(404, "unknown offer_id");
+            }
+            if !state.offers.iter().any(|offer| offer.str_of("offer_id") == Some(offer_id.as_str())
+                && body.str_of("tenant").is_some()
+                && offer.str_of("tenant") == body.str_of("tenant")) {
+                return Response::problem(403, "tenant_mismatch");
             }
             state.stock.retain(|(id, _)| *id != offer_id);
             state.stock.push((offer_id.clone(), stock));

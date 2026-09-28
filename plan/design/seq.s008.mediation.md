@@ -28,7 +28,8 @@ sequenceDiagram
         PlatformSvc-->>Sam: Artifact read-only - identity still withheld
     end
     Sam->>LedgerSvc: Evidence supports the buyer - refund posts as compensating entries referencing the case
-    Note over LedgerSvc: History is never edited - the chains still verify and the derived net reflects the refund
+    Note over LedgerSvc: One full reversal per match; identical case replay returns its prior outcome, including after restart
+    Note over LedgerSvc: History is never edited; a conflicting case or inconsistent prior refund is rejected
     Sam->>PlatformSvc: Resolution recorded, case closed
     Sam->>PlatformSvc: Recurring pattern escalated to operations
     PlatformSvc->>Priya: Cross-party case in the operations queue

@@ -21,7 +21,7 @@ struct Shortlist {
     environment_id: String,
     need_context: String,
     entries: Vec<json::Json>,
-    booked: bool,
+    booking: Option<json::Json>,
 }
 
 struct OpenNeed {
@@ -291,7 +291,7 @@ fn attempt_match(
             environment_id,
             need_context,
             entries,
-            booked: false,
+            booking: None,
         });
         state.notifications.push((handle, String::from("shortlist")));
         return Ok(Some(response));
@@ -1043,7 +1043,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(i) => i,
                 None => return Response::error(404, "unknown handle"),
             };
-            if state.shortlists[index].booked {
+            if let Some(booking) = &state.shortlists[index].booking {
+                if booking.str_of("offer_id") == Some(offer_id.as_str())
+                    && booking.str_of("slot_id") == Some(slot_id.as_str()) {
+                    return Response::json(200, booking);
+                }
                 return Response::error(409, "already booked");
             }
             let (environment_id, need_context, entry) = {
@@ -1120,7 +1124,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 &format!("{}/v1/settlements/instructions", ledger_url()),
                 Some(&instruction),
             ) {
-                Ok((201, _)) => {}
+                Ok((200 | 201, _)) => {}
                 Ok((status, body)) => {
                     return Response::error(502, &format!("settlement instruction ({status}): {body}"))
                 }
@@ -1140,7 +1144,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 &format!("{}/v1/orders", seller_url()),
                 Some(&order_body),
             ) {
-                Ok((201, _)) => {}
+                Ok((200 | 201, _)) => {}
                 Ok((status, body)) => {
                     return Response::error(502, &format!("order create ({status}): {body}"))
                 }
@@ -1168,7 +1172,6 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     }
                 }
             }
-            state.shortlists[index].booked = true;
             state.orders.push((handle.clone(), match_id.clone()));
             state
                 .notifications
@@ -1184,7 +1187,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
             if ad_cents > 0 {
                 resp.push(("boosted", json::b(true)));
             }
-            Response::json(201, &json::obj(resp))
+            let booking = json::obj(resp);
+            state.shortlists[index].booking = Some(booking.clone());
+            Response::json(201, &booking)
         }
         _ => {
             if let ("GET", Some(handle)) =

@@ -46,7 +46,8 @@ paths:
       responses:
         "201": { description: "Pending" }
         "400": { description: "Splits do not sum to value" }
-        "409": { description: "Instruction exists" }
+        "200": { description: "Identical instruction replay; existing pending or confirmed status" }
+        "409": { description: "Existing match_id has a different value or splits" }
   /v1/settlements/confirm:
     post:
       summary: "Confirm settlement: appends one chained entry per party (body: match_id)"
@@ -58,7 +59,7 @@ paths:
       responses:
         "201": { description: "Entries appended (entries, head)" }
         "404": { description: "No instruction" }
-        "409": { description: "Already confirmed" }
+        "200": { description: "Already confirmed; no ledger entries appended" }
   /v1/settlements/match/{matchId}:
     get:
       summary: "Settlement view for a match"
@@ -99,4 +100,7 @@ paths:
       responses:
         "201": { description: "adjustment_entries" }
         "404": { description: "no settlement" }
+        "200": { description: "Identical refund replay; prior outcome with no new entries" }
+        "400": { description: "Missing or empty case_id" }
+        "409": { description: "Unconfirmed settlement, conflicting case, or existing inconsistent adjustment" }
   # GET /v1/settlements and GET /v1/consents -> raw chain dumps ({payload, prev, hash}) for independent audit (s010)

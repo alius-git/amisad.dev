@@ -1,0 +1,47 @@
+{
+  "locale": "zh-CN",
+  "messages": {
+    "tenant_mismatch": {
+      "text": "该租户不拥有此商品。",
+      "sourceHash": "e09e86569b6b86b88d5db5e8d11564236658f0ebf2229f830ababe5bc2e7828a",
+      "origin": "machine",
+      "description": "Catalog or inventory access outside the authorized tenant."
+    },
+    "settlement_unavailable": {
+      "text": "结算确认失败。请重试请求。",
+      "sourceHash": "3ff1c7f2496e3429d6df03ecf639baeeb8ff34d40b752efc97b3985440a64381",
+      "origin": "machine",
+      "description": "Order advancement can be retried after ledger confirmation fails."
+    },
+    "refund_conflict": {
+      "text": "此退款与现有调整冲突。",
+      "sourceHash": "9297206d535746205909c45ed2db7eaca6d15e9f3356c3f736a541af42da3cdc",
+      "origin": "machine",
+      "description": "A refund replay differs from a durable adjustment."
+    },
+    "invalid_chain": {
+      "text": "账本证据不完整或格式错误。",
+      "sourceHash": "bb7ec1476e67be3e429f41b42a47b35f9db38ffe381e1cb208ebec1d72af9b9b",
+      "origin": "machine",
+      "description": "Upstream evidence lacks a valid chain envelope or row fields."
+    },
+    "invalid_request": {
+      "text": "HTTP 请求格式错误或不受支持。",
+      "sourceHash": "fe17c4aa76081998f1820d02f9fbb081d7447761552f57a5f8f1f7c17eb43623",
+      "origin": "machine",
+      "description": "HTTP framing cannot be safely interpreted."
+    },
+    "request_too_large": {
+      "text": "HTTP 请求超过大小限制。",
+      "sourceHash": "35cfd60e660a93a9e62ebcc9199eb3bb54e8660177dd4d800132f3b85c60e987",
+      "origin": "machine",
+      "description": "The aggregate header or body byte limit was exceeded."
+    },
+    "request_timeout": {
+      "text": "HTTP 请求超过时间限制。",
+      "sourceHash": "b88276f34f5815c7a6e935fe68cd109774d5cbb9d88301182bb3155853801a39",
+      "origin": "machine",
+      "description": "The total request read deadline elapsed."
+    }
+  }
+}

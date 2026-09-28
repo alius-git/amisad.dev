@@ -2,7 +2,8 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 
 rust_library(
     name = "amisad-common",
-    srcs = ["src/lib.rs"],
+    srcs = ["src/lib.rs", "src/i18n.rs"],
+    compile_data = glob(["locales/*.json"]),
     crate_name = "amisad_common",
     edition = "2021",
     visibility = ["//visibility:public"],

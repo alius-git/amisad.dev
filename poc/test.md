@@ -4,6 +4,24 @@ Full automation from a **clean machine** (no pre-built VMs): build the design
 topology, then run each implemented scenario in order against it. For running
 the demo by hand instead, see [demo.md](demo.md).
 
+## Native service contract checks
+
+From `poc/`, run `cargo build --workspace --locked`,
+`cargo test --workspace --locked`, `python3 test/check_messages.py`, and
+`python3 test/service_contracts.py -v`. Set `AMISAD_BIN_DIR` when the binaries
+are outside `target/debug`. Tests start isolated loopback processes and stubs;
+the deadline case takes about 20 seconds. They require no VM or temporary commit.
+
+To check durable recovery, initialize an **empty disposable PostgreSQL database**
+with `db/schema.sql`, set `AMISAD_TEST_DATABASE_URL` to its connection URL, and run
+`python3 test/service_contracts.py DurableContracts -v`. This explicit suite writes
+fixture offers, instructions, orders, and refunds, then restarts the services.
+Use a fresh database for each invocation; never point it at the demo database.
+The regular suite uses memory stores regardless of the caller's `DATABASE_URL`.
+
+These checks complement the VM scenarios below. They do not qualify Kubernetes,
+Bazel runfiles, or the pinned container image toolchain.
+
 ## One-time setup
 
 1. **Get the framework.** Use the OS one-liner from the Yuruna repo's

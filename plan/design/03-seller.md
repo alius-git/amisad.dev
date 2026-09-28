@@ -9,7 +9,7 @@ flowchart TD
     subgraph svc["seller-svc (vm-core)"]
         catalog["Offer catalog<br/>matchable structured offers"]
         inventory["Inventory & availability<br/>per-offer stock"]
-        orders["Order state machine<br/>committed->provisioning->fulfilled->settled"]
+        orders["Order state machine<br/>committed->provisioning->settled"]
         outlook["Demand-outlook view"]
     end
     spa["SPA - seller module"]
@@ -31,9 +31,9 @@ flowchart TD
 
 **POC notes**
 
-- **Multi-tenant from day one:** tenant ID on every row in the `seller` schema; scenario seeds create Elena plus the deliberately out-of-range seller s002.fitting asserts is filtered.
+- **Multi-tenant from day one:** tenant ID on every row in the `seller` schema, immutable offer ownership, and a required matching tenant on inventory updates; scenario seeds create Elena plus the deliberately out-of-range seller s002.fitting asserts is filtered.
 - **Matchability is the catalog's contract:** offers carry structured attributes (price, exclusion-relevant fields like color, reach, fitting slots, standing-deal terms) so environments evaluate them without interpretation.
-- **The order state machine starts at `committed`:** a closed match creates the order already committed, the seller advances it through `provisioning` to `fulfilled`, and `settled` is reached only internally, when the ledger confirms the split -- never by request. Illegal transitions are refused, and a confirm that already landed converges to `settled` instead of wedging.
+- **The order state machine starts at `committed`:** a closed match creates the order already committed, the seller advances it through `provisioning` to `fulfilled`, and `settled` is reached only internally, when the ledger confirms the split -- never by request. Illegal transitions are refused. Fulfillment is a requested transition: failed ledger confirmation returns 503 and preserves the prior state; successful or previously confirmed settlement persists `settled`. A retry also repairs an older `fulfilled` row. Identical order creation returns the current order without another event.
 - **Both outbound events are detached and best-effort** -- offer publication to the coordinator, order transitions to connect-svc. Detachment is load-bearing: the coordinator's matching cycle calls back into this catalog, so a synchronous notify would deadlock the pair. They carry the `orders.*` / `inventory.*` payloads JetStream will carry later; the seller never blocks on either consumer.
 - **Match notifications contain need context only** -- the seller-side record has no buyer identity field at all, so s002.fitting's assertion is structural, not filtered.
 - **Integration grants live in connect-svc,** not here: seller-svc exposes no grant surface, and revocation there kills sync while this catalog stays intact and hand-editable (s007.inventory steps 3, 9).

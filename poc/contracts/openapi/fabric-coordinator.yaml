@@ -40,8 +40,9 @@ paths:
         "201": { description: "Booking (handle, match_id, offer_id, slot_id, slot_day, state committed); delivers the booking-confirmed notification" }
         "400": { description: "Missing handle/offer_id/slot_id" }
         "404": { description: "Unknown handle / offer not on shortlist / slot not offered" }
-        "409": { description: "Already booked" }
-        "502": { description: "Ledger or seller rejected the commitment" }
+        "200": { description: "Identical completed booking replay; no duplicate notification or attribution" }
+        "409": { description: "Handle already booked with a different offer or slot" }
+        "502": { description: "Ledger or seller rejected the commitment; an identical retry resumes matching durable writes" }
         "503": { description: "Ledger unavailable" }
   /v1/notifications/{handle}:
     get:

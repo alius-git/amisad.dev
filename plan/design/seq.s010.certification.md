@@ -1,6 +1,6 @@
 # s010.certification sequence — Independent Certification of the Full Evidence Trail
 
-> One sentence: the auditor recomputes chains, residency, consent, and settlement conservation over a corpus spanning every kind of evidence s001-s009 produce, catches an injected tamper by recomputation, and certifies on evidence -- read-only throughout.
+> One sentence: the auditor recomputes chains, residency, consent, and settlement evidence over a corpus spanning every kind of evidence s001-s009 produce, catches an injected tamper by recomputation, and certifies on evidence -- read-only throughout.
 
 See [../design.md](../design.md#9-diagrams) - [s010.certification](../scenarios.md#s010certification-independent-certification-of-the-full-evidence-trail).
 
@@ -15,11 +15,13 @@ sequenceDiagram
     Note over Ingrid,Priya: Seeded - the scenario builds its own corpus, one instance of every kind of evidence s001 through s009 produce: a completed match plus an injected abort, consent granted and revoked, a mandate, a disclosure and its adjustment
     Ingrid->>AuditSvc: Start certification run
     AuditSvc->>LedgerSvc: Read every record on all three chains - read endpoints only
+    AuditSvc->>AuditSvc: Validate dump envelope, row types, hashes, and head; malformed evidence returns 502
     AuditSvc->>AuditSvc: Recompute the chains from the raw records - trusting no ledger self-report
     AuditSvc->>AuditSvc: Verify attestation continuity - every environment created-attested-executed or aborted-destroyed
     AuditSvc->>AuditSvc: Verify residency - the attested region satisfies the jurisdiction
     AuditSvc->>AuditSvc: Verify consent - the chain is intact across all four grant types
-    AuditSvc->>AuditSvc: Verify settlement conservation - splits sum, adjustments compensate and reference cases
+    AuditSvc->>AuditSvc: Verify settlement chain integrity and adjustment case references
+    Note over AuditSvc: Independent monetary conservation and strict lifecycle ordering remain to be implemented
     alt tamper check
         Ingrid->>AuditSvc: Submit a copy of the attestation records with one row modified
         AuditSvc-->>Ingrid: Recomputation localizes the tamper to exactly that record

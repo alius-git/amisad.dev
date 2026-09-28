@@ -29,12 +29,29 @@ fn read_chain(state: &mut State, path: &str) -> Result<Vec<json::Json>, Response
     ]));
     match request("GET", &format!("{}{path}", ledger_url()), None) {
         Ok((200, text)) => match json::parse(&text) {
-            Ok(b) => Ok(b.get("entries").and_then(|e| e.as_arr()).cloned().unwrap_or_default()),
+            Ok(b) => chain_entries(&b).ok_or_else(|| Response::problem(502, "invalid_chain")),
             Err(e) => Err(Response::error(502, &format!("bad chain dump: {e}"))),
         },
         Ok((status, _)) => Err(Response::error(502, &format!("chain read ({status})"))),
         Err(e) => Err(Response::error(503, &format!("ledger unavailable: {e}"))),
     }
+}
+
+/// A syntactically valid JSON value is not necessarily a ledger dump.
+fn chain_entries(dump: &json::Json) -> Option<Vec<json::Json>> {
+    let entries = dump.get("entries")?.as_arr()?;
+    let head = dump.str_of("head")?;
+    let hash_ok = |hash: &str| hash.len() == 64 && hash.bytes().all(|c| c.is_ascii_hexdigit());
+    if !hash_ok(head) || entries.iter().any(|entry|
+        !matches!(entry.get("payload"), Some(json::Json::Obj(_)))
+        || !entry.str_of("prev").is_some_and(hash_ok)
+        || !entry.str_of("hash").is_some_and(hash_ok)) {
+        return None;
+    }
+    if head != entries.last().and_then(|entry| entry.str_of("hash")).unwrap_or(GENESIS) {
+        return None;
+    }
+    Some(entries.clone())
 }
 
 /// Independently recompute a hash chain: genesis linkage, per-row

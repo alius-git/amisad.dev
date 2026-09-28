@@ -9,7 +9,9 @@
 use std::io::{BufRead, BufReader, ErrorKind, Read, Write};
 use std::net::{TcpListener, TcpStream, ToSocketAddrs};
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant};
+
+mod i18n;
 
 pub struct ServiceInfo {
     pub name: &'static str,
@@ -28,6 +30,25 @@ pub struct Response {
 }
 
 impl Response {
+    /// Stable codes are protocol values; message text is negotiated by the server.
+    pub fn problem(status: u16, code: &str) -> Response {
+        Response::json(status, &json::obj(vec![
+            ("code", json::s(code)),
+            ("error", json::s(&i18n::message("en-US", code))),
+        ]))
+    }
+    fn localized(self, locale: &str) -> Response {
+        if let Ok(value) = json::parse(&self.body) {
+            if let Some(code) = value.str_of("code").filter(|code| i18n::contains(code)) {
+                return Response::json(self.status, &json::obj(vec![
+                    ("code", json::s(code)),
+                    ("error", json::s(&i18n::message(locale, code))),
+                ]));
+            }
+        }
+        self
+    }
+
     pub fn json(status: u16, value: &json::Json) -> Response {
         Response { status, body: value.dump() }
     }
@@ -45,47 +66,94 @@ fn status_text(status: u16) -> &'static str {
         201 => "Created",
         400 => "Bad Request",
         401 => "Unauthorized",
+        403 => "Forbidden",
         404 => "Not Found",
+        408 => "Request Timeout",
+        413 => "Content Too Large",
         409 => "Conflict",
+        502 => "Bad Gateway",
         503 => "Service Unavailable",
         _ => "Internal Server Error",
     }
 }
 
-fn read_request(stream: &TcpStream) -> Option<Request> {
-    let mut reader = BufReader::new(stream);
-    let mut line = String::new();
-    if reader.read_line(&mut line).ok()? == 0 {
-        return None;
+const MAX_HEADER_BYTES: usize = 32 * 1024;
+const MAX_BODY_BYTES: usize = 1024 * 1024;
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(20);
+
+struct DeadlineReader<'a> {
+    stream: &'a TcpStream,
+    deadline: Instant,
+}
+
+impl Read for DeadlineReader<'_> {
+    fn read(&mut self, buffer: &mut [u8]) -> std::io::Result<usize> {
+        let remaining = self.deadline.checked_duration_since(Instant::now())
+            .filter(|time| !time.is_zero())
+            .ok_or_else(|| std::io::Error::from(ErrorKind::TimedOut))?;
+        self.stream.set_read_timeout(Some(remaining))?;
+        self.stream.read(buffer)
     }
-    let mut parts = line.split_whitespace();
-    let method = parts.next()?.to_string();
-    let path = parts.next()?.to_string();
-    let mut content_length = 0usize;
+}
+
+fn read_request(stream: &TcpStream, locale: &mut String) -> Result<Option<Request>, Response> {
+    let invalid = || Response::problem(400, "invalid_request");
+    let io_error = |error: std::io::Error| {
+        if matches!(error.kind(), ErrorKind::TimedOut | ErrorKind::WouldBlock) {
+            Response::problem(408, "request_timeout")
+        } else {
+            invalid()
+        }
+    };
+    let mut reader = BufReader::new(DeadlineReader { stream, deadline: Instant::now() + REQUEST_TIMEOUT });
+    let mut budget = MAX_HEADER_BYTES;
+    let mut read_line = |reader: &mut BufReader<DeadlineReader<'_>>| -> Result<String, Response> {
+        let mut bytes = Vec::new();
+        reader.take((budget + 1) as u64).read_until(b'\n', &mut bytes).map_err(io_error)?;
+        if bytes.len() > budget {
+            return Err(Response::problem(413, "request_too_large"));
+        }
+        budget -= bytes.len();
+        if !bytes.is_empty() && !bytes.ends_with(b"\r\n") {
+            return Err(invalid());
+        }
+        String::from_utf8(bytes).map_err(|_| invalid())
+    };
+    let line = read_line(&mut reader)?;
+    if line.is_empty() { return Ok(None); }
+    let parts: Vec<_> = line.split_whitespace().collect();
+    if parts.len() != 3 || !matches!(parts[2], "HTTP/1.0" | "HTTP/1.1") {
+        return Err(invalid());
+    }
+    let method = parts[0].to_string();
+    let path = parts[1].to_string();
+    let mut content_length = None;
     loop {
-        let mut header = String::new();
-        if reader.read_line(&mut header).ok()? == 0 {
-            break;
+        let header = read_line(&mut reader)?;
+        if header == "\r\n" { break; }
+        let (name, value) = header.strip_suffix("\r\n").and_then(|h| h.split_once(':')).ok_or_else(invalid)?;
+        if name.is_empty() || !name.bytes().all(|c| c.is_ascii_alphanumeric() || b"!#$%&'*+-.^_`|~".contains(&c)) {
+            return Err(invalid());
         }
-        let header = header.trim_end();
-        if header.is_empty() {
-            break;
+        if name.eq_ignore_ascii_case("transfer-encoding") {
+            return Err(invalid());
         }
-        if let Some((name, value)) = header.split_once(':') {
-            if name.eq_ignore_ascii_case("content-length") {
-                content_length = value.trim().parse().unwrap_or(0);
+        if name.eq_ignore_ascii_case("accept-language") {
+            *locale = i18n::negotiate(value.trim());
+        }
+        if name.eq_ignore_ascii_case("content-length") {
+            let value = value.trim();
+            if content_length.is_some() || value.is_empty() || !value.bytes().all(|c| c.is_ascii_digit()) {
+                return Err(invalid());
             }
+            let size = value.parse::<usize>().map_err(|_| Response::problem(413, "request_too_large"))?;
+            if size > MAX_BODY_BYTES { return Err(Response::problem(413, "request_too_large")); }
+            content_length = Some(size);
         }
     }
-    let mut body = vec![0u8; content_length];
-    if content_length > 0 {
-        reader.read_exact(&mut body).ok()?;
-    }
-    Some(Request {
-        method,
-        path,
-        body: String::from_utf8_lossy(&body).into_owned(),
-    })
+    let mut body = vec![0; content_length.unwrap_or(0)];
+    reader.read_exact(&mut body).map_err(io_error)?;
+    Ok(Some(Request { method, path, body: String::from_utf8(body).map_err(|_| invalid())? }))
 }
 
 fn write_response(stream: &TcpStream, response: &Response) {
@@ -118,10 +186,15 @@ pub fn serve_app<S>(
             Ok(s) => s,
             Err(_) => continue,
         };
-        let _ = stream.set_read_timeout(Some(Duration::from_secs(20)));
-        let request = match read_request(&stream) {
-            Some(r) => r,
-            None => continue,
+        let _ = stream.set_write_timeout(Some(Duration::from_secs(5)));
+        let mut locale = i18n::negotiate(&std::env::var("AMISAD_LOCALE").unwrap_or_default());
+        let request = match read_request(&stream, &mut locale) {
+            Ok(Some(r)) => r,
+            Ok(None) => continue,
+            Err(response) => {
+                write_response(&stream, &response.localized(&locale));
+                continue;
+            }
         };
         let response = match (request.method.as_str(), request.path.as_str()) {
             ("GET", "/health") => Response::json(
@@ -137,7 +210,7 @@ pub fn serve_app<S>(
             ),
             _ => handler(&mut state, &request),
         };
-        write_response(&stream, &response);
+        write_response(&stream, &response.localized(&locale));
     }
     Ok(())
 }

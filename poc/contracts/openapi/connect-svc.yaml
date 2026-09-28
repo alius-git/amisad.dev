@@ -85,7 +85,7 @@ paths:
       responses:
         "200": { description: "synced" }
         "401": { description: "invalid/revoked" }
-        "403": { description: "out of scope" }
+        "403": { description: "Outside credential scope or tenant; no cross-tenant mutation" }
   /v1/sync/inventory:
     post:
       summary: "Apply an inventory delta (scope inventory; body: credential, offer_id, stock, delta_ts)"
@@ -97,7 +97,7 @@ paths:
       responses:
         "200": { description: "offer_id, stock" }
         "401": { description: "invalid/revoked" }
-        "403": { description: "out of scope" }
+        "403": { description: "Outside credential scope or tenant; no cross-tenant mutation" }
   /v1/orders/events:
     post:
       summary: "Order-lifecycle event from seller-svc; mirror to the ERP idempotently (body: match_id, tenant, state)"

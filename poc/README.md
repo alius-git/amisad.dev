@@ -1,5 +1,8 @@
 # AmisAd POC
 
+Service behavior, retry rules, HTTP limits, and localized errors are documented in
+[service contracts](contracts/service-behavior.md).
+
 Code skeletons for the AmisAd proof of concept, laid out in the
 **yuruna-project convention** so the Yuruna runner discovers and drives them.
 Design: [../plan/design.md](../plan/design.md) - scenarios:

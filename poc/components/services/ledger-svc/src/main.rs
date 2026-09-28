@@ -333,11 +333,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Ok(i) => i,
                 Err(e) => return Response::error(400, &e),
             };
-            if state
-                .instructions
-                .iter()
-                .any(|i| i.match_id == instruction.match_id)
-            {
+            if let Some(existing) = state.instructions.iter().find(|i| i.match_id == instruction.match_id) {
+                if existing.value_cents == instruction.value_cents && existing.splits == instruction.splits {
+                    return Response::json(200, &json::obj(vec![
+                        ("match_id", json::s(&existing.match_id)),
+                        ("status", json::s(if existing.confirmed { "confirmed" } else { "pending" })),
+                    ]));
+                }
                 return Response::error(409, "instruction exists for match_id");
             }
             if let Some(db) = state.db.as_mut() {
@@ -369,7 +371,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 None => return Response::error(404, "no instruction for match_id"),
             };
             if state.instructions[index].confirmed {
-                return Response::error(409, "already confirmed");
+                return Response::json(200, &json::obj(vec![
+                    ("match_id", json::s(&match_id)),
+                    ("entries", json::n(state.instructions[index].splits.len() as i64)),
+                    ("head", json::s(&state.settlement.head())),
+                ]));
             }
             // Precompute the whole chain extension, persist it as ONE
             // transaction (confirmed flag + all splits), and only then apply
@@ -429,14 +435,35 @@ fn handle(state: &mut State, req: &Request) -> Response {
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let case_id = match body.str_of("case_id") {
-                Some(c) => c.to_string(),
-                None => return Response::error(400, "case_id required"),
+                Some(c) if !c.is_empty() => c.to_string(),
+                _ => return Response::error(400, "case_id required"),
             };
             let instruction = match state.instructions.iter().find(|i| i.match_id == match_id) {
                 Some(i) if i.confirmed => i,
                 Some(_) => return Response::error(409, "settlement not confirmed"),
                 None => return Response::error(404, "no settlement for match_id"),
             };
+            // The durable chain is also the replay record, including after restart.
+            let previous: Vec<_> = state.settlement.entries.iter().filter(|entry|
+                entry.payload.str_of("entry_type") == Some("adjustment")
+                && (entry.payload.str_of("match_id") == Some(match_id.as_str())
+                    || entry.payload.str_of("case_id") == Some(case_id.as_str()))).collect();
+            if !previous.is_empty() {
+                let exact = previous.len() == instruction.splits.len()
+                    && instruction.splits.iter().all(|(party, amount)| previous.iter().filter(|entry|
+                        entry.payload.str_of("match_id") == Some(match_id.as_str())
+                        && entry.payload.str_of("case_id") == Some(case_id.as_str())
+                        && entry.payload.str_of("party") == Some(party.as_str())
+                        && entry.payload.i64_of("amount_cents") == Some(-amount)).count() == 1);
+                if !exact {
+                    return Response::problem(409, "refund_conflict");
+                }
+                return Response::json(200, &json::obj(vec![
+                    ("match_id", json::s(&match_id)),
+                    ("case_id", json::s(&case_id)),
+                    ("adjustment_entries", json::n(previous.len() as i64)),
+                ]));
+            }
             // Reverse every split as a negative compensating entry.
             let reversals: Vec<(String, i64)> = instruction
                 .splits

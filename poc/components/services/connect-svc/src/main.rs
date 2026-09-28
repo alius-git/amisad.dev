@@ -191,15 +191,21 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(e) => return Response::error(400, &e),
             };
             let credential = body.str_of("credential").unwrap_or("").to_string();
-            if let Err(resp) = authorize(state, &credential, "catalog") {
-                return resp;
-            }
+            let grant = match authorize(state, &credential, "catalog") {
+                Ok(index) => index,
+                Err(resp) => return resp,
+            };
+            let tenant = state.grants[grant].tenant.clone();
             let empty = Vec::new();
             let offers = body.get("offers").and_then(|o| o.as_arr()).unwrap_or(&empty).clone();
+            if offers.iter().any(|offer| offer.str_of("tenant") != Some(tenant.as_str())) {
+                return Response::problem(403, "tenant_mismatch");
+            }
             let mut synced = 0;
             for offer in &offers {
                 match request("POST", &format!("{}/v1/offers", seller_url()), Some(&offer.dump())) {
                     Ok((201, _)) => synced += 1,
+                    Ok((403, _)) => return Response::problem(403, "tenant_mismatch"),
                     Ok((status, resp)) => return Response::error(502, &format!("seller offer ({status}): {resp}")),
                     Err(e) => return Response::error(503, &format!("seller unavailable: {e}")),
                 }
@@ -214,9 +220,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(e) => return Response::error(400, &e),
             };
             let credential = body.str_of("credential").unwrap_or("").to_string();
-            if let Err(resp) = authorize(state, &credential, "inventory") {
-                return resp;
-            }
+            let grant = match authorize(state, &credential, "inventory") {
+                Ok(index) => index,
+                Err(resp) => return resp,
+            };
+            let tenant = state.grants[grant].tenant.clone();
             let offer_id = body.str_of("offer_id").unwrap_or("").to_string();
             let stock = body.i64_of("stock").unwrap_or(-1);
             let delta_ts = body.i64_of("delta_ts").unwrap_or(0);
@@ -224,12 +232,14 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 return Response::error(400, "offer_id and stock (>= 0) required");
             }
             let update = json::obj(vec![
+                ("tenant", json::s(&tenant)),
                 ("offer_id", json::s(&offer_id)),
                 ("stock", json::n(stock)),
             ])
             .dump();
             match request("POST", &format!("{}/v1/offers/inventory", seller_url()), Some(&update)) {
                 Ok((200, _)) => {}
+                Ok((403, _)) => return Response::problem(403, "tenant_mismatch"),
                 Ok((status, resp)) => return Response::error(502, &format!("seller inventory ({status}): {resp}")),
                 Err(e) => return Response::error(503, &format!("seller unavailable: {e}")),
             }
