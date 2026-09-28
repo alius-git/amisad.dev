@@ -78,7 +78,7 @@ GRANT USAGE ON SCHEMA ledger, seller TO amisad;
 GRANT SELECT, INSERT ON ledger.consent_ledger, ledger.settlement_ledger, ledger.attestation_ledger TO amisad;
 -- Instructions are working state: confirmed flips true once.
 GRANT SELECT, INSERT, UPDATE ON ledger.settlement_instructions TO amisad;
-GRANT SELECT, INSERT, UPDATE ON seller.offers, seller.orders TO amisad;
+GRANT SELECT, INSERT, UPDATE ON seller.offers, seller.orders, seller.inventory TO amisad;
 SQL
 
 # Reachable from pods: listen on every interface, allow the pod/node networks.

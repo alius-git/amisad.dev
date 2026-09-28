@@ -2,6 +2,7 @@
 import contextlib
 import http.client
 import os
+import re
 from pathlib import Path
 import socket
 import subprocess
@@ -19,6 +20,42 @@ def sql(statement):
 
 
 class DatabasePolicy(unittest.TestCase):
+    def test_provisioned_inventory_permissions(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh').read_text()
+        grants = re.search(r"<<'SQL'\n(.*?)\nSQL", source, re.DOTALL)
+        self.assertIsNotNone(grants, 'database provisioning SQL block is missing')
+        # Execute the provisioning grants against real PostgreSQL, then exercise
+        # the application role rather than the schema owner's implicit access.
+        result = sql('BEGIN;\n' + (root / 'db/schema.sql').read_text() + """
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'amisad') THEN
+        CREATE ROLE amisad LOGIN;
+    END IF;
+END $$;
+REVOKE ALL ON ALL TABLES IN SCHEMA seller, ledger FROM amisad;
+""" + grants.group(1) + """
+SET LOCAL ROLE amisad;
+SELECT current_user, rolsuper FROM pg_roles WHERE rolname = current_user;
+INSERT INTO seller.offers (offer_id, tenant, title, category, region, price_cents)
+VALUES ('provisioning-inventory', 'tenant', 'Offer', 'test', 'test', 100);
+INSERT INTO seller.inventory (offer_id, stock, delta_ts)
+VALUES ('provisioning-inventory', 5, 20);
+UPDATE seller.inventory SET stock = 7, delta_ts = 21
+WHERE offer_id = 'provisioning-inventory';
+SELECT stock, delta_ts FROM seller.inventory WHERE offer_id = 'provisioning-inventory';
+SELECT has_table_privilege(current_user, 'seller.inventory', 'DELETE');
+SELECT has_table_privilege(current_user, table_name, 'UPDATE')
+    OR has_table_privilege(current_user, table_name, 'DELETE')
+FROM (VALUES ('ledger.consent_ledger'), ('ledger.settlement_ledger'),
+             ('ledger.attestation_ledger')) AS ledgers(table_name);
+ROLLBACK;
+""")
+        lines = result.splitlines()
+        self.assertIn('amisad|f', lines)
+        self.assertIn('7|21', lines)
+        self.assertEqual(lines[-5:], ['f', 'f', 'f', 'f', 'ROLLBACK'])
+
     def test_invalid_configuration_exits(self):
         for name in ('seller-svc', 'ledger-svc'):
             result = subprocess.run([str(BIN / name)], env={**os.environ, 'DATABASE_URL': 'invalid option'}, capture_output=True, timeout=5)

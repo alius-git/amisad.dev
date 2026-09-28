@@ -165,7 +165,10 @@ vault PAT in a `sensitive: true` step.
 role `amisad` (fixed lab password `amisadpoc2026` -- it rides inside a URL, so
 alphanumeric on purpose), opens `listen_addresses`/pg_hba to the pod and node
 networks, and grants the role INSERT+SELECT only on ledger tables: append-only
-is enforced by the database itself. `deploy.sh` passes `DATABASE_URL` (node
+is enforced by the database itself. The seller role receives SELECT, INSERT, and
+UPDATE on `seller.offers`, `seller.orders`, and `seller.inventory`; inventory
+access is required during seller startup as well as during stock updates.
+`deploy.sh` passes `DATABASE_URL` (node
 IP:5432) to ledger-svc and seller-svc via the `databaseUrl` helm value; writes
 go to PostgreSQL first, and pods reload state on start. s001 asserts the rows
 landed and that a `kubectl rollout restart` reloads verifying chains and the
@@ -177,6 +180,18 @@ s008 the compensating adjustment entries + disclosure grant; s010 the
 independent four-dimension certification and tamper localization. An empty
 `databaseUrl` (the chart default) keeps a service in-memory -- how `cargo test`
 and skeleton services run.
+
+Existing `amisad-core-k8s` and `amisad-core` snapshots created before the inventory
+grant must be rebuilt or repaired before reuse. The normal end-to-end cycle
+removes and rebuilds these VMs automatically. For a retained lab, apply the current
+`db/schema.sql` as the database administrator, then run this in the `amisad`
+database. Recapture the repaired infrastructure snapshot and rebuild the deployed
+`amisad-core` snapshot from it; for a running deployed VM, restart seller after
+applying the grant:
+
+```sql
+GRANT SELECT, INSERT, UPDATE ON seller.inventory TO amisad;
+```
 
 ## Project archive helper
 
@@ -274,6 +289,16 @@ module directly; the common library itself remains std-only. SQL errors return
 503 without terminating a live connection; a closed connection exits for restart.
 `test/database_policy_contracts.py` verifies both against a disposable PostgreSQL
 database selected by `DATABASE_POLICY_URL` (never use an existing lab database).
+Run it with an administrative connection to a disposable PostgreSQL cluster and
+`PSQL` pointing to `psql` if it is outside PATH. Its provisioning regression applies
+`db/schema.sql` and the actual grant block from the guest db script in a rolled-back
+transaction, then exercises inventory reads and writes as the non-superuser
+`amisad` role and verifies that ledger UPDATE/DELETE remain forbidden. Run that
+check alone with:
+
+```bash
+python3 test/database_policy_contracts.py DatabasePolicy.test_provisioned_inventory_permissions -v
+```
 
 The SPA provides unknown-route recovery in English, Portuguese, Chinese, and
 Hebrew. Translations are machine drafts with source hashes in

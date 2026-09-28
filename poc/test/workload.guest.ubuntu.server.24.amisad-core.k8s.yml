@@ -6,7 +6,7 @@
 # tier's rename to amisad-core).
 
 sequenceGuid: 42098986-ed31-41e5-ac09-1e50119cc209
-sequenceRevision: 3
+sequenceRevision: 4
 
 description: "Ubuntu Server: provision amisad-core (admin amisad-core-admin), install Kubernetes + PostgreSQL + NATS over SSH, snapshot amisad-core-k8s."
 keystrokeMechanism: ssh
