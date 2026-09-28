@@ -14,7 +14,9 @@
 // genesis prev = 64 zeros. History is never edited; balances are derived.
 
 use amisad_common::{json, serve_app, sha256, Request, Response, ServiceInfo};
-use postgres::{Client, NoTls};
+use postgres::Client;
+#[path = "../../../lib/amisad-common/src/database.rs"]
+mod database;
 
 const GENESIS: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 
@@ -126,32 +128,9 @@ fn consent_state(chain: &Chain, subject: &str, grant_type: &str) -> &'static str
     state
 }
 
-/// DATABASE_URL unset/empty -> in-memory. Set but unreachable -> exit(1);
-/// kubernetes restarts the pod until PostgreSQL accepts connections.
-fn open_db() -> Option<Client> {
-    let url = match std::env::var("DATABASE_URL") {
-        Ok(u) if !u.is_empty() => u,
-        _ => return None,
-    };
-    match Client::connect(&url, NoTls) {
-        Ok(c) => Some(c),
-        Err(e) => {
-            eprintln!("ledger-svc: DATABASE_URL set but connection failed: {e}");
-            std::process::exit(1);
-        }
-    }
-}
-
-/// A dead connection means every future write 503s while /health stays green
-/// (probes never touch the store) - exit instead and let kubernetes restart
-/// the pod, which rehydrates from the database. SQL-level errors (constraint
-/// violations etc.) keep the connection alive and surface as 503.
+fn open_db() -> Option<Client> { database::open("ledger-svc") }
 fn store_error(db: &Client, what: &str, e: postgres::Error) -> Response {
-    if db.is_closed() {
-        eprintln!("ledger-svc: {what}: connection lost ({e}); exiting to reload");
-        std::process::exit(1);
-    }
-    Response::error(503, &format!("{what} unavailable: {e}"))
+    database::store_error("ledger-svc", db, what, e)
 }
 
 fn load_chain(db: &mut Client, table: &str) -> Chain {

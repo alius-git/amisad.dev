@@ -180,7 +180,7 @@ and skeleton services run.
 
 ## Project archive helper
 
-[build/serve-local.ps1](build/serve-local.ps1) publishes this checkout's committed
+[build/Publish-ProjectArchive.ps1](build/Publish-ProjectArchive.ps1) publishes this checkout's committed
 HEAD to `<yuruna-root>/project-poc.tar.gz`, served at
 `/yuruna-repo/project-poc.tar.gz`. Republish after a commit when using this
 manual archive; it excludes uncommitted changes. The active guest scripts use
@@ -265,3 +265,18 @@ These tests create records and restart their own local service processes.
 they do not modify the host firewall, install system services, or deploy VMs.
 Run `flutter test` and `flutter analyze` in `components/apps/buyer-flutter` for
 request-deadline, navigation/disposal, and stale-response checks.
+
+Scenario HTTP diagnostics and edge lookup are shared in `test/amisad-scenario.sh`,
+loaded from the extracted project archive. `build/Publish-ProjectArchive.ps1`
+is the canonical archive command; `build/serve-local.ps1` forwards for compatibility.
+Seller and ledger compile the database-specific `amisad-common/src/database.rs`
+module directly; the common library itself remains std-only. SQL errors return
+503 without terminating a live connection; a closed connection exits for restart.
+`test/database_policy_contracts.py` verifies both against a disposable PostgreSQL
+database selected by `DATABASE_POLICY_URL` (never use an existing lab database).
+
+The SPA provides unknown-route recovery in English, Portuguese, Chinese, and
+Hebrew. Translations are machine drafts with source hashes in
+`messages.provenance.json`; `python3 test/check_messages.py` checks completeness,
+unused keys, and staleness. `node test/low_browser_contracts.cjs` tests the built SPA
+with Chrome; `PLAYWRIGHT_MODULE` and `CHROME_PATH` can override local tool paths.

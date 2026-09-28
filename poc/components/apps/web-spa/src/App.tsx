@@ -6,6 +6,7 @@
 // until its scenarios land.
 
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import { notFoundMessages } from "./messages";
 import RoleModule from "./modules/RoleModule";
 
 const MODULES = [
@@ -35,10 +36,19 @@ function Home() {
   );
 }
 
+function NotFound() {
+  const locale = (navigator.language || "en").split("-")[0];
+  const text = notFoundMessages[locale] || notFoundMessages.en;
+  return <main lang={locale in notFoundMessages ? locale : "en"} dir={locale === "he" ? "rtl" : "ltr"}>
+    <h1>{text.title}</h1><p>{text.description}</p><Link to="/">{text.home}</Link>
+  </main>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="*" element={<NotFound />} />
         <Route path="/" element={<Home />} />
         {MODULES.map((m) => (
           <Route

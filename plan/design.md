@@ -87,7 +87,7 @@ amisad.dev/
   poc/
     MODULE.bazel            # Bazel root (bzlmod, rules_rust pinned; .bazelversion via bazelisk)
     build/                  # doctor.ps1 (toolchain check), build-all.ps1, images.ps1,
-                            #   run-tests.ps1 (scenario driver), serve-local.ps1
+                            #   run-tests.ps1 (scenario driver), Publish-ProjectArchive.ps1
     contracts/              # OpenAPI specs -- the compatibility gate; NATS event schemas land
                             #   with the first scenario that publishes on a subject
     components/

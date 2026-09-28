@@ -9,7 +9,9 @@
 // board survive pod restarts); without it the store is in-memory.
 
 use amisad_common::{json, request, serve_app, Request, Response, ServiceInfo};
-use postgres::{Client, NoTls};
+use postgres::Client;
+#[path = "../../../lib/amisad-common/src/database.rs"]
+mod database;
 
 struct Order {
     match_id: String,
@@ -33,32 +35,9 @@ struct State {
     db: Option<Client>,
 }
 
-/// DATABASE_URL unset/empty -> in-memory. Set but unreachable -> exit(1);
-/// kubernetes restarts the pod until PostgreSQL accepts connections.
-fn open_db() -> Option<Client> {
-    let url = match std::env::var("DATABASE_URL") {
-        Ok(u) if !u.is_empty() => u,
-        _ => return None,
-    };
-    match Client::connect(&url, NoTls) {
-        Ok(c) => Some(c),
-        Err(e) => {
-            eprintln!("seller-svc: DATABASE_URL set but connection failed: {e}");
-            std::process::exit(1);
-        }
-    }
-}
-
-/// A dead connection means every future write 503s while /health stays green
-/// (probes never touch the store) - exit instead and let kubernetes restart
-/// the pod, which rehydrates from the database. SQL-level errors (constraint
-/// violations etc.) keep the connection alive and surface as 503.
+fn open_db() -> Option<Client> { database::open("seller-svc") }
 fn store_error(db: &Client, what: &str, e: postgres::Error) -> Response {
-    if db.is_closed() {
-        eprintln!("seller-svc: {what}: connection lost ({e}); exiting to reload");
-        std::process::exit(1);
-    }
-    Response::error(503, &format!("{what} unavailable: {e}"))
+    database::store_error("seller-svc", db, what, e)
 }
 
 fn load_store(db: &mut Client) -> (Vec<json::Json>, Vec<Order>, Vec<(String, i64, i64)>) {

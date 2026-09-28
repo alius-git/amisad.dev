@@ -13,7 +13,7 @@ Design: [../plan/design.md](../plan/design.md) - scenarios:
 | Path | Contents |
 |------|----------|
 | `MODULE.bazel`, `.bazelversion`, `BUILD.bazel` | Bazel root (bzlmod, pinned via bazelisk) |
-| `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `run-tests.ps1` (the scenario driver), `serve-local.ps1` (optional manual HEAD archive) |
+| `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `run-tests.ps1` (the scenario driver), `Publish-ProjectArchive.ps1` (optional manual HEAD archive) |
 | `contracts/` | OpenAPI specs per service -- real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest -- + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |

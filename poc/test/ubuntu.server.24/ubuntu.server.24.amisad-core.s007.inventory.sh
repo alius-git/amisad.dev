@@ -14,6 +14,8 @@ REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
+# shellcheck source=../amisad-scenario.sh
+. "$POC/test/amisad-scenario.sh"
 
 NODE_IP=$(hostname -I | awk '{print $1}')
 LEDGER="http://${NODE_IP}:30081"
@@ -28,49 +30,8 @@ if [ -r /etc/yuruna/host.env ]; then
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
 # --- REGION: https://yuruna.link/4220a755-0019
-# --- REGION: a failed service call must name the service and what it answered
-# `curl -sf` prints nothing on a non-2xx and exits non-zero. On the LEFT of a
-# pipe that is invisible: the parser downstream reads empty stdin and reports a
-# syntax error at line 1, so a service that never answered is diagnosed as
-# malformed data -- the run then ends on a traceback naming neither the URL nor
-# the status. Takes the same arguments as `curl -sf` and, on success, writes the
-# body to stdout unchanged, so callers can pipe it exactly like `curl -sf`.
-amisad_curl() { # <same args as curl -sf>
-    local out status body url='' arg
-    for arg in "$@"; do
-        case "$arg" in http://*|https://*) url="$arg" ;; esac
-    done
-    if ! out=$(curl -sS -w '\n%{http_code}' "$@"); then
-        printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   cause:  the request did not complete (curl reported it above)\n\n' \
-            "${url:-<no url among the arguments>}" >&2
-        return 1
-    fi
-    status=${out##*$'\n'}
-    body=${out%$'\n'*}
-    case "$status" in
-        2[0-9][0-9]) ;;
-        *)
-            printf '\n!! SERVICE CALL FAILED\n!!   url:    %s\n!!   status: HTTP %s\n!!   body:   %s\n\n' \
-                "${url:-<no url among the arguments>}" "$status" "$(printf '%.400s' "${body:-<empty>}")" >&2
-            return 1
-            ;;
-    esac
-    # A 2xx with no body is normal for a POST and fatal for a caller about to
-    # parse it. Say so here rather than leave the parser to report a syntax
-    # error at line 1 of nothing.
-    if [ -z "$body" ]; then
-        printf '!! note: %s answered HTTP %s with an empty body\n' "$url" "$status" >&2
-    fi
-    printf '%s' "$body"
-}
 
-amisad_edge_addr() { # <edge-vm-name>
-    local edge="$1" ip
-    ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
-    if [ -n "$ip" ]; then printf '%s' "$ip"; return 0; fi
-    wget --no-proxy --timeout=10 --tries=2 -qO- \
-        "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log/handoff/${edge}.ip.txt" 2>/dev/null || true
-}
+
 
 if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
     EDGE_IP=$(amisad_edge_addr amisad-edge-a)

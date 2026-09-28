@@ -124,13 +124,21 @@ var AD = (function () {
   }
   function deepFindAll(node, key, out) {
     out = out || [];
-    if (node === null || typeof node !== "object") return out;
-    if (!Array.isArray(node) && key in node && typeof node[key] !== "object") out.push(node[key]);
-    var vals = Object.values(node);
-    for (var i = 0; i < vals.length; i++) deepFindAll(vals[i], key, out);
-    var seen = [];
-    for (var j = 0; j < out.length; j++) if (seen.indexOf(out[j]) < 0) seen.push(out[j]);
-    return seen;
+    function visit(value) {
+      if (value === null || typeof value !== "object") return;
+      if (!Array.isArray(value) && key in value && typeof value[key] !== "object") out.push(value[key]);
+      var vals = Object.values(value);
+      for (var i = 0; i < vals.length; i++) visit(vals[i]);
+    }
+    visit(node);
+    var seen = new Set();
+    return out.filter(function (value) {
+      // indexOf historically retained each NaN occurrence.
+      if (value !== value) return true;
+      if (seen.has(value)) return false;
+      seen.add(value);
+      return true;
+    });
   }
 
   // Every window's single hook for lab traffic. onCall lets the action window

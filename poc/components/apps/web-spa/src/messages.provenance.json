@@ -1,0 +1,18 @@
+{
+  "source": "en-US",
+  "sourceSha256": "d580752e1febbd45813cda7cb5b2a39f479791e82c9e7e6815d56631257d09af",
+  "translations": {
+    "pt-BR": {
+      "origin": "machine",
+      "sourceSha256": "d580752e1febbd45813cda7cb5b2a39f479791e82c9e7e6815d56631257d09af"
+    },
+    "zh-CN": {
+      "origin": "machine",
+      "sourceSha256": "d580752e1febbd45813cda7cb5b2a39f479791e82c9e7e6815d56631257d09af"
+    },
+    "he-IL": {
+      "origin": "machine",
+      "sourceSha256": "d580752e1febbd45813cda7cb5b2a39f479791e82c9e7e6815d56631257d09af"
+    }
+  }
+}

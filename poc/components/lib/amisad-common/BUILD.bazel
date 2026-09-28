@@ -9,4 +9,4 @@ rust_library(
     visibility = ["//visibility:public"],
 )
 
-exports_files(["Cargo.toml"])
+exports_files(["Cargo.toml", "src/database.rs"])

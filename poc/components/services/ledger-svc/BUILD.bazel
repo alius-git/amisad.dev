@@ -2,7 +2,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 rust_binary(
     name = "ledger-svc",
-    srcs = ["src/main.rs"],
+    srcs = ["src/main.rs", "//components/lib/amisad-common:src/database.rs"],
     edition = "2021",
     deps = [
         "//components/lib/amisad-common",
