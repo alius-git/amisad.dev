@@ -49,7 +49,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/incidents") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let summary = body.str_of("summary").unwrap_or("").to_string();
             let from = body.str_of("from").unwrap_or("").to_string();
@@ -94,7 +94,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/support/cases") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let match_id = match body.str_of("match_id") {
                 Some(m) => m.to_string(),
@@ -117,7 +117,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/support/cases/disclosure/request") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let case_id = body.str_of("case_id").unwrap_or("").to_string();
             let case = match state.support.iter_mut().find(|c| c.id == case_id) {
@@ -136,7 +136,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/support/cases/disclosure/grant") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let case_id = body.str_of("case_id").unwrap_or("").to_string();
             let artifact = body.str_of("artifact").unwrap_or("").to_string();
@@ -155,7 +155,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/support/cases/resolve") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let case_id = body.str_of("case_id").unwrap_or("").to_string();
             match state.support.iter_mut().find(|c| c.id == case_id) {

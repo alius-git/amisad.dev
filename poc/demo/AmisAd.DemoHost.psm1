@@ -121,6 +121,22 @@ function Add-DemoFirewallRule {
     return Add-DemoFirewallRuleLinux -Port $Port
 }
 
+function Invoke-DemoNativeCommand {
+    [CmdletBinding()]
+    [OutputType([object[]])]
+    param([string]$FilePath, [string[]]$ArgumentList, [switch]$Elevated)
+    $program = $FilePath
+    $nativeArgs = $ArgumentList
+    if ($Elevated -and -not (Test-DemoAdministrator)) {
+        $program = 'sudo'
+        $nativeArgs = @($FilePath) + $ArgumentList
+    }
+    $global:LASTEXITCODE = 0
+    $output = @(& $program @nativeArgs 2>&1)
+    if ($LASTEXITCODE -ne 0) { throw "$FilePath exited $LASTEXITCODE`: $($output -join ' ')" }
+    return $output
+}
+
 function Add-DemoFirewallRuleWindows {
     <#
     .SYNOPSIS
@@ -130,44 +146,34 @@ function Add-DemoFirewallRuleWindows {
     [OutputType([bool])]
     param([int]$Port, [string]$RuleName)
 
-    $existing = Get-NetFirewallRule -DisplayName $RuleName -ErrorAction SilentlyContinue
-    if ($existing) {
-        Write-Information "Firewall: inbound rule '$RuleName' already present." -InformationAction Continue
-        return $true
-    }
-    # Windows needs the same elevation for the http.sys reservation that a
-    # non-loopback HttpListener prefix requires, so both are done in one pass.
-    $inner = "New-NetFirewallRule -DisplayName '$RuleName' -Direction Inbound -Protocol TCP " +
-             "-LocalPort $Port -Action Allow -Profile Any | Out-Null; " +
-             "netsh http add urlacl url=http://+:$Port/ user='$env:USERDOMAIN\$env:USERNAME' | Out-Null"
-    if (Test-DemoAdministrator) {
-        if (-not $PSCmdlet.ShouldProcess("port $Port", 'open inbound firewall port')) { return $false }
-        try {
-            New-NetFirewallRule -DisplayName $RuleName -Direction Inbound -Protocol TCP `
-                -LocalPort $Port -Action Allow -Profile Any | Out-Null
-            & netsh http add urlacl "url=http://+:$Port/" "user=$env:USERDOMAIN\$env:USERNAME" | Out-Null
-            Write-Information "Firewall: opened inbound TCP $Port." -InformationAction Continue
-            return $true
-        } catch {
-            Write-Warning "Firewall: could not open TCP $Port ($($_.Exception.Message))."
-            return $false
-        }
-    }
-    Write-Information "Firewall: inbound TCP $Port is not open yet - Windows will ask for administrator approval." -InformationAction Continue
-    if (-not $PSCmdlet.ShouldProcess("port $Port", 'open inbound firewall port (elevated)')) { return $false }
+    if (-not $PSCmdlet.ShouldProcess("port $Port", 'open inbound firewall port and reserve listener URL')) { return $false }
+    $quotedRule = $RuleName.Replace("'", "''")
+    $quotedUser = "$env:USERDOMAIN\$env:USERNAME".Replace("'", "''")
+    $inner = @"
+`$ErrorActionPreference = 'Stop'
+if (-not (Get-NetFirewallRule -DisplayName '$quotedRule' -ErrorAction SilentlyContinue)) {
+    New-NetFirewallRule -DisplayName '$quotedRule' -Direction Inbound -Protocol TCP -LocalPort $Port -Action Allow -Profile Any -ErrorAction Stop | Out-Null
+}
+`$reservation = @(& netsh http show urlacl 'url=http://+:$Port/' 2>&1) -join ' '
+if (`$LASTEXITCODE -ne 0 -or `$reservation -notmatch [regex]::Escape('http://+:$Port/')) {
+    & netsh http add urlacl 'url=http://+:$Port/' 'user=$quotedUser' | Out-Null
+    if (`$LASTEXITCODE -ne 0) { throw 'Listener URL reservation failed.' }
+}
+"@
     try {
-        $p = Start-Process -FilePath (Get-Process -Id $PID).Path `
-            -ArgumentList '-NoProfile', '-NonInteractive', '-Command', $inner `
-            -Verb RunAs -Wait -PassThru -WindowStyle Hidden
-        if ($p.ExitCode -eq 0) {
-            Write-Information "Firewall: opened inbound TCP $Port." -InformationAction Continue
-            return $true
+        if (Test-DemoAdministrator) {
+            & ([scriptblock]::Create($inner))
+        } else {
+            $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($inner))
+            $process = Start-Process -FilePath (Get-Process -Id $PID).Path `
+                -ArgumentList '-NoProfile', '-NonInteractive', '-EncodedCommand', $encoded `
+                -Verb RunAs -Wait -PassThru -WindowStyle Hidden
+            if ($process.ExitCode -ne 0) { throw "Elevated helper exited $($process.ExitCode)." }
         }
-        Write-Warning "Firewall: the elevated helper exited with $($p.ExitCode); TCP $Port may still be blocked."
-        return $false
+        Write-Information "Firewall: opened inbound TCP $Port." -InformationAction Continue
+        return $true
     } catch {
-        Write-Warning ("Firewall: elevation declined or failed ($($_.Exception.Message)). " +
-            "Open TCP $Port manually, or rerun this script from an elevated shell.")
+        Write-Warning "Firewall: could not open TCP $Port ($($_.Exception.Message))."
         return $false
     }
 }
@@ -183,19 +189,13 @@ function Add-DemoFirewallRuleMacOS {
 
     $fw = '/usr/libexec/ApplicationFirewall/socketfilterfw'
     if (-not (Test-Path -LiteralPath $fw)) { return $true }
-    $globalState = (& $fw --getglobalstate 2>$null) -join ' '
-    if ($globalState -notmatch 'enabled') {
-        Write-Information 'Firewall: the macOS application firewall is off; nothing to open.' -InformationAction Continue
-        return $true
-    }
-    # That firewall filters by application, not by port, so the thing to
-    # unblock is this PowerShell binary rather than a port number.
-    $pwshPath = (Get-Process -Id $PID).Path
-    if (-not $PSCmdlet.ShouldProcess($pwshPath, 'allow incoming connections')) { return $false }
-    Write-Information "Firewall: allowing incoming connections for $pwshPath (sudo may prompt)." -InformationAction Continue
     try {
-        & sudo $fw --add $pwshPath | Out-Null
-        & sudo $fw --unblockapp $pwshPath | Out-Null
+        $globalState = (Invoke-DemoNativeCommand -FilePath $fw -ArgumentList '--getglobalstate') -join ' '
+        if ($globalState -notmatch 'enabled') { return $true }
+        $pwshPath = (Get-Process -Id $PID).Path
+        if (-not $PSCmdlet.ShouldProcess($pwshPath, 'allow incoming connections')) { return $false }
+        Invoke-DemoNativeCommand -FilePath $fw -ArgumentList @('--add', $pwshPath) -Elevated | Out-Null
+        Invoke-DemoNativeCommand -FilePath $fw -ArgumentList @('--unblockapp', $pwshPath) -Elevated | Out-Null
         Write-Information 'Firewall: this PowerShell may accept incoming connections.' -InformationAction Continue
         return $true
     } catch {
@@ -213,33 +213,30 @@ function Add-DemoFirewallRuleLinux {
     [OutputType([bool])]
     param([int]$Port)
 
-    $sudo = @()
-    if (-not (Test-DemoAdministrator)) { $sudo = @('sudo') }
-
-    if (Get-Command ufw -ErrorAction SilentlyContinue) {
-        $status = (& @sudo ufw status 2>$null) -join ' '
-        if ($status -match 'Status:\s*active') {
-            if ($status -match "\b$Port/tcp\s+ALLOW") {
-                Write-Information "Firewall: ufw already allows $Port/tcp." -InformationAction Continue
+    try {
+        if (Get-Command ufw -ErrorAction SilentlyContinue) {
+            $status = (Invoke-DemoNativeCommand -FilePath 'ufw' -ArgumentList 'status' -Elevated) -join ' '
+            if ($status -match 'Status:\s*active') {
+                if ($status -match "\b$Port/tcp\s+ALLOW") { return $true }
+                if (-not $PSCmdlet.ShouldProcess("$Port/tcp", 'ufw allow')) { return $false }
+                Invoke-DemoNativeCommand -FilePath 'ufw' -ArgumentList @('allow', "$Port/tcp") -Elevated | Out-Null
                 return $true
             }
-            if (-not $PSCmdlet.ShouldProcess("$Port/tcp", 'ufw allow')) { return $false }
-            Write-Information "Firewall: running 'ufw allow $Port/tcp' (sudo may prompt)." -InformationAction Continue
-            & @sudo ufw allow "$Port/tcp" | Out-Null
-            return $true
         }
-    }
-    if (Get-Command firewall-cmd -ErrorAction SilentlyContinue) {
-        $state = (& firewall-cmd --state 2>$null) -join ' '
-        if ($state -match 'running') {
-            if (-not $PSCmdlet.ShouldProcess("$Port/tcp", 'firewall-cmd --add-port')) { return $false }
-            Write-Information "Firewall: running 'firewall-cmd --add-port=$Port/tcp' (sudo may prompt)." -InformationAction Continue
-            & @sudo firewall-cmd --add-port="$Port/tcp" | Out-Null
-            return $true
+        if (Get-Command firewall-cmd -ErrorAction SilentlyContinue) {
+            $state = (Invoke-DemoNativeCommand -FilePath 'firewall-cmd' -ArgumentList '--state' -Elevated) -join ' '
+            if ($state -match '^running$') {
+                if (-not $PSCmdlet.ShouldProcess("$Port/tcp", 'firewall-cmd --add-port')) { return $false }
+                Invoke-DemoNativeCommand -FilePath 'firewall-cmd' -ArgumentList "--add-port=$Port/tcp" -Elevated | Out-Null
+                return $true
+            }
         }
+        Write-Information "Firewall: no active ufw or firewalld found; inbound $Port needs nothing here." -InformationAction Continue
+        return $true
+    } catch {
+        Write-Warning "Firewall: could not open TCP $Port ($($_.Exception.Message))."
+        return $false
     }
-    Write-Information "Firewall: no active ufw or firewalld found; inbound $Port needs nothing here." -InformationAction Continue
-    return $true
 }
 
 function New-DemoListener {

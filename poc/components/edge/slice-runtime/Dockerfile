@@ -4,9 +4,9 @@
 #   docker build -f components/edge/slice-runtime/Dockerfile -t amisad/slice-runtime .
 FROM rust:1.96-slim AS build
 WORKDIR /src
-COPY Cargo.toml ./
+COPY Cargo.toml Cargo.lock ./
 COPY components ./components
-RUN cargo build --release -p slice-runtime
+RUN cargo build --release --locked -p slice-runtime
 
 FROM debian:bookworm-slim
 COPY --from=build /src/target/release/slice-runtime /usr/local/bin/slice-runtime

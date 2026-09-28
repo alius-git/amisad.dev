@@ -4,9 +4,9 @@
 #   docker build -f components/services/ledger-svc/Dockerfile -t amisad/ledger-svc .
 FROM rust:1.96-slim AS build
 WORKDIR /src
-COPY Cargo.toml ./
+COPY Cargo.toml Cargo.lock ./
 COPY components ./components
-RUN cargo build --release -p ledger-svc
+RUN cargo build --release --locked -p ledger-svc
 
 FROM debian:bookworm-slim
 COPY --from=build /src/target/release/ledger-svc /usr/local/bin/ledger-svc

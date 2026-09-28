@@ -125,6 +125,28 @@ class Contracts(unittest.TestCase):
             self.assertEqual(call(connect, '/v1/sync/catalog', dict(credential=credential, offers=[own]))[0], 200)
             self.assertEqual(call(connect, '/v1/sync/inventory', dict(credential=credential, offer_id='own', stock=0))[0], 200)
 
+    def test_inventory_versions_reject_stale_and_conflicting_replays(self):
+        with peer(lambda *_: (200, {})) as sink, service('seller-svc', COORDINATOR_URL=sink, CONNECT_URL=sink) as seller:
+            self.assertEqual(call(seller, '/v1/offers', OFFER)[0], 201)
+            base = dict(tenant=OFFER['tenant'], offer_id=OFFER['offer_id'])
+            for stock, stamp, expected in [(0, 20, 200), (5, 10, 409), (5, 20, 409), (0, 20, 200)]:
+                self.assertEqual(call(seller, '/v1/offers/inventory', dict(base, stock=stock, delta_ts=stamp))[0], expected)
+            self.assertEqual(call(seller, '/v1/offers/region/eu')[1]['offers'], [])
+            self.assertEqual(call(seller, '/v1/offers/inventory', dict(base, stock=5, delta_ts=30))[0], 200)
+            self.assertEqual(call(seller, '/v1/offers/region/eu')[1]['offers'], [OFFER])
+
+    def test_connector_inventory_preserves_version(self):
+        with peer(lambda *_: (200, {})) as sink, service('seller-svc', COORDINATOR_URL=sink, CONNECT_URL=sink) as seller, service('connect-svc', SELLER_URL=seller) as connect:
+            self.assertEqual(call(seller, '/v1/offers', OFFER)[0], 201)
+            partner = call(connect, '/v1/partners', {'name': 'ERP'})[1]['partner_id']
+            call(connect, '/v1/partners/certify', {'partner_id': partner})
+            credential = call(connect, '/v1/grants', dict(partner_id=partner, tenant=OFFER['tenant'], scopes=['inventory']))[1]['credential']
+            base = dict(credential=credential, offer_id=OFFER['offer_id'])
+            self.assertEqual(call(connect, '/v1/sync/inventory', dict(base, stock=0, delta_ts=20))[0], 200)
+            self.assertEqual(call(connect, '/v1/sync/inventory', dict(base, stock=5, delta_ts=10))[0], 409)
+            self.assertEqual(call(connect, '/v1/sync/inventory', dict(base, stock=0, delta_ts=20))[0], 200)
+            self.assertEqual(call(seller, '/v1/offers/region/eu')[1]['offers'], [])
+
     def test_settlement_failure_is_retryable(self):
         answer = [503]
         with peer(lambda *_: (answer[0], {})) as ledger, service('seller-svc', LEDGER_URL=ledger, COORDINATOR_URL=ledger, CONNECT_URL=ledger) as seller:
@@ -166,7 +188,7 @@ class Contracts(unittest.TestCase):
                 with self.subTest(dump=malformed):
                     dump[0] = malformed
                     self.assertEqual(call(audit, '/v1/certify', {})[0], 502)
-            dump[0] = {'entries': [], 'head': '0' * 64}
+            dump[0] = {'entries': [], 'head': '0' * 64, 'instructions': []}
             self.assertTrue(call(audit, '/v1/certify', {})[1]['certified'])
 
     def test_booking_recovers_from_seller_failure_and_response_loss(self):
@@ -246,6 +268,37 @@ class Contracts(unittest.TestCase):
             writer.join(timeout=2)
             self.assertEqual(call(url, '/health')[0], 200)
 
+    def test_audit_validates_lifecycle_order_and_settlement_amounts(self):
+        import hashlib
+        def chain(payloads):
+            previous = '0' * 64
+            entries = []
+            for payload in payloads:
+                digest = hashlib.sha256((previous + json.dumps(payload, separators=(',', ':'))).encode()).hexdigest()
+                entries.append(dict(payload=payload, prev=previous, hash=digest))
+                previous = digest
+            return dict(entries=entries, head=previous)
+        parties = dict(seller=80, network=10, platform=10, ads=0)
+        instructions = dict(instructions=[dict(match_id='m1', value_cents=100, confirmed=True,
+            splits=[dict(party=p, amount_cents=n) for p, n in parties.items()])])
+        events = [dict(environment_id='e1', lifecycle=e, jurisdiction='eu', region='eu')
+            for e in ['created', 'attested', 'executed', 'destroyed']]
+        splits = [dict(match_id='m1', party=p, amount_cents=n) for p, n in parties.items()]
+        refund = [dict(match_id='m1', party=p, amount_cents=-n, entry_type='adjustment', case_id='c1') for p, n in parties.items()]
+        evidence = {'/v1/attestations': chain(events), '/v1/settlements': chain(splits),
+                    '/v1/consents': chain([]), '/v1/settlements/instructions': instructions}
+        with peer(lambda path, _: (200, evidence[path])) as ledger, service('audit-svc', LEDGER_URL=ledger) as audit:
+            for broken in [list(reversed(events)), events + [events[-1]], events[:2] + [events[0]] + events[2:]]:
+                evidence['/v1/attestations'] = chain(broken)
+                self.assertFalse(call(audit, '/v1/certify', {})[1]['certified'])
+            evidence['/v1/attestations'] = chain(events)
+            for broken in [splits + refund + refund, [{**splits[0], 'amount_cents': 81}] + splits[1:], splits[:-1]]:
+                evidence['/v1/settlements'] = chain(broken)
+                self.assertFalse(call(audit, '/v1/certify', {})[1]['certified'])
+            for valid in [splits, splits + refund]:
+                evidence['/v1/settlements'] = chain(valid)
+                self.assertTrue(call(audit, '/v1/certify', {})[1]['certified'])
+
 
 class DurableContracts(unittest.TestCase):
     """Run explicitly with AMISAD_TEST_DATABASE_URL pointing at an empty disposable schema."""
@@ -258,6 +311,20 @@ class DurableContracts(unittest.TestCase):
         with peer(lambda *_: (200, {})) as sink, service('seller-svc', DATABASE_URL=database, COORDINATOR_URL=sink, CONNECT_URL=sink) as reloaded:
             offers = call(reloaded, '/v1/offers/region/eu')[1]['offers']
             self.assertEqual(next(o for o in offers if o['offer_id'] == 'concurrent-offer')['tenant'], 'tenant-b')
+
+    def test_inventory_version_survives_restart(self):
+        database = os.environ['AMISAD_TEST_DATABASE_URL']
+        offer = {**OFFER, 'offer_id': 'inventory-durable'}
+        update = dict(tenant=offer['tenant'], offer_id=offer['offer_id'], stock=0, delta_ts=20)
+        with peer(lambda *_: (200, {})) as sink:
+            with service('seller-svc', DATABASE_URL=database, COORDINATOR_URL=sink, CONNECT_URL=sink) as seller:
+                self.assertEqual(call(seller, '/v1/offers', offer)[0], 201)
+                self.assertEqual(call(seller, '/v1/offers/inventory', update)[0], 200)
+            with service('seller-svc', DATABASE_URL=database, COORDINATOR_URL=sink, CONNECT_URL=sink) as seller:
+                self.assertNotIn(offer, call(seller, '/v1/offers/region/eu')[1]['offers'])
+                self.assertEqual(call(seller, '/v1/offers/inventory', dict(update, stock=5, delta_ts=10))[0], 409)
+                self.assertEqual(call(seller, '/v1/offers/inventory', update)[0], 200)
+                self.assertEqual(call(seller, '/v1/offers/inventory', dict(update, stock=5, delta_ts=30))[0], 200)
 
     def test_replay_and_settlement_across_restart(self):
         database = os.environ['AMISAD_TEST_DATABASE_URL']

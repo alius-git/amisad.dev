@@ -90,6 +90,13 @@ CREATE TABLE IF NOT EXISTS seller.offers (
     created_at      timestamptz NOT NULL DEFAULT now()
 );
 
+-- Apply this additive migration before starting seller-svc after an upgrade.
+CREATE TABLE IF NOT EXISTS seller.inventory (
+    offer_id text PRIMARY KEY REFERENCES seller.offers (offer_id),
+    stock bigint NOT NULL CHECK (stock >= 0),
+    delta_ts bigint NOT NULL CHECK (delta_ts >= 0)
+);
+
 -- Orders carry need context only; there is deliberately no buyer identity
 -- column - the privacy constraint is the schema.
 CREATE TABLE IF NOT EXISTS seller.orders (

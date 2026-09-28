@@ -477,7 +477,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/needs") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let token = body.str_of("token").unwrap_or("");
             let jurisdiction = body.str_of("jurisdiction").unwrap_or("").to_string();
@@ -542,7 +542,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/consents") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let token = body.str_of("token").unwrap_or("");
             let grant_type = body.str_of("grant_type").unwrap_or("").to_string();
@@ -605,7 +605,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/consents/state") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let subject = match verify_subject(body.str_of("token").unwrap_or("")) {
                 Ok(s) => s,
@@ -629,7 +629,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/mandates") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let principal = match verify_subject(body.str_of("token").unwrap_or("")) {
                 Ok(s) => s,
@@ -681,7 +681,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/mandates/revoke") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let principal = match verify_subject(body.str_of("token").unwrap_or("")) {
                 Ok(s) => s,
@@ -719,7 +719,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/delegate/workspace") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let delegate = match verify_subject(body.str_of("token").unwrap_or("")) {
                 Ok(s) => s,
@@ -747,7 +747,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/delegate/needs") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let delegate = match verify_subject(body.str_of("token").unwrap_or("")) {
                 Ok(s) => s,
@@ -891,7 +891,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/mandates/approve") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let principal = match verify_subject(body.str_of("token").unwrap_or("")) {
                 Ok(s) => s,
@@ -929,7 +929,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/disclosures") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let subject = match verify_subject(body.str_of("token").unwrap_or("")) {
                 Ok(s) => s,
@@ -989,7 +989,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/activity") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let principal = match verify_subject(body.str_of("token").unwrap_or("")) {
                 Ok(s) => s,
@@ -1030,7 +1030,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/bookings") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let (handle, offer_id) = match (body.str_of("handle"), body.str_of("offer_id")) {
                 (Some(h), Some(o)) => (h.to_string(), o.to_string()),

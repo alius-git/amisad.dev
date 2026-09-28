@@ -206,7 +206,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/environments") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let jurisdiction = body.str_of("jurisdiction").unwrap_or("").to_string();
             let envelope = match body.str_of("envelope") {
@@ -406,7 +406,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             // abort with an isolation fault.
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             if body.str_of("mode") != Some("isolation") {
                 return Response::error(400, "mode 'isolation' required");

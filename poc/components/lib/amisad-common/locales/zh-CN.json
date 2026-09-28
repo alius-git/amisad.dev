@@ -42,6 +42,12 @@
       "sourceHash": "b88276f34f5815c7a6e935fe68cd109774d5cbb9d88301182bb3155853801a39",
       "origin": "machine",
       "description": "The total request read deadline elapsed."
+    },
+    "inventory_conflict": {
+      "text": "此库存更新已过期或与当前版本冲突。",
+      "sourceHash": "5a5995df081fb2c4b33941350d3134990a331b173ae00637d0a6bf435dab23fc",
+      "origin": "machine",
+      "description": "An inventory timestamp is older, or a replay changes stock at the same timestamp."
     }
   }
 }

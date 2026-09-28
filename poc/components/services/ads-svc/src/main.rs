@@ -71,7 +71,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/campaigns") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             for field in ["tenant", "region", "category"] {
                 if body.str_of(field).is_none() {
@@ -103,7 +103,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/briefs") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let campaign_id = body.str_of("campaign_id").unwrap_or("").to_string();
             if !state.campaigns.iter().any(|c| c.id == campaign_id) {
@@ -136,7 +136,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/assets") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let campaign_id = body.str_of("campaign_id").unwrap_or("").to_string();
             let creator = match body.str_of("creator") {
@@ -165,7 +165,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/campaigns/activate") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let campaign_id = body.str_of("campaign_id").unwrap_or("").to_string();
             let asset_id = body.str_of("asset_id").unwrap_or("").to_string();
@@ -194,7 +194,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/attributions") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let campaign_id = body.str_of("campaign_id").unwrap_or("").to_string();
             let (index, ad_cents) = match state

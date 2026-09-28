@@ -49,7 +49,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/edges") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let (region, endpoint) = match (body.str_of("region"), body.str_of("endpoint")) {
                 (Some(r), Some(e)) => (r.to_string(), e.to_string()),
@@ -91,7 +91,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/policies") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let jurisdiction = match body.str_of("jurisdiction") {
                 Some(j) => j.to_string(),
@@ -121,7 +121,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/placements") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let jurisdiction = body.str_of("jurisdiction").unwrap_or("");
             if jurisdiction.is_empty() {
@@ -141,7 +141,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/telemetry") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             // A terminated slice is an operator incident, not just a log line.
             if body.str_of("event") == Some("aborted") {

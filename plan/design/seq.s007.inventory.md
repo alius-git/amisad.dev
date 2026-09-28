@@ -25,7 +25,7 @@ sequenceDiagram
     ConnectSvc->>SellerSvc: Offers for the credential tenant; existing ownership must match
     Note over ERP: Counter sale in the shop - last unit of the item sells externally
     ERP->>ConnectSvc: Inventory delta
-    ConnectSvc->>SellerSvc: Authorized tenant and stock zero; seller checks ownership before mutation
+    ConnectSvc->>SellerSvc: Authorized tenant, stock zero, and delta_ts; seller checks ownership and version before durable mutation
     Coordinator->>SellerSvc: Fetch offers for the seeded buyer need
     SellerSvc-->>Coordinator: Only the in-stock alternative, though the zeroed item was cheaper
     SellerSvc->>ConnectSvc: Order state transitions, one detached notify each

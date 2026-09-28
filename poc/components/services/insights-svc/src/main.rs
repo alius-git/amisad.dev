@@ -96,7 +96,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/insights/record") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let category = body.str_of("category").unwrap_or("").to_string();
             let region = body.str_of("region").unwrap_or("").to_string();
@@ -140,7 +140,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/outlooks") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let version = match body.str_of("version") {
                 Some(v) => v.to_string(),

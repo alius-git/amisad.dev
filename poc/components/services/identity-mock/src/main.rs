@@ -23,7 +23,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/tokens") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let actor = match body.str_of("actor") {
                 Some(a) => a.to_string(),
@@ -37,7 +37,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/verify") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let token = body.str_of("token").unwrap_or("");
             match state.tokens.iter().find(|(t, _, _)| t == token) {

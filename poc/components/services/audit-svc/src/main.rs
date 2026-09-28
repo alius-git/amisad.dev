@@ -10,6 +10,8 @@
 
 use amisad_common::{json, request, serve_app, sha256, Request, Response, ServiceInfo};
 
+use std::collections::{HashMap, HashSet};
+
 const GENESIS: &str = "0000000000000000000000000000000000000000000000000000000000000000";
 
 struct State {
@@ -79,25 +81,92 @@ fn chain_violations(entries: &[json::Json]) -> i64 {
 /// Attestation continuity: every environment shows a complete lifecycle
 /// created -> attested -> executed|aborted -> destroyed.
 fn lifecycle_violations(entries: &[json::Json]) -> i64 {
-    let mut envs: Vec<(String, Vec<String>)> = Vec::new();
-    for e in entries {
-        let payload = e.get("payload");
-        let env = payload.and_then(|p| p.str_of("environment_id")).unwrap_or("").to_string();
-        let life = payload.and_then(|p| p.str_of("lifecycle")).unwrap_or("").to_string();
-        match envs.iter_mut().find(|(id, _)| *id == env) {
-            Some((_, v)) => v.push(life),
-            None => envs.push((env, vec![life])),
-        }
+    let mut environments: HashMap<&str, Vec<&str>> = HashMap::new();
+    for entry in entries {
+        let payload = entry.get("payload");
+        let environment = payload.and_then(|p| p.str_of("environment_id")).unwrap_or("");
+        let event = payload.and_then(|p| p.str_of("lifecycle")).unwrap_or("");
+        environments.entry(environment).or_default().push(event);
     }
+    // Certification is of completed environments; in-progress traces fail.
+    environments.iter().filter(|(id, events)| id.is_empty()
+        || !matches!(events.as_slice(), ["created", "attested", "executed" | "aborted", "destroyed"]))
+        .count() as i64
+}
+
+fn settlement_violations(entries: &[json::Json], instructions: &[json::Json]) -> i64 {
+    let mut by_match: HashMap<&str, Vec<&json::Json>> = HashMap::new();
+    for entry in entries {
+        let Some(payload) = entry.get("payload") else { return 1; };
+        let Some(id) = payload.str_of("match_id").filter(|id| !id.is_empty()) else { return 1; };
+        by_match.entry(id).or_default().push(payload);
+    }
+    let mut seen = HashSet::new();
+    let mut cases = HashMap::new();
     let mut violations = 0;
-    for (_, life) in &envs {
-        let has = |s: &str| life.iter().any(|l| l == s);
-        let terminal_ok = has("executed") ^ has("aborted");
-        if !(has("created") && has("attested") && has("destroyed") && terminal_ok) {
-            violations += 1;
+    for instruction in instructions {
+        let id = instruction.str_of("match_id").unwrap_or("");
+        if id.is_empty() || !seen.insert(id) { violations += 1; continue; }
+        let Some(splits) = instruction.get("splits").and_then(|s| s.as_arr()) else { violations += 1; continue; };
+        let mut expected = HashMap::new();
+        let mut total = Some(0i64);
+        let mut valid = true;
+        for split in splits {
+            match (split.str_of("party"), split.i64_of("amount_cents")) {
+                (Some(party), Some(amount)) if amount >= 0 => {
+                    if expected.insert(party, amount).is_some() { valid = false; }
+                    total = total.and_then(|sum| sum.checked_add(amount));
+                },
+                _ => valid = false,
+            }
         }
+        let parties: &[&str] = if expected.contains_key("agency") {
+            &["seller", "network", "platform", "agency", "creator"]
+        } else { &["seller", "network", "platform", "ads"] };
+        if expected.len() != parties.len() || parties.iter().any(|party| !expected.contains_key(party))
+            || total.is_none() || total != instruction.i64_of("value_cents") { valid = false; }
+        let rows = by_match.remove(id).unwrap_or_default();
+        let mut paid = HashSet::new();
+        let mut refunded = HashSet::new();
+        let mut refund_case = None;
+        for row in rows {
+            let party = row.str_of("party").unwrap_or("");
+            let Some(amount) = expected.get(party) else { valid = false; continue; };
+            match row.str_of("entry_type") {
+                None | Some("split") => {
+                    if !refunded.is_empty() || !paid.insert(party) || row.i64_of("amount_cents") != Some(*amount) { valid = false; }
+                },
+                Some("adjustment") => {
+                    let case = row.str_of("case_id").unwrap_or("");
+                    if case.is_empty() || paid.len() != expected.len() || !refunded.insert(party)
+                        || row.i64_of("amount_cents") != Some(-amount)
+                        || refund_case.is_some_and(|previous| previous != case) { valid = false; }
+                    if cases.insert(case, id).is_some_and(|previous| previous != id) { valid = false; }
+                    refund_case = Some(case);
+                },
+                _ => valid = false,
+            }
+        }
+        match instruction.bool_of("confirmed") {
+            Some(true) if paid.len() == expected.len()
+                && (refunded.is_empty() || refunded.len() == expected.len()) => {},
+            Some(false) if paid.is_empty() && refunded.is_empty() => {},
+            _ => valid = false,
+        }
+        if !valid { violations += 1; }
     }
-    violations
+    violations + by_match.len() as i64
+}
+
+fn read_instructions(state: &mut State) -> Result<Vec<json::Json>, Response> {
+    let path = "/v1/settlements/instructions";
+    state.access_log.push(json::obj(vec![("method", json::s("GET")), ("target", json::s(path))]));
+    match request("GET", &format!("{}{path}", ledger_url()), None) {
+        Ok((200, body)) => json::parse(&body).ok().and_then(|value|
+            value.get("instructions").and_then(|items| items.as_arr()).cloned())
+            .ok_or_else(|| Response::problem(502, "invalid_chain")),
+        _ => Err(Response::problem(502, "invalid_chain")),
+    }
 }
 
 fn dimension(name: &str, violations: i64) -> json::Json {
@@ -139,18 +208,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
             // Consent: chain integrity (grant->use->termination is the
             // ledger's newest-wins fold; here we certify the chain is intact).
             let consent_v = chain_violations(&consent);
-            // Settlement conservation: chain integrity + every adjustment is a
-            // compensating entry referencing a support case.
-            let settlement_chain_v = chain_violations(&settle);
-            let adjustment_v = settle
-                .iter()
-                .filter(|e| {
-                    let p = e.get("payload");
-                    p.and_then(|p| p.str_of("entry_type")) == Some("adjustment")
-                        && p.and_then(|p| p.str_of("case_id")).unwrap_or("").is_empty()
-                })
-                .count() as i64;
-            let settlement_v = settlement_chain_v + adjustment_v;
+            let instructions = match read_instructions(state) {
+                Ok(instructions) => instructions,
+                Err(response) => return response,
+            };
+            let settlement_v = chain_violations(&settle) + settlement_violations(&settle, &instructions);
 
             let total = attestation_v + residency_v + consent_v + settlement_v;
             Response::json(
@@ -170,7 +232,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/certify/tamper") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let entries = body.get("entries").and_then(|e| e.as_arr()).cloned().unwrap_or_default();
             let mut prev = GENESIS.to_string();

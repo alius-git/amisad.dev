@@ -107,7 +107,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/partners") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let name = match body.str_of("name") {
                 Some(n) => n.to_string(),
@@ -127,7 +127,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/partners/certify") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let partner_id = body.str_of("partner_id").unwrap_or("").to_string();
             match state.partners.iter_mut().find(|p| p.id == partner_id) {
@@ -141,7 +141,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/grants") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let tenant = body.str_of("tenant").unwrap_or("").to_string();
             let partner_id = body.str_of("partner_id").unwrap_or("").to_string();
@@ -174,7 +174,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/grants/revoke") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let credential = body.str_of("credential").unwrap_or("");
             match state.grants.iter_mut().find(|g| g.credential == credential) {
@@ -188,7 +188,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/sync/catalog") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let credential = body.str_of("credential").unwrap_or("").to_string();
             let grant = match authorize(state, &credential, "catalog") {
@@ -217,7 +217,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/sync/inventory") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let credential = body.str_of("credential").unwrap_or("").to_string();
             let grant = match authorize(state, &credential, "inventory") {
@@ -227,7 +227,11 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let tenant = state.grants[grant].tenant.clone();
             let offer_id = body.str_of("offer_id").unwrap_or("").to_string();
             let stock = body.i64_of("stock").unwrap_or(-1);
-            let delta_ts = body.i64_of("delta_ts").unwrap_or(0);
+            let delta_ts = match body.i64_of("delta_ts") {
+                Some(ts) if ts >= 0 => ts,
+                None if body.get("delta_ts").is_none() => 0,
+                _ => return Response::problem(400, "invalid_request"),
+            };
             if offer_id.is_empty() || stock < 0 {
                 return Response::error(400, "offer_id and stock (>= 0) required");
             }
@@ -235,15 +239,20 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ("tenant", json::s(&tenant)),
                 ("offer_id", json::s(&offer_id)),
                 ("stock", json::n(stock)),
+                ("delta_ts", json::n(delta_ts)),
             ])
             .dump();
             match request("POST", &format!("{}/v1/offers/inventory", seller_url()), Some(&update)) {
                 Ok((200, _)) => {}
+                Ok((409, _)) => return Response::problem(409, "inventory_conflict"),
                 Ok((403, _)) => return Response::problem(403, "tenant_mismatch"),
                 Ok((status, resp)) => return Response::error(502, &format!("seller inventory ({status}): {resp}")),
                 Err(e) => return Response::error(503, &format!("seller unavailable: {e}")),
             }
+            state.deltas.retain(|delta| !(delta.str_of("tenant") == Some(tenant.as_str())
+                && delta.str_of("offer_id") == Some(offer_id.as_str())));
             state.deltas.push(json::obj(vec![
+                ("tenant", json::s(&tenant)),
                 ("offer_id", json::s(&offer_id)),
                 ("stock", json::n(stock)),
                 ("delta_ts", json::n(delta_ts)),
@@ -259,7 +268,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/orders/events") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let order_state = body.str_of("state").unwrap_or("").to_string();
@@ -274,7 +283,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/webhooks/replay") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let order_state = body.str_of("state").unwrap_or("").to_string();
@@ -288,7 +297,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/query") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let credential = body.str_of("credential").unwrap_or("").to_string();
             let resource = body.str_of("resource").unwrap_or("").to_string();

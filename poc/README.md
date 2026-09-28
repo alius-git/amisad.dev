@@ -40,7 +40,9 @@ build/images.ps1        # docker images (optional; Docker required)
 
 `bazel build //...` builds the entire Rust workspace via rules_rust. Cargo
 works directly too (`cargo build --workspace`) -- the two share the same
-sources.
+sources. Cargo container builds use `--locked`. The doctor rejects failed native
+version probes, requires Rust/Cargo 1.96.1 or newer, and accepts Node 20.19+ on
+20.x or Node 22.12+ on newer supported lines.
 
 ## Deliberate skeleton choices
 
@@ -52,7 +54,10 @@ sources.
 - **App builds are `bazel run` wrappers.** Flutter and Vite have no mature
   Bazel rules, and their toolchains fight sandboxing (Gradle/pub/npm caches).
   `sh_binary` wrappers keep Bazel as the single entry point without lying
-  about hermeticity; `build-all.ps1` runs all three stages.
+  about hermeticity; `build-all.ps1` runs all three stages. Under `bazel run`,
+  each wrapper resolves its app from `BUILD_WORKSPACE_DIRECTORY`, so manifests,
+  source files, and outputs are read/written in the actual checkout. A direct
+  invocation resolves the directory containing the script.
 - **Flutter platform scaffolding is hydrated, not committed.** `build.sh`
   runs `flutter create --platforms=android .` on first build; only
   `pubspec.yaml`, `lib/`, and `assets/` are source of truth.

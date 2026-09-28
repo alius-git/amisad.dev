@@ -94,7 +94,9 @@ paths:
         content:
           application/json:
             schema: { type: object }
+      description: "delta_ts is a nonnegative monotonic source version (default 0). Identical replay is accepted; stale or equal-version conflicting stock is rejected."
       responses:
+        "409": { description: "inventory_conflict; current stock is preserved" }
         "200": { description: "offer_id, stock" }
         "401": { description: "invalid/revoked" }
         "403": { description: "Outside credential scope or tenant; no cross-tenant mutation" }

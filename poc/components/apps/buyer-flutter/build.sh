@@ -4,7 +4,11 @@
 # AmisAd buyer app - build wrapper invoked via `bazel run //components/apps/buyer-flutter:build`.
 # Hydrates the Android platform scaffolding on first run, then builds a debug APK.
 set -euo pipefail
-cd "$(dirname "$0")"
+if [ -n "${BUILD_WORKSPACE_DIRECTORY:-}" ]; then
+    cd "$BUILD_WORKSPACE_DIRECTORY/components/apps/buyer-flutter"
+else
+    cd "$(dirname "$0")"
+fi
 
 if [ ! -d android ]; then
     flutter create --platforms=android --project-name amisad_buyer .

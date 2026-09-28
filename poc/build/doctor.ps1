@@ -32,7 +32,18 @@ function Test-Tool {
     foreach ($c in $Candidates) {
         $cmd = Get-Command $c -ErrorAction SilentlyContinue
         if ($cmd) {
-            try { $v = (& $c $VersionArgs.Split(' ') 2>&1 | Select-Object -First 1) } catch { $v = 'version check failed' }
+            try {
+                $global:LASTEXITCODE = 0
+                $versionOutput = @(& $c $VersionArgs.Split(' ') 2>&1)
+                if ($LASTEXITCODE -ne 0 -or $versionOutput.Count -eq 0) { continue }
+                $v = [string]$versionOutput[0]
+                if ($Name -in @('rust', 'node')) {
+                    if ($v -notmatch '(\d+\.\d+\.\d+)') { continue }
+                    $version = [version]$Matches[1]
+                    if ($Name -eq 'rust' -and $version -lt [version]'1.96.1') { continue }
+                    if ($Name -eq 'node' -and -not (($version.Major -eq 20 -and $version -ge [version]'20.19.0') -or $version -ge [version]'22.12.0')) { continue }
+                }
+            } catch { Write-Verbose "$c version probe failed: $_"; continue }
             Write-Information ("  OK       {0,-10} {1}" -f $Name, $v)
             return
         }
@@ -58,7 +69,7 @@ Test-Tool -Name 'helm'    -Candidates @('helm')              -VersionArgs 'versi
 Test-Tool -Name 'kubectl' -Candidates @('kubectl')           -VersionArgs 'version --client' -Required $false -Hint 'needed for cluster deploys'
 
 if ($failures.Count -gt 0) {
-    Write-Error ("doctor FAILED - missing required toolchains: {0}" -f ($failures -join ', '))
+    Write-Error ("doctor FAILED - missing or unusable required toolchains: {0}" -f ($failures -join ', '))
     exit 1
 }
 Write-Information "doctor OK - all required toolchains present"

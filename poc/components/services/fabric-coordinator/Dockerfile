@@ -4,9 +4,9 @@
 #   docker build -f components/services/fabric-coordinator/Dockerfile -t amisad/fabric-coordinator .
 FROM rust:1.96-slim AS build
 WORKDIR /src
-COPY Cargo.toml ./
+COPY Cargo.toml Cargo.lock ./
 COPY components ./components
-RUN cargo build --release -p fabric-coordinator
+RUN cargo build --release --locked -p fabric-coordinator
 
 FROM debian:bookworm-slim
 COPY --from=build /src/target/release/fabric-coordinator /usr/local/bin/fabric-coordinator

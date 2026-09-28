@@ -18,7 +18,9 @@ case "$ARCH" in
     *) NARCH=amd64 ;;
 esac
 
-if ! command -v nats-server >/dev/null 2>&1; then
+changed=0
+installed_version=$(/usr/local/bin/nats-server --version 2>/dev/null || true)
+if [ "$installed_version" != "nats-server: $NATS_VERSION" ]; then
     # Same exposure as the bazelisk download: one transient empty reply through
     # the lab proxy ends the script under `set -e`. fetch-and-execute exports the
     # framework's retry wrappers into this environment; without them, a bounded
@@ -31,11 +33,15 @@ if ! command -v nats-server >/dev/null 2>&1; then
             -qO /tmp/nats-server.tar.gz "$NATS_URL"
     fi
     tar -xzf /tmp/nats-server.tar.gz -C /tmp
+    [ "$(/tmp/nats-server-${NATS_VERSION}-linux-${NARCH}/nats-server --version)" = "nats-server: $NATS_VERSION" ]
     sudo install -m 0755 "/tmp/nats-server-${NATS_VERSION}-linux-${NARCH}/nats-server" /usr/local/bin/nats-server
+    changed=1
     rm -rf /tmp/nats-server.tar.gz "/tmp/nats-server-${NATS_VERSION}-linux-${NARCH}"
 fi
 
-sudo tee /etc/systemd/system/nats.service >/dev/null <<'UNIT'
+unit_file=$(mktemp)
+trap 'rm -f "$unit_file"' EXIT
+cat > "$unit_file" <<'UNIT'
 [Unit]
 Description=NATS JetStream (AmisAd POC)
 After=network-online.target
@@ -48,11 +54,21 @@ RestartSec=2
 [Install]
 WantedBy=multi-user.target
 UNIT
-sudo systemctl daemon-reload
-sudo systemctl enable --now nats
+if ! cmp -s "$unit_file" /etc/systemd/system/nats.service; then
+    sudo install -m 0644 "$unit_file" /etc/systemd/system/nats.service
+    sudo systemctl daemon-reload
+    changed=1
+fi
+sudo systemctl enable nats
+if [ "$changed" -eq 1 ]; then
+    sudo systemctl restart nats
+else
+    sudo systemctl start nats
+fi
 
 for _ in $(seq 1 30); do
-    if curl -sf http://localhost:8222/healthz >/dev/null 2>&1; then
+    if curl -sf http://localhost:8222/healthz >/dev/null 2>&1 &&
+        curl -sf http://localhost:8222/varz | python3 -c 'import json,sys; sys.exit(json.load(sys.stdin).get("version") != sys.argv[1])' "${NATS_VERSION#v}"; then
         # A snapshot without writeback would lose the just-written NATS
         # binary/unit -- see poc/test.md "Snapshot page-cache flush".
         sync

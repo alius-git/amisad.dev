@@ -27,9 +27,9 @@ struct State {
     offers: Vec<json::Json>,
     orders: Vec<Order>,
     // s007.inventory: per-offer stock. Absent = not inventory-tracked
-    // (available); 0 = out of stock and NOT matchable. In-memory: the
-    // integration control plane is transient like connect-svc.
-    stock: Vec<(String, i64)>,
+    // (available); 0 = out of stock and NOT matchable. Each value carries
+    // a monotonic source timestamp and is durable when DATABASE_URL is set.
+    stock: Vec<(String, i64, i64)>,
     db: Option<Client>,
 }
 
@@ -61,7 +61,7 @@ fn store_error(db: &Client, what: &str, e: postgres::Error) -> Response {
     Response::error(503, &format!("{what} unavailable: {e}"))
 }
 
-fn load_store(db: &mut Client) -> (Vec<json::Json>, Vec<Order>) {
+fn load_store(db: &mut Client) -> (Vec<json::Json>, Vec<Order>, Vec<(String, i64, i64)>) {
     let offers = db
         .query("SELECT document FROM seller.offers ORDER BY created_at, offer_id", &[])
         .unwrap_or_else(|e| {
@@ -101,7 +101,12 @@ fn load_store(db: &mut Client) -> (Vec<json::Json>, Vec<Order>) {
             slot_day: row.get(6),
         })
         .collect();
-    (offers, orders)
+    let stock = db.query("SELECT offer_id, stock, delta_ts FROM seller.inventory", &[])
+        .unwrap_or_else(|e| {
+            eprintln!("seller-svc: loading inventory failed: {e}");
+            std::process::exit(1);
+        }).iter().map(|row| (row.get(0), row.get(1), row.get(2))).collect();
+    (offers, orders, stock)
 }
 
 fn ledger_url() -> String {
@@ -196,7 +201,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/offers") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             for field in ["offer_id", "tenant", "title", "category", "region"] {
                 if body.str_of(field).is_none() {
@@ -249,7 +254,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/orders") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let (match_id, offer_id, tenant) = match (
                 body.str_of("match_id"),
@@ -330,7 +335,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/orders/advance") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let requested = body.str_of("state").unwrap_or("").to_string();
@@ -402,7 +407,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/offers/inventory") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let offer_id = match body.str_of("offer_id") {
                 Some(o) => o.to_string(),
@@ -420,8 +425,27 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 && offer.str_of("tenant") == body.str_of("tenant")) {
                 return Response::problem(403, "tenant_mismatch");
             }
-            state.stock.retain(|(id, _)| *id != offer_id);
-            state.stock.push((offer_id.clone(), stock));
+            let delta_ts = match body.i64_of("delta_ts") {
+                Some(ts) if ts >= 0 => ts,
+                None if body.get("delta_ts").is_none() => 0,
+                _ => return Response::problem(400, "invalid_request"),
+            };
+            if let Some(db) = state.db.as_mut() {
+                match db.execute("INSERT INTO seller.inventory (offer_id, stock, delta_ts) VALUES ($1, $2, $3)
+                    ON CONFLICT (offer_id) DO UPDATE SET stock = EXCLUDED.stock, delta_ts = EXCLUDED.delta_ts
+                    WHERE seller.inventory.delta_ts < EXCLUDED.delta_ts
+                       OR (seller.inventory.delta_ts = EXCLUDED.delta_ts AND seller.inventory.stock = EXCLUDED.stock)",
+                    &[&offer_id, &stock, &delta_ts]) {
+                    Ok(0) => return Response::problem(409, "inventory_conflict"),
+                    Ok(_) => {},
+                    Err(e) => return store_error(db, "inventory", e),
+                }
+            } else if state.stock.iter().any(|(id, old_stock, old_ts)| id == &offer_id
+                && (delta_ts < *old_ts || delta_ts == *old_ts && stock != *old_stock)) {
+                return Response::problem(409, "inventory_conflict");
+            }
+            state.stock.retain(|(id, _, _)| *id != offer_id);
+            state.stock.push((offer_id.clone(), stock, delta_ts));
             Response::json(
                 200,
                 &json::obj(vec![("offer_id", json::s(&offer_id)), ("stock", json::n(stock))]),
@@ -440,7 +464,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     .filter(|o| o.str_of("region") == Some(region))
                     .filter(|o| {
                         let id = o.str_of("offer_id").unwrap_or("");
-                        !state.stock.iter().any(|(sid, s)| sid == id && *s == 0)
+                        !state.stock.iter().any(|(sid, s, _)| sid == id && *s == 0)
                     })
                     .cloned()
                     .collect();
@@ -480,16 +504,16 @@ fn handle(state: &mut State, req: &Request) -> Response {
 
 fn main() -> std::io::Result<()> {
     let mut db = open_db();
-    let (offers, orders) = match db.as_mut() {
+    let (offers, orders, stock) = match db.as_mut() {
         Some(client) => load_store(client),
-        None => (Vec::new(), Vec::new()),
+        None => (Vec::new(), Vec::new(), Vec::new()),
     };
     serve_app(
         ServiceInfo {
             name: "seller-svc",
             version: env!("CARGO_PKG_VERSION"),
         },
-        State { offers, orders, stock: Vec::new(), db },
+        State { offers, orders, stock, db },
         handle,
     )
 }

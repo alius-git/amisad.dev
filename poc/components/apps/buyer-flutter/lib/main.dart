@@ -22,35 +22,31 @@ const coordinatorUrl =
 const identityUrl =
     String.fromEnvironment('IDENTITY_URL', defaultValue: 'http://10.0.2.2:30084');
 
-Future<Map<String, dynamic>> postJson(String url, Map<String, dynamic> body) async {
-  final client = HttpClient();
-  try {
-    final request = await client.postUrl(Uri.parse(url));
-    request.headers.contentType = ContentType.json;
-    request.write(jsonEncode(body));
-    final response = await request.close();
-    final text = await response.transform(utf8.decoder).join();
-    if (response.statusCode >= 300) {
-      throw Exception('$url -> ${response.statusCode}: $text');
-    }
-    return jsonDecode(text) as Map<String, dynamic>;
-  } finally {
-    client.close();
-  }
-}
+Future<Map<String, dynamic>> postJson(String url, Map<String, dynamic> body) =>
+    requestJson(url, body: body);
 
-Future<Map<String, dynamic>> getJson(String url) async {
+Future<Map<String, dynamic>> getJson(String url) => requestJson(url);
+
+Future<Map<String, dynamic>> requestJson(String url,
+    {Map<String, dynamic>? body, Duration timeout = const Duration(seconds: 20)}) async {
   final client = HttpClient();
   try {
-    final request = await client.getUrl(Uri.parse(url));
-    final response = await request.close();
-    final text = await response.transform(utf8.decoder).join();
-    if (response.statusCode >= 300) {
-      throw Exception('$url -> ${response.statusCode}: $text');
-    }
-    return jsonDecode(text) as Map<String, dynamic>;
+    return await (() async {
+      final request = await client.openUrl(body == null ? 'GET' : 'POST', Uri.parse(url));
+      if (body != null) {
+        request.headers.contentType = ContentType.json;
+        request.write(jsonEncode(body));
+      }
+      final response = await request.close();
+      final text = await response.transform(utf8.decoder).join();
+      if (response.statusCode >= 300) {
+        throw HttpException('$url -> ${response.statusCode}: $text');
+      }
+      return jsonDecode(text) as Map<String, dynamic>;
+    })().timeout(timeout);
   } finally {
-    client.close();
+    // Also abort the transport when the total deadline expires mid-body.
+    client.close(force: true);
   }
 }
 
@@ -78,7 +74,10 @@ class AmisAdBuyerApp extends StatelessWidget {
 }
 
 class NeedsScreen extends StatefulWidget {
-  const NeedsScreen({super.key});
+  const NeedsScreen({super.key, this.post = postJson, this.get = getJson});
+
+  final Future<Map<String, dynamic>> Function(String, Map<String, dynamic>) post;
+  final Future<Map<String, dynamic>> Function(String) get;
 
   @override
   State<NeedsScreen> createState() => _NeedsScreenState();
@@ -90,6 +89,7 @@ class _NeedsScreenState extends State<NeedsScreen> {
   );
   final _budgetController = TextEditingController(text: '120.00');
 
+  int _generation = 0;
   bool _busy = false;
   String? _error;
   String? _handle;
@@ -97,7 +97,17 @@ class _NeedsScreenState extends State<NeedsScreen> {
   int? _priceCents;
   String _status = '-';
 
+  @override
+  void dispose() {
+    _generation++;
+    _contextController.dispose();
+    _budgetController.dispose();
+    super.dispose();
+  }
+
   Future<void> _submit() async {
+    final generation = ++_generation;
+    final contextText = _contextController.text.trim();
     setState(() {
       _busy = true;
       _error = null;
@@ -105,22 +115,24 @@ class _NeedsScreenState extends State<NeedsScreen> {
     try {
       final budgetCents =
           (double.parse(_budgetController.text.trim()) * 100).round();
-      final tokenReply = await postJson('$identityUrl/v1/tokens',
+      final tokenReply = await widget.post('$identityUrl/v1/tokens',
           {'actor': 'maya', 'class': 'person'});
+      if (!mounted || generation != _generation) return;
       final need = {
         'category': 'housewares',
         'budget_cents': budgetCents,
         'region': 'region-a',
         'deadline_days': 14,
         'auto_close': true,
-        'context': _contextController.text.trim(),
+        'context': contextText,
       };
-      final result = await postJson('$coordinatorUrl/v1/needs', {
+      final result = await widget.post('$coordinatorUrl/v1/needs', {
         'token': tokenReply['token'],
         'jurisdiction': 'region-a',
         // Opaque envelope: only the sealed environment opens it.
         'envelope': jsonEncode(need),
       });
+      if (!mounted || generation != _generation) return;
       final offer = result['offer'] as Map<String, dynamic>? ?? {};
       setState(() {
         _handle = result['handle'] as String?;
@@ -129,20 +141,22 @@ class _NeedsScreenState extends State<NeedsScreen> {
         _status = 'matched';
       });
     } catch (e) {
-      setState(() => _error = '$e');
+      if (mounted && generation == _generation) setState(() => _error = '$e');
     } finally {
-      setState(() => _busy = false);
+      if (mounted && generation == _generation) setState(() => _busy = false);
     }
   }
 
   Future<void> _refresh() async {
     final handle = _handle;
-    if (handle == null) return;
+    if (handle == null || _busy) return;
+    final generation = ++_generation;
     try {
-      final order = await getJson('$coordinatorUrl/v1/orders/$handle');
+      final order = await widget.get('$coordinatorUrl/v1/orders/$handle');
+      if (!mounted || generation != _generation || handle != _handle) return;
       setState(() => _status = order['status'] as String? ?? 'unknown');
     } catch (e) {
-      setState(() => _error = '$e');
+      if (mounted && generation == _generation) setState(() => _error = '$e');
     }
   }
 
@@ -220,7 +234,7 @@ class _NeedsScreenState extends State<NeedsScreen> {
                     Text('Order status: $_status'),
                     const SizedBox(height: 8),
                     OutlinedButton(
-                      onPressed: _refresh,
+                      onPressed: _busy ? null : _refresh,
                       child: const Text('Refresh status'),
                     ),
                   ],

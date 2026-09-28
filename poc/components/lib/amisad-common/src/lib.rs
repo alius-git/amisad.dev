@@ -555,7 +555,7 @@ pub mod json {
 
     pub fn parse(text: &str) -> Result<Json, String> {
         let bytes: Vec<char> = text.chars().collect();
-        let mut parser = Parser { chars: bytes, pos: 0 };
+        let mut parser = Parser { chars: bytes, pos: 0, depth: 0 };
         parser.skip_ws();
         let value = parser.value()?;
         parser.skip_ws();
@@ -568,6 +568,7 @@ pub mod json {
     struct Parser {
         chars: Vec<char>,
         pos: usize,
+        depth: usize,
     }
 
     impl Parser {
@@ -605,8 +606,13 @@ pub mod json {
         fn value(&mut self) -> Result<Json, String> {
             self.skip_ws();
             match self.peek() {
-                Some('{') => self.object(),
-                Some('[') => self.array(),
+                Some('{' | '[') => {
+                    if self.depth >= 64 { return Err(String::from("JSON nesting exceeds 64 containers")); }
+                    self.depth += 1;
+                    let result = if self.peek() == Some('{') { self.object() } else { self.array() };
+                    self.depth -= 1;
+                    result
+                },
                 Some('"') => Ok(Json::Str(self.string()?)),
                 Some('t') => self.literal("true", Json::Bool(true)),
                 Some('f') => self.literal("false", Json::Bool(false)),
@@ -627,6 +633,9 @@ pub mod json {
             loop {
                 self.skip_ws();
                 let key = self.string()?;
+                if pairs.iter().any(|(existing, _)| existing == &key) {
+                    return Err(String::from("duplicate JSON object key"));
+                }
                 self.skip_ws();
                 self.expect(':')?;
                 let value = self.value()?;
@@ -690,10 +699,11 @@ pub mod json {
                             } else {
                                 first
                             };
-                            out.push(char::from_u32(code).unwrap_or('\u{fffd}'));
+                            out.push(char::from_u32(code).ok_or("invalid Unicode surrogate")?);
                         }
                         other => return Err(format!("bad escape {other:?}")),
                     },
+                    Some(c) if c < '\u{0020}' => return Err(String::from("unescaped control character")),
                     Some(c) => out.push(c),
                 }
             }
@@ -711,11 +721,22 @@ pub mod json {
 
         fn number(&mut self) -> Result<Json, String> {
             let start = self.pos;
-            while matches!(
-                self.peek(),
-                Some('-' | '+' | '.' | 'e' | 'E') | Some('0'..='9')
-            ) {
+            if self.peek() == Some('-') { self.pos += 1; }
+            match self.next() {
+                Some('0') => {},
+                Some('1'..='9') => while matches!(self.peek(), Some('0'..='9')) { self.pos += 1; },
+                _ => return Err(String::from("invalid JSON number")),
+            }
+            if self.peek() == Some('.') {
                 self.pos += 1;
+                if !matches!(self.peek(), Some('0'..='9')) { return Err(String::from("missing fractional digits")); }
+                while matches!(self.peek(), Some('0'..='9')) { self.pos += 1; }
+            }
+            if matches!(self.peek(), Some('e' | 'E')) {
+                self.pos += 1;
+                if matches!(self.peek(), Some('+' | '-')) { self.pos += 1; }
+                if !matches!(self.peek(), Some('0'..='9')) { return Err(String::from("missing exponent digits")); }
+                while matches!(self.peek(), Some('0'..='9')) { self.pos += 1; }
             }
             let text: String = self.chars[start..self.pos].iter().collect();
             // Rust float parsing saturates overflow to infinity; dump() would
@@ -812,5 +833,28 @@ mod tests {
         assert!(json::parse("\"\\ud800\\u0041\"").is_err());
         let paired = json::parse("\"\\ud83d\\ude00\"").expect("surrogate pair");
         assert_eq!(paired.as_str(), Some("😀"));
+    }
+}
+
+#[cfg(test)]
+mod json_boundary_tests {
+    use super::json;
+    #[test]
+    fn nested_input_is_bounded_before_descent() {
+        let at_limit = format!("{}0{}", "[".repeat(64), "]".repeat(64));
+        let value = json::parse(&at_limit).unwrap();
+        assert_eq!(value.dump(), at_limit);
+        for depth in [65, 4096] {
+            assert!(json::parse(&format!("{}0{}", "[".repeat(depth), "]".repeat(depth))).is_err());
+        }
+    }
+    #[test]
+    fn strict_json_grammar_and_unique_keys() {
+        for text in ["01", "-01", "1.", "1e", "1e+", "[1,]", "{\"a\":1,\"a\":2}", "\"raw\nline\"", "\"\\uDC00\""] {
+            assert!(json::parse(text).is_err(), "accepted {text:?}");
+        }
+        for text in ["0", "-0", "1.0", "1e+2", "-0.1E-2", "\"\\uD83D\\uDE00\"", "\"escaped\\nline\""] {
+            assert!(json::parse(text).is_ok(), "rejected {text:?}");
+        }
     }
 }

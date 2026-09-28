@@ -251,3 +251,17 @@ foreign build.
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+## Focused recovery and packaging checks
+
+After `cargo build --workspace --locked`, run `python3 test/service_contracts.py`
+and `python3 test/check_messages.py`. For durable inventory and settlement recovery,
+apply `db/schema.sql` to a disposable PostgreSQL database, set
+`AMISAD_TEST_DATABASE_URL`, and run `python3 test/service_contracts.py DurableContracts`.
+These tests create records and restart their own local service processes.
+
+`python3 test/build_contracts.py`, `python3 test/nats_installer_contracts.py`, and
+`pwsh test/host_contracts.ps1` use disposable paths and native command fixtures;
+they do not modify the host firewall, install system services, or deploy VMs.
+Run `flutter test` and `flutter analyze` in `components/apps/buyer-flutter` for
+request-deadline, navigation/disposal, and stale-response checks.

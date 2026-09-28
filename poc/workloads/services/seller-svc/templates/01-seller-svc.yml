@@ -1,3 +1,6 @@
+{{- if ne (toString .Values.replicas) "1" -}}
+{{- fail "replicas must be exactly 1 for this cached single-writer service" -}}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -36,6 +36,10 @@ paths:
       responses:
         "200": { description: "entries: [payload]" }
   /v1/settlements/instructions:
+    get:
+      summary: "Read-only instruction inventory for audit conservation checks"
+      responses:
+        "200": { description: "instructions: [{match_id, value_cents, confirmed, splits: [{party, amount_cents}]}]" }
     post:
       summary: "Store a pending settlement instruction; splits must sum to value_cents (body: match_id, value_cents, splits{seller_cents, network_cents, platform_cents, ads_cents})"
       requestBody:

@@ -278,7 +278,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/attestations") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             if body.str_of("environment_id").is_none() || body.str_of("lifecycle").is_none() {
                 return Response::error(400, "environment_id and lifecycle required");
@@ -324,14 +324,24 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ("head", json::s(&state.consent.head())),
             ]),
         ),
+        ("GET", "/v1/settlements/instructions") => Response::json(200, &json::obj(vec![
+            ("instructions", json::arr(state.instructions.iter().map(|instruction| json::obj(vec![
+                ("match_id", json::s(&instruction.match_id)),
+                ("value_cents", json::n(instruction.value_cents)),
+                ("confirmed", json::b(instruction.confirmed)),
+                ("splits", json::arr(instruction.splits.iter().map(|(party, amount)| json::obj(vec![
+                    ("party", json::s(party)), ("amount_cents", json::n(*amount)),
+                ])).collect())),
+            ])).collect())),
+        ])),
         ("POST", "/v1/settlements/instructions") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let instruction = match parse_instruction(&body) {
                 Ok(i) => i,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             if let Some(existing) = state.instructions.iter().find(|i| i.match_id == instruction.match_id) {
                 if existing.value_cents == instruction.value_cents && existing.splits == instruction.splits {
@@ -363,7 +373,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/settlements/confirm") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let index = match state.instructions.iter().position(|i| i.match_id == match_id) {
@@ -431,7 +441,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/settlements/adjust") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let match_id = body.str_of("match_id").unwrap_or("").to_string();
             let case_id = match body.str_of("case_id") {
@@ -514,7 +524,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
         ("POST", "/v1/consents") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
-                Err(e) => return Response::error(400, &e),
+                Err(_) => return Response::problem(400, "invalid_request"),
             };
             let grant_type = body.str_of("grant_type").unwrap_or("");
             let action = body.str_of("action").unwrap_or("");
