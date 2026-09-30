@@ -1,5 +1,6 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 by Alisson Sol et al.
 # Shared service diagnostics and lab endpoint discovery.
 amisad_curl() { # <same args as curl -sf>
     local out status body url='' arg

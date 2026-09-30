@@ -119,7 +119,7 @@ them:
   process; each request runs one attested created->attested->executed->destroyed
   environment whose state drops at response time.
 - **Real edge required by default.** slice-runtime runs on `amisad-edge-a`
-  (resolved from its host name or status-server IP report). An unresolved edge
+  (resolved from its hostname or status-server IP report). An unresolved edge
   stops the scenario unless `AMISAD_ALLOW_SINGLE_VM=1` explicitly permits
   running it on vm-core. A resolved but unreachable edge still fails.
 

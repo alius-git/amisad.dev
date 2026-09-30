@@ -1,3 +1,19 @@
+<#PSScriptInfo
+.VERSION 2026.09.30
+.GUID 423b0429-a6bf-4b76-884e-a2931b3a7781
+.AUTHOR Alisson Sol et al.
+.COPYRIGHT (c) 2026 by Alisson Sol et al.
+.TAGS amisad poc test host contracts
+.LICENSEURI https://yuruna.link/license
+.PROJECTURI https://amisad.com
+.ICONURI
+.EXTERNALMODULEDEPENDENCIES
+.REQUIREDSCRIPTS
+.EXTERNALSCRIPTDEPENDENCIES
+.RELEASENOTES
+.PRIVATEDATA
+#>
+
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 [CmdletBinding()]
