@@ -258,10 +258,10 @@ s010.certification is the capstone: audit-svc independently re-verifies the
 evidence trail across FOUR dimensions - attestation continuity (every
 environment's created -> attested -> executed|aborted -> destroyed lifecycle),
 residency (region satisfies jurisdiction), consent (chain integrity across
-every grant type), and settlement conservation (splits sum, adjustments are
-compensating entries referencing a case, nothing edited) - trusting no
-self-report from the ledger (it recomputes the sha256 chains from the raw
-dumps). Because each scenario restores a fresh snapshot, s010 self-seeds a
+every grant type), and settlement evidence (every party and amount matches
+its instruction, payments and refunds are complete, and cases do not conflict)
+-- trusting no self-report from the ledger (it recomputes the sha256 chains
+from the raw dumps). Because each scenario restores a fresh snapshot, s010 self-seeds a
 representative corpus (a completed match + an injected abort, consent
 grant/revoke, a mandate, a disclosure + adjustment) and certifies THAT. It
 localizes a deliberate tamper to the exact modified record, delivers findings

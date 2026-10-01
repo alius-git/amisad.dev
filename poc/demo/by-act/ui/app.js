@@ -563,7 +563,7 @@ const STEPS = [
 
   // --- s010.certification -----------------------------------------------
   { scenario: "s010", persona: "ingrid", label: "Certify the evidence trail",
-    explain: "Four dimensions over everything this demo just did -- attestation continuity, residency, consent, settlement conservation -- recomputing the chains from raw dumps, trusting no self-report.",
+    explain: "Four dimensions over everything this demo just did -- attestation continuity, residency, consent, settlement evidence -- recomputing the chains from raw dumps, trusting no self-report.",
     run: async () => [mk("certify", await post("core/30089/v1/certify"))] },
   { scenario: "s010", persona: "ingrid", label: "Tamper with one record -- get caught",
     explain: "We fetch the attestation dump, flip one lifecycle field, and resubmit. Certification localizes the exact modified record.",

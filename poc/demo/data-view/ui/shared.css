@@ -6,8 +6,9 @@
 
    Baseline is Safari 13.1 / iPadOS 13: no flexbox `gap` (grid-gap only), no
    :is()/:where()/:has(), no container queries, no logical properties. Spacing
-   inside flex rows is done with margins for that reason. Interactive targets
-   are >=44px so the demo can be driven from a tablet. */
+   inside flex rows is done with margins for that reason. Navigation and form
+   controls are >=44px;
+   timeline cells stay dense so the demo can show the whole sequence. */
 :root {
   --amisad-navy: #2b3a67;
   --amisad-terracotta: #e2725b;
@@ -90,7 +91,7 @@ body {
 }
 .chip.bad { color: #ffb4a8; opacity: 1; }
 .chip.good { color: #9df5c8; opacity: 1; }
-.bar a { color: var(--amisad-white); font-size: 0.8rem; }
+.bar a { color: var(--amisad-white); font-size: 0.8rem; display: inline-flex; align-items: center; min-height: 44px; }
 
 /* ---------- controls ---------- */
 button {

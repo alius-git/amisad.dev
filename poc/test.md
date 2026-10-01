@@ -164,10 +164,12 @@ vault PAT in a `sensitive: true` step.
 **Durable stores.** The db step provisions the `amisad` database with the app
 role `amisad` (fixed lab password `amisadpoc2026` -- it rides inside a URL, so
 alphanumeric on purpose), opens `listen_addresses`/pg_hba to the pod and node
-networks, and grants the role INSERT+SELECT only on ledger tables: append-only
-is enforced by the database itself. The seller role receives SELECT, INSERT, and
-UPDATE on `seller.offers`, `seller.orders`, and `seller.inventory`; inventory
-access is required during seller startup as well as during stock updates.
+networks, and grants SELECT and INSERT on the three append-only ledger tables,
+with no UPDATE or DELETE grant. It also grants SELECT, INSERT, and UPDATE on
+`ledger.settlement_instructions`. The same
+app role receives SELECT, INSERT, and UPDATE on `seller.offers`, `seller.orders`,
+and `seller.inventory`; inventory access is required during seller startup as
+well as during stock updates.
 `deploy.sh` passes `DATABASE_URL` (node
 IP:5432) to ledger-svc and seller-svc via the `databaseUrl` helm value; writes
 go to PostgreSQL first, and pods reload state on start. s001 asserts the rows

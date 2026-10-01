@@ -20,8 +20,9 @@ framework that can deploy it.
   provisioning half -- base-image check, VM creation, first boot, none of which
   reach a sequence transcript -- ships with the cycle's other artifacts. A run
   outside a cycle still uses `<temp>/amisad-tests`.
-- `test/test.runner.yml` lists only its `sequences:`. A pool runs this project
-  when its Project URL on the pool-control Pools page points at this repository.
+- `test/test.runner.yml` lists only its `sequences:`. The pool-control Pools
+  page assigns the Framework URL and Project URL together; a pool runs this
+  project when its Project URL points at this repository.
 
 ---
 

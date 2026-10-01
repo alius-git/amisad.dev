@@ -37,7 +37,7 @@ paths:
         "200": { description: "entries: [payload]" }
   /v1/settlements/instructions:
     get:
-      summary: "Read-only instruction inventory for audit conservation checks"
+      summary: "Read-only instruction inventory for audit settlement evidence checks"
       responses:
         "200": { description: "instructions: [{match_id, value_cents, confirmed, splits: [{party, amount_cents}]}]" }
     post:

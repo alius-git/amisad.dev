@@ -44,12 +44,14 @@ header h1 span { font-weight: 300; opacity: 0.8; }
 header label { font-size: 0.85rem; opacity: 0.85; }
 header select {
   font-size: 1rem;
+  min-height: 44px;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   border: 1px solid var(--amisad-terracotta);
 }
-header a { color: var(--amisad-white); font-size: 0.85rem; margin-left: auto; }
+header a { color: var(--amisad-white); font-size: 0.85rem; margin-left: auto; display: inline-flex; align-items: center; min-height: 44px; }
 header button {
+  min-height: 44px;
   background: transparent;
   color: var(--amisad-white);
   border: 1px solid rgba(255, 255, 255, 0.45);
@@ -108,7 +110,7 @@ main {
 }
 .cred > * + * { margin-left: 0.4rem; }
 .cred b { font-weight: 600; }
-.cred button { border: none; background: none; cursor: pointer; font-size: 0.8rem; }
+.cred button { border: none; background: none; cursor: pointer; font-size: 0.8rem; min-height: 44px; }
 
 /* Scenario panels */
 .scenario { border-left: 4px solid var(--amisad-navy); }
@@ -143,6 +145,7 @@ main {
 .step.optional { opacity: 0.75; }
 .step.optional .label::after { content: " (optional)"; font-weight: 400; font-size: 0.75rem; color: #999; }
 .step button.run {
+  min-height: 44px;
   background: var(--amisad-navy);
   color: var(--amisad-white);
   border: none; border-radius: 4px;
@@ -160,7 +163,7 @@ main {
 .result-line .status.warn { background: var(--warn); }
 .result-line .status.bad { background: var(--bad); }
 .results details { margin: 0.1rem 0 0.3rem; }
-.results summary { font-size: 0.72rem; color: #888; cursor: pointer; }
+.results summary { font-size: 0.72rem; color: #888; cursor: pointer; display: flex; align-items: center; min-height: 44px; }
 .results pre {
   margin: 0.2rem 0;
   padding: 0.5rem;

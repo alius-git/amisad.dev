@@ -133,7 +133,7 @@ var AD = (function () {
     visit(node);
     var seen = new Set();
     return out.filter(function (value) {
-      // indexOf historically retained each NaN occurrence.
+      // NaN is unequal to itself, so retain each occurrence.
       if (value !== value) return true;
       if (seen.has(value)) return false;
       seen.add(value);
@@ -775,7 +775,7 @@ var AD = (function () {
 
     // --- s010.certification ----------------------------------------------
     { scenario: "s010", persona: "ingrid", label: "Certify the evidence trail",
-      explain: "Four dimensions over everything this demo just did -- attestation continuity, residency, consent, settlement conservation -- recomputing the chains from raw dumps, trusting no self-report.",
+      explain: "Four dimensions over everything this demo just did -- attestation continuity, residency, consent, settlement evidence -- recomputing the chains from raw dumps, trusting no self-report.",
       touches: ["audit.accesslog"],
       run: async function () { return [mk("certify", await post("core/30089/v1/certify"))]; } },
     { scenario: "s010", persona: "ingrid", label: "Tamper with one record -- get caught",

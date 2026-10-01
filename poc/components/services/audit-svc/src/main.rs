@@ -3,7 +3,7 @@
 // AmisAd POC audit-svc: independent certification of the full evidence trail
 // (s010.certification). Ingrid runs a certification that walks the ledger's
 // raw chain dumps and re-verifies FOUR dimensions itself - attestation
-// continuity, residency, consent, and settlement conservation - trusting no
+// continuity, residency, consent, and settlement evidence - trusting no
 // self-report from the ledger. It also localizes a deliberate tamper to the
 // exact modified record. audit-svc NEVER writes to any ledger and reads no
 // personal data; its own access log (all GETs) is the proof. In-memory (POC).
