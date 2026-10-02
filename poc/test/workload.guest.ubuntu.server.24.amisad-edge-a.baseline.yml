@@ -1,14 +1,16 @@
 # yaml-language-server: $schema=../../../yuruna/test/schemas/sequence.schema.yml
 #
-# AmisAd POC - vm-edge-a (region A slice VM): install the core->edge demo key
-# and a boot-time IP reporter (posts <hostname>.ip.txt to the host status
-# server) so amisad-core can locate this edge. Snapshotted as "amisad-edge-a";
-# slice-runtime itself is delivered per scenario run.
+# AmisAd POC - vm-edge-a (region A slice VM): install a boot-time IP reporter
+# (posts <hostname>.ip.txt to the host status server) so amisad-core can locate
+# this edge. Snapshotted as "amisad-edge-a"; slice-runtime itself is delivered
+# per scenario run. The core->edge demo key is not installed here: vm-core
+# generates it after the edges exist, and the lab driver authorizes its public
+# half on this VM over the harness SSH channel (poc/usernames.md).
 
 sequenceGuid: 4266ff06-2b4c-4d58-8e1a-9c3b5d70e266
 sequenceRevision: 1
 
-description: "Ubuntu Server: provision amisad-edge-a (admin amisad-edge-a-admin), install the demo key + IP reporter over SSH, snapshot amisad-edge-a."
+description: "Ubuntu Server: provision amisad-edge-a (admin amisad-edge-a-admin), install the IP reporter over SSH, snapshot amisad-edge-a."
 keystrokeMechanism: ssh
 resource:
   ubuntu.server.24:
@@ -26,7 +28,7 @@ workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-edge.setup.sh"
     timeoutSeconds: 600
-    description: "Edge setup: demo key into authorized_keys + boot-time IP reporter"
+    description: "Edge setup: boot-time IP reporter"
 
   - action: saveDiskSnapshot
     id: "amisad-edge-a"

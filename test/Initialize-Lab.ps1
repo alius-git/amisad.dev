@@ -28,14 +28,19 @@
     is already cloned (Debug-TestSequence, running the orchestration sequence, clones
     once, so guest builds run with -NoProjectClone). Stages, in order:
 
-      0. Generate the core->edge demo keypair (once per host).
+      0. Delete a demo private key that sits in the status service's served
+         tree (it is exposed; vm-core generates its own pair and keeps the
+         private half).
       1. Resolve the stash service and publish its address for the cycle
          (discovered or pinned; no stash found stops the pass immediately).
       2. Build once: compile + upload binaries to the stash (amisad-build).
       3. Edge VMs: provision + snapshot amisad-edge-a / -b, shrink to 4GB.
-      4. vm-core: k8s + PostgreSQL + NATS + deploy 10 services + demo users.
+      4. vm-core: k8s + PostgreSQL + NATS + deploy 10 services + demo users,
+         including the core->edge demo keypair (generated inside vm-core).
       5. Start both edges and wait for their boot-time IP reports (the fresh
          handoff/*.ip.txt the scenarios resolve the edge from).
+      6. Authorize the PUBLIC half of vm-core's demo key on both edges over
+         the harness SSH channel, and prove vm-core can log in to each.
 
     Leaves amisad-core + both edges live.
 
@@ -159,15 +164,12 @@ if (Get-Command Initialize-HostDisplay -ErrorAction SilentlyContinue) {
     Initialize-HostDisplay -HostType $HostType
 }
 
-# --- [0] core->edge demo keypair (served to guests from the status handoff dir)
-$handoff = Join-Path $YurunaRoot 'test/status/handoff'
-New-Item -ItemType Directory -Force -Path $handoff | Out-Null
-$demoKey = Join-Path $handoff 'amisad-demo-key'
-if (-not (Test-Path -LiteralPath $demoKey)) {
-    Write-Information "Generating the core->edge demo keypair."
-    # -N '' (a true empty argument): -N '""' would encrypt with the literal "".
-    ssh-keygen -t ed25519 -N '' -C 'amisad-demo' -f $demoKey | Out-Host
-}
+# --- [0] delete a demo key left in the served tree ---
+# The core->edge keypair is generated INSIDE vm-core and its private half never
+# leaves it (stage [6] moves only the public half). A host that ran an older
+# version of this lab holds a pair under test/status/handoff, which the status
+# service serves to the whole LAN; it is deleted and said so.
+foreach ($line in (Remove-LegacyDemoKey -YurunaRoot $YurunaRoot -Confirm:$false)) { Write-Warning $line }
 
 # --- [1] stash service: resolve + publish before anything long starts ---
 # A stash is a requirement of this pass, not an optimization, and the project
@@ -261,6 +263,29 @@ $deadEdges = @($edges | Where-Object { -not $edgeState[$_].Ready })
 if ($deadEdges.Count -gt 0) {
     $detail = ($deadEdges | ForEach-Object { "$_ ($($edgeState[$_].Reason))" }) -join '; '
     Write-Error "Region edges are not live: $detail. Stopping the warm-up instead of handing the scenarios a topology they cannot run on."
+    exit 1
+}
+
+# --- [6] let the edges trust vm-core's demo key ---
+# vm-core generated the keypair during its deploy, after the edges were built, so
+# the edges could not be given the key when they were provisioned. Only the PUBLIC
+# half moves, read out of vm-core and written into each edge's authorized_keys
+# over the harness SSH channel (the one every other guest action uses); the
+# private half stays in vm-core, and nothing about the key touches the status
+# service's HTTP. The login is then proved from vm-core, for the same reason the
+# edges' IP reports are awaited above: a scenario cannot report a missing trust
+# usefully, only fail at its first ssh to an edge.
+$edgeAddress = @{}
+foreach ($edge in $edges) {
+    if ($edgeState[$edge].Ready) {
+        $reported = Get-Content -LiteralPath $edgeState[$edge].IpFile -Raw -ErrorAction SilentlyContinue
+        if ($reported) { $edgeAddress[$edge] = $reported.Trim() }
+    }
+}
+$keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
+foreach ($line in $keyHandoff.Lines) { Write-Information $line }
+if (-not $keyHandoff.Ok) {
+    Write-Error "The edges do not trust vm-core's demo key: $($keyHandoff.Reason). Stopping the warm-up instead of handing the scenarios edges they cannot reach."
     exit 1
 }
 

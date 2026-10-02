@@ -8,7 +8,7 @@
 sequenceGuid: 4277aa07-3c5d-4e69-9f2b-0d4c6e81f377
 sequenceRevision: 1
 
-description: "Ubuntu Server: provision amisad-edge-b (admin amisad-edge-b-admin), install the demo key + IP reporter over SSH, snapshot amisad-edge-b."
+description: "Ubuntu Server: provision amisad-edge-b (admin amisad-edge-b-admin), install the IP reporter over SSH, snapshot amisad-edge-b."
 keystrokeMechanism: ssh
 resource:
   ubuntu.server.24:
@@ -26,7 +26,7 @@ workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-edge.setup.sh"
     timeoutSeconds: 600
-    description: "Edge setup: demo key into authorized_keys + boot-time IP reporter"
+    description: "Edge setup: boot-time IP reporter"
 
   - action: saveDiskSnapshot
     id: "amisad-edge-b"

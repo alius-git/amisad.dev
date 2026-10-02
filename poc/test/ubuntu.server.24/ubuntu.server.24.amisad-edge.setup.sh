@@ -1,15 +1,18 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - edge VM setup (shared by amisad-edge-a/b): authorize the
-# core->edge demo key for the admin user, and install a boot-time IP reporter
-# that posts <hostname>.ip.txt to the host status service so amisad-core can
-# locate this edge. The slice runtime itself is delivered per scenario run -
-# the edge VM stays stateless.
+# AmisAd POC - edge VM setup (shared by amisad-edge-a/b): install a boot-time IP
+# reporter that posts <hostname>.ip.txt to the host status service so
+# amisad-core can locate this edge. The slice runtime itself is delivered per
+# scenario run - the edge VM stays stateless.
+#
+# The core->edge demo key is NOT installed here. vm-core generates that keypair
+# (after the edges are built) and keeps the private half; the host then
+# authorizes the PUBLIC half in this VM's authorized_keys over the harness SSH
+# channel (test/AmisAd.Lab.psm1 Sync-AmisAdDemoKey). Nothing about the key is
+# fetched over the status service's HTTP, where an answer from anything on the
+# LAN would be believed.
 set -euo pipefail
-
-REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
 
 if [ -r /etc/yuruna/host.env ]; then
     # shellcheck disable=SC1091
@@ -19,15 +22,6 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
     echo "no host.env - cannot locate the host status service" >&2
     exit 2
 fi
-BASE="http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}"
-
-echo "== authorize the core->edge demo key =="
-mkdir -p "$REAL_HOME/.ssh"
-chmod 700 "$REAL_HOME/.ssh"
-wget --no-proxy --timeout=10 --tries=2 -qO- "${BASE}/handoff/amisad-demo-key.pub" >> "$REAL_HOME/.ssh/authorized_keys"
-sort -u "$REAL_HOME/.ssh/authorized_keys" -o "$REAL_HOME/.ssh/authorized_keys"
-chmod 600 "$REAL_HOME/.ssh/authorized_keys"
-chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.ssh"
 
 echo "== boot-time IP reporter =="
 # Posts this VM's IP to the status service's log-upload sink at every boot (and
@@ -92,8 +86,8 @@ sudo systemctl enable amisad-ip-report.service amisad-ip-report.timer
 sudo systemctl start amisad-ip-report.service
 sudo systemctl start amisad-ip-report.timer
 
-# A snapshot without writeback would strip the just-written authorized_keys
-# entry and IP-reporter unit -- see poc/test.md "Snapshot page-cache flush".
+# A snapshot without writeback would strip the just-written IP-reporter units --
+# see poc/test.md "Snapshot page-cache flush".
 sync
 
 echo "amisad edge setup complete"

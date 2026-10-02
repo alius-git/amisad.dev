@@ -5,48 +5,18 @@
 # (maya, elena buyers/sellers; tom, priya operators; marcel, kai ad agency +
 # creator - s005; pat delegate - s006; alex integration partner - s007; sam
 # support - s008; dana analyst - s009; ingrid auditor - s010) and
-# install the core->edge demo SSH keypair for the admin so scenario scripts
-# can scp/ssh slice-runtime to the edge VMs. Passwords are set by a separate
-# sensitive sshExec sequence step (vault-rendered, masked), never passed to
-# this script. Runs as the admin (passwordless sudo).
+# generate the core->edge demo SSH keypair for the admin so scenario scripts
+# can scp/ssh slice-runtime to the edge VMs. The keypair is created HERE and the
+# private key never leaves this VM: it is not fetched from, or uploaded to, the
+# host status service (which serves its files to the whole LAN). Only the public
+# half crosses to the edges, carried by the host over the harness SSH channel
+# once both exist (test/AmisAd.Lab.psm1 Sync-AmisAdDemoKey). Passwords are set by
+# a separate sensitive sshExec sequence step (vault-rendered, masked), never
+# passed to this script. Runs as the admin (passwordless sudo).
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
-
-if [ -r /etc/yuruna/host.env ]; then
-    # shellcheck disable=SC1091
-    . /etc/yuruna/host.env
-fi
-if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:-}" ]; then
-    echo "no host.env - cannot locate the host status service" >&2
-    exit 2
-fi
-
-# --- REGION: https://yuruna.link/4220a755-004d
-amisad_host_fetch() {
-    local dest="$1" path="$2" attempt
-    for attempt in 1 2; do
-        if [ "$attempt" -eq 2 ] && [ -x /usr/local/lib/yuruna/yuruna-host-locate.sh ]; then
-            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null 2>&1 || true
-        fi
-        if [ -r /etc/yuruna/host.env ]; then
-            # shellcheck disable=SC1091
-            . /etc/yuruna/host.env
-        fi
-        if [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_PORT:-}" ] && \
-           wget --no-proxy --timeout=30 --tries=2 -qO "$dest" \
-                "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/${path}"; then
-            return 0
-        fi
-        if [ "$attempt" -eq 1 ]; then
-            echo "host fetch of '${path}' failed; refreshing the host coordinates and retrying." >&2
-        fi
-    done
-    return 1
-}
-
-BASE="http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}"
 
 echo "== non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex, sam, dana, ingrid) =="
 for u in maya elena tom priya marcel kai pat alex sam dana ingrid; do
@@ -56,13 +26,28 @@ for u in maya elena tom priya marcel kai pat alex sam dana ingrid; do
 done
 # The accounts are NOT in sudoers; passwords come from the sensitive step.
 
-echo "== core->edge demo SSH keypair for the admin =="
-mkdir -p "$REAL_HOME/.ssh"
-chmod 700 "$REAL_HOME/.ssh"
-amisad_host_fetch "$REAL_HOME/.ssh/amisad-demo-key"     "handoff/amisad-demo-key"
-amisad_host_fetch "$REAL_HOME/.ssh/amisad-demo-key.pub" "handoff/amisad-demo-key.pub"
-chmod 600 "$REAL_HOME/.ssh/amisad-demo-key"
-chmod 644 "$REAL_HOME/.ssh/amisad-demo-key.pub"
-chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.ssh"
+echo "== core->edge demo SSH keypair for the admin (generated here; the private key never leaves this VM) =="
+SSH_DIR="$REAL_HOME/.ssh"
+DEMO_KEY="$SSH_DIR/amisad-demo-key"
+mkdir -p "$SSH_DIR"
+chmod 700 "$SSH_DIR"
+# A key that already parses with an empty passphrase stays: the edges may
+# already authorize it. Anything else (absent, truncated, passphrase-protected)
+# is replaced, together with its .pub.
+if [ -f "$DEMO_KEY" ] && ssh-keygen -y -P '' -f "$DEMO_KEY" >/dev/null 2>&1; then
+    echo "keeping the existing demo key"
+else
+    rm -f "$DEMO_KEY" "$DEMO_KEY.pub"
+    ssh-keygen -q -t ed25519 -N '' -C 'amisad-demo' -f "$DEMO_KEY"
+fi
+# The .pub is always derived from the private key, so a stale or hand-edited
+# copy cannot disagree with the key it is meant to describe. The comment field
+# (amisad-demo) is what an edge's authorized_keys uses to replace this key
+# instead of accumulating old ones.
+ssh-keygen -y -P '' -f "$DEMO_KEY" > "$DEMO_KEY.pub"
+chmod 600 "$DEMO_KEY"
+chmod 644 "$DEMO_KEY.pub"
+chown -R "$REAL_USER:$REAL_USER" "$SSH_DIR"
+echo "demo key fingerprint: $(ssh-keygen -lf "$DEMO_KEY.pub")"
 
 echo "amisad vm-core demo users provisioned"

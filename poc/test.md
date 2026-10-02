@@ -103,21 +103,27 @@ independent without per-scenario VMs. Hostnames are set with the framework's
 ```
 [0] cleanup        remove every amisad lab VM (current and legacy names)
                       and any leftover test-* VMs with their storage dirs;
-                      ensure the core->edge demo keypair exists; resolve the
+                      delete a demo private key found in the status
+                      service's served tree; resolve the
                       stash service (pinned or discovered), verify /healthz,
                       and publish the address -- no stash, no run.
 [1] amisad-build   start.guest -> build tools -> snapshot; compile run
-                      uploads amisad-<arch>-binaries.tgz to the stash service;
+                      uploads amisad-<arch>-binaries.tgz to the stash service
+                      and records its SHA-256 for the deploy to verify;
                       VM stopped afterwards.
-[2] amisad-edge-a  start.guest -> demo key + IP reporter -> snapshot.
+[2] amisad-edge-a  start.guest -> IP reporter -> snapshot.
     amisad-edge-b  (provisioned one at a time: first-login OCR is only
                       reliable with no other lab VM running)
 [3] amisad-core    start.guest -> k8s + PostgreSQL + NATS (snapshot
                       amisad-core-k8s) -> binaries from the stash, deploy
                       10 services (ledger+seller on PostgreSQL), add
-                      maya/elena/tom/priya/marcel/kai/pat/alex/sam/dana/ingrid -> snapshot
-                      amisad-core.
+                      maya/elena/tom/priya/marcel/kai/pat/alex/sam/dana/ingrid
+                      and generate the core->edge demo keypair INSIDE this
+                      VM -> snapshot amisad-core.
 [4] both edges started; each reports its IP to the status service.
+[4b] the PUBLIC half of amisad-core's demo key is written into both edges'
+                      authorized_keys over the harness SSH channel, and
+                      amisad-core's login to each is proved.
 [5] scenarios in order, each: restore amisad-core -> drive over SSH
     (sshWaitReady + sshFetchAndExecute; no OCR, so live edge VMs cannot
     disturb it) -> full TVP asserts. slice-runtime runs on amisad-edge-a
@@ -138,10 +144,12 @@ pwsh poc/build/run-tests.ps1 -NoConfigGate
 ```
 
 `run-tests.ps1` removes every amisad lab VM and leftover `test-*` VM
-(enforcing the clean start), generates the core->edge demo keypair if missing,
-resolves the stash service and stops at once if none answers (see
-[one-time setup](#one-time-setup) step 4), builds the topology, then runs each
-scenario from its registry in order. Green ends with `ALL SCENARIOS PASSED`,
+(enforcing the clean start), deletes a demo key found in the status service's
+served tree, resolves the stash service and stops at once if
+none answers (see [one-time setup](#one-time-setup) step 4), builds the
+topology, hands the edges amisad-core's public demo key (see
+[usernames.md](usernames.md#core-edge-access)), then runs each scenario from its
+registry in order. Green ends with `ALL SCENARIOS PASSED`,
 leaving `amisad-core` and both edge VMs live as the demo environment. Stage
 logs land under `<temp>/amisad-tests/` (override with `-LogDir`); watch live progress at
 `http://localhost:8080/status/`. Expect ~15 min for the build, ~15 min per
@@ -158,7 +166,8 @@ with `poc/`, `test/`, and the rest of the project at the archive root. The
 runner populates that clone from `repositories.projectUrl`; uncommitted edits
 are excluded. Both the [compile script](test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh)
 and the [deploy script](test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh)
-use this endpoint. The production path (kept for later) git-clones with the
+use this endpoint, and verify what it returns before extracting it (see
+[Verified nested downloads](#verified-nested-downloads)). The production path (kept for later) git-clones with the
 vault PAT in a `sensitive: true` step.
 
 **Durable stores.** The db step provisions the `amisad` database with the app
@@ -194,6 +203,79 @@ applying the grant:
 ```sql
 GRANT SELECT, INSERT, UPDATE ON seller.inventory TO amisad;
 ```
+
+## Verified nested downloads
+
+The framework verifies the script a sequence launches against a SHA-256 the host
+types into the launch command, over SSH, never against anything the download
+itself carries. That protects the launched script and nothing it fetches
+afterwards. The guest scripts here fetch more -- a project tarball they extract and
+build, a SQL file they run as the `postgres` superuser, a binaries tarball they
+turn into images that run as root -- over the status service's plain HTTP, where
+whatever answers the request decides the bytes. So every such input is checked
+against a SHA-256 carried by the **same launch command** (the `command:` of the
+`sshFetchAndExecute` step), computed on the host at step time, and **before** it
+is extracted, installed or executed. The digest is the trust boundary; the status
+listener offers HTTP only, so there is no transport to prefer.
+
+| Input | Script | Variable in the launch command | Where the host gets it |
+| --- | --- | --- | --- |
+| Project tarball | compile, deploy | `AMISAD_PROJECT_ARCHIVE_SHA256` | `${ext:digest.GetArchiveSha256(project)}`: the status service is asked for the tarball over loopback and the bytes it answers are hashed. |
+| `poc/db/schema.sql` | db | `AMISAD_SCHEMA_SHA256` | `${ext:digest.GetFileSha256(project/poc/db/schema.sql)}`: the file the service serves. |
+| Stash binaries tarball | deploy | `AMISAD_BINARIES_SHA256` | `${ext:digest.GetPublishedSha256(amisad-binaries)}`: right after the build uploads, the compile sequence's `callExtension` step asks the **build VM** for the SHA-256 of the file it built, over the harness SSH channel. |
+
+Each script verifies, deletes the download on a mismatch, and fails closed with
+exit 7 and a message naming the variable when the digest is **absent** -- an empty
+value means the host could not compute it (its warning is in the host log) or the
+script was started by hand. A hand run that has no digest can set
+`AMISAD_ALLOW_UNVERIFIED=1`: the download is then used as it arrived and a warning
+banner says so. No sequence sets it, a wrong digest is still refused, and a
+malformed one is refused even with it set. Downloads land in a private directory
+(mode 0700), not loose in `/tmp`, and the schema reaches `psql` on stdin, so
+another local user cannot swap a file between its check and its use.
+
+**The archive digest is of the exact bytes the service serves.** The tarball is
+cut on demand from the project clone's HEAD, with two sidecars carrying the origin
+and the commit. A re-cut of one commit is byte-identical -- tar entries carry the
+commit time and fixed ownership, and the gzip header has no timestamp, which the
+framework's archive suite holds -- and the service also keeps what it cut per
+commit, so the download that follows the hash gets the bytes that were hashed. If
+the clone's HEAD moves between the two (a `git pull` in `project/` mid-step), the
+guest refuses the download; re-run the step.
+
+**The binaries tarball is selected by digest, not by recency.** The stash is shared
+by the whole lab, so another pass or host can upload the same label after this
+pass's build. The deploy script looks back through the ten newest uploads for the
+one whose SHA-256 is the build's, so an upload altered or replaced on its way
+through the stash is refused, and a busy lab does not hand one pass another pass's
+binaries.
+
+**Upstream releases are pinned, not trusted by transport.** `rustup-init` (a named
+release, instead of piping the rustup.rs installer into `sh`), `bazelisk` (a named
+release, instead of whatever `latest` is on the day) and the NATS server tarball
+are downloaded from their publishers and then executed or installed as root. Each is
+checked against the publisher's own SHA-256, pinned in the script that fetches it:
+the `.sha256` beside each `rustup-init`, the digest GitHub shows on each bazelisk
+release asset, and the `SHA256SUMS` of the NATS release. The pins live in a script
+the framework verified against the digest the host typed into the launch command,
+so they are exactly as trustworthy as the script. To bump a version, change it and
+its digests together.
+
+`test/download_contracts.py` and `test/nats_installer_contracts.py` hold all of
+this: the helper copies stay identical, each script verifies before it extracts, the
+launch commands carry every variable their script reads, and a download that does
+not match is refused and removed.
+
+**Deliberately not covered:**
+
+- `apt-get install`, `cargo` (with the committed `Cargo.lock`) and `npm` (with
+  `package-lock.json`): the package managers verify signed indexes or lockfile
+  hashes themselves.
+- Bazel's module and toolchain archives: Bazel verifies them against the
+  registry's integrity hashes.
+- The container base images pulled during `docker build` (`rust:*-slim` and the
+  distroless runtime base): referenced by tag, not by digest. The images that run
+  the ten services are built locally from the verified binaries.
 
 ## Project archive helper
 

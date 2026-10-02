@@ -34,8 +34,12 @@ workload:
     timeoutSeconds: 360
     description: "Wait for the node to be Ready"
 
+  # The schema runs as the postgres superuser, so its SHA-256 rides in the launch
+  # command (hashed by the host at step time from the file the status service
+  # serves) and the script verifies the download before psql reads it. See
+  # poc/test.md "Verified nested downloads".
   - action: sshFetchAndExecute
-    command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh"
+    command: "AMISAD_SCHEMA_SHA256='${ext:digest.GetFileSha256(project/poc/db/schema.sql)}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh"
     timeoutSeconds: 900
     description: "AmisAd database bring-up (install PostgreSQL, create amisad DB, load schema.sql, app role + pod access)"
 

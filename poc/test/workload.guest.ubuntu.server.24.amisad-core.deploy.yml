@@ -7,7 +7,7 @@
 sequenceGuid: 4244dd04-5c0e-4b7d-9f3a-2e8d47c60a44
 sequenceRevision: 5
 
-description: "AmisAd amisad-core: restore amisad-core-k8s, download binaries from the stash, deploy 10 services, add maya/elena/tom/priya/marcel/kai/pat/alex/sam/dana/ingrid + demo key, snapshot amisad-core."
+description: "AmisAd amisad-core: restore amisad-core-k8s, download binaries from the stash, deploy 10 services, add maya/elena/tom/priya/marcel/kai/pat/alex/sam/dana/ingrid + generate the demo key pair, snapshot amisad-core."
 keystrokeMechanism: ssh
 resource:
   ubuntu.server.24:
@@ -32,8 +32,13 @@ component:
     description: "SSH up after the restore"
 
 workload:
+  # Two downloads are extracted here, so the launch command carries the SHA-256
+  # of each and the script verifies both before extracting: the project tarball
+  # (hashed by the host at step time) and the binaries tarball (the digest the
+  # host read from the build VM right after it uploaded, published by the
+  # compile sequence). See poc/test.md "Verified nested downloads".
   - action: sshFetchAndExecute
-    command: "STASH_HOST='${stashHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh"
+    command: "STASH_HOST='${stashHost}' AMISAD_PROJECT_ARCHIVE_SHA256='${ext:digest.GetArchiveSha256(project)}' AMISAD_BINARIES_SHA256='${ext:digest.GetPublishedSha256(amisad-binaries)}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh"
     timeoutSeconds: 3600
     # Safe to re-run after a dropped SSH transport: the script wipes and
     # re-fetches the project tree, and every service goes out through
@@ -46,7 +51,7 @@ workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.users.sh"
     timeoutSeconds: 300
-    description: "Add non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex, sam, dana, ingrid) + install the core->edge demo SSH key"
+    description: "Add non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex, sam, dana, ingrid) + generate the core->edge demo SSH key pair (the private key stays in this VM)"
 
   # Passwords via sshExec, the ssh action with sensitive masking in its
   # handler (sshFetchAndExecute ignores 'sensitive'; vault plaintext must not

@@ -6,7 +6,7 @@
 # scenario consumes the same artifact (poc/test.md).
 
 sequenceGuid: 4233cc03-7d1f-4c8e-8a4b-3f9e58d71b33
-sequenceRevision: 2
+sequenceRevision: 3
 
 description: "AmisAd amisad-build: cargo build --release over SSH, upload binaries tarball to the stash service."
 keystrokeMechanism: ssh
@@ -33,11 +33,28 @@ component:
     description: "SSH up after the restore"
 
 workload:
+  # The project tarball is a plain HTTP download that this script extracts and
+  # builds, so its SHA-256 rides in the launch command (computed on the host at
+  # step time, from the bytes the status service serves) and the script checks
+  # it before extracting. See poc/test.md "Verified nested downloads".
   - action: sshFetchAndExecute
-    command: "STASH_HOST='${stashHost}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh"
+    command: "STASH_HOST='${stashHost}' AMISAD_PROJECT_ARCHIVE_SHA256='${ext:digest.GetArchiveSha256(project)}' /usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh"
     timeoutSeconds: 3600
     # Safe to re-run after a dropped SSH transport: the script wipes and
     # re-fetches the project tree before building, and the stash upload
     # overwrites, so a second pass starts from the same place the first did.
     transportRetries: 1
     description: "cargo build --release + upload binaries to the stash service"
+
+  # The binaries are what a LATER guest runs as root. The deploy step checks what
+  # it downloads from the stash against the digest read here, from the guest
+  # that built them, over the harness SSH channel -- so an upload altered or
+  # replaced on its way through the stash is refused there.
+  - action: callExtension
+    method: digest.PublishGuestFileSha256
+    args:
+      name: amisad-binaries
+      vmName: "${vmName}"
+      user: "${username}"
+      path: "/tmp/amisad-*-binaries.tgz"
+    description: "Record the digest of the uploaded binaries for the amisad-core deploy to verify"

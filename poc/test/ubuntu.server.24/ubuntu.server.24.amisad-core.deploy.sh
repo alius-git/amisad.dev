@@ -11,6 +11,14 @@
 # which returns the address the cycle's warm-up resolved and confirmed answers
 # /healthz. A run that reaches this script with no published address stops
 # immediately rather than fetching executables from a guessed host.
+# AMISAD_PROJECT_ARCHIVE_SHA256 and AMISAD_BINARIES_SHA256: the SHA-256 of the
+# project tarball and of the binaries tarball this script downloads and then
+# extracts. The sequence supplies the first from ${ext:digest.GetArchiveSha256(project)}
+# and the second from ${ext:digest.GetPublishedSha256(amisad-binaries)} (the
+# digest the host read from the build VM after it uploaded); each download is
+# verified before it is extracted, and the binaries run in pods as root, which
+# is why that one matters most (see poc/test.md "Verified nested downloads").
+# AMISAD_ALLOW_UNVERIFIED=1 waives an absent digest for a hand run.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -53,12 +61,149 @@ amisad_host_fetch() {
     return 1
 }
 
+# --- amisad download verification: identical copy in compile.sh, deploy.sh and db.sh ---
+# fetch-and-execute verified THIS script against a SHA-256 the host typed into
+# the launch command. Whatever this script downloads and then extracts, installs
+# or feeds to a program is a plain HTTP answer from a LAN service, so it is
+# checked here against a SHA-256 carried by the same launch command (the
+# sequence's command: text, filled in by ${ext:digest....} on the host) BEFORE
+# it is used. The digest is the trust boundary; the transport is not. An empty
+# digest refuses the download; AMISAD_ALLOW_UNVERIFIED=1 is the loud override
+# for a hand run, and no sequence sets it. test/download_contracts.py holds the
+# three copies equal.
+amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
+    local file="$1" out
+    out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1
+    printf '%s' "${out%% *}" | tr 'A-F' 'a-f'
+}
+
+# amisad_verify_download <file> <expected sha256> <label> <variable name>
+# Returns 0 when the bytes match (or when the digest is absent and the override
+# is set), 1 otherwise; a refused download is deleted, never left to be reused.
+amisad_verify_download() {
+    local file="$1" expected="${2:-}" label="$3" variable="$4" actual
+    if [ -z "$expected" ]; then
+        if [ "${AMISAD_ALLOW_UNVERIFIED:-}" = "1" ]; then
+            {
+                echo ""
+                echo "!! UNVERIFIED DOWNLOAD (AMISAD_ALLOW_UNVERIFIED=1)"
+                echo "!!   input:  ${label}"
+                echo "!!   cause:  ${variable} is empty, so nothing proves these bytes are the ones the host meant"
+                echo "!!   effect: the download is used as it arrived. This override exists for hand runs;"
+                echo "!!           a sequence never sets it."
+                echo ""
+            } >&2
+            return 0
+        fi
+        rm -f -- "$file"
+        {
+            echo ""
+            echo "!! DOWNLOAD NOT VERIFIED -- refusing to use ${label}"
+            echo "!!   cause:  ${variable} is empty. The sequence puts the expected SHA-256 in this script's"
+            echo "!!           launch command; an empty value means the host could not compute it (see the"
+            echo "!!           host log for a digest warning) or this script was started by hand."
+            echo "!!   by hand: set ${variable}=<sha256>, or AMISAD_ALLOW_UNVERIFIED=1 to use the download"
+            echo "!!           unverified (a warning banner is printed)."
+            echo ""
+        } >&2
+        return 1
+    fi
+    if [ "${#expected}" -ne 64 ] || [ -n "${expected//[0-9A-Fa-f]/}" ]; then
+        rm -f -- "$file"
+        echo "!! DOWNLOAD NOT VERIFIED -- ${variable} is not a SHA-256 (64 hex characters): ${expected}" >&2
+        return 1
+    fi
+    expected=$(printf '%s' "$expected" | tr 'A-F' 'a-f')
+    actual=$(amisad_sha256 "$file") || actual=''
+    if [ "$actual" = "$expected" ]; then
+        echo "  integrity: sha256 verified (${label})"
+        return 0
+    fi
+    rm -f -- "$file"
+    {
+        echo ""
+        echo "!! INTEGRITY MISMATCH -- refusing to use ${label}"
+        echo "!!   expected: ${expected}"
+        echo "!!   actual:   ${actual:-<unreadable>}"
+        echo "!!   The download was deleted. Either the bytes changed after the host hashed them (the"
+        echo "!!   clone moved, or something on the path answered instead of the status service) or"
+        echo "!!   the host and this guest disagree about which input this is."
+        echo ""
+    } >&2
+    return 1
+}
+# --- end amisad download verification ---
+
+# amisad_fetch_stash_binaries <stash base url> <label> <dest file>
+# Fetches the newest stash upload under <label> whose SHA-256 is the one the host
+# read from the build VM (AMISAD_BINARIES_SHA256), looking back through the ten
+# newest: the stash is shared by the whole lab, so another pass or host may have
+# uploaded the same label since this pass's build. Returns 3 when the stash lists
+# nothing for the label and 7 when no upload verifies. With no digest set, only
+# the newest is a candidate and amisad_verify_download decides whether it may be
+# used at all.
+amisad_fetch_stash_binaries() {
+    local stash="$1" label="$2" dest="$3" links link url want have tried=0
+    # `|| true`: grep exits 1 when the list is empty (no artifact yet), which
+    # under `set -o pipefail` would abort here BEFORE the guard below could
+    # explain why.
+    links=$(curl -fsS --noproxy '*' \
+        "${stash}/api/stashes?username=amisad-poc&filename=${label}&limit=10" \
+        | grep -o '"permalink":"[^"]*"' | cut -d'"' -f4 || true)
+    if [ -z "$links" ]; then
+        echo "no stash artifact found for label amisad-poc/${label} - did amisad-build run first on this architecture?" >&2
+        return 3
+    fi
+    want=$(printf '%s' "${AMISAD_BINARIES_SHA256:-}" | tr 'A-F' 'a-f')
+    if [ -n "$want" ] && { [ "${#want}" -ne 64 ] || [ -n "${want//[0-9a-f]/}" ]; }; then
+        echo "!! DOWNLOAD NOT VERIFIED -- AMISAD_BINARIES_SHA256 is not a SHA-256 (64 hex characters): ${want}" >&2
+        return 7
+    fi
+    for link in $links; do
+        tried=$((tried + 1))
+        url="${stash}${link/#\/s\//\/download\/}"
+        if ! curl -fsS --noproxy '*' "$url" -o "$dest"; then
+            rm -f -- "$dest"
+            echo "  stash download of ${url} failed; trying an older upload" >&2
+            continue
+        fi
+        if [ -z "$want" ]; then
+            amisad_verify_download "$dest" "" "the stash binaries (${label})" AMISAD_BINARIES_SHA256 || return 7
+            return 0
+        fi
+        have=$(amisad_sha256 "$dest") || have=''
+        if [ "$have" = "$want" ]; then
+            amisad_verify_download "$dest" "$want" "the stash binaries (${label}, ${link})" AMISAD_BINARIES_SHA256 || return 7
+            return 0
+        fi
+        echo "  stash upload ${link} is not this pass's build (sha256 ${have:-<unreadable>}); trying an older one" >&2
+        rm -f -- "$dest"
+    done
+    {
+        echo ""
+        echo "!! INTEGRITY MISMATCH -- none of the ${tried} newest stash uploads for ${label} is the build this pass made"
+        echo "!!   expected: ${want}"
+        echo "!!   The digest was read from the build VM after it uploaded. Either the upload was altered or"
+        echo "!!   replaced on the way to or inside the stash, or it never arrived. Nothing was extracted."
+        echo ""
+    } >&2
+    return 7
+}
+
+# Downloads land in a private directory (mode 0700), not loose in /tmp: another
+# local user could otherwise swap a file between its digest check and its use.
+AMISAD_WORK=$(mktemp -d "${TMPDIR:-/tmp}/amisad-fetch.XXXXXX")
+trap 'rm -rf -- "$AMISAD_WORK"' EXIT
+
+# Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
+# The previous tree is replaced only after the new archive verified.
+amisad_host_fetch "$AMISAD_WORK/project-poc.tar.gz" "yuruna-project-archive.tar.gz?nocache=${RANDOM}"
+amisad_verify_download "$AMISAD_WORK/project-poc.tar.gz" "${AMISAD_PROJECT_ARCHIVE_SHA256:-}" \
+    "the project archive (yuruna-project-archive.tar.gz)" AMISAD_PROJECT_ARCHIVE_SHA256 || exit 7
 rm -rf "$REAL_HOME/amisad.dev"
 mkdir -p "$REAL_HOME/amisad.dev"
-# Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
-amisad_host_fetch /tmp/project-poc.tar.gz "yuruna-project-archive.tar.gz?nocache=${RANDOM}"
-tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
-rm -f /tmp/project-poc.tar.gz
+tar -xzf "$AMISAD_WORK/project-poc.tar.gz" -C "$REAL_HOME/amisad.dev"
+rm -f "$AMISAD_WORK/project-poc.tar.gz"
 
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
@@ -67,8 +212,9 @@ echo "== download prebuilt binaries from the stash service =="
 # --noproxy '*': the stash IP is not in the guest no_proxy list, so an HTTP GET
 # would otherwise be sent through squid. The label carries the architecture
 # (amisad-<arch>-binaries; see poc/test.md "Stash artifact naming"): match our
-# own uname -m and nothing else. /api/stashes returns newest-first, so limit=1
-# is the latest build FOR THIS ARCHITECTURE.
+# own uname -m and nothing else. /api/stashes returns newest-first, and the
+# build this pass made is the newest upload under that label unless another
+# pass or host uploaded since; amisad_fetch_stash_binaries picks it by digest.
 # No default address: the caller supplies one it already verified, and guessing
 # here would pull executables from whatever answers on someone's network.
 if [ -z "${STASH_HOST:-}" ]; then
@@ -82,19 +228,9 @@ curl -fsS --noproxy '*' --connect-timeout 20 "${STASH}/healthz" >/dev/null || {
     echo "STASH UNREACHABLE at ${STASH} - is yuruna-stash-service running and reachable from this guest?" >&2
     exit 3
 }
-# `|| true`: grep exits 1 when the list is empty (no artifact yet), which under
-# `set -o pipefail` would abort here BEFORE the guard below could explain why.
-PERMALINK=$(curl -fsS --noproxy '*' \
-    "${STASH}/api/stashes?username=amisad-poc&filename=${LABEL}&limit=1" \
-    | grep -o '"permalink":"[^"]*"' | head -n1 | cut -d'"' -f4 || true)
-if [ -z "$PERMALINK" ]; then
-    echo "no stash artifact found for label amisad-poc/${LABEL} - did amisad-build run first on a ${ARCH} host?" >&2
-    exit 3
-fi
-DOWNLOAD="${STASH}${PERMALINK/#\/s\//\/download\/}"
 mkdir -p target/release
-curl -fsS --noproxy '*' "$DOWNLOAD" -o /tmp/amisad-binaries.tgz
-tar -xzf /tmp/amisad-binaries.tgz -C target/release
+amisad_fetch_stash_binaries "$STASH" "$LABEL" "$AMISAD_WORK/amisad-binaries.tgz" || exit $?
+tar -xzf "$AMISAD_WORK/amisad-binaries.tgz" -C target/release
 chmod +x target/release/*
 echo "binaries retrieved from stash:"
 ls -l target/release/

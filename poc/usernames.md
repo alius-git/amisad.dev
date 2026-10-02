@@ -61,11 +61,41 @@ in sudoers.
 ## Core->edge access
 
 Scenario scripts on vm-core reach the edge VMs with a dedicated **demo
-keypair** (`amisad-demo-key`), generated host-side by `run-tests.ps1` under
-`test/status/handoff/` and fetched by the guests from the status service. The
-edges' boot-time IP reporter posts `<hostname>.ip.txt` under the status
-server's `log/handoff/`, which is how vm-core resolves them without DNS. Lab
-deviation, deliberate: the handoff dir is readable on the trusted lab LAN.
+keypair** (`~/.ssh/amisad-demo-key` in the `amisad-core-admin` home). The pair is
+generated **inside vm-core**, by the users step of the deploy chain (ed25519,
+empty passphrase; a key that already parses is kept), and **the private key never
+leaves that VM**. Once both edges are live, the lab driver
+(`test/Initialize-Lab.ps1` stage 6, `poc/build/run-tests.ps1` stage 4b) reads the
+*public* half out of vm-core and writes it into each edge's `authorized_keys`,
+both over the harness SSH channel -- the one every other host-to-guest action
+uses -- and then proves the login from vm-core. Each edge keeps exactly one entry
+ending in `amisad-demo`: a re-run replaces it instead of appending, so a rotated
+key invalidates the previous one. The edges cannot be given the key when they are
+provisioned, because they are built before vm-core exists.
+
+**Why the status service is not the channel.** The status service answers every
+machine that can reach its port, so a file it serves is readable by the whole LAN:
+a design that parks the private key where guests can download it publishes the
+key, and a "trusted lab LAN" does not bound who can read a served file. So nothing
+here creates, copies or serves a private key under a directory the status service
+serves (`test/status`, its `runtime/` and `log/` mounts, or the
+checkout it serves as `yuruna-repo/`), and the framework's listener also refuses
+private-key file names wherever they sit. A public key and the edges' IP reports
+(`<hostname>.ip.txt` under the status server's `log/handoff/`, which is how vm-core
+resolves them without DNS) are not secret and are the only things that travel by
+that route.
+
+**Rotation (operator).** A host that ran an older version of this lab generated
+the pair under `test/status/handoff/` and had the guests download both halves
+from the status service, so it may have served the private key to the LAN: treat
+it as exposed. `Initialize-Lab.ps1` and
+`run-tests.ps1` delete `test/status/handoff/amisad-demo-key` and its `.pub` when they
+find them and say so, and every VM built from then on trusts a new key. A
+long-lived VM built earlier still trusts the old one: rebuild it, or remove the
+`authorized_keys` line ending in `amisad-demo`
+(`sed -i '/ amisad-demo$/d' ~/.ssh/authorized_keys`) and let the driver add the new
+one. Restart the host's status service too, so a listener started before the
+framework refused key names is not left running.
 
 ---
 

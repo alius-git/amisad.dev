@@ -5,9 +5,15 @@
 # instance to in-cluster pods: role 'amisad' (fixed lab password, rides in
 # DATABASE_URL - see poc/test.md), listen_addresses '*', pg_hba for the pod
 # and node networks. The role gets NO UPDATE/DELETE on ledger tables - the
-# database itself enforces append-only. Schema is fetched from the host
-# status service into /tmp because the postgres user cannot read the login
-# user's 0750 home.
+# database itself enforces append-only. The schema is fetched from the host
+# status service into a private directory and fed to psql on stdin, because the
+# postgres user cannot read the login user's 0750 home and a world-readable
+# copy in /tmp could be swapped after its digest was checked.
+# AMISAD_SCHEMA_SHA256: the SHA-256 of poc/db/schema.sql as the host serves it.
+# The sequence supplies it from ${ext:digest.GetFileSha256(project/poc/db/schema.sql)};
+# the schema runs as the postgres superuser, so it is verified before psql sees
+# a byte of it (see poc/test.md "Verified nested downloads").
+# AMISAD_ALLOW_UNVERIFIED=1 waives an absent digest for a hand run.
 set -euo pipefail
 
 if [ -r /etc/yuruna/host.env ]; then
@@ -42,6 +48,90 @@ amisad_host_fetch() {
     return 1
 }
 
+# --- amisad download verification: identical copy in compile.sh, deploy.sh and db.sh ---
+# fetch-and-execute verified THIS script against a SHA-256 the host typed into
+# the launch command. Whatever this script downloads and then extracts, installs
+# or feeds to a program is a plain HTTP answer from a LAN service, so it is
+# checked here against a SHA-256 carried by the same launch command (the
+# sequence's command: text, filled in by ${ext:digest....} on the host) BEFORE
+# it is used. The digest is the trust boundary; the transport is not. An empty
+# digest refuses the download; AMISAD_ALLOW_UNVERIFIED=1 is the loud override
+# for a hand run, and no sequence sets it. test/download_contracts.py holds the
+# three copies equal.
+amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
+    local file="$1" out
+    out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1
+    printf '%s' "${out%% *}" | tr 'A-F' 'a-f'
+}
+
+# amisad_verify_download <file> <expected sha256> <label> <variable name>
+# Returns 0 when the bytes match (or when the digest is absent and the override
+# is set), 1 otherwise; a refused download is deleted, never left to be reused.
+amisad_verify_download() {
+    local file="$1" expected="${2:-}" label="$3" variable="$4" actual
+    if [ -z "$expected" ]; then
+        if [ "${AMISAD_ALLOW_UNVERIFIED:-}" = "1" ]; then
+            {
+                echo ""
+                echo "!! UNVERIFIED DOWNLOAD (AMISAD_ALLOW_UNVERIFIED=1)"
+                echo "!!   input:  ${label}"
+                echo "!!   cause:  ${variable} is empty, so nothing proves these bytes are the ones the host meant"
+                echo "!!   effect: the download is used as it arrived. This override exists for hand runs;"
+                echo "!!           a sequence never sets it."
+                echo ""
+            } >&2
+            return 0
+        fi
+        rm -f -- "$file"
+        {
+            echo ""
+            echo "!! DOWNLOAD NOT VERIFIED -- refusing to use ${label}"
+            echo "!!   cause:  ${variable} is empty. The sequence puts the expected SHA-256 in this script's"
+            echo "!!           launch command; an empty value means the host could not compute it (see the"
+            echo "!!           host log for a digest warning) or this script was started by hand."
+            echo "!!   by hand: set ${variable}=<sha256>, or AMISAD_ALLOW_UNVERIFIED=1 to use the download"
+            echo "!!           unverified (a warning banner is printed)."
+            echo ""
+        } >&2
+        return 1
+    fi
+    if [ "${#expected}" -ne 64 ] || [ -n "${expected//[0-9A-Fa-f]/}" ]; then
+        rm -f -- "$file"
+        echo "!! DOWNLOAD NOT VERIFIED -- ${variable} is not a SHA-256 (64 hex characters): ${expected}" >&2
+        return 1
+    fi
+    expected=$(printf '%s' "$expected" | tr 'A-F' 'a-f')
+    actual=$(amisad_sha256 "$file") || actual=''
+    if [ "$actual" = "$expected" ]; then
+        echo "  integrity: sha256 verified (${label})"
+        return 0
+    fi
+    rm -f -- "$file"
+    {
+        echo ""
+        echo "!! INTEGRITY MISMATCH -- refusing to use ${label}"
+        echo "!!   expected: ${expected}"
+        echo "!!   actual:   ${actual:-<unreadable>}"
+        echo "!!   The download was deleted. Either the bytes changed after the host hashed them (the"
+        echo "!!   clone moved, or something on the path answered instead of the status service) or"
+        echo "!!   the host and this guest disagree about which input this is."
+        echo ""
+    } >&2
+    return 1
+}
+# --- end amisad download verification ---
+
+# Fetched and verified first, before the install: a digest the host could not
+# supply or a download that does not match is decided in seconds, and costs
+# nothing to find out before PostgreSQL is installed. A private directory (mode
+# 0700), not a loose file in /tmp: another local user could otherwise swap the
+# schema between its digest check and psql reading it.
+AMISAD_WORK=$(mktemp -d "${TMPDIR:-/tmp}/amisad-fetch.XXXXXX")
+trap 'rm -rf -- "$AMISAD_WORK"' EXIT
+SCHEMA="$AMISAD_WORK/amisad-schema.sql"
+amisad_host_fetch "$SCHEMA" "yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
+amisad_verify_download "$SCHEMA" "${AMISAD_SCHEMA_SHA256:-}" \
+    "the database schema (poc/db/schema.sql)" AMISAD_SCHEMA_SHA256 || exit 7
 
 # Self-sufficient PostgreSQL install (Ubuntu's default packages): the
 # framework's pgdg-based script raced its own cluster re-init.
@@ -57,13 +147,11 @@ for _ in $(seq 1 30); do
 done
 sudo -u postgres pg_isready
 
-SCHEMA=/tmp/amisad-schema.sql
-amisad_host_fetch "$SCHEMA" "yuruna-repo/project/poc/db/schema.sql?nocache=${RANDOM}"
-chmod 644 "$SCHEMA"
-
 sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='amisad'" | grep -q 1 || \
     sudo -u postgres createdb amisad
-sudo -u postgres psql -v ON_ERROR_STOP=1 -d amisad -f "$SCHEMA"
+# stdin, not -f <path>: the postgres user cannot open a file in the private
+# directory, and the bytes read are the bytes that were verified.
+sudo -u postgres psql -v ON_ERROR_STOP=1 -d amisad -f - < "$SCHEMA"
 rm -f "$SCHEMA"
 
 # App role 'amisad' (name also hardcoded in the grants and pg_hba below).

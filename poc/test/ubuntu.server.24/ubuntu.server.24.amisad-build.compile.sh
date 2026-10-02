@@ -10,6 +10,11 @@
 # cycle's warm-up resolved and confirmed answers /healthz. A run that reaches
 # this script with no published address stops immediately rather than shipping
 # a build's binaries at a guessed host.
+# AMISAD_PROJECT_ARCHIVE_SHA256: the SHA-256 of the project tarball this script
+# downloads and builds. The sequence supplies it from ${ext:digest.GetArchiveSha256(project)};
+# the tarball is verified before it is extracted (see poc/test.md "Verified
+# nested downloads"). AMISAD_ALLOW_UNVERIFIED=1 waives an absent digest for a
+# hand run.
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -49,12 +54,93 @@ amisad_host_fetch() {
     return 1
 }
 
+# --- amisad download verification: identical copy in compile.sh, deploy.sh and db.sh ---
+# fetch-and-execute verified THIS script against a SHA-256 the host typed into
+# the launch command. Whatever this script downloads and then extracts, installs
+# or feeds to a program is a plain HTTP answer from a LAN service, so it is
+# checked here against a SHA-256 carried by the same launch command (the
+# sequence's command: text, filled in by ${ext:digest....} on the host) BEFORE
+# it is used. The digest is the trust boundary; the transport is not. An empty
+# digest refuses the download; AMISAD_ALLOW_UNVERIFIED=1 is the loud override
+# for a hand run, and no sequence sets it. test/download_contracts.py holds the
+# three copies equal.
+amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
+    local file="$1" out
+    out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1
+    printf '%s' "${out%% *}" | tr 'A-F' 'a-f'
+}
+
+# amisad_verify_download <file> <expected sha256> <label> <variable name>
+# Returns 0 when the bytes match (or when the digest is absent and the override
+# is set), 1 otherwise; a refused download is deleted, never left to be reused.
+amisad_verify_download() {
+    local file="$1" expected="${2:-}" label="$3" variable="$4" actual
+    if [ -z "$expected" ]; then
+        if [ "${AMISAD_ALLOW_UNVERIFIED:-}" = "1" ]; then
+            {
+                echo ""
+                echo "!! UNVERIFIED DOWNLOAD (AMISAD_ALLOW_UNVERIFIED=1)"
+                echo "!!   input:  ${label}"
+                echo "!!   cause:  ${variable} is empty, so nothing proves these bytes are the ones the host meant"
+                echo "!!   effect: the download is used as it arrived. This override exists for hand runs;"
+                echo "!!           a sequence never sets it."
+                echo ""
+            } >&2
+            return 0
+        fi
+        rm -f -- "$file"
+        {
+            echo ""
+            echo "!! DOWNLOAD NOT VERIFIED -- refusing to use ${label}"
+            echo "!!   cause:  ${variable} is empty. The sequence puts the expected SHA-256 in this script's"
+            echo "!!           launch command; an empty value means the host could not compute it (see the"
+            echo "!!           host log for a digest warning) or this script was started by hand."
+            echo "!!   by hand: set ${variable}=<sha256>, or AMISAD_ALLOW_UNVERIFIED=1 to use the download"
+            echo "!!           unverified (a warning banner is printed)."
+            echo ""
+        } >&2
+        return 1
+    fi
+    if [ "${#expected}" -ne 64 ] || [ -n "${expected//[0-9A-Fa-f]/}" ]; then
+        rm -f -- "$file"
+        echo "!! DOWNLOAD NOT VERIFIED -- ${variable} is not a SHA-256 (64 hex characters): ${expected}" >&2
+        return 1
+    fi
+    expected=$(printf '%s' "$expected" | tr 'A-F' 'a-f')
+    actual=$(amisad_sha256 "$file") || actual=''
+    if [ "$actual" = "$expected" ]; then
+        echo "  integrity: sha256 verified (${label})"
+        return 0
+    fi
+    rm -f -- "$file"
+    {
+        echo ""
+        echo "!! INTEGRITY MISMATCH -- refusing to use ${label}"
+        echo "!!   expected: ${expected}"
+        echo "!!   actual:   ${actual:-<unreadable>}"
+        echo "!!   The download was deleted. Either the bytes changed after the host hashed them (the"
+        echo "!!   clone moved, or something on the path answered instead of the status service) or"
+        echo "!!   the host and this guest disagree about which input this is."
+        echo ""
+    } >&2
+    return 1
+}
+# --- end amisad download verification ---
+
+# Downloads land in a private directory (mode 0700), not loose in /tmp: another
+# local user could otherwise swap a file between its digest check and its use.
+AMISAD_WORK=$(mktemp -d "${TMPDIR:-/tmp}/amisad-fetch.XXXXXX")
+trap 'rm -rf -- "$AMISAD_WORK"' EXIT
+
+# Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
+# The previous tree is replaced only after the new archive verified.
+amisad_host_fetch "$AMISAD_WORK/project-poc.tar.gz" "yuruna-project-archive.tar.gz?nocache=${RANDOM}"
+amisad_verify_download "$AMISAD_WORK/project-poc.tar.gz" "${AMISAD_PROJECT_ARCHIVE_SHA256:-}" \
+    "the project archive (yuruna-project-archive.tar.gz)" AMISAD_PROJECT_ARCHIVE_SHA256 || exit 7
 rm -rf "$REAL_HOME/amisad.dev"
 mkdir -p "$REAL_HOME/amisad.dev"
-# Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
-amisad_host_fetch /tmp/project-poc.tar.gz "yuruna-project-archive.tar.gz?nocache=${RANDOM}"
-tar -xzf /tmp/project-poc.tar.gz -C "$REAL_HOME/amisad.dev"
-rm -f /tmp/project-poc.tar.gz
+tar -xzf "$AMISAD_WORK/project-poc.tar.gz" -C "$REAL_HOME/amisad.dev"
+rm -f "$AMISAD_WORK/project-poc.tar.gz"
 
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"

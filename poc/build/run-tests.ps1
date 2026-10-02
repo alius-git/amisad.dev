@@ -143,17 +143,12 @@ if ($sweepExit -ne 0) {
 }
 Stop-LabConsole -HostType $HostType
 
-# Core->edge demo keypair, served to guests from the status service's handoff
-# dir (lab-trusted LAN; see poc/usernames.md). Generated once per host.
-$handoff = Join-Path $YurunaRoot 'test/status/handoff'
-New-Item -ItemType Directory -Force -Path $handoff | Out-Null
-$demoKey = Join-Path $handoff 'amisad-demo-key'
-if (-not (Test-Path -LiteralPath $demoKey)) {
-    Write-Information "Generating the core->edge demo keypair."
-    # -N '' (a true empty argument): under pwsh 7's Standard native passing,
-    # -N '""' would create a key ENCRYPTED with the literal passphrase "".
-    ssh-keygen -t ed25519 -N '' -C 'amisad-demo' -f $demoKey | Out-Host
-}
+# The core->edge demo keypair is generated INSIDE amisad-core (its deploy chain);
+# the private half never leaves it and only the public half is handed to the
+# edges, after both exist (see [4b] below and poc/usernames.md). A host that ran
+# an older version of this driver holds a pair under test/status/handoff, which
+# the status service serves to the whole LAN; it is deleted and said so.
+foreach ($line in (Remove-LegacyDemoKey -YurunaRoot $YurunaRoot -Confirm:$false)) { Write-Warning $line }
 
 # --- pre-flight: stash service, resolved + published before anything long starts ---
 # A stash is a requirement of this pass, not an optimization: the build uploads
@@ -238,6 +233,25 @@ foreach ($edge in $edges) {
     if (-not $edgeReady) {
         Write-Warning "$edge IP report not seen; dependent scenarios will fall back or fail loudly."
     }
+}
+
+# --- [4b] let the edges trust amisad-core's demo key ---
+# amisad-core generated the keypair during its deploy, after the edges were built,
+# so only now can the edges be given it. Only the PUBLIC half moves, read out of
+# amisad-core and written into each edge's authorized_keys over the harness SSH
+# channel; the private half stays in amisad-core. The login is proved from
+# amisad-core so a missing trust stops the run here, not at the first scenario's
+# ssh to an edge.
+$edgeAddress = @{}
+foreach ($edge in $edges) {
+    $reported = Get-Content -LiteralPath $edgeState[$edge].IpFile -Raw -ErrorAction SilentlyContinue
+    if ($reported) { $edgeAddress[$edge] = $reported.Trim() }
+}
+$keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
+foreach ($line in $keyHandoff.Lines) { Write-Information $line }
+if (-not $keyHandoff.Ok) {
+    Write-Error "The edges do not trust amisad-core's demo key: $($keyHandoff.Reason). Stopping before the scenarios; VMs are left as-is for debugging."
+    exit 1
 }
 
 # --- [5] scenarios, in order, each restoring amisad-core over SSH ---
