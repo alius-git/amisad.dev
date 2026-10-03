@@ -3,6 +3,7 @@
 # Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - install the build toolchains on the build VM:
 # rustup (pinned stable Rust), bazelisk (as /usr/local/bin/bazel), git, python3.
+# --- REGION: Initialize environment
 set -euo pipefail
 
 export DEBIAN_FRONTEND=noninteractive
@@ -19,6 +20,7 @@ if ! declare -F _yuruna_retry >/dev/null 2>&1 && [ -r /usr/local/lib/yuruna/yuru
 fi
 
 # Run $@ through the retry ladder when the lib is present, plain otherwise.
+# --- REGION: amisad_retry
 amisad_retry() {
     local label="$1"; shift
     if declare -F _yuruna_retry >/dev/null 2>&1; then
@@ -28,15 +30,8 @@ amisad_retry() {
     fi
 }
 
-# --- amisad pinned download check: identical copy in tools.sh and nats.sh ---
-# rustup-init, bazelisk and the NATS server are downloaded from their publishers
-# and then executed or installed as root, so each is checked against a SHA-256
-# pinned in THIS script before use. The pins are the publishers' own values (the
-# .sha256 file beside each rustup-init, the digest on each bazelisk release
-# asset, the release's SHA256SUMS for NATS), recorded when the version was
-# chosen. They live in a script that fetch-and-execute verified against the
-# digest the host typed into the launch command, so they are as trustworthy as
-# the script. A mismatch deletes the download, so a retried unit fetches afresh.
+# --- REGION: amisad_verify_pinned
+# See https://yuruna.link/42010605-0008
 amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
     local file="$1" want="$2" label="$3" have
     have=$(sha256sum "$file" 2>/dev/null) || have=''
@@ -58,7 +53,7 @@ amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
     } >&2
     return 1
 }
-# --- end amisad pinned download check ---
+# End pinned download verification
 
 # rustup-init, pinned. The rustup.rs shell installer is rewritten whenever rustup
 # is and carries no digest; the binary of a named release does, so that is what
@@ -71,6 +66,7 @@ RUSTUP_SHA256_AARCH64=15f6e4ce9f583b929c996c91562bad6d4454f3281de858b02cdfdef615
 # A truncated transfer (curl 18, "transfer closed with N bytes remaining to
 # read") ends the install and, under `set -e`, the cycle, so download, check and
 # run together are the retried unit.
+# --- REGION: amisad_install_rustup
 amisad_install_rustup() {
     local target sha work rc=0
     case "$(uname -m)" in
@@ -100,24 +96,11 @@ fi
 cargo --version
 rustc --version
 
-# Retried for the same reason the rustup install above is: a single "empty
-# reply from server" through the lab proxy -- a transient the lab does
-# produce -- would exit the script under `set -e` and cost the whole cycle,
-# after rust had already installed cleanly.
-#
-# The fetch is unprivileged and the install is the only privileged step. sudo
-# inside the retried unit would put the privilege where the retry cannot see
-# whether it was the download or the elevation that failed, and curl writing
-# straight to /usr/local/bin leaves a truncated binary on a partial transfer.
-#
-# bazelisk is pinned to a release, not to whatever "latest" is on the day of the
-# run, because an executable installed as root is only worth checking if there
-# is one file to check it against. Bump the version and both digests together;
-# the release page lists each asset's SHA-256. The download sits in a private
-# directory so no other local user can swap it between the check and the install.
+# See https://yuruna.link/42010605-0008
 BAZELISK_VERSION=v1.29.0
 BAZELISK_SHA256_AMD64=5a408715e932c0250d28bd84555f12edbf70117de42f9181691c736eacc4a992
 BAZELISK_SHA256_ARM64=e20e8b0f4f240091b7a55bf17b9398bd4f40ee70ae0208dff95dd4c445fb4010
+# --- REGION: amisad_install_bazelisk
 amisad_install_bazelisk() {
     local sha rc=0
     case "$BARCH" in

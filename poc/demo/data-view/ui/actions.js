@@ -18,7 +18,7 @@
   var personaSecrets = {};
   var running = false;
 
-  // --- journal fold -----------------------------------------------------
+  // --- REGION: journal fold
   // Everything on screen derives from journal events, so a reload or a second
   // window rebuilds the identical picture. localStorage is only a boot seed
   // for the notebook before the first poll lands.
@@ -51,8 +51,7 @@
     render();
   }
 
-  // --- current / selection ---------------------------------------------
-
+  // --- REGION: current / selection
   function currentStepId() {
     for (var i = 0; i < AD.STEPS.length; i++) {
       var s = AD.STEPS[i];
@@ -72,8 +71,7 @@
     return AD.missingNeeds(step).length === 0;
   }
 
-  // --- running a step ---------------------------------------------------
-
+  // --- REGION: running a step
   async function runStep(step, btn) {
     running = true;
     btn.disabled = true;
@@ -135,8 +133,7 @@
     render();
   }
 
-  // --- rendering --------------------------------------------------------
-
+  // --- REGION: rendering
   function logLine(method, url, status) {
     var el = document.createElement("div");
     el.className = "s" + String(status).charAt(0);
@@ -327,7 +324,7 @@
     renderNotebook();
   }
 
-  // --- consent preflight ------------------------------------------------
+  // --- REGION: consent preflight
   // The coordinator refuses a need with 403 whenever the newest consent entry
   // for the buyer's subject is a revoke, and that state is durable: a pause
   // left behind by an earlier run would 403 her very first step here. Repair
@@ -368,8 +365,7 @@
     }
   }
 
-  // --- reset ------------------------------------------------------------
-
+  // --- REGION: reset
   async function resetDemo() {
     if (!window.confirm(
       "Reset the demo?\n\n" +
@@ -392,8 +388,7 @@
     render();
   }
 
-  // --- boot -------------------------------------------------------------
-
+  // --- REGION: boot
   async function boot() {
     var sel = $("#persona-select");
     for (var i = 0; i < AD.PERSONA_ORDER.length; i++) {

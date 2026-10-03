@@ -2,6 +2,7 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # AmisAd POC - build all service images and deploy the skeleton charts (idempotent).
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"

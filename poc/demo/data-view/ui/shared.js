@@ -15,8 +15,7 @@
 
 var AD = (function () {
 
-  // --- cast -------------------------------------------------------------
-
+  // --- REGION: cast
   var PERSONAS = {
     maya:   { name: "Maya",   role: "The Buyer",                   app: "AmisAd/buyer",
               blurb: "States a need once, in her own words. Nothing about her leaves -- not to the seller, not to anyone." },
@@ -72,8 +71,7 @@ var AD = (function () {
       tagline: "Ingrid certifies the very demo you just watched -- and catches a deliberate tamper." }
   ];
 
-  // --- notebook state ---------------------------------------------------
-
+  // --- REGION: notebook state
   var LS_STATE = "amisad-dv-state";
   var LS_DONE = "amisad-dv-done";
 
@@ -110,8 +108,7 @@ var AD = (function () {
   var topo = { core: "", edgeA: "", edgeB: "" };
   var subjects = { maya: "", pat: "" };
 
-  // --- plumbing ---------------------------------------------------------
-
+  // --- REGION: plumbing
   function deepFind(node, key) {
     if (node === null || typeof node !== "object") return undefined;
     if (!Array.isArray(node) && key in node && typeof node[key] !== "object") return node[key];
@@ -186,7 +183,7 @@ var AD = (function () {
     }, extra || {});
   }
 
-  // --- the script -------------------------------------------------------
+  // --- REGION: the script
   // Array order is presentation order. `touches` names the data-view boxes a
   // step can actually change: the data window fast-polls exactly those and
   // stamps them with who caused the change. Steps that only read touch
@@ -194,7 +191,7 @@ var AD = (function () {
   // without a hint is still caught by the regular sweep within a few seconds.
 
   var STEPS = [
-    // --- s001.fulfillment ------------------------------------------------
+    // --- REGION: s001.fulfillment
     { scenario: "s001", persona: "elena", label: "Publish the standing offer",
       explain: "Ceramic serving set, standing terms, closes automatically -- Elena's catalog, her words.",
       touches: ["seller.catalog.a"],
@@ -239,7 +236,7 @@ var AD = (function () {
       touches: [],
       run: async function () { return [mk("ledger verify", await get("core/30081/v1/verify"))]; } },
 
-    // --- s002.fitting ----------------------------------------------------
+    // --- REGION: s002.fitting
     { scenario: "s002", persona: "elena", label: "Publish the dress rack",
       explain: "Five dresses across two sellers -- one dusty blue, one missing attributes, one past deadline, one out of region.",
       touches: ["seller.catalog.a", "seller.catalog.b"],
@@ -306,7 +303,7 @@ var AD = (function () {
         ];
       } },
 
-    // --- s003.silence ----------------------------------------------------
+    // --- REGION: s003.silence
     { scenario: "s003", persona: "maya", label: "Sign up (consent grants)",
       explain: "Participation and contribution, granted on the consent ledger under a pseudonymous subject -- never a name.",
       touches: ["ledger.consent.maya", "ledger.verify"],
@@ -376,7 +373,7 @@ var AD = (function () {
           { token: await token("maya") }))];
       } },
 
-    // --- s005.attribution ------------------------------------------------
+    // --- REGION: s005.attribution
     { scenario: "s005", persona: "marcel", label: "Create the campaign",
       explain: "Aggregate targeting only: a region and a need category. 2000c committed per match on top of the price.",
       touches: ["ads.campaign"],
@@ -459,7 +456,7 @@ var AD = (function () {
       touches: [],
       run: async function () { return [mk("attributions", await get("core/30087/v1/attributions"))]; } },
 
-    // --- s006.mandate ----------------------------------------------------
+    // --- REGION: s006.mandate
     { scenario: "s006", persona: "elena", label: "Publish the household offers",
       explain: "A stock pot under Pat's coming cap, and a premium vase over it.",
       touches: ["seller.catalog.a"],
@@ -539,7 +536,7 @@ var AD = (function () {
           { token: await token("maya"), delegate: "pat" }))];
       } },
 
-    // --- s007.inventory --------------------------------------------------
+    // --- REGION: s007.inventory
     { scenario: "s007", persona: "alex", label: "Register + certify the connector",
       explain: "Sandbox first -- no production tenant before partner verification. Partner records stay private: no endpoint lists them.",
       touches: [],
@@ -603,7 +600,7 @@ var AD = (function () {
           { credential: state.s007_cred, resource: "settlement" }))];
       } },
 
-    // --- s009.suppression ------------------------------------------------
+    // --- REGION: s009.suppression
     { scenario: "s009", persona: "dana", label: "Record the week's demand",
       explain: "Six picnicware needs in region-a, one in region-b -- counts, never content.",
       touches: ["insights.workbench", "insights.unmet"],
@@ -642,7 +639,7 @@ var AD = (function () {
         return [mk("ads view", await get("core/30087/v1/demand-view/" + state.s009_version))];
       } },
 
-    // --- s004.failover ---------------------------------------------------
+    // --- REGION: s004.failover
     { scenario: "s004", persona: "tom", label: "Register both regions",
       explain: "region-a: capacity 2 (sovereign). region-b: capacity 10 (roomier). Both slices attest a region identity.",
       touches: ["resource.edges"],
@@ -723,7 +720,7 @@ var AD = (function () {
         return [mk("case", await get("core/30086/v1/incidents/" + state.s004_case))];
       } },
 
-    // --- s008.mediation --------------------------------------------------
+    // --- REGION: s008.mediation
     { scenario: "s008", persona: "sam", label: "Open the case (metadata only)", needs: ["s001_match"],
       explain: "Maya reports the Act I gift never arrived. The case carries order state and settlement -- no identity ever reaches it.",
       touches: ["platform.disclosure"],
@@ -773,7 +770,7 @@ var AD = (function () {
           await get("core/30086/v1/support/cases/" + state.s008_case + "/disclosure"))];
       } },
 
-    // --- s010.certification ----------------------------------------------
+    // --- REGION: s010.certification
     { scenario: "s010", persona: "ingrid", label: "Certify the evidence trail",
       explain: "Four dimensions over everything this demo just did -- attestation continuity, residency, consent, settlement evidence -- recomputing the chains from raw dumps, trusting no self-report.",
       touches: ["audit.accesslog"],
@@ -845,7 +842,7 @@ var AD = (function () {
     return out;
   }
 
-  // --- verdict ----------------------------------------------------------
+  // --- REGION: verdict
   // step.check wins outright; otherwise a refusal step passes on a 4xx from
   // its LAST call, and any other 4xx/5xx fails the step.
   function verdictFor(step, results) {
@@ -864,7 +861,7 @@ var AD = (function () {
     return { ok: true, note: "" };
   }
 
-  // --- data-view box registry -------------------------------------------
+  // --- REGION: data-view box registry
   // Every box reads ONE endpoint, and every endpoint here is a GET: the data
   // window must never mutate what it observes. `pick` projects the response
   // into the displayed rows, and change detection compares that projection -
@@ -1113,7 +1110,7 @@ var AD = (function () {
     return null;
   }
 
-  // --- privacy scanner --------------------------------------------------
+  // --- REGION: privacy scanner
   // Two different questions, deliberately kept apart.
   //
   // Identity: the buyer-side logins and PII field names must appear in NO lab
@@ -1152,7 +1149,7 @@ var AD = (function () {
     return null;
   }
 
-  // --- journal client ---------------------------------------------------
+  // --- REGION: journal client
   // One writer (the action window), any number of readers. A 'latest' below
   // our cursor means this server process restarted and its in-memory journal
   // is gone, so every derived view must be rebuilt rather than left frozen.
@@ -1221,7 +1218,7 @@ var AD = (function () {
     }
   };
 
-  // --- swimlane renderer ------------------------------------------------
+  // --- REGION: swimlane renderer
   // Both windows draw the same chart from the same data: the action window at
   // full size and interactive, the data window as a compact read-only strip so
   // a single projector still carries the parallel-persona picture.
@@ -1303,8 +1300,7 @@ var AD = (function () {
     host.appendChild(inner);
   }
 
-  // --- misc -------------------------------------------------------------
-
+  // --- REGION: misc
   function hhmmss(ms) {
     var d = new Date(ms);
     var p = function (x) { return (x < 10 ? "0" : "") + x; };

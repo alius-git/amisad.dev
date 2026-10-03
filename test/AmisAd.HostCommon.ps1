@@ -21,47 +21,18 @@
     Shared host-portability helpers for the AmisAd host-action scripts
     (Clear-Lab.ps1, Initialize-Lab.ps1). Dot-sourced, not invoked.
 .DESCRIPTION
-    A host action that calls `Hyper-V\Get-VM` directly, or defaults its root to
-    a drive-letter path, cannot run on host.ubuntu.kvm or host.macos.utm: the
-    Hyper-V module is absent, and a leading 'c:' is read as a PSDrive name
-    there, so Join-Path fails with "Cannot find drive".
-
-    Yuruna solves this: host/<host-type>/modules/Yuruna.Host.psm1 exports ONE
-    contract (New-VM / Start-VM / Stop-VMForce / Remove-VM / Get-VMState /
-    Save-VMDiskSnapshot / ...) implemented per hypervisor, and
-    Initialize-YurunaHost imports the right driver for the detected host. These
-    helpers wire the project into that contract so the host actions carry no
-    hypervisor branches of their own.
+    See https://yuruna.link/42010605-0006.
 #>
 
 Set-StrictMode -Version Latest
 
+# --- REGION: Resolve-YurunaRoot
 function Resolve-YurunaRoot {
     <#
     .SYNOPSIS
         Locate the Yuruna framework checkout, without hard-coding a path.
     .DESCRIPTION
-        Tried in order, first one that actually looks like a checkout wins:
-
-          1. -Explicit (the caller's -YurunaRoot), so an operator override
-             always beats discovery.
-          2. $env:YURUNA_ROOT, for a host whose layout matches nothing below.
-          3. $env:YURUNA_CONFIG_PATH -- the runner publishes the resolved
-             '<root>/test/test.config.yml' before every step and the host
-             action inherits it, which makes this exact in-cycle.
-          4. <this file>/../.. -- the cycle clones the project to
-             '<root>/project', so the project's test/ dir sits two levels
-             under the framework root.
-          5. $HOME/git/yuruna, for a standalone run outside any cycle (an
-             operator invoking the teardown by hand). That is where the
-             bootstrap installers clone on every platform, Windows included,
-             so one candidate covers all three hosts and no drive letter is
-             written down anywhere.
-
-        A candidate counts only if test/modules/Test.HostContract.psm1 is
-        there: that is the module both host actions import, so validating on
-        it means a match can never resolve to a checkout too old or too
-        partial to drive.
+        See https://yuruna.link/42010605-0006.
     .OUTPUTS
         [string] absolute path; throws when nothing validates.
     #>
@@ -93,6 +64,7 @@ function Resolve-YurunaRoot {
           "Pass -YurunaRoot, or set YURUNA_ROOT."
 }
 
+# --- REGION: Initialize-AmisAdHost
 function Initialize-AmisAdHost {
     <#
     .SYNOPSIS
@@ -118,6 +90,7 @@ function Initialize-AmisAdHost {
     return $hostType
 }
 
+# --- REGION: Stop-LabConsole
 function Stop-LabConsole {
     <#
     .SYNOPSIS

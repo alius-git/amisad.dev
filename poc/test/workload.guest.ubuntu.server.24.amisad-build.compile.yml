@@ -10,6 +10,7 @@ sequenceRevision: 3
 
 description: "AmisAd amisad-build: cargo build --release over SSH, upload binaries tarball to the stash service."
 keystrokeMechanism: ssh
+# --- REGION: resource
 resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-build.baseline
@@ -23,6 +24,7 @@ variables:
   # the guest .compile.sh aborts before building if this resolves empty.
   stashHost: "${ext:stash-service.ResolveHost(yuruna-stash-service)}"
 
+# --- REGION: component
 component:
   - action: loadDiskSnapshot
     id: "amisad-build"
@@ -32,6 +34,7 @@ component:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+# --- REGION: workload
 workload:
   # The project tarball is a plain HTTP download that this script extracts and
   # builds, so its SHA-256 rides in the launch command (computed on the host at

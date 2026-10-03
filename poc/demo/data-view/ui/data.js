@@ -23,7 +23,7 @@
 
   var scan = { responses: 0, bytes: 0, identityHits: 0, identityWhat: "", contextHits: 0, contextWhere: {} };
 
-  // --- scanning ---------------------------------------------------------
+  // --- REGION: scanning
   // Runs over every lab response the pump receives. Host-side endpoints are
   // never scanned: /api/personas is the operator's own vault view, and
   // /api/journal legitimately carries persona labels for the UI.
@@ -65,8 +65,7 @@
       : "nothing shared yet";
   }
 
-  // --- polling ----------------------------------------------------------
-
+  // --- REGION: polling
   function urlFor(box) {
     return typeof box.url === "function" ? box.url() : box.url;
   }
@@ -196,8 +195,7 @@
     renderVms();
   }
 
-  // --- journal ----------------------------------------------------------
-
+  // --- REGION: journal
   function onEvents(events) {
     for (var i = 0; i < events.length; i++) {
       var ev = events[i];
@@ -250,8 +248,7 @@
     renderBoxes();
   }
 
-  // --- rendering --------------------------------------------------------
-
+  // --- REGION: rendering
   function renderVms() {
     var host = $("#vms");
     var byName = { "amisad-core": "core", "amisad-edge-a": "edge-a", "amisad-edge-b": "edge-b" };
@@ -352,8 +349,7 @@
     await AD.journal.reset();
   }
 
-  // --- boot -------------------------------------------------------------
-
+  // --- REGION: boot
   async function boot() {
     $("#reset-demo").onclick = resetDemo;
 

@@ -1,22 +1,19 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - s008.mediation run on amisad-core: zero-knowledge dispute
-# mediation and settlement adjustment. From a settled order, Maya reports
-# non-delivery; a support case opens carrying operational metadata only (no
-# buyer identity); Sam requests and Maya grants a scoped, time-boxed
-# disclosure; the refund posts as compensating settlement entries referencing
-# the case (original history untouched); and after the grant expires the
-# disclosed artifact is no longer accessible. EDGE_HOST (optional override).
+# See https://yuruna.link/42010605-0007
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
+# --- REGION: Load scenario helpers
 # shellcheck source=../amisad-scenario.sh
 . "$POC/test/amisad-scenario.sh"
 
+# --- REGION: Resolve service endpoints
 NODE_IP=$(hostname -I | awk '{print $1}')
 LEDGER="http://${NODE_IP}:30081"
 RESOURCE="http://${NODE_IP}:30082"
@@ -29,10 +26,8 @@ if [ -r /etc/yuruna/host.env ]; then
     . /etc/yuruna/host.env
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
-# --- REGION: https://yuruna.link/4220a755-0019
-
-
-
+# --- REGION: Resolve edge address
+# See https://yuruna.link/4220a755-0019
 if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
     EDGE_IP=$(amisad_edge_addr amisad-edge-a)
     if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-edge-a-admin@${EDGE_IP}"; fi
@@ -46,7 +41,8 @@ if [ -n "${EDGE_HOST:-}" ]; then
     EDGE_IP=$(ssh "${SSH_OPTS[@]}" "$EDGE_HOST" "hostname -I | awk '{print \$1}'")
     SLICE_EP="http://${EDGE_IP}:8080"
 else
-    # --- REGION: https://yuruna.link/4220a755-004e
+    # --- REGION: Single-VM fallback
+    # See https://yuruna.link/4220a755-004e
     if [ "${AMISAD_ALLOW_SINGLE_VM:-0}" != "1" ]; then
         echo "edge unresolved, and AMISAD_ALLOW_SINGLE_VM is not set: refusing to assert a distributed scenario against a single-VM topology." >&2
         exit 4
@@ -66,6 +62,7 @@ curl -sf "${SLICE_EP}/health" >/dev/null
 echo "slice-runtime at ${SLICE_EP}"
 
 export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
+# --- REGION: PSQL
 PSQL() { sudo -u postgres psql -d amisad -tAc "$1"; }
 
 echo "== seed a settled order (like s001) to dispute =="

@@ -1,24 +1,8 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - amisad-core deploy step: download the prebuilt binaries from the
-# stash service (produced by amisad-build), build thin distroless images from
-# them, and deploy the ten services to the in-VM Kubernetes cluster. This VM has
-# the runtime stack (Docker+containerd+kubeadm K8s+Helm+PostgreSQL+NATS from the
-# amisad-core-k8s baseline) plus python3 - but NO Rust toolchain and no source build.
-# STASH_HOST: the stash service to pull binaries from. REQUIRED, and with no
-# default -- the sequence supplies it from ${ext:stash-service.ResolveHost(...)},
-# which returns the address the cycle's warm-up resolved and confirmed answers
-# /healthz. A run that reaches this script with no published address stops
-# immediately rather than fetching executables from a guessed host.
-# AMISAD_PROJECT_ARCHIVE_SHA256 and AMISAD_BINARIES_SHA256: the SHA-256 of the
-# project tarball and of the binaries tarball this script downloads and then
-# extracts. The sequence supplies the first from ${ext:digest.GetArchiveSha256(project)}
-# and the second from ${ext:digest.GetPublishedSha256(amisad-binaries)} (the
-# digest the host read from the build VM after it uploaded); each download is
-# verified before it is extracted, and the binaries run in pods as root, which
-# is why that one matters most (see poc/test.md "Verified nested downloads").
-# AMISAD_ALLOW_UNVERIFIED=1 waives an absent digest for a hand run.
+# See https://yuruna.link/42010605-0008
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -38,12 +22,13 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
     exit 2
 fi
 
-# --- REGION: https://yuruna.link/4220a755-004d
+# --- REGION: amisad_host_fetch
+# See https://yuruna.link/4220a755-004d
 amisad_host_fetch() {
     local dest="$1" path="$2" attempt
     for attempt in 1 2; do
         if [ "$attempt" -eq 2 ] && [ -x /usr/local/lib/yuruna/yuruna-host-locate.sh ]; then
-            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null 2>&1 || true
+            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null || return 1
         fi
         if [ -r /etc/yuruna/host.env ]; then
             # shellcheck disable=SC1091
@@ -61,16 +46,8 @@ amisad_host_fetch() {
     return 1
 }
 
-# --- amisad download verification: identical copy in compile.sh, deploy.sh and db.sh ---
-# fetch-and-execute verified THIS script against a SHA-256 the host typed into
-# the launch command. Whatever this script downloads and then extracts, installs
-# or feeds to a program is a plain HTTP answer from a LAN service, so it is
-# checked here against a SHA-256 carried by the same launch command (the
-# sequence's command: text, filled in by ${ext:digest....} on the host) BEFORE
-# it is used. The digest is the trust boundary; the transport is not. An empty
-# digest refuses the download; AMISAD_ALLOW_UNVERIFIED=1 is the loud override
-# for a hand run, and no sequence sets it. test/download_contracts.py holds the
-# three copies equal.
+# --- REGION: amisad_sha256
+# See https://yuruna.link/42010605-0008
 amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
     local file="$1" out
     out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1
@@ -80,6 +57,7 @@ amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
 # amisad_verify_download <file> <expected sha256> <label> <variable name>
 # Returns 0 when the bytes match (or when the digest is absent and the override
 # is set), 1 otherwise; a refused download is deleted, never left to be reused.
+# --- REGION: amisad_verify_download
 amisad_verify_download() {
     local file="$1" expected="${2:-}" label="$3" variable="$4" actual
     if [ -z "$expected" ]; then
@@ -132,16 +110,10 @@ amisad_verify_download() {
     } >&2
     return 1
 }
-# --- end amisad download verification ---
+# End download verification
 
-# amisad_fetch_stash_binaries <stash base url> <label> <dest file>
-# Fetches the newest stash upload under <label> whose SHA-256 is the one the host
-# read from the build VM (AMISAD_BINARIES_SHA256), looking back through the ten
-# newest: the stash is shared by the whole lab, so another pass or host may have
-# uploaded the same label since this pass's build. Returns 3 when the stash lists
-# nothing for the label and 7 when no upload verifies. With no digest set, only
-# the newest is a candidate and amisad_verify_download decides whether it may be
-# used at all.
+# --- REGION: amisad_fetch_stash_binaries
+# See https://yuruna.link/42010605-0008
 amisad_fetch_stash_binaries() {
     local stash="$1" label="$2" dest="$3" links link url want have tried=0
     # `|| true`: grep exits 1 when the list is empty (no artifact yet), which
@@ -209,14 +181,7 @@ POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
 
 echo "== download prebuilt binaries from the stash service =="
-# --noproxy '*': the stash IP is not in the guest no_proxy list, so an HTTP GET
-# would otherwise be sent through squid. The label carries the architecture
-# (amisad-<arch>-binaries; see poc/test.md "Stash artifact naming"): match our
-# own uname -m and nothing else. /api/stashes returns newest-first, and the
-# build this pass made is the newest upload under that label unless another
-# pass or host uploaded since; amisad_fetch_stash_binaries picks it by digest.
-# No default address: the caller supplies one it already verified, and guessing
-# here would pull executables from whatever answers on someone's network.
+# See https://yuruna.link/42010605-0008
 if [ -z "${STASH_HOST:-}" ]; then
     echo "STASH_HOST is empty - the sequence supplies it from \${ext:stash-service.ResolveHost(...)} and the cycle's warm-up publishes the address it verified. Nowhere to fetch the binaries from; aborting." >&2
     exit 3
@@ -267,6 +232,7 @@ SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc co
 # expansion from the downward API, NOT shell) - a snapshot restore with a new
 # DHCP lease would make a deploy-time IP stale. Role/password: db step.
 DATABASE_URL='postgres://amisad:amisadpoc2026@$(NODE_IP):5432/amisad'
+# --- REGION: Resolve service endpoints
 NODE_IP=$(hostname -I | awk '{print $1}')
 # docker.io is unreachable in this lab: distroless base from gcr.io, thin images
 # from the prebuilt binaries, imported straight into the cluster's containerd
@@ -292,12 +258,7 @@ for svc in $SERVICES; do
     if kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=600s; then
         continue
     fi
-    # `wait` reports only that the condition never arrived, so on its own a
-    # failure here says a deployment is stuck and nothing about why -- and the
-    # VM is torn down before anyone can look. Dump what the cluster already
-    # knows: the pod phase, the scheduling/pull events, and whatever the
-    # container wrote before dying are each enough to name the cause on their
-    # own. Every probe is best-effort; the exit below is the real result.
+    # See https://yuruna.link/42010605-0008
     echo "== ${svc} never became available; cluster state ==" >&2
     kubectl -n amisad get pods -o wide >&2 || true
     kubectl -n amisad describe "deployment/${svc}" 2>&1 | tail -25 >&2 || true

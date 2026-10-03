@@ -133,6 +133,12 @@ independent without per-scenario VMs. Hostnames are set with the framework's
 After `start.guest`'s one OCR-driven first login per VM, everything runs over
 SSH with the harness key and passwordless sudo.
 
+Both host entrypoints use the same edge admission helper: start both edges before
+waiting and require a fresh, valid IP report from each. A missing report or failed
+start stops the run before scenarios. See the
+[host orchestration constraints](https://yuruna.link/42010605-0006) and
+[download trust boundary](https://yuruna.link/42010605-0008).
+
 ## Run
 
 From `pwsh` -- on a Hyper-V host it must be **elevated** (KVM and UTM drive the

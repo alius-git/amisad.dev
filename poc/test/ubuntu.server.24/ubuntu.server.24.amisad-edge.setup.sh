@@ -1,17 +1,8 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - edge VM setup (shared by amisad-edge-a/b): install a boot-time IP
-# reporter that posts <hostname>.ip.txt to the host status service so
-# amisad-core can locate this edge. The slice runtime itself is delivered per
-# scenario run - the edge VM stays stateless.
-#
-# The core->edge demo key is NOT installed here. vm-core generates that keypair
-# (after the edges are built) and keeps the private half; the host then
-# authorizes the PUBLIC half in this VM's authorized_keys over the harness SSH
-# channel (test/AmisAd.Lab.psm1 Sync-AmisAdDemoKey). Nothing about the key is
-# fetched over the status service's HTTP, where an answer from anything on the
-# LAN would be believed.
+# See https://yuruna.link/42010605-0007
+# --- REGION: Initialize environment
 set -euo pipefail
 
 if [ -r /etc/yuruna/host.env ]; then
@@ -50,34 +41,33 @@ EOS
 sudo chmod 755 /usr/local/lib/amisad-ip-report.sh
 
 sudo tee /etc/systemd/system/amisad-ip-report.service >/dev/null <<'EOS'
+# --- REGION: [Unit]
 [Unit]
 Description=Report this edge VM's IP to the Yuruna status service
 Wants=network-online.target
 After=network-online.target
 
+# --- REGION: [Service]
 [Service]
 Type=oneshot
 ExecStart=/usr/local/lib/amisad-ip-report.sh
 
+# --- REGION: [Install]
 [Install]
 WantedBy=multi-user.target
 EOS
 sudo tee /etc/systemd/system/amisad-ip-report.timer >/dev/null <<'EOS'
+# --- REGION: [Unit]
 [Unit]
 Description=Keep this edge VM's reported IP current
 
 [Timer]
-# Boot-only reporting publishes the address this VM had when it started, and
-# amisad-core reads that file to find the edge for the whole cycle. Under a
-# short DHCP lease neither end stays put for a cycle, so a report that is never
-# repeated is a report that goes stale and strands the scenario -- which
-# refuses to degrade to a single-VM run rather than quietly pretending it
-# passed. Re-reporting is one small PUT; the interval is well inside the gap
-# between a renumber and the next scenario needing the address.
+# See https://yuruna.link/42010605-0007
 OnBootSec=45s
 OnUnitActiveSec=30s
 AccuracySec=5s
 
+# --- REGION: [Install]
 [Install]
 WantedBy=timers.target
 EOS

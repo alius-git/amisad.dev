@@ -1,21 +1,19 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - s009.suppression run on amisad-core: aggregate insight
-# publication and the demand-planning loop. Seed demand across a high-volume
-# region (above the anonymity threshold) and a below-threshold region; prove
-# the below-threshold region is SUPPRESSED (absent, not zeroed) from Dana's
-# workbench, the published versioned outlook, and Elena's seller +
-# Marcel's ads views - which carry identical figures. No edge/matching.
+# See https://yuruna.link/42010605-0007
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
+# --- REGION: Load scenario helpers
 # shellcheck source=../amisad-scenario.sh
 . "$POC/test/amisad-scenario.sh"
 
+# --- REGION: Resolve service endpoints
 NODE_IP=$(hostname -I | awk '{print $1}')
 SELLER="http://${NODE_IP}:30083"
 INSIGHTS="http://${NODE_IP}:30085"

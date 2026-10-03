@@ -4,6 +4,7 @@
 # Shared service diagnostics and lab endpoint discovery.
 # curl -sf inside command substitution hides a non-2xx body and leaves callers
 # with a parser error at line 1. Preserve the HTTP status and body here.
+# --- REGION: amisad_curl
 amisad_curl() { # <same args as curl -sf>
     local out status body url='' arg
     for arg in "$@"; do
@@ -33,6 +34,7 @@ amisad_curl() { # <same args as curl -sf>
     printf '%s' "$body"
 }
 
+# --- REGION: amisad_edge_addr
 amisad_edge_addr() { # <edge-vm-name>
     local edge="$1" ip
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)

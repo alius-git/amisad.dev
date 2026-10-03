@@ -1,19 +1,8 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - create the amisad database, load the schema, and open the
-# instance to in-cluster pods: role 'amisad' (fixed lab password, rides in
-# DATABASE_URL - see poc/test.md), listen_addresses '*', pg_hba for the pod
-# and node networks. The role gets NO UPDATE/DELETE on ledger tables - the
-# database itself enforces append-only. The schema is fetched from the host
-# status service into a private directory and fed to psql on stdin, because the
-# postgres user cannot read the login user's 0750 home and a world-readable
-# copy in /tmp could be swapped after its digest was checked.
-# AMISAD_SCHEMA_SHA256: the SHA-256 of poc/db/schema.sql as the host serves it.
-# The sequence supplies it from ${ext:digest.GetFileSha256(project/poc/db/schema.sql)};
-# the schema runs as the postgres superuser, so it is verified before psql sees
-# a byte of it (see poc/test.md "Verified nested downloads").
-# AMISAD_ALLOW_UNVERIFIED=1 waives an absent digest for a hand run.
+# See https://yuruna.link/42010605-0008
+# --- REGION: Initialize environment
 set -euo pipefail
 
 if [ -r /etc/yuruna/host.env ]; then
@@ -25,12 +14,13 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
     exit 2
 fi
 
-# --- REGION: https://yuruna.link/4220a755-004d
+# --- REGION: amisad_host_fetch
+# See https://yuruna.link/4220a755-004d
 amisad_host_fetch() {
     local dest="$1" path="$2" attempt
     for attempt in 1 2; do
         if [ "$attempt" -eq 2 ] && [ -x /usr/local/lib/yuruna/yuruna-host-locate.sh ]; then
-            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null 2>&1 || true
+            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null || return 1
         fi
         if [ -r /etc/yuruna/host.env ]; then
             # shellcheck disable=SC1091
@@ -48,16 +38,8 @@ amisad_host_fetch() {
     return 1
 }
 
-# --- amisad download verification: identical copy in compile.sh, deploy.sh and db.sh ---
-# fetch-and-execute verified THIS script against a SHA-256 the host typed into
-# the launch command. Whatever this script downloads and then extracts, installs
-# or feeds to a program is a plain HTTP answer from a LAN service, so it is
-# checked here against a SHA-256 carried by the same launch command (the
-# sequence's command: text, filled in by ${ext:digest....} on the host) BEFORE
-# it is used. The digest is the trust boundary; the transport is not. An empty
-# digest refuses the download; AMISAD_ALLOW_UNVERIFIED=1 is the loud override
-# for a hand run, and no sequence sets it. test/download_contracts.py holds the
-# three copies equal.
+# --- REGION: amisad_sha256
+# See https://yuruna.link/42010605-0008
 amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
     local file="$1" out
     out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1
@@ -67,6 +49,7 @@ amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
 # amisad_verify_download <file> <expected sha256> <label> <variable name>
 # Returns 0 when the bytes match (or when the digest is absent and the override
 # is set), 1 otherwise; a refused download is deleted, never left to be reused.
+# --- REGION: amisad_verify_download
 amisad_verify_download() {
     local file="$1" expected="${2:-}" label="$3" variable="$4" actual
     if [ -z "$expected" ]; then
@@ -119,7 +102,7 @@ amisad_verify_download() {
     } >&2
     return 1
 }
-# --- end amisad download verification ---
+# End download verification
 
 # Fetched and verified first, before the install: a digest the host could not
 # supply or a download that does not match is decided in seconds, and costs

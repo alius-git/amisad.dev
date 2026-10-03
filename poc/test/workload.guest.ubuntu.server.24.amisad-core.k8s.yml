@@ -10,6 +10,7 @@ sequenceRevision: 4
 
 description: "Ubuntu Server: provision amisad-core (admin amisad-core-admin), install Kubernetes + PostgreSQL + NATS over SSH, snapshot amisad-core-k8s."
 keystrokeMechanism: ssh
+# --- REGION: resource
 resource:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
@@ -18,11 +19,13 @@ variables:
   username: amisad-core-admin
   hostname: amisad-core
 
+# --- REGION: component
 component:
   - action: sshWaitReady
     timeoutSeconds: 300
     description: "SSH up after the start.guest reboot"
 
+# --- REGION: workload
 workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh guest/ubuntu.server.24/ubuntu.server.24.k8s.sh"

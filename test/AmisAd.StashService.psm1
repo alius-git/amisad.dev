@@ -21,61 +21,19 @@
     Stash-service pre-flight shared by the AmisAd entry points that build the
     topology (test/Initialize-Lab.ps1, poc/build/run-tests.ps1).
 .DESCRIPTION
-    A module rather than a dot-sourced helper so both drivers run ONE
-    implementation: the address a pass uploads its binaries to must not depend
-    on which entry point started it.
-
-    This project states no stash address of its own. A site's stash address is
-    that site's -- naming one here would leak it and would go stale the first
-    time the service moved -- so every candidate is either discovered through
-    the Yuruna framework or stated by the operator, and an environment that can
-    produce neither has no stash as far as a pass is concerned.
+    See https://yuruna.link/42010605-0006.
 #>
 
 Set-StrictMode -Version Latest
 
+# --- REGION: Resolve-StashService
 function Resolve-StashService {
     <#
     .SYNOPSIS
         Find the stash service, verify it answers, and publish the address for
         the rest of the cycle to resolve without re-probing.
     .DESCRIPTION
-        The build uploads its binaries to the stash and vm-core downloads them,
-        so a stash nobody can reach makes the whole pass pointless -- but the
-        guests only discover that from inside their own long chains, tens of
-        minutes in. Resolving here, before any VM starts, turns that into an
-        immediate stop.
-
-        A pin (-Pin, or $env:YURUNA_STASH_SERVICE_HOST for the address a pool handed
-        this host) is the ONLY candidate when present -- a pass told to use a
-        particular stash must fail rather than quietly exercise a different one.
-        Otherwise every address the framework can find for the area
-        (Get-ExtensionHostAddress -HostType 'stash-service') is tried in order
-        and the first that answers /healthz wins: an operator pin for the area,
-        a stash VM on THIS host at its current address, and the address the pool
-        reports for a stash running on another host entirely. The pool answer is
-        what keeps a lab working after its stash is rebuilt onto a new IP -- the
-        service announces itself, and this host reads that back.
-
-        Both the discovery and the probe are re-asked over a short backoff
-        rather than answered once. A host whose link is briefly away -- a DHCP
-        renew is enough, even one that hands back the same address -- produces
-        an empty directory answer and a failed /healthz that are indistinguish-
-        able from having no stash at all, and this runs before any VM starts,
-        so a single unlucky instant would end the pass. A stash that is really
-        absent stays absent for the whole window and still stops it.
-
-        Publishing the winner makes every later
-        ${ext:stash-service.ResolveHost(...)} expansion return the address that
-        was actually verified, instead of each sequence re-probing for a VM this
-        host may not run and warning when it finds none. Nothing answering
-        CLEARS the published address, so a pass can never inherit one a previous
-        cycle proved and this one did not.
-
-        Progress is returned as Lines rather than written here: a module
-        function does not see the caller's script-scoped $InformationPreference,
-        so printing inside would silently drop the very report an operator needs
-        when the pre-flight is what stopped the pass.
+        See https://yuruna.link/42010605-0006.
     .PARAMETER YurunaRoot
         Yuruna framework checkout supplying the stash extension and the
         extension-host lookup.
@@ -112,20 +70,7 @@ function Resolve-StashService {
 
     $lines.Add('== Resolving the stash service ==')
 
-    # Every leg of this resolution rides the host's link, and that link is not
-    # continuously up: a DHCP renew alone takes it away for a few seconds, and a
-    # renew that returns the SAME address still does, so nothing downstream even
-    # reports an address change. Inside that window the pool lookup answers with
-    # nothing and a perfectly healthy stash fails /healthz -- both shaped exactly
-    # like a stash that does not exist. Answering on the first attempt therefore
-    # converts a blip into a hard stop before any VM starts, and the pass dies
-    # for a condition that cured itself seconds later.
-    #
-    # So ask across a window that outlasts a renew rather than at one instant.
-    # Discovery is redone per attempt, not just the probe: the empty answer is
-    # the more common symptom, and a cached candidate list would keep replaying
-    # it. Only an environment still silent at the end of the window really has
-    # no stash, and that still stops the pass.
+    # See https://yuruna.link/42010605-0006
     $retryDelaySeconds = @(2, 5, 10)
     $attemptCount = $retryDelaySeconds.Count + 1
     $canDiscover = [bool](Get-Command Get-ExtensionHostAddress -ErrorAction SilentlyContinue)

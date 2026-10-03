@@ -2,9 +2,11 @@
 # Deploys the ten service charts into the amisad namespace. TLS/ingress and
 # the SPA static serving land when the applications grow real routes.
 ---
+# --- REGION: globalVariables
 globalVariables:
   ingressClass:          "nginx"
 
+# --- REGION: workloads
 workloads:
 - context: "${env:runTag}-${env:project}-${env:runId}"
   deployments:

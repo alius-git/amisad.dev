@@ -10,6 +10,7 @@ sequenceRevision: 3
 
 description: "Ubuntu Server: provision amisad-build (admin amisad-build-admin), install Rust + bazelisk + git build tools over SSH, snapshot amisad-build."
 keystrokeMechanism: ssh
+# --- REGION: resource
 resource:
   ubuntu.server.24:
     - start.guest.ubuntu.server.24
@@ -18,11 +19,13 @@ variables:
   username: amisad-build-admin
   hostname: amisad-build
 
+# --- REGION: component
 component:
   - action: sshWaitReady
     timeoutSeconds: 300
     description: "SSH up after the start.guest reboot"
 
+# --- REGION: workload
 workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh"

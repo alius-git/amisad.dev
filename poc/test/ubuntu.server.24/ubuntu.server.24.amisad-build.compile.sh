@@ -1,20 +1,8 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - amisad-build compile step: build every release binary and
-# upload the tarball to the stash service, for amisad-core to download and
-# deploy. This VM has the Rust toolchain but no Kubernetes; it produces
-# artifacts, it does not run them. STASH_HOST: the stash service the binaries
-# are dropped into. REQUIRED, and with no default -- the sequence supplies it
-# from ${ext:stash-service.ResolveHost(...)}, which returns the address the
-# cycle's warm-up resolved and confirmed answers /healthz. A run that reaches
-# this script with no published address stops immediately rather than shipping
-# a build's binaries at a guessed host.
-# AMISAD_PROJECT_ARCHIVE_SHA256: the SHA-256 of the project tarball this script
-# downloads and builds. The sequence supplies it from ${ext:digest.GetArchiveSha256(project)};
-# the tarball is verified before it is extracted (see poc/test.md "Verified
-# nested downloads"). AMISAD_ALLOW_UNVERIFIED=1 waives an absent digest for a
-# hand run.
+# See https://yuruna.link/42010605-0008
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -31,12 +19,13 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
     exit 2
 fi
 
-# --- REGION: https://yuruna.link/4220a755-004d
+# --- REGION: amisad_host_fetch
+# See https://yuruna.link/4220a755-004d
 amisad_host_fetch() {
     local dest="$1" path="$2" attempt
     for attempt in 1 2; do
         if [ "$attempt" -eq 2 ] && [ -x /usr/local/lib/yuruna/yuruna-host-locate.sh ]; then
-            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null 2>&1 || true
+            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null || return 1
         fi
         if [ -r /etc/yuruna/host.env ]; then
             # shellcheck disable=SC1091
@@ -54,16 +43,8 @@ amisad_host_fetch() {
     return 1
 }
 
-# --- amisad download verification: identical copy in compile.sh, deploy.sh and db.sh ---
-# fetch-and-execute verified THIS script against a SHA-256 the host typed into
-# the launch command. Whatever this script downloads and then extracts, installs
-# or feeds to a program is a plain HTTP answer from a LAN service, so it is
-# checked here against a SHA-256 carried by the same launch command (the
-# sequence's command: text, filled in by ${ext:digest....} on the host) BEFORE
-# it is used. The digest is the trust boundary; the transport is not. An empty
-# digest refuses the download; AMISAD_ALLOW_UNVERIFIED=1 is the loud override
-# for a hand run, and no sequence sets it. test/download_contracts.py holds the
-# three copies equal.
+# --- REGION: amisad_sha256
+# See https://yuruna.link/42010605-0008
 amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
     local file="$1" out
     out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1
@@ -73,6 +54,7 @@ amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
 # amisad_verify_download <file> <expected sha256> <label> <variable name>
 # Returns 0 when the bytes match (or when the digest is absent and the override
 # is set), 1 otherwise; a refused download is deleted, never left to be reused.
+# --- REGION: amisad_verify_download
 amisad_verify_download() {
     local file="$1" expected="${2:-}" label="$3" variable="$4" actual
     if [ -z "$expected" ]; then
@@ -125,7 +107,7 @@ amisad_verify_download() {
     } >&2
     return 1
 }
-# --- end amisad download verification ---
+# End download verification
 
 # Downloads land in a private directory (mode 0700), not loose in /tmp: another
 # local user could otherwise swap a file between its digest check and its use.
@@ -146,16 +128,7 @@ POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
 
 echo "== stash reachability (fail fast, before the ~20-min build) =="
-# What this establishes: the address is populated and the host answers on the
-# bridged LAN from this guest's NAT. That is the failure worth catching before
-# a ~20-minute build -- a wrong or unroutable address costs the whole build.
-# What it does NOT establish: /healthz is served by the HTTP listener alone and
-# says nothing about sshd on :22, the share the drop lands on, or the metadata
-# index that records it. A few-byte GET is also nowhere near a multi-megabyte
-# transfer. A green probe here still leaves the upload able to fail, which is
-# why the upload carries its own retry rather than trusting this result.
-# No default address: the caller supplies one it already verified, and guessing
-# here would send a build's binaries at whatever answers on someone's network.
+# See https://yuruna.link/42010605-0008
 if [ -z "${STASH_HOST:-}" ]; then
     echo "STASH_HOST is empty - the sequence supplies it from \${ext:stash-service.ResolveHost(...)} and the cycle's warm-up publishes the address it verified. Nowhere to upload binaries; aborting before build." >&2
     exit 3
@@ -205,24 +178,7 @@ if [ "$SZ" -ge 104857600 ]; then
 fi
 
 echo "== upload binaries to the stash service =="
-# The stash records the upload (username=amisad-poc, filename=amisad-<arch>-binaries.tgz)
-# for later investigation; amisad-core locates it by that label. scp only (the
-# stash SSH server accepts the drop); no key needed - it is a write-only sink.
-# STASH_HOST was reachable at the pre-flight above, which is weaker than it
-# sounds: that was an HTTP GET, not this transfer.
-#
-# Bounded retry, in the shape amisad_host_fetch above already uses. Every way
-# this drop can fail reaches the client as scp's generic "lost connection" --
-# the server closes the channel without stating a reason, so a transport drop
-# and a server-side refusal of the upload are indistinguishable from here.
-# A retry is the right answer to both: it gets a fresh connection, and the
-# server allocates a fresh identifier for the new session. Bounded at three so
-# a sink that is genuinely gone still fails the step instead of looping.
-#
-# scp's stderr is captured per attempt and replayed under the attempt label
-# because the cycle transcript interleaves several guests: a bare
-# "lost connection" in that stream cannot be traced to the attempt that
-# emitted it, and a silent retry reads as a hang.
+# See https://yuruna.link/42010605-0008
 SCP_LOG=/tmp/scp-upload.log
 SCP_ATTEMPTS=3
 SCP_BACKOFF=5

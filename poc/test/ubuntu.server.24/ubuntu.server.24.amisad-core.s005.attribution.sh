@@ -1,23 +1,19 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - s005.attribution run on amisad-core: campaign-boosted match,
-# edge creative serving, and attribution credit. Marcel creates a campaign and
-# brief; Kai produces an approved asset; Marcel activates it; Maya's need in
-# the campaign category matches Elena's offer boosted with Kai's creative
-# (rendered INSIDE the sealed environment); on accept the settlement carries
-# non-zero agency + creator credit; the campaign budget decrements by the
-# per-match commitment; and no buyer signal appears on the campaign side.
-# EDGE_HOST (optional override): ssh target for slice-runtime.
+# See https://yuruna.link/42010605-0007
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
+# --- REGION: Load scenario helpers
 # shellcheck source=../amisad-scenario.sh
 . "$POC/test/amisad-scenario.sh"
 
+# --- REGION: Resolve service endpoints
 NODE_IP=$(hostname -I | awk '{print $1}')
 LEDGER="http://${NODE_IP}:30081"
 RESOURCE="http://${NODE_IP}:30082"
@@ -30,10 +26,8 @@ if [ -r /etc/yuruna/host.env ]; then
     . /etc/yuruna/host.env
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
-# --- REGION: https://yuruna.link/4220a755-0019
-
-
-
+# --- REGION: Resolve edge address
+# See https://yuruna.link/4220a755-0019
 if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
     EDGE_IP=$(amisad_edge_addr amisad-edge-a)
     if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-edge-a-admin@${EDGE_IP}"; fi
@@ -47,7 +41,8 @@ if [ -n "${EDGE_HOST:-}" ]; then
     EDGE_IP=$(ssh "${SSH_OPTS[@]}" "$EDGE_HOST" "hostname -I | awk '{print \$1}'")
     SLICE_EP="http://${EDGE_IP}:8080"
 else
-    # --- REGION: https://yuruna.link/4220a755-004e
+    # --- REGION: Single-VM fallback
+    # See https://yuruna.link/4220a755-004e
     if [ "${AMISAD_ALLOW_SINGLE_VM:-0}" != "1" ]; then
         echo "edge unresolved, and AMISAD_ALLOW_SINGLE_VM is not set: refusing to assert a distributed scenario against a single-VM topology." >&2
         exit 4

@@ -9,6 +9,7 @@ sequenceRevision: 5
 
 description: "AmisAd amisad-core: restore amisad-core-k8s, download binaries from the stash, deploy 10 services, add maya/elena/tom/priya/marcel/kai/pat/alex/sam/dana/ingrid + generate the demo key pair, snapshot amisad-core."
 keystrokeMechanism: ssh
+# --- REGION: resource
 resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.k8s
@@ -22,6 +23,7 @@ variables:
   # the guest .deploy.sh aborts before deploying if this resolves empty.
   stashHost: "${ext:stash-service.ResolveHost(yuruna-stash-service)}"
 
+# --- REGION: component
 component:
   - action: loadDiskSnapshot
     id: "amisad-core-k8s"
@@ -31,6 +33,7 @@ component:
     timeoutSeconds: 300
     description: "SSH up after the restore"
 
+# --- REGION: workload
 workload:
   # Two downloads are extracted here, so the launch command carries the SHA-256
   # of each and the script verifies both before extracting: the project tarball

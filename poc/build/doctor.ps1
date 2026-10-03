@@ -21,6 +21,7 @@ $ErrorActionPreference = 'Stop'
 
 $failures = @()
 
+# --- REGION: Test-Tool
 function Test-Tool {
     param(
         [string]$Name,

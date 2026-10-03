@@ -12,6 +12,7 @@
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'AmisAd.HostCommon.ps1')
 
+# --- REGION: Invoke-AmisAdScript
 function Invoke-AmisAdScript {
     <#
     .SYNOPSIS
@@ -59,6 +60,7 @@ function Invoke-AmisAdScript {
     }
 }
 
+# --- REGION: Invoke-AmisAdStage
 function Invoke-AmisAdStage {
     <#
     .SYNOPSIS
@@ -91,6 +93,7 @@ function Invoke-AmisAdStage {
     return $exitCode
 }
 
+# --- REGION: Invoke-AmisAdCleanup
 function Invoke-AmisAdCleanup {
     <#
     .SYNOPSIS
@@ -121,6 +124,7 @@ function Invoke-AmisAdCleanup {
     return 0
 }
 
+# --- REGION: Remove-InstallMedia
 function Remove-InstallMedia {
     <#
     .SYNOPSIS
@@ -145,6 +149,7 @@ function Remove-InstallMedia {
     }
 }
 
+# --- REGION: Set-EdgeMemory
 function Set-EdgeMemory {
     <#
     .SYNOPSIS
@@ -161,6 +166,7 @@ function Set-EdgeMemory {
     Write-Information "$Name memory set to 4GB (slice-runtime only)." -InformationAction Continue
 }
 
+# --- REGION: Start-VMConfirmed
 function Start-VMConfirmed {
     <#
     .SYNOPSIS
@@ -187,22 +193,75 @@ function Start-VMConfirmed {
     return @{ started = $false; reason = "start reported success but the VM is '$(Get-VMState -VMName $Name)' after ${RunningTimeoutSeconds}s" }
 }
 
+# --- REGION: Start-AmisAdEdge
+function Start-AmisAdEdge {
+    <#
+    .SYNOPSIS
+        Start all region edges, then require a fresh valid address from each.
+    .DESCRIPTION
+        See https://yuruna.link/42010605-0006.
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    [OutputType([hashtable])]
+    param(
+        [string[]]$Name = @('amisad-edge-a', 'amisad-edge-b'),
+        [Parameter(Mandatory)][string]$LogRoot,
+        [ValidateRange(0, 3600)][int]$ReadyTimeoutSeconds = 480,
+        [ValidateRange(0, 300)][int]$PollSeconds = 10
+    )
+    $state = @{}
+    $address = @{}
+    $lines = [System.Collections.Generic.List[string]]::new()
+    foreach ($edge in $Name) {
+        $report = Join-Path $LogRoot "handoff/$edge.ip.txt"
+        $state[$edge] = @{ IpFile = $report; Start = (Get-Date); Started = $false; Ready = $false; Reason = 'not attempted' }
+        if (-not $PSCmdlet.ShouldProcess($edge, 'Remove stale IP report and start VM')) { continue }
+        Remove-Item -LiteralPath $report -Force -ErrorAction SilentlyContinue
+        $state[$edge].Start = Get-Date
+        foreach ($attempt in 1..3) {
+            $started = Start-VMConfirmed -Name $edge -Confirm:$false
+            $state[$edge].Reason = $started.reason
+            if ($started.started) {
+                $state[$edge].Started = $true
+                break
+            }
+            $lines.Add("Start-VM $edge attempt ${attempt}/3 failed: $($started.reason)")
+            if ($attempt -lt 3) { Start-Sleep -Seconds $PollSeconds }
+        }
+    }
+    $deadline = (Get-Date).AddSeconds($ReadyTimeoutSeconds)
+    foreach ($edge in $Name) {
+        if (-not $state[$edge].Started) { continue }
+        do {
+            $report = $state[$edge].IpFile
+            if ((Test-Path -LiteralPath $report -PathType Leaf) -and
+                (Get-Item -LiteralPath $report).LastWriteTime -gt $state[$edge].Start) {
+                $reported = Get-Content -LiteralPath $report -Raw -ErrorAction SilentlyContinue
+                $parsed = $null
+                if ($reported -and [Net.IPAddress]::TryParse($reported.Trim(), [ref]$parsed)) {
+                    $address[$edge] = $reported.Trim()
+                    $state[$edge].Ready = $true
+                    $state[$edge].Reason = $null
+                    break
+                }
+            }
+            if ((Get-Date) -ge $deadline) { break }
+            Start-Sleep -Seconds $PollSeconds
+        } while ((Get-Date) -lt $deadline)
+        if (-not $state[$edge].Ready) { $state[$edge].Reason = 'started but never reported a fresh valid IP address' }
+    }
+    $missing = @($Name | Where-Object { -not $state[$_].Ready })
+    return @{ Ok = $missing.Count -eq 0; State = $state; Address = $address; Missing = $missing; Lines = [string[]]$lines }
+}
+
+# --- REGION: Remove-LegacyDemoKey
 function Remove-LegacyDemoKey {
     <#
     .SYNOPSIS
         Delete a core->edge demo key that an earlier lab run left in the status
         service's served tree.
     .DESCRIPTION
-        A host that ran an older version of this lab holds the demo keypair
-        under test/status/handoff: that design generated it on the host and had
-        the guests download it, private half included, from the status service,
-        which hands its files to every machine that can reach the port. A key
-        that sat there is exposed no matter how long ago it was made, so it is
-        deleted rather than kept for reuse; vm-core generates its own pair
-        instead. Removing the file stops it being served. It does not make a
-        long-lived VM that still trusts the key safe: that VM must be rebuilt,
-        or its authorized_keys line ending in "amisad-demo" removed, which
-        Sync-AmisAdDemoKey does on the edges it reaches.
+        See https://yuruna.link/42010605-0006.
     .PARAMETER YurunaRoot
         Yuruna framework checkout whose status service served the file.
     .OUTPUTS
@@ -229,6 +288,7 @@ function Remove-LegacyDemoKey {
     return [string[]]$lines
 }
 
+# --- REGION: ConvertTo-AmisAdDemoPublicKey
 function ConvertTo-AmisAdDemoPublicKey {
     <#
     .SYNOPSIS
@@ -263,6 +323,7 @@ function ConvertTo-AmisAdDemoPublicKey {
     return "ssh-ed25519 $($match.Groups[1].Value) amisad-demo"
 }
 
+# --- REGION: Get-AmisAdKeyFingerprint
 function Get-AmisAdKeyFingerprint {
     <#
     .SYNOPSIS
@@ -281,6 +342,7 @@ function Get-AmisAdKeyFingerprint {
     return 'SHA256:' + [Convert]::ToBase64String($digest).TrimEnd('=')
 }
 
+# --- REGION: Get-AmisAdAuthorizeKeyCommand
 function Get-AmisAdAuthorizeKeyCommand {
     <#
     .SYNOPSIS
@@ -310,6 +372,7 @@ umask 077; d="$HOME/.ssh"; f="$d/authorized_keys"; mkdir -p "$d" && chmod 700 "$
     return $template.Trim().Replace('__PUBLIC_KEY__', $line)
 }
 
+# --- REGION: Get-AmisAdEdgeLoginCommand
 function Get-AmisAdEdgeLoginCommand {
     <#
     .SYNOPSIS
@@ -333,30 +396,14 @@ function Get-AmisAdEdgeLoginCommand {
     return 'ssh -i "$HOME/.ssh/amisad-demo-key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 {0}@{1} true' -f $EdgeUser, $EdgeAddress
 }
 
+# --- REGION: Sync-AmisAdDemoKey
 function Sync-AmisAdDemoKey {
     <#
     .SYNOPSIS
         Authorize the PUBLIC half of vm-core's demo key on the edge VMs, over
         the harness SSH channel, and prove the login works.
     .DESCRIPTION
-        vm-core generates the core->edge keypair inside itself and keeps the
-        private half there. Only the public half is read out (over SSH with the
-        harness key, the channel every other harness action on a guest uses) and
-        written into each edge's authorized_keys the same way. Nothing private is
-        ever copied, uploaded or served, and nothing about the key travels over
-        the status service's HTTP.
-
-        Ordering is why this runs here and not inside the edge sequences: the
-        edges are provisioned before vm-core exists, so the key they must trust
-        does not exist yet when they are built.
-
-        vm-core is started when it is not running and left running. The
-        scenarios restore its snapshot before they use it, and the key lives in
-        that snapshot, so a restore keeps it.
-
-        Progress and the verdict are returned rather than written: a module
-        function does not see the caller's script-scoped $InformationPreference,
-        so printing here would silently drop the report that explains a stop.
+        See https://yuruna.link/42010605-0006.
     .PARAMETER YurunaRoot
         Yuruna framework checkout; supplies the SSH helper when -InvokeGuest is
         not given.
@@ -410,7 +457,7 @@ function Sync-AmisAdDemoKey {
         }
     }
 
-    # --- vm-core: running, answering SSH ---
+    # --- REGION: Wait for core SSH
     if ((Get-Command Get-VMState -ErrorAction SilentlyContinue) -and ((Get-VMState -VMName $CoreVm) -ne 'running')) {
         $lines.Add("Starting $CoreVm to read its demo public key.")
         $started = Start-VMConfirmed -Name $CoreVm -Confirm:$false
@@ -426,7 +473,7 @@ function Sync-AmisAdDemoKey {
     } while ((Get-Date) -lt $deadline)
     if (-not $answering) { return (& $fail "$CoreVm did not answer SSH within ${ReadySeconds}s ($($probe.output))") }
 
-    # --- the public half, and only the public half ---
+    # --- REGION: Read demo public key
     $read = & $InvokeGuest $CoreVm $coreUser 'cat "$HOME/.ssh/amisad-demo-key.pub"' 60
     if (-not $read.success) {
         return (& $fail "could not read $CoreVm's demo public key (exit $($read.exitCode)); did the users step of the deploy run? $($read.output)")
@@ -436,7 +483,7 @@ function Sync-AmisAdDemoKey {
     $fingerprint = Get-AmisAdKeyFingerprint -PublicKey $publicKey
     $lines.Add("$CoreVm demo key: $fingerprint")
 
-    # --- each edge trusts exactly that key ---
+    # --- REGION: Authorize demo public key
     $authorize = Get-AmisAdAuthorizeKeyCommand -PublicKey $publicKey
     foreach ($edge in $EdgeVm) {
         $edgeUser = "$edge-admin"
@@ -450,7 +497,7 @@ function Sync-AmisAdDemoKey {
         $lines.Add("$edge now trusts $fingerprint (any earlier amisad-demo entry replaced).")
     }
 
-    # --- the proof the scenarios depend on: vm-core logs in to each edge ---
+    # --- REGION: Verify core-to-edge login
     foreach ($edge in $EdgeVm) {
         $address = if ($EdgeAddress.ContainsKey($edge)) { [string]$EdgeAddress[$edge] }
                    elseif (Get-Command Get-VMIp -ErrorAction SilentlyContinue) { [string](Get-VMIp -VMName $edge) }
@@ -476,6 +523,6 @@ function Sync-AmisAdDemoKey {
 }
 
 Export-ModuleMember -Function Invoke-AmisAdScript, Invoke-AmisAdStage, Invoke-AmisAdCleanup,
-    Remove-InstallMedia, Set-EdgeMemory, Start-VMConfirmed, Remove-LegacyDemoKey,
+    Remove-InstallMedia, Set-EdgeMemory, Start-VMConfirmed, Start-AmisAdEdge, Remove-LegacyDemoKey,
     ConvertTo-AmisAdDemoPublicKey, Get-AmisAdKeyFingerprint, Get-AmisAdAuthorizeKeyCommand,
     Get-AmisAdEdgeLoginCommand, Sync-AmisAdDemoKey

@@ -3,12 +3,14 @@
 # context (the Rust workspace lives there); buildPath entries below name the
 # component folder, and the buildCommand passes the workspace root context.
 ---
+# --- REGION: globalVariables
 globalVariables:
   DOCKER_SCAN_SUGGEST:   "false"
   buildCommand: docker build --progress=plain --rm -f "${env:buildPath}/Dockerfile" -t "${env:containerPrefix}/${env:project}:latest" ../..
   tagCommand: docker tag "${env:containerPrefix}/${env:project}:latest" "$([Environment]::GetEnvironmentVariable("${env:registryName}.registryLocation"))/${env:containerPrefix}/${env:project}:latest"
   pushCommand: docker push "$([Environment]::GetEnvironmentVariable("${env:registryName}.registryLocation"))/${env:containerPrefix}/${env:project}:latest"
 
+# --- REGION: components
 components:
 - project: "seller-svc"
   buildPath: "services/seller-svc"

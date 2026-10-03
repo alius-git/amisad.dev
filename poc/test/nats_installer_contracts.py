@@ -61,8 +61,14 @@ class NatsInstaller(unittest.TestCase):
             path.write_bytes(('#!/bin/sh\n' + body + '\n').encode())
             path.chmod(0o755)
         env = {**os.environ, 'FIXTURE': posix, 'TMPDIR': posix + '/tmp', 'TARBALL': TARBALL.decode(),
-               'PYTHON': sys.executable, 'PATH': str(root / 'bin') + os.pathsep + os.environ['PATH']}
+               'PYTHON': Path(sys.executable).as_posix()}
         return root, script, env
+
+    @staticmethod
+    def run_installer(root, env):
+        # Prepend fixtures after Bash converts the host PATH into its native format.
+        return subprocess.run(['bash', '-c', 'export PATH="$PWD/bin:$PATH"; exec bash ./installer.sh'],
+                              cwd=root, env=env, capture_output=True, text=True)
 
     def test_upgrade_restart_idempotency_and_runtime_version(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -70,7 +76,7 @@ class NatsInstaller(unittest.TestCase):
             installed = root / 'usr/local/bin/nats-server'
 
             def run():
-                return subprocess.run(['bash', str(script)], env=env, capture_output=True, text=True)
+                return self.run_installer(root, env)
             result = run(); self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn('v2.15.0', subprocess.check_output(['bash', str(installed), '--version'], text=True))
             self.assertEqual((root/'actions').read_text().count('restart nats'), 1)
@@ -83,7 +89,7 @@ class NatsInstaller(unittest.TestCase):
     def test_verifies_the_download_before_extracting_and_cleans_up(self):
         with tempfile.TemporaryDirectory() as directory:
             root, script, env = self.fixture(directory, pin_the_fixture_tarball=True)
-            result = subprocess.run(['bash', str(script)], env=env, capture_output=True, text=True)
+            result = self.run_installer(root, env)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn('sha256 verified', result.stdout)
             # The private download directory is gone once the install finished.
@@ -95,7 +101,7 @@ class NatsInstaller(unittest.TestCase):
             root, script, env = self.fixture(directory, pin_the_fixture_tarball=False)
             installed = root / 'usr/local/bin/nats-server'
             before = installed.read_text()
-            result = subprocess.run(['bash', str(script)], env=env, capture_output=True, text=True)
+            result = self.run_installer(root, env)
             self.assertEqual(result.returncode, 7, result.stderr)
             self.assertIn('INTEGRITY MISMATCH', result.stderr)
             self.assertIn(hashlib.sha256(TARBALL).hexdigest(), result.stderr)

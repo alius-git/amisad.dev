@@ -6,8 +6,7 @@
 
 "use strict";
 
-// --- personas -----------------------------------------------------------
-
+// --- REGION: personas
 const PERSONAS = {
   maya:   { name: "Maya",   role: "The Buyer",                  app: "AmisAd/buyer",
             blurb: "States a need once, in her own words. Nothing about her leaves -- not to the seller, not to anyone." },
@@ -33,8 +32,7 @@ const PERSONAS = {
             blurb: "Acts for Maya under a scoped, capped, expiring mandate -- every action on her trail." },
 };
 
-// --- state --------------------------------------------------------------
-
+// --- REGION: state
 const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const state = load("amisad-demo-state", {});
 const done = load("amisad-demo-done", {});
@@ -58,8 +56,7 @@ const NOTEBOOK = {
 let topo = { core: "", edgeA: "", edgeB: "" };
 let currentPersona = "";
 
-// --- plumbing -----------------------------------------------------------
-
+// --- REGION: plumbing
 function deepFind(node, key) {
   if (node === null || typeof node !== "object") return undefined;
   if (!Array.isArray(node) && key in node && typeof node[key] !== "object") return node[key];
@@ -132,7 +129,7 @@ function offer(id, title, category, price, extra) {
   }, extra || {});
 }
 
-// --- the script: scenarios and steps ------------------------------------
+// --- REGION: the script: scenarios and steps
 // Order = demo order. `persona` is who clicks; `needs` lists notebook keys
 // the step consumes (button disabled until captured); `refusal` marks steps
 // whose PASS is a 4xx from the platform.
@@ -167,7 +164,7 @@ const SCENARIOS = [
 ];
 
 const STEPS = [
-  // --- s001.fulfillment -------------------------------------------------
+  // --- REGION: s001.fulfillment
   { scenario: "s001", persona: "elena", label: "Publish the standing offer",
     explain: "Ceramic serving set, standing terms, closes automatically -- Elena's catalog, her words.",
     run: async () => [mk("publish offer", await post("core/30083/v1/offers",
@@ -196,7 +193,7 @@ const STEPS = [
     explain: "Both ledgers verify end to end -- the receipt survives restarts and cannot be quietly edited.",
     run: async () => [mk("ledger verify", await get("core/30081/v1/verify"))] },
 
-  // --- s002.fitting -----------------------------------------------------
+  // --- REGION: s002.fitting
   { scenario: "s002", persona: "elena", label: "Publish the dress rack",
     explain: "Five dresses across two sellers -- one dusty blue, one missing attributes, one past deadline, one out of region.",
     run: async () => {
@@ -247,7 +244,7 @@ const STEPS = [
       mk("fulfilled", await post("core/30083/v1/orders/advance", { match_id: state.s002_match, state: "fulfilled" })),
     ] },
 
-  // --- s003.silence -----------------------------------------------------
+  // --- REGION: s003.silence
   { scenario: "s003", persona: "maya", label: "Sign up (consent grants)",
     explain: "Participation and contribution, granted on the consent ledger under a pseudonymous subject -- never a name.",
     run: async () => [
@@ -292,7 +289,7 @@ const STEPS = [
     run: async () => [mk("consent state", await post("core/30080/v1/consents/state",
       { token: await token("maya") }))] },
 
-  // --- s005.attribution -------------------------------------------------
+  // --- REGION: s005.attribution
   { scenario: "s005", persona: "marcel", label: "Create the campaign",
     explain: "Aggregate targeting only: a region and a need category. 2000c committed per match on top of the price.",
     run: async () => [mk("create campaign", await post("core/30087/v1/campaigns",
@@ -346,7 +343,7 @@ const STEPS = [
     explain: "Aggregate attribution referencing campaign and asset ids -- zero buyer signal on the campaign side.",
     run: async () => [mk("attributions", await get("core/30087/v1/attributions"))] },
 
-  // --- s006.mandate -----------------------------------------------------
+  // --- REGION: s006.mandate
   { scenario: "s006", persona: "elena", label: "Publish the household offers",
     explain: "A stock pot under Pat's coming cap, and a premium vase over it.",
     run: async () => [
@@ -400,7 +397,7 @@ const STEPS = [
     run: async () => [mk("revoke", await post("core/30080/v1/mandates/revoke",
       { token: await token("maya"), delegate: "pat" }))] },
 
-  // --- s007.inventory ---------------------------------------------------
+  // --- REGION: s007.inventory
   { scenario: "s007", persona: "alex", label: "Register + certify the connector",
     explain: "Sandbox first -- no production tenant before partner verification.",
     run: async () => {
@@ -445,7 +442,7 @@ const STEPS = [
     run: async () => [mk("query settlement", await post("core/30088/v1/query",
       { credential: state.s007_cred, resource: "settlement" }))] },
 
-  // --- s009.suppression -------------------------------------------------
+  // --- REGION: s009.suppression
   { scenario: "s009", persona: "dana", label: "Record the week's demand",
     explain: "Six picnicware needs in region-a, one in region-b -- counts, never content.",
     run: async () => {
@@ -473,7 +470,7 @@ const STEPS = [
     explain: "Same version, same figures -- campaigns land where the need already was.",
     run: async () => [mk("ads view", await get("core/30087/v1/demand-view/" + state.s009_version))] },
 
-  // --- s004.failover ----------------------------------------------------
+  // --- REGION: s004.failover
   { scenario: "s004", persona: "tom", label: "Register both regions",
     explain: "region-a: capacity 2 (sovereign). region-b: capacity 10 (roomier). Both slices attest a region identity.",
     run: async () => [
@@ -527,7 +524,7 @@ const STEPS = [
     explain: "Priya owns the whole thread: both aborted lifecycles, one case, no single participant could resolve it alone.",
     run: async () => [mk("case", await get("core/30086/v1/incidents/" + state.s004_case))] },
 
-  // --- s008.mediation ---------------------------------------------------
+  // --- REGION: s008.mediation
   { scenario: "s008", persona: "sam", label: "Open the case (metadata only)", needs: ["s001_match"],
     explain: "Maya reports the Act I gift never arrived. The case carries order state and settlement -- no identity ever reaches it.",
     run: async () => [mk("open case", await post("core/30086/v1/support/cases",
@@ -561,7 +558,7 @@ const STEPS = [
     run: async () => [mk("disclosure after expiry",
       await get("core/30086/v1/support/cases/" + state.s008_case + "/disclosure"))] },
 
-  // --- s010.certification -----------------------------------------------
+  // --- REGION: s010.certification
   { scenario: "s010", persona: "ingrid", label: "Certify the evidence trail",
     explain: "Four dimensions over everything this demo just did -- attestation continuity, residency, consent, settlement evidence -- recomputing the chains from raw dumps, trusting no self-report.",
     run: async () => [mk("certify", await post("core/30089/v1/certify"))] },
@@ -590,8 +587,7 @@ const STEPS = [
 
 STEPS.forEach((s, i) => { s.id = s.scenario + "-" + i; });
 
-// --- rendering ----------------------------------------------------------
-
+// --- REGION: rendering
 const $ = (sel) => document.querySelector(sel);
 let personaSecrets = {};
 const stepResults = {}; // step.id -> { results, verdict } (session only)
@@ -795,8 +791,7 @@ function selectPersona(p) {
   render();
 }
 
-// --- boot ---------------------------------------------------------------
-
+// --- REGION: boot
 async function boot() {
   const sel = $("#persona-select");
   for (const [key, p] of Object.entries(PERSONAS)) {

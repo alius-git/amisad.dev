@@ -6,6 +6,7 @@
 # deployment restarted onto pods that exist now, and every NodePort answering.
 # Runs as a component step, so a cluster that has not converged is replayed from
 # the restore instead of failing the scenario that was about to use it.
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
@@ -36,16 +37,7 @@ done
     exit 9
 }
 SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
-# The snapshot carries deployment and pod status frozen at snapshot time, so
-# every readiness signal in it describes containers the reboot has already
-# replaced. Waiting on that status can pass while the pod network is still
-# moving, and a NodePort rule still pointing at a departed pod answers the next
-# dial with "No route to host". Restarting first is what makes the wait mean
-# something: rollout status then reports against a generation created after
-# this restore, so it completes only once pods that exist NOW are ready and the
-# endpoints behind those rules are theirs. Peers are addressed by cluster DNS
-# name, so CoreDNS has to answer from live pods as well; both restarts are
-# issued before either is awaited so the two roll in parallel.
+# See https://yuruna.link/42010605-0007
 kubectl -n kube-system rollout restart deployment/coredns
 kubectl -n amisad rollout restart deployment
 kubectl -n kube-system rollout status deployment/coredns --timeout=600s
@@ -53,6 +45,7 @@ for svc in $SERVICES; do
     kubectl -n amisad rollout status "deployment/${svc}" --timeout=600s
 done
 
+# --- REGION: Resolve service endpoints
 NODE_IP=$(hostname -I | awk '{print $1}')
 
 echo "== wait for the NodePort services to actually answer (post-restore) =="

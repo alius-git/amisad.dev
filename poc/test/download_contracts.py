@@ -28,10 +28,10 @@ DB = GUEST / 'ubuntu.server.24.amisad-core.db.sh'
 TOOLS = GUEST / 'ubuntu.server.24.amisad-build.tools.sh'
 NATS = GUEST / 'ubuntu.server.24.amisad-core.nats.sh'
 SCRIPTS = [COMPILE, DEPLOY, DB]
-BEGIN = '# --- amisad download verification: identical copy in compile.sh, deploy.sh and db.sh ---'
-END = '# --- end amisad download verification ---'
-PINNED_BEGIN = '# --- amisad pinned download check: identical copy in tools.sh and nats.sh ---'
-PINNED_END = '# --- end amisad pinned download check ---'
+BEGIN = '# --- REGION: amisad_sha256'
+END = '# End download verification'
+PINNED_BEGIN = '# --- REGION: amisad_verify_pinned'
+PINNED_END = '# End pinned download verification'
 
 
 def text_of(path):
@@ -91,6 +91,23 @@ class VerificationHelper(Contract):
         blocks = {path.name: helper_block(path) for path in SCRIPTS}
         self.assertEqual(len(set(blocks.values())), 1, 'the verification helper drifted between scripts')
         self.contains('amisad_verify_download()', blocks[COMPILE.name], 'the helper block lost its verifier')
+
+    def test_every_script_carries_the_same_host_refresh(self):
+        functions = [function_text(path, 'amisad_host_fetch') for path in SCRIPTS]
+        self.assertEqual(len(set(functions)), 1, 'host-coordinate refresh drifted between scripts')
+
+    def test_failed_host_refresh_stops_fetching_and_preserves_the_reason(self):
+        with tempfile.TemporaryDirectory() as directory:
+            Path(directory, 'host.env').write_text('YURUNA_STATUS_SERVICE_IP=192.0.2.1\nYURUNA_STATUS_SERVICE_PORT=8080\n')
+            Path(directory, 'locate.sh').write_text('#!/bin/bash\necho "fixture resolver refused" >&2\nexit 9\n')
+            helper = function_text(COMPILE, 'amisad_host_fetch').replace('/etc/yuruna/host.env', './host.env').replace(
+                '/usr/local/lib/yuruna/yuruna-host-locate.sh', './locate.sh')
+            result = run_bash('chmod +x ./locate.sh\n' + helper + '\n'
+                              'wget() { echo attempt >> attempts; return 8; }\n'
+                              'amisad_host_fetch got.bin project.tar.gz; echo "rc=$?"\n', directory)
+            self.assertIn('rc=1', result.stdout)
+            self.assertIn('fixture resolver refused', result.stderr)
+            self.assertEqual(Path(directory, 'attempts').read_text().splitlines(), ['attempt'])
 
     def verify(self, expected, content=b'payload', override=False):
         with tempfile.TemporaryDirectory() as directory:

@@ -1,18 +1,8 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - vm-core demo users: add the non-administrator persona accounts
-# (maya, elena buyers/sellers; tom, priya operators; marcel, kai ad agency +
-# creator - s005; pat delegate - s006; alex integration partner - s007; sam
-# support - s008; dana analyst - s009; ingrid auditor - s010) and
-# generate the core->edge demo SSH keypair for the admin so scenario scripts
-# can scp/ssh slice-runtime to the edge VMs. The keypair is created HERE and the
-# private key never leaves this VM: it is not fetched from, or uploaded to, the
-# host status service (which serves its files to the whole LAN). Only the public
-# half crosses to the edges, carried by the host over the harness SSH channel
-# once both exist (test/AmisAd.Lab.psm1 Sync-AmisAdDemoKey). Passwords are set by
-# a separate sensitive sshExec sequence step (vault-rendered, masked), never
-# passed to this script. Runs as the admin (passwordless sudo).
+# See https://yuruna.link/42010605-0007
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"

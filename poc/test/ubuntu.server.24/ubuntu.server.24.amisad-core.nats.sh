@@ -6,17 +6,11 @@
 # caching path); the GitHub release binary avoids Docker Hub.
 # Services reach NATS at <node-ip>:4222; the in-cluster Service indirection
 # returns when the event-driven scenarios actually wire JetStream in.
+# --- REGION: Initialize environment
 set -euo pipefail
 
-# --- amisad pinned download check: identical copy in tools.sh and nats.sh ---
-# rustup-init, bazelisk and the NATS server are downloaded from their publishers
-# and then executed or installed as root, so each is checked against a SHA-256
-# pinned in THIS script before use. The pins are the publishers' own values (the
-# .sha256 file beside each rustup-init, the digest on each bazelisk release
-# asset, the release's SHA256SUMS for NATS), recorded when the version was
-# chosen. They live in a script that fetch-and-execute verified against the
-# digest the host typed into the launch command, so they are as trustworthy as
-# the script. A mismatch deletes the download, so a retried unit fetches afresh.
+# --- REGION: amisad_verify_pinned
+# See https://yuruna.link/42010605-0008
 amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
     local file="$1" want="$2" label="$3" have
     have=$(sha256sum "$file" 2>/dev/null) || have=''
@@ -38,7 +32,7 @@ amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
     } >&2
     return 1
 }
-# --- end amisad pinned download check ---
+# End pinned download verification
 
 # Pinned (not 'latest'): resolving latest needs the unauthenticated GitHub
 # releases API, which 403s behind the shared NAT egress. Bump by editing these
@@ -85,15 +79,18 @@ fi
 unit_file=$(mktemp)
 trap 'rm -f "$unit_file"' EXIT
 cat > "$unit_file" <<'UNIT'
+# --- REGION: [Unit]
 [Unit]
 Description=NATS JetStream (AmisAd POC)
 After=network-online.target
 
+# --- REGION: [Service]
 [Service]
 ExecStart=/usr/local/bin/nats-server -js -m 8222
 Restart=always
 RestartSec=2
 
+# --- REGION: [Install]
 [Install]
 WantedBy=multi-user.target
 UNIT

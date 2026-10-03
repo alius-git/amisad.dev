@@ -10,6 +10,7 @@ sequenceRevision: 3
 
 description: "AmisAd s008.mediation: restore amisad-core, run zero-knowledge dispute mediation (metadata-only case, scoped time-boxed disclosure, compensating settlement entries), assert full TVP."
 keystrokeMechanism: ssh
+# --- REGION: resource
 resource:
   ubuntu.server.24:
     - workload.guest.ubuntu.server.24.amisad-core.deploy
@@ -24,6 +25,7 @@ variables:
 # are idempotent and every attempt starts from the snapshot again. The workload
 # below is deliberately outside it: a scenario that passes only on a second run
 # is reporting a defect, and replaying it would file the report in the bin.
+# --- REGION: component
 component:
   - action: retry
     description: "Put amisad-core in position for s008.mediation: restore, SSH, cluster live"
@@ -41,6 +43,7 @@ component:
         timeoutSeconds: 900
         description: "Bring the restored cluster to a known-live state (deployments restarted, every NodePort answering)"
 
+# --- REGION: workload
 workload:
   - action: sshFetchAndExecute
     command: "/usr/local/lib/yuruna/fetch-and-execute.sh project/poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s008.mediation.sh"

@@ -32,6 +32,7 @@ Imported with -Force by each serve script; nothing here touches the lab.
 $script:personaCache = $null
 $script:personaCacheKey = ''
 
+# --- REGION: Get-DemoHostIp
 function Get-DemoHostIp {
     <#
     .SYNOPSIS
@@ -64,6 +65,7 @@ function Get-DemoHostIp {
     return $candidates[0]
 }
 
+# --- REGION: Get-DemoHostIpList
 function Get-DemoHostIpList {
     <#
     .SYNOPSIS
@@ -85,6 +87,7 @@ function Get-DemoHostIpList {
     return [string[]]$list
 }
 
+# --- REGION: Test-DemoAdministrator
 function Test-DemoAdministrator {
     <#
     .SYNOPSIS
@@ -101,6 +104,7 @@ function Test-DemoAdministrator {
     return ((id -u) -eq '0')
 }
 
+# --- REGION: Add-DemoFirewallRule
 function Add-DemoFirewallRule {
     <#
     .SYNOPSIS
@@ -121,6 +125,7 @@ function Add-DemoFirewallRule {
     return Add-DemoFirewallRuleLinux -Port $Port
 }
 
+# --- REGION: Invoke-DemoNativeCommand
 function Invoke-DemoNativeCommand {
     [CmdletBinding()]
     [OutputType([object[]])]
@@ -137,6 +142,7 @@ function Invoke-DemoNativeCommand {
     return $output
 }
 
+# --- REGION: Add-DemoFirewallRuleWindows
 function Add-DemoFirewallRuleWindows {
     <#
     .SYNOPSIS
@@ -178,6 +184,7 @@ if (`$LASTEXITCODE -ne 0 -or `$reservation -notmatch [regex]::Escape('http://+:$
     }
 }
 
+# --- REGION: Add-DemoFirewallRuleMacOS
 function Add-DemoFirewallRuleMacOS {
     <#
     .SYNOPSIS
@@ -204,6 +211,7 @@ function Add-DemoFirewallRuleMacOS {
     }
 }
 
+# --- REGION: Add-DemoFirewallRuleLinux
 function Add-DemoFirewallRuleLinux {
     <#
     .SYNOPSIS
@@ -239,6 +247,7 @@ function Add-DemoFirewallRuleLinux {
     }
 }
 
+# --- REGION: New-DemoListener
 function New-DemoListener {
     <#
     .SYNOPSIS
@@ -279,6 +288,7 @@ function New-DemoListener {
     return $listener
 }
 
+# --- REGION: Enable-DemoStopKey
 function Enable-DemoStopKey {
     <#
     .SYNOPSIS
@@ -300,6 +310,7 @@ function Enable-DemoStopKey {
     }
 }
 
+# --- REGION: Disable-DemoStopKey
 function Disable-DemoStopKey {
     <#
     .SYNOPSIS
@@ -310,6 +321,7 @@ function Disable-DemoStopKey {
     try { [Console]::TreatControlCAsInput = $false } catch { Write-Verbose 'Console restore skipped.' }
 }
 
+# --- REGION: Test-DemoStopKey
 function Test-DemoStopKey {
     <#
     .SYNOPSIS
@@ -339,6 +351,7 @@ function Test-DemoStopKey {
 # Invoke-Proxy deliberately stay per-server -- their differences are each
 # app's own routing and proxy policy, not drift.
 
+# --- REGION: Resolve-VmIp
 function Resolve-VmIp([string]$Name, [string]$YurunaRoot) {
     <#
     .SYNOPSIS
@@ -361,6 +374,7 @@ function Resolve-VmIp([string]$Name, [string]$YurunaRoot) {
     return ''
 }
 
+# --- REGION: Get-PersonaSecret
 function Get-PersonaSecret {
     <#
     .SYNOPSIS
@@ -397,6 +411,7 @@ function Get-PersonaSecret {
     return ,$script:personaCache
 }
 
+# --- REGION: Test-LoopbackClient
 function Test-LoopbackClient($Request) {
     <#
     .SYNOPSIS
@@ -409,6 +424,7 @@ function Test-LoopbackClient($Request) {
     return [System.Net.IPAddress]::IsLoopback($addr)
 }
 
+# --- REGION: Write-Body
 function Write-Body($Response, [int]$Status, [byte[]]$Bytes, [string]$ContentType) {
     <#
     .SYNOPSIS
@@ -421,6 +437,7 @@ function Write-Body($Response, [int]$Status, [byte[]]$Bytes, [string]$ContentTyp
     $Response.OutputStream.Close()
 }
 
+# --- REGION: Write-Json
 function Write-Json($Response, [int]$Status, $Object, [int]$Depth = 8) {
     <#
     .SYNOPSIS

@@ -89,6 +89,7 @@ $http.Timeout = [TimeSpan]::FromSeconds(60)
 # Forward one browser request to a lab endpoint, body and method intact,
 # and relay the upstream status + body verbatim (non-2xx included: refusal
 # statuses like 403/410 are demo evidence, not proxy errors).
+# --- REGION: Invoke-Proxy
 function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
     $uri = $TargetBase + $Rest + $Request.Url.Query
     $msg = [System.Net.Http.HttpRequestMessage]::new(
@@ -114,6 +115,7 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
     }
 }
 
+# --- REGION: Send-StaticFile
 function Send-StaticFile($Response, [string]$UrlPath) {
     $rel = $UrlPath.TrimStart('/')
     if ($rel -eq '') { $rel = 'ui/index.html' }

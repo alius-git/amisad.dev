@@ -74,6 +74,7 @@ if (-not $EdgeBIp) { $EdgeBIp = Resolve-VmIp -Name 'amisad-edge-b' -YurunaRoot $
 # and the IP fallback chain can be slow when a guest has no lease.
 $script:vmCache = $null
 $script:vmCacheAt = [DateTime]::MinValue
+# --- REGION: Get-VmReport
 function Get-VmReport {
     if ($script:vmCache -and ((Get-Date) - $script:vmCacheAt).TotalSeconds -lt 5) {
         return $script:vmCache
@@ -97,6 +98,7 @@ function Get-VmReport {
 # sha256("<actor>|<class>|subject") truncated to 16 hex chars. Computing it
 # here rather than in the browser keeps the data view working over plain http
 # on a LAN address, where WebCrypto is unavailable outside a secure context.
+# --- REGION: Get-SubjectHash
 function Get-SubjectHash([string]$Actor) {
     $sha = [System.Security.Cryptography.SHA256]::Create()
     try {
@@ -111,13 +113,7 @@ function Get-SubjectHash([string]$Actor) {
 # a pure read here; a missing entry would mean the VM account never got that
 # password either.
 $personaUsers = 'maya', 'elena', 'tom', 'marcel', 'kai', 'priya', 'ingrid', 'dana', 'alex', 'sam', 'pat'
-# The vault passwords are the one thing here that must not travel further than
-# the operator intends, so they are gated per REQUEST, not per binding: opening
-# the console to the network still leaves the host's own browser fully
-# featured, and remote viewers see the cards without the secrets.
-# The journal: append-only in memory, monotonic sequence. Clients poll with the
-# highest seq they hold; a 'latest' lower than that tells them this process
-# restarted and their view must be rebuilt from scratch.
+# See https://yuruna.link/42010605-0009
 $script:journal = [System.Collections.Generic.List[object]]::new()
 $script:journalSeq = 0
 
@@ -134,6 +130,7 @@ $mime = @{
 $http = [System.Net.Http.HttpClient]::new()
 $http.Timeout = [TimeSpan]::FromSeconds(30)
 
+# --- REGION: Read-RequestBody
 function Read-RequestBody($Request) {
     if (-not $Request.HasEntityBody) { return '' }
     $reader = [IO.StreamReader]::new($Request.InputStream, $Request.ContentEncoding)
@@ -145,6 +142,7 @@ function Read-RequestBody($Request) {
 # like 403/410 are demo evidence, not proxy errors). Reads get a short deadline
 # of their own: the data view polls continuously, and one unreachable VM must
 # not stall the single-threaded loop for the full client timeout.
+# --- REGION: Invoke-Proxy
 function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
     $uri = $TargetBase + $Rest + $Request.Url.Query
     $msg = [System.Net.Http.HttpRequestMessage]::new(
@@ -178,6 +176,7 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
 
 # '' serves the action window and '/data' the data view; both are ordinary
 # files under ui/, so everything else resolves as a normal static path.
+# --- REGION: Send-StaticFile
 function Send-StaticFile($Response, [string]$UrlPath) {
     $rel = $UrlPath.TrimStart('/')
     if ($rel -eq '') { $rel = 'ui/actions.html' }

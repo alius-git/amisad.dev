@@ -140,6 +140,74 @@ Export-ModuleMember -Function Start-VM, Get-VMState
     }
 }
 
+Describe 'AmisAd edge admission' {
+    BeforeEach {
+        $script:EdgeTrace = [System.Collections.Generic.List[string]]::new()
+        Mock Start-VMConfirmed -ModuleName AmisAd.Lab -MockWith {
+            param($Name)
+            $script:EdgeTrace.Add("start:$Name")
+            return @{ started = $true; reason = $null }
+        }
+        Mock Remove-Item -ModuleName AmisAd.Lab -MockWith { }
+        Mock Start-Sleep -ModuleName AmisAd.Lab -MockWith { }
+        Mock Test-Path -ModuleName AmisAd.Lab -MockWith { $true }
+        Mock Get-Item -ModuleName AmisAd.Lab -MockWith {
+            param($LiteralPath)
+            $script:EdgeTrace.Add("report:$LiteralPath")
+            return [pscustomobject]@{ LastWriteTime = (Get-Date).AddMinutes(1) }
+        }
+        Mock Get-Content -ModuleName AmisAd.Lab -MockWith {
+            param($LiteralPath)
+            if ($LiteralPath -like '*edge-b*') { return '192.0.2.12' }
+            return '192.0.2.11'
+        }
+    }
+
+    It 'starts both edges before waiting and returns their fresh addresses' {
+        $result = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -Confirm:$false
+        $result.Ok | Should -BeTrue
+        $result.Address['amisad-edge-a'] | Should -Be '192.0.2.11'
+        $result.Address['amisad-edge-b'] | Should -Be '192.0.2.12'
+        $script:EdgeTrace[0] | Should -Be 'start:amisad-edge-a'
+        $script:EdgeTrace[1] | Should -Be 'start:amisad-edge-b'
+    }
+
+    It 'retains the start failure and refuses admission when an edge never starts' {
+        Mock Start-VMConfirmed -ModuleName AmisAd.Lab -ParameterFilter { $Name -eq 'amisad-edge-b' } -MockWith {
+            return @{ started = $false; reason = 'fixture start denied' }
+        }
+        $result = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -Confirm:$false
+        $result.Ok | Should -BeFalse
+        $result.Missing | Should -Contain 'amisad-edge-b'
+        $result.State['amisad-edge-b'].Reason | Should -Be 'fixture start denied'
+        $result.Address.ContainsKey('amisad-edge-b') | Should -BeFalse
+        Should -Invoke Start-VMConfirmed -ModuleName AmisAd.Lab -ParameterFilter { $Name -eq 'amisad-edge-b' } -Times 3 -Exactly
+    }
+
+    It 'rejects a stale, blank, or malformed report (<Case>)' -TestCases @(
+        @{ Case = 'stale'; Stale = $true; Address = '192.0.2.11' }
+        @{ Case = 'blank'; Stale = $false; Address = '' }
+        @{ Case = 'malformed'; Stale = $false; Address = 'not an address' }
+    ) {
+        param($Case, $Stale, $Address)
+        $null = @($Case, $Stale, $Address)
+        Mock Get-Item -ModuleName AmisAd.Lab -MockWith {
+            return [pscustomobject]@{ LastWriteTime = if ($Stale) { (Get-Date).AddHours(-1) } else { (Get-Date).AddMinutes(1) } }
+        }.GetNewClosure()
+        Mock Get-Content -ModuleName AmisAd.Lab -MockWith { return $Address }.GetNewClosure()
+        $result = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -Confirm:$false
+        $result.Ok | Should -BeFalse
+        $result.Missing.Count | Should -Be 2
+        $result.Address.Count | Should -Be 0
+    }
+
+    It 'does not remove reports or start VMs during a rehearsal' {
+        $null = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -WhatIf
+        Should -Invoke Remove-Item -ModuleName AmisAd.Lab -Times 0 -Exactly
+        Should -Invoke Start-VMConfirmed -ModuleName AmisAd.Lab -Times 0 -Exactly
+    }
+}
+
 Describe 'AmisAd demo module inputs' {
     BeforeAll {
         $vaultDir = Join-Path $script:FixtureRoot 'test/extension/authentication'

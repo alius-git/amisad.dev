@@ -1,24 +1,19 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
-# AmisAd POC - s004.failover run on amisad-core: sovereign slice
-# allocation, isolation fault, attested failover. Both edges run
-# slice-runtime with their region identity; Tom's policy pins the restricted
-# jurisdiction to region-a although region-b is roomier; two injected
-# isolation faults abort two environments SAFELY (attested abort with reason,
-# before the envelope is ever opened); the fabric's automatic retry completes
-# the match with exactly one settlement; both incidents queue for Tom, and
-# the systemic pattern escalates to Priya's cross-party platform case.
-# This scenario REQUIRES both edges - there is no degraded fallback.
+# See https://yuruna.link/42010605-0007
+# --- REGION: Initialize environment
 set -euo pipefail
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
+# --- REGION: Load scenario helpers
 # shellcheck source=../amisad-scenario.sh
 . "$POC/test/amisad-scenario.sh"
 
+# --- REGION: Resolve service endpoints
 NODE_IP=$(hostname -I | awk '{print $1}')
 LEDGER="http://${NODE_IP}:30081"
 RESOURCE="http://${NODE_IP}:30082"
@@ -35,10 +30,8 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
     exit 2
 fi
 SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
-# --- REGION: https://yuruna.link/4220a755-0019
-
-
-
+# See https://yuruna.link/4220a755-0019
+# --- REGION: start_slice
 start_slice() { # <edge-hostname> <region>
     # Runs inside $( ) - errexit does NOT reach in here, so every step fails
     # loudly by hand; the exit code escapes through pipefail to the caller.
@@ -72,6 +65,7 @@ done
 echo "slices: region-a at ${SLICE_A}, region-b at ${SLICE_B}"
 
 export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
+# --- REGION: PSQL
 PSQL() { sudo -u postgres psql -d amisad -tAc "$1"; }
 
 echo "== Tom: allocation policy - two regions, region-b roomier, region-a sovereign =="

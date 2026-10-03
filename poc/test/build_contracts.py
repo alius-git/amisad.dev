@@ -24,9 +24,11 @@ class BuildContracts(unittest.TestCase):
                 command = tools / tool
                 command.write_text(f'#!/bin/sh\n[ -f "{manifest}" ] || exit 42\npwd > build.cwd\n')
                 command.chmod(493)
-                result = subprocess.run(['bash', str(wrapper)], env={**os.environ, 'BUILD_WORKSPACE_DIRECTORY': str(work), 'PATH': str(tools) + ':' + os.environ['PATH']}, capture_output=True, text=True)
+                result = subprocess.run(['bash', '-c', 'export PATH="$PWD/bin:$PATH"; export BUILD_WORKSPACE_DIRECTORY="$PWD/workspace"; exec bash runfiles/build.sh'],
+                                        cwd=base, env=os.environ, capture_output=True, text=True)
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertEqual((appdir / 'build.cwd').read_text().strip(), str(appdir))
+                expected = subprocess.check_output(['bash', '-c', 'pwd -P'], cwd=appdir, text=True).strip()
+                self.assertEqual((appdir / 'build.cwd').read_text().strip(), expected)
 
     def test_dockerfiles_use_committed_lock(self):
         paths = list((ROOT / 'components').rglob('Dockerfile'))
