@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="@rolldown/binding-android-arm-eabi" tagId="urn:uuid:1e9d228a-0b3d-5205-aa54-b4547e659547" version="1.2.11" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;locked&quot;, &quot;ecosystem&quot;: &quot;npm&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;npm lockfile package&quot;, &quot;line&quot;: 36, &quot;path&quot;: &quot;poc/components/apps/web-spa/package-lock.json&quot;}], &quot;notes&quot;: [&quot;npm lock location: node_modules/@rolldown/binding-android-arm-eabi.&quot;], &quot;scope&quot;: &quot;optional&quot;}" sbom:hashes="[{&quot;alg&quot;: &quot;SHA512&quot;, &quot;content&quot;: &quot;0399177c62af2965991344ed3eb7ecbd3faae18e5dd501bc806533a588c6c9d33e7c044cf4cb97f743eb5d85ded176ec0d5832c713731e8ea08828fdd1bb0537&quot;}]" />
+</SoftwareIdentity>

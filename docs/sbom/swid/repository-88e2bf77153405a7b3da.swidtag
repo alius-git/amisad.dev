@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="js-sys" tagId="urn:uuid:98432c7e-ad6a-59f7-9c58-7895714af2d9" version="0.3.106" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;locked&quot;, &quot;ecosystem&quot;: &quot;cargo&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;Declared dependency&quot;, &quot;line&quot;: 253, &quot;path&quot;: &quot;poc/Cargo.lock&quot;}], &quot;notes&quot;: [&quot;Cargo source: registry+https://github.com/rust-lang/crates.io-index&quot;], &quot;scope&quot;: &quot;runtime&quot;}" sbom:hashes="[{&quot;alg&quot;: &quot;SHA256&quot;, &quot;content&quot;: &quot;7883d941dae510fb2d978fc3fe018c71c9e2892fd38854de3e8b92c2e5ad9cc5&quot;}]" />
+</SoftwareIdentity>

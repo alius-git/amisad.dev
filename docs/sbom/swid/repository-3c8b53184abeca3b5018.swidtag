@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="seller-svc" tagId="urn:uuid:21b81bcb-9713-52e5-94aa-38d5a6fc5faa" version="0.1.0" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;locked&quot;, &quot;ecosystem&quot;: &quot;cargo&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;Cargo package manifest&quot;, &quot;line&quot;: 2, &quot;path&quot;: &quot;poc/components/services/seller-svc/Cargo.toml&quot;}, {&quot;detail&quot;: &quot;Declared dependency&quot;, &quot;line&quot;: 526, &quot;path&quot;: &quot;poc/Cargo.lock&quot;}], &quot;notes&quot;: [&quot;Internal Cargo workspace package.&quot;], &quot;scope&quot;: &quot;runtime&quot;}" />
+</SoftwareIdentity>

@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="@rolldown/binding-linux-s390x-gnu" tagId="urn:uuid:8806b7e3-6899-58d3-a280-14d2e09d04bd" version="1.2.11" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;locked&quot;, &quot;ecosystem&quot;: &quot;npm&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;npm lockfile package&quot;, &quot;line&quot;: 198, &quot;path&quot;: &quot;poc/components/apps/web-spa/package-lock.json&quot;}], &quot;notes&quot;: [&quot;npm lock location: node_modules/@rolldown/binding-linux-s390x-gnu.&quot;], &quot;scope&quot;: &quot;optional&quot;}" sbom:hashes="[{&quot;alg&quot;: &quot;SHA512&quot;, &quot;content&quot;: &quot;b1e72911a77ed2f09b49f9fcba91724a40ec92ff9b18f9374c74834bd63cf72738adbe24cea1e9f039b277d064416e129e13570590a5ffa0ab3bffe165a84d25&quot;}]" />
+</SoftwareIdentity>

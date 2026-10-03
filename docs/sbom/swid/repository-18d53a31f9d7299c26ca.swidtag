@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="fsevents" tagId="urn:uuid:11c28f8a-4764-5d09-a32b-85bda9912f1b" version="2.3.3" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;locked&quot;, &quot;ecosystem&quot;: &quot;npm&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;npm lockfile package&quot;, &quot;line&quot;: 754, &quot;path&quot;: &quot;poc/components/apps/web-spa/package-lock.json&quot;}], &quot;notes&quot;: [&quot;npm lock location: node_modules/fsevents.&quot;], &quot;scope&quot;: &quot;optional&quot;}" sbom:hashes="[{&quot;alg&quot;: &quot;SHA512&quot;, &quot;content&quot;: &quot;e71a037d7f9f2fb7da0139da82658fa5b16dc21fd1efb5a630caaa1c64bae42defbc1d181eb805f81d58999df8e35b4c8f99fade4d36d765cda09c339617df43&quot;}]" />
+</SoftwareIdentity>

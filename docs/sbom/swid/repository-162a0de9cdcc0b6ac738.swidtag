@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="@typescript/typescript-linux-riscv64" tagId="urn:uuid:7f7a03f1-417f-5ee6-a4e3-99ae6ff66918" version="7.0.2" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;locked&quot;, &quot;ecosystem&quot;: &quot;npm&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;npm lockfile package&quot;, &quot;line&quot;: 506, &quot;path&quot;: &quot;poc/components/apps/web-spa/package-lock.json&quot;}], &quot;notes&quot;: [&quot;npm lock location: node_modules/@typescript/typescript-linux-riscv64.&quot;], &quot;scope&quot;: &quot;optional&quot;}" sbom:hashes="[{&quot;alg&quot;: &quot;SHA512&quot;, &quot;content&quot;: &quot;c1fd23a840ce8eb3d19cac18472c890d1a35d4a31bbcc16b53eab8cea2b20a1383073be591b84d41f2af2f14027304e974369748765356e8742680ab28250c1d&quot;}]" />
+</SoftwareIdentity>

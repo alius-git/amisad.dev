@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="@rolldown/binding-win32-x64-msvc" tagId="urn:uuid:1f95b687-0eda-5561-8eea-c3ef6d16e2ed" version="1.2.11" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;locked&quot;, &quot;ecosystem&quot;: &quot;npm&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;npm lockfile package&quot;, &quot;line&quot;: 292, &quot;path&quot;: &quot;poc/components/apps/web-spa/package-lock.json&quot;}], &quot;notes&quot;: [&quot;npm lock location: node_modules/@rolldown/binding-win32-x64-msvc.&quot;], &quot;scope&quot;: &quot;optional&quot;}" sbom:hashes="[{&quot;alg&quot;: &quot;SHA512&quot;, &quot;content&quot;: &quot;fcfccaab3009d378b5f68cb622d3efcaf6958ce8c108d9df689b3ccaf51d1812a68844a09eb2524366b077cd50cc56db9c09aeed83bd66726b0c26fd55224f44&quot;}]" />
+</SoftwareIdentity>

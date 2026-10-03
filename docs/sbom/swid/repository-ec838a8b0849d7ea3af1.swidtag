@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="libredox" tagId="urn:uuid:e3e36355-7e6b-54d4-add7-20d534e73b6b" version="0.1.25" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;locked&quot;, &quot;ecosystem&quot;: &quot;cargo&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;Declared dependency&quot;, &quot;line&quot;: 278, &quot;path&quot;: &quot;poc/Cargo.lock&quot;}], &quot;notes&quot;: [&quot;Cargo source: registry+https://github.com/rust-lang/crates.io-index&quot;], &quot;scope&quot;: &quot;runtime&quot;}" sbom:hashes="[{&quot;alg&quot;: &quot;SHA256&quot;, &quot;content&quot;: &quot;61ff90caf6077a803a240f62fdbe88645a890bbca49ef8174c3cb0404362171d&quot;}]" />
+</SoftwareIdentity>

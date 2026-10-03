@@ -1,0 +1,10 @@
+{
+  "schema": "yuruna.sbom-policy/v1",
+  "name": "amisad.dev",
+  "source": "https://github.com/alius-git/amisad.dev",
+  "creator": "Alisson Sol et al.",
+  "creatorRegid": "amisad.dev",
+  "created": "2026-10-03T16:48:41Z",
+  "licenseId": "MIT",
+  "licensePath": "LICENSE"
+}

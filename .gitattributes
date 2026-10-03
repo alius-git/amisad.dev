@@ -49,3 +49,10 @@ VERSION text eol=lf
 *.pdf   binary
 *.zip   binary
 *.exe   binary
+
+# --- REGION: SBOM
+# See https://yuruna.link/427fb0be-0001
+docs/sbom/** text eol=lf
+tools/Sync-Sbom.py text eol=lf
+tools/sbom_*.py text eol=lf
+tools/githooks/pre-commit text eol=lf

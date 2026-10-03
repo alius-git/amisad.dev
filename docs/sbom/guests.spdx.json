@@ -1,0 +1,403 @@
+{
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "amisad.dev-guests",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/8908669c84d29fa3c673c0c76956cdbccc429d4fe489b13802b4621d5c3cbecf",
+  "creationInfo": {
+    "created": "2026-10-03T16:48:41Z",
+    "creators": [
+      "Tool: Sync-Sbom.py-1",
+      "Organization: Alisson Sol et al."
+    ],
+    "comment": "Created date is the initial inventory creation date. Source digest identifies each regenerated inventory. Unrecorded licenses and transitive dependencies remain unasserted."
+  },
+  "documentDescribes": [
+    "SPDXRef-Repository"
+  ],
+  "packages": [
+    {
+      "name": "amisad.dev-guests",
+      "SPDXID": "SPDXRef-Repository",
+      "downloadLocation": "https://github.com/alius-git/amisad.dev",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "MIT",
+      "copyrightText": "NOASSERTION",
+      "supplier": "Organization: Alisson Sol et al.",
+      "comment": "Declared guests inventory; source-inputs SHA256 8908669c84d29fa3c673c0c76956cdbccc429d4fe489b13802b4621d5c3cbecf. Not an installed-system scan.",
+      "versionInfo": "2026.10.04"
+    },
+    {
+      "name": "build-essential",
+      "SPDXID": "SPDXRef-91c5fcad2df9fd2bc18d",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=build-essential; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+    },
+    {
+      "name": "ca-certificates-java",
+      "SPDXID": "SPDXRef-91ae6752004639211caf",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=ca-certificates-java; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 149, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+    },
+    {
+      "name": "curl",
+      "SPDXID": "SPDXRef-9aeb1463104ba2d20372",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=curl; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=curl; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 13, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+    },
+    {
+      "name": "git",
+      "SPDXID": "SPDXRef-2bf35518bbd1a849d403",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=git; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+    },
+    {
+      "name": "pkg-config",
+      "SPDXID": "SPDXRef-bb4c45de1346dc273729",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=pkg-config; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+    },
+    {
+      "name": "postgresql",
+      "SPDXID": "SPDXRef-2a214e234ca892fc378e",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=postgresql; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 124, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+    },
+    {
+      "name": "python3",
+      "SPDXID": "SPDXRef-f5d83d9f93e7446aa6c3",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=python3; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=python3; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 13, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+    },
+    {
+      "name": "bazelbuild/bazelisk",
+      "SPDXID": "SPDXRef-d48a7b8b6893e4729828",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-amd64; installed payload dependencies unresolved\", \"line\": 110, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-arm64; installed payload dependencies unresolved\", \"line\": 110, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.29.0"
+    },
+    {
+      "name": "nats-io/nats-server",
+      "SPDXID": "SPDXRef-43381493987b67930afb",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 63, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 65, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 63, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 65, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
+      "versionInfo": "2.15.0"
+    },
+    {
+      "name": "rustup-init",
+      "SPDXID": "SPDXRef-dc4f18c560c1aac8ce82",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved\", \"line\": 77, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved\", \"line\": 77, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.29.1"
+    },
+    {
+      "name": "debian",
+      "SPDXID": "SPDXRef-1f908889d63fa2f253e0",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"group\": \"amisad.dev:guests:container\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"bookworm-slim\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/ads-svc",
+      "SPDXID": "SPDXRef-38b90e0a39fc8aedf063",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ads-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/ads-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/audit-svc",
+      "SPDXID": "SPDXRef-1a0dee1d8bb3729b64e5",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/audit-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/audit-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/connect-svc",
+      "SPDXID": "SPDXRef-c25f6b79aef28b3a1919",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/connect-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/connect-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/fabric-coordinator",
+      "SPDXID": "SPDXRef-03805c65c34f6958b68c",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/fabric-coordinator:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/fabric-coordinator/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/identity-mock",
+      "SPDXID": "SPDXRef-2905947dd608c5eca9b4",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/identity-mock:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/identity-mock/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/insights-svc",
+      "SPDXID": "SPDXRef-02fdc077210a94538a89",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/insights-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/insights-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/ledger-svc",
+      "SPDXID": "SPDXRef-f3b1276007d2fae8fe57",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ledger-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/ledger-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/platform-svc",
+      "SPDXID": "SPDXRef-82640629edd6f708814f",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/platform-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/platform-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/resource-svc",
+      "SPDXID": "SPDXRef-c6c7ca354afc670045a3",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/resource-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/resource-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "localhost:5000/amisad/seller-svc",
+      "SPDXID": "SPDXRef-c4802700a054cd605e9d",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/seller-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/seller-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+    },
+    {
+      "name": "registry",
+      "SPDXID": "SPDXRef-caefaced660302525654",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=container run; reference=registry:2; tags may move; transitive image contents unresolved\", \"line\": 17, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"2\"}"
+    },
+    {
+      "name": "rust",
+      "SPDXID": "SPDXRef-53af0dac7859137f8fbd",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"group\": \"amisad.dev:guests:container\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"build\", \"versionConstraint\": \"1.96-slim\"}"
+    },
+    {
+      "name": "rust",
+      "SPDXID": "SPDXRef-95b4912553adadf68dfc",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"rustup\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=rustup-init --default-toolchain; compiler/toolchain declaration\", \"line\": 86, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.96.1"
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-DOCUMENT",
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-Repository"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-91c5fcad2df9fd2bc18d"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-91ae6752004639211caf"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-9aeb1463104ba2d20372"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-2bf35518bbd1a849d403"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-bb4c45de1346dc273729"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-2a214e234ca892fc378e"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-f5d83d9f93e7446aa6c3"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-d48a7b8b6893e4729828"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-43381493987b67930afb"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-dc4f18c560c1aac8ce82"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-1f908889d63fa2f253e0"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-38b90e0a39fc8aedf063"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-1a0dee1d8bb3729b64e5"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c25f6b79aef28b3a1919"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-03805c65c34f6958b68c"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-2905947dd608c5eca9b4"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-02fdc077210a94538a89"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-f3b1276007d2fae8fe57"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-82640629edd6f708814f"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c6c7ca354afc670045a3"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c4802700a054cd605e9d"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-caefaced660302525654"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-53af0dac7859137f8fbd"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-95b4912553adadf68dfc"
+    }
+  ]
+}

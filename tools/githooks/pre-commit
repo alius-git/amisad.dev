@@ -1,0 +1,31 @@
+#!/bin/sh
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2019-2026 by Alisson Sol et al.
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 1
+# --- REGION: SBOM
+# See https://yuruna.link/sbom
+run_sbom() {
+    sbom_generator="$repo_root/tools/Sync-Sbom.py"
+    if [ ! -f "$sbom_generator" ]; then
+        echo 'pre-commit: SBOM generator is missing: tools/Sync-Sbom.py.' >&2
+        return 1
+    fi
+    sbom_python=''
+    for sbom_candidate in python3 python; do
+        if command -v "$sbom_candidate" >/dev/null 2>&1 &&
+            "$sbom_candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)' >/dev/null 2>&1; then
+            sbom_python=$sbom_candidate
+            break
+        fi
+    done
+    if [ -z "$sbom_python" ]; then
+        echo 'pre-commit: Python 3.11 or newer is required to refresh and stage SBOMs.' >&2
+        return 1
+    fi
+    if ! "$sbom_python" "$sbom_generator" --staged --stage; then
+        echo 'pre-commit: SBOM refresh failed; the commit is blocked.' >&2
+        return 1
+    fi
+}
+run_sbom || exit 1
+exit 0

@@ -13,6 +13,10 @@ AmisAd development
 - [poc/](poc/README.md) -- POC implementation: Bazel/Cargo workspace, service contracts, deploy config, and the Yuruna lab setup for running the scenarios.
 - [poc/STATUS.s001.fulfillment.md](poc/STATUS.s001.fulfillment.md) -- Historical record (2026-07-19) of the s001.fulfillment unattended verification run. Current test automation and topology: [poc/test.md](poc/test.md).
 
+## Software inventory
+
+- [Software bill of materials](docs/sbom/README.md) -- Repository, host, and guest inventories in SPDX, CycloneDX, and SWID formats, with automatic maintenance before commits.
+
 ---
 
 LICENSEURI https://yuruna.link/license

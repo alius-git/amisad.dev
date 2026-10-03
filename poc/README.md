@@ -8,6 +8,9 @@ Code skeletons for the AmisAd proof of concept, laid out in the
 Design: [../plan/design.md](../plan/design.md) - scenarios:
 [../plan/scenarios.md](../plan/scenarios.md).
 
+Repository and deployment software declarations are recorded in the
+[software bill of materials](../docs/sbom/README.md).
+
 ## Layout
 
 | Path | Contents |
