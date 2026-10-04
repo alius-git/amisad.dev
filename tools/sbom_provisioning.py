@@ -1,7 +1,6 @@
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2019-2026 by Alisson Sol et al.
 """Collect declared host and guest provisioning inputs without executing them.
-
-LICENSEURI https://yuruna.link/license
-Copyright (c) 2019-2026 by Alisson Sol et al.
 
 This is an inventory of source declarations, including conditional alternatives.
 It never claims that a command ran or resolves a package repository. Dynamic

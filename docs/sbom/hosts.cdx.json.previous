@@ -1,0 +1,39 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:24c756d7-3aee-50a5-83de-5805a4ae6dc3",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "repository-hosts",
+      "name": "amisad.dev-hosts",
+      "properties": [
+        {
+          "name": "yuruna:source-inputs-sha256",
+          "value": "4b0cd95d6cbdd3c46ff0373b18bec0e48da759f00439a1cfecd5ccd12fe45631"
+        },
+        {
+          "name": "yuruna:inventory-kind",
+          "value": "declared-source"
+        }
+      ],
+      "version": "2026.10.04"
+    }
+  },
+  "components": [],
+  "dependencies": [
+    {
+      "ref": "repository-hosts",
+      "dependsOn": []
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "incomplete",
+      "assemblies": [
+        "repository-hosts"
+      ]
+    }
+  ]
+}

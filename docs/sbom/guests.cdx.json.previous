@@ -1,0 +1,357 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:8be139a2-c7ea-5390-b66d-ff7b35180386",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "repository-guests",
+      "name": "amisad.dev-guests",
+      "properties": [
+        {
+          "name": "yuruna:source-inputs-sha256",
+          "value": "4b0cd95d6cbdd3c46ff0373b18bec0e48da759f00439a1cfecd5ccd12fe45631"
+        },
+        {
+          "name": "yuruna:inventory-kind",
+          "value": "declared-source"
+        }
+      ],
+      "version": "2026.10.04"
+    }
+  },
+  "components": [
+    {
+      "type": "application",
+      "bom-ref": "component-91c5fcad2df9fd2bc18d",
+      "name": "build-essential",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=build-essential; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-91ae6752004639211caf",
+      "name": "ca-certificates-java",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=ca-certificates-java; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 149, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-9aeb1463104ba2d20372",
+      "name": "curl",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=curl; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=curl; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 13, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-2bf35518bbd1a849d403",
+      "name": "git",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=git; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-bb4c45de1346dc273729",
+      "name": "pkg-config",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=pkg-config; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-2a214e234ca892fc378e",
+      "name": "postgresql",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=postgresql; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 124, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-f5d83d9f93e7446aa6c3",
+      "name": "python3",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=python3; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 11, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=python3; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 13, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-d48a7b8b6893e4729828",
+      "name": "bazelbuild/bazelisk",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-amd64; installed payload dependencies unresolved\", \"line\": 110, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-arm64; installed payload dependencies unresolved\", \"line\": 110, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.29.0",
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-43381493987b67930afb",
+      "name": "nats-io/nats-server",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 63, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 65, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 63, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 65, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "2.15.0",
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-dc4f18c560c1aac8ce82",
+      "name": "rustup-init",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved\", \"line\": 77, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved\", \"line\": 77, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.29.1",
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-1f908889d63fa2f253e0",
+      "name": "debian",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=debian:bookworm-slim; tags may move; transitive image contents unresolved\", \"line\": 11, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"group\": \"amisad.dev:guests:container\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"bookworm-slim\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:container"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-38b90e0a39fc8aedf063",
+      "name": "localhost:5000/amisad/ads-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ads-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/ads-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-1a0dee1d8bb3729b64e5",
+      "name": "localhost:5000/amisad/audit-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/audit-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/audit-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-c25f6b79aef28b3a1919",
+      "name": "localhost:5000/amisad/connect-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/connect-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/connect-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-03805c65c34f6958b68c",
+      "name": "localhost:5000/amisad/fabric-coordinator",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/fabric-coordinator:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/fabric-coordinator/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-2905947dd608c5eca9b4",
+      "name": "localhost:5000/amisad/identity-mock",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/identity-mock:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/identity-mock/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-02fdc077210a94538a89",
+      "name": "localhost:5000/amisad/insights-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/insights-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/insights-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-f3b1276007d2fae8fe57",
+      "name": "localhost:5000/amisad/ledger-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ledger-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/ledger-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-82640629edd6f708814f",
+      "name": "localhost:5000/amisad/platform-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/platform-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/platform-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-c6c7ca354afc670045a3",
+      "name": "localhost:5000/amisad/resource-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/resource-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/resource-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-c4802700a054cd605e9d",
+      "name": "localhost:5000/amisad/seller-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/seller-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/seller-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:shared-or-configured"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-caefaced660302525654",
+      "name": "registry",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=container run; reference=registry:2; tags may move; transitive image contents unresolved\", \"line\": 17, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"2\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-53af0dac7859137f8fbd",
+      "name": "rust",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"group\": \"amisad.dev:guests:container\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"build\", \"versionConstraint\": \"1.96-slim\"}"
+        }
+      ],
+      "group": "amisad.dev:guests:container"
+    },
+    {
+      "type": "platform",
+      "bom-ref": "component-95b4912553adadf68dfc",
+      "name": "rust",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"rustup\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=rustup-init --default-toolchain; compiler/toolchain declaration\", \"line\": 86, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.96.1",
+      "group": "amisad.dev:guests:ubuntu-server-24"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "repository-guests",
+      "dependsOn": [
+        "component-02fdc077210a94538a89",
+        "component-03805c65c34f6958b68c",
+        "component-1a0dee1d8bb3729b64e5",
+        "component-1f908889d63fa2f253e0",
+        "component-2905947dd608c5eca9b4",
+        "component-2a214e234ca892fc378e",
+        "component-2bf35518bbd1a849d403",
+        "component-38b90e0a39fc8aedf063",
+        "component-43381493987b67930afb",
+        "component-53af0dac7859137f8fbd",
+        "component-82640629edd6f708814f",
+        "component-91ae6752004639211caf",
+        "component-91c5fcad2df9fd2bc18d",
+        "component-95b4912553adadf68dfc",
+        "component-9aeb1463104ba2d20372",
+        "component-bb4c45de1346dc273729",
+        "component-c25f6b79aef28b3a1919",
+        "component-c4802700a054cd605e9d",
+        "component-c6c7ca354afc670045a3",
+        "component-caefaced660302525654",
+        "component-d48a7b8b6893e4729828",
+        "component-dc4f18c560c1aac8ce82",
+        "component-f3b1276007d2fae8fe57",
+        "component-f5d83d9f93e7446aa6c3"
+      ]
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "incomplete",
+      "assemblies": [
+        "repository-guests"
+      ]
+    }
+  ]
+}

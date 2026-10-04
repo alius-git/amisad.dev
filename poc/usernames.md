@@ -80,9 +80,9 @@ key, and a "trusted lab LAN" does not bound who can read a served file. So nothi
 here creates, copies or serves a private key under a directory the status service
 serves (`test/status`, its `runtime/` and `log/` mounts, or the
 checkout it serves as `yuruna-repo/`), and the framework's listener also refuses
-private-key file names wherever they sit. A public key and the edges' IP reports
+private-key file names wherever they sit. The public key is not secret and travels over SSH. The edges' IP reports
 (`<hostname>.ip.txt` under the status server's `log/handoff/`, which is how vm-core
-resolves them without DNS) are not secret and are the only things that travel by
+resolves them without DNS) are also not secret and travel by
 that route.
 
 **Rotation (operator).** A host that ran an older version of this lab generated

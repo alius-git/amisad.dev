@@ -1,0 +1,21 @@
+{
+  "schema": "yuruna.doc-translations/v1",
+  "documents": [
+    {
+      "repo": "amisad.dev",
+      "source": "poc/test.md",
+      "locale": "pt-BR",
+      "translated": "docs/pt-BR/poc/test.md",
+      "sourceHash": "9860fa1d63fe7a249a279c0f766eb7e6cdbe1c93f3f498c78bdd8f6c13b34774",
+      "origin": "machine"
+    },
+    {
+      "repo": "amisad.dev",
+      "source": "poc/usernames.md",
+      "locale": "pt-BR",
+      "translated": "docs/pt-BR/poc/usernames.md",
+      "sourceHash": "8f7935d84ecf1464ee649dbfadd0866a46879937f100a2bfacaa3d45e1e0ec0a",
+      "origin": "machine"
+    }
+  ]
+}

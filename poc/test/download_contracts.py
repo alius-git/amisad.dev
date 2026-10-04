@@ -420,7 +420,6 @@ class LaunchCommandsCarryTheDigests(Contract):
         self.assertIn('path: "/tmp/amisad-*-binaries.tgz"', text)
         # The compile script leaves the tarball where the host reads it.
         self.assertIn('TARBALL="/tmp/amisad-${ARCH}-binaries.tgz"', text_of(COMPILE))
-        # The publish step comes after the step that builds and uploads.
         self.assertLess(text.index('amisad-build.compile.sh'), text.index('digest.PublishGuestFileSha256'))
 
     def test_deploy_carries_both_digests(self):

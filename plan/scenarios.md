@@ -201,7 +201,7 @@ This document is the functional blueprint for the end-to-end automated system de
 
 ## s010.certification: Independent Certification of the Full Evidence Trail
 
-**Objective & Priority.** Validate that the entire system is *provable*: the auditor independently verifies attestation continuity, residency, consent (all three grant types), and settlement conservation across everything scenarios s001-s009 produced -- and detects deliberate tampering. **Priority: P2, ranked last by dependency, first by consequence** -- it consumes the evidence of every other scenario; it is the capstone that turns nine passing tests into a certifiable system.
+**Objective & Priority.** Validate that the entire system is *provable*: the auditor independently verifies attestation continuity, residency, consent (all four grant types), and settlement conservation across everything scenarios s001-s009 produced -- and detects deliberate tampering. **Priority: P2, ranked last by dependency, first by consequence** -- it consumes the evidence of every other scenario; it is the capstone that turns nine passing tests into a certifiable system.
 
 **Cross-Refs:** *Personas:* Ingrid, Priya - *Applications:* AmisAd/audit, AmisAd/platform - *Foundations:* Private Matching Fabric (attestation evidence), Identity & Verification, Consent Ledger, Settlement & Attribution Ledger - *Sequence diagram:* [seq.s010.certification](design/seq.s010.certification.md)
 

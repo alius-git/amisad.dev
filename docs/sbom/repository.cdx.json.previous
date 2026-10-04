@@ -1,0 +1,4907 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.7",
+  "serialNumber": "urn:uuid:83c1f352-2883-5cb9-893e-d39687929f78",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "bom-ref": "repository-repository",
+      "name": "amisad.dev-repository",
+      "properties": [
+        {
+          "name": "yuruna:source-inputs-sha256",
+          "value": "4b0cd95d6cbdd3c46ff0373b18bec0e48da759f00439a1cfecd5ccd12fe45631"
+        },
+        {
+          "name": "yuruna:inventory-kind",
+          "value": "declared-source"
+        }
+      ],
+      "version": "2026.10.04"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "component-9328c7589c6a3f437b1c",
+      "name": "rules_rust",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 3, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "0.71.3"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-5b87d470155010b330ab",
+      "name": "ads-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/ads-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-81da6ac3475bd2365bd4",
+      "name": "amisad-common",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/amisad-common@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-97041d09cf5f0ef0d825",
+      "name": "async-trait",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.92",
+      "purl": "pkg:cargo/async-trait@0.1.92",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "82f6aeea286b8eb4dd3431a1be1b59d290ace00f5bfd8e2a159bc2a05e2c1667"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-0c13b8454d7be5b5c3d3",
+      "name": "audit-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 27, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/audit-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-775a3fe7c4501d999cfe",
+      "name": "base64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 34, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.22.1",
+      "purl": "pkg:cargo/base64@0.22.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ca671449c7f6168ed197",
+      "name": "bitflags",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 40, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "2.13.2",
+      "purl": "pkg:cargo/bitflags@2.13.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-7a55deaf00dcd91ceb1b",
+      "name": "block-buffer",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 46, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.12.1",
+      "purl": "pkg:cargo/block-buffer@0.12.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d2f6c7dbe95a6ed67ad9f18e57daf93a2f034c524b99fd2b76d18fdfeb6660aa"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-34610dcfba7d04bf0a9e",
+      "name": "bumpalo",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 55, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "3.20.3",
+      "purl": "pkg:cargo/bumpalo@3.20.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-1c5ef9ac358619b2a5ff",
+      "name": "buyer-client",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 61, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/buyer-client@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-d5ad57211a3879f5640c",
+      "name": "byteorder",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 68, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.5.0",
+      "purl": "pkg:cargo/byteorder@1.5.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-08faf646b9b39c46b560",
+      "name": "bytes",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 74, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.12.1",
+      "purl": "pkg:cargo/bytes@1.12.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-053b555cf9191d41a62e",
+      "name": "cfg-if",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 80, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.5",
+      "purl": "pkg:cargo/cfg-if@1.0.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-034c38c9330d51ebd208",
+      "name": "chacha20",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 86, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.10.2",
+      "purl": "pkg:cargo/chacha20@0.10.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "65c35e4b699c7e15ccbe7ee35c005e4fc0a278d22238a2857e6ce2dadeda1b06"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-c7917f804d963de4d81d",
+      "name": "cmov",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 97, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.5.4",
+      "purl": "pkg:cargo/cmov@0.5.4",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-8d477c895cd989d2c12e",
+      "name": "connect-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 103, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/connect-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-77d833f1e6db334e658b",
+      "name": "const-oid",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 110, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.10.2",
+      "purl": "pkg:cargo/const-oid@0.10.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-af8eee1897fb3c912fae",
+      "name": "cpufeatures",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 116, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.1",
+      "purl": "pkg:cargo/cpufeatures@0.3.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5ca28b0ae3115b884660db4118d803791fd6756b6e88f39c0f3f7859060d7566"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-2dae99ffde412bc61d02",
+      "name": "crypto-common",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 125, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.2",
+      "purl": "pkg:cargo/crypto-common@0.2.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-aa040d9c7308a54cd032",
+      "name": "ctutils",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 134, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.4.2",
+      "purl": "pkg:cargo/ctutils@0.4.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7d5515a3834141de9eafb9717ad39eea8247b5674e6066c404e8c4b365d2a29e"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-da9cc9eee808cce14fa1",
+      "name": "digest",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 143, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.11.3",
+      "purl": "pkg:cargo/digest@0.11.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f1dd6dbb5841937940781866fa1281a1ff7bd3bf827091440879f9994983d5c2"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-334ab6a1343ff5cf1aaf",
+      "name": "fabric-coordinator",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 155, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/fabric-coordinator@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f9dec0ab39f2cf4d4b50",
+      "name": "fallible-iterator",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 162, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.0",
+      "purl": "pkg:cargo/fallible-iterator@0.2.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4443176a9f2c162692bd3d352d745ef9413eec5782a80d8fd6f8a1ac692a07f7"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-c8e4f1b7e84c3b6b9bae",
+      "name": "futures-channel",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 168, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.34",
+      "purl": "pkg:cargo/futures-channel@0.3.34",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b1f9e3d69d39e4862ffed03ed071a76f9a13ba1d9109d355b0f0aa6b15e393c4"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-2a77cfce14bb4554fc93",
+      "name": "futures-core",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 178, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.34",
+      "purl": "pkg:cargo/futures-core@0.3.34",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "92d699e522242e69e3003b94ecc1f960f3a5e015aa7c5d7486e65ad01dd94f5e"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-376808d40295136911be",
+      "name": "futures-sink",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 184, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.34",
+      "purl": "pkg:cargo/futures-sink@0.3.34",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1944426bf7d03f1d14f708785e4b33efd750b36d48a157b836b3efc15ede8e1d"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-7d49138d8a2fcea70a00",
+      "name": "futures-task",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 190, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.34",
+      "purl": "pkg:cargo/futures-task@0.3.34",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cd417de3d1d015fc3bfd2b1ea46dfc7bab72ef86f1cc7cc9c78e728b34a6d1fd"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-8c527eaa3590dc86a0ab",
+      "name": "futures-util",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 196, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.34",
+      "purl": "pkg:cargo/futures-util@0.3.34",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0d50a92467f8ba5dd6e3ee5d4bd04d73ab2e4e1c44474a0674821dfce14b79bc"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-750a15aeedbf42aa9578",
+      "name": "getrandom",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 209, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.4.3",
+      "purl": "pkg:cargo/getrandom@0.4.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "300e883d756b2e4ec94e02791f39b04b522276138852cfc41d9fb7e904106099"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f6bdd0ab9e59579351d9",
+      "name": "hmac",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 221, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.13.0",
+      "purl": "pkg:cargo/hmac@0.13.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6303bc9732ae41b04cb554b844a762b4115a61bfaa81e3e83050991eeb56863f"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-7b09dbf00f2621afb99e",
+      "name": "hybrid-array",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 230, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.4.15",
+      "purl": "pkg:cargo/hybrid-array@0.4.15",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "27f864f10dfb56725ce5ce5472bc52252c8f93a4ab86327122cebf62c5f59a17"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-0d2f85a06d20107be8e5",
+      "name": "identity-mock",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 239, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/identity-mock@0.1.0"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-10c72c20b80ada8f1628",
+      "name": "insights-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 246, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/insights-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-88e2bf77153405a7b3da",
+      "name": "js-sys",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 253, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.106",
+      "purl": "pkg:cargo/js-sys@0.3.106",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7883d941dae510fb2d978fc3fe018c71c9e2892fd38854de3e8b92c2e5ad9cc5"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-e6ac38308dd69428432b",
+      "name": "ledger-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 264, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/ledger-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-34a71dbb96a0de0ca4c8",
+      "name": "libc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 272, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.189",
+      "purl": "pkg:cargo/libc@0.2.189",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ec838a8b0849d7ea3af1",
+      "name": "libredox",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 278, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.25",
+      "purl": "pkg:cargo/libredox@0.1.25",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "61ff90caf6077a803a240f62fdbe88645a890bbca49ef8174c3cb0404362171d"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-37fb8ad6a0df9eabe034",
+      "name": "lock_api",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 287, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.4.14",
+      "purl": "pkg:cargo/lock_api@0.4.14",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "224399e74b87b5f3557511d98dff8b14089b3dadafcab6bb93eab67d3aace965"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-a54cc080f4eaffe67885",
+      "name": "log",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 296, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.4.34",
+      "purl": "pkg:cargo/log@0.4.34",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f19a9659c481a09a3447",
+      "name": "md-5",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 302, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.11.0",
+      "purl": "pkg:cargo/md-5@0.11.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "69b6441f590336821bb897fb28fc622898ccceb1d6cea3fde5ea86b090c4de98"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-108ce2cc57feb757cd3e",
+      "name": "memchr",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 312, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "2.8.3",
+      "purl": "pkg:cargo/memchr@2.8.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-3d1ab4d9c0da045e029f",
+      "name": "mio",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 318, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.2.3",
+      "purl": "pkg:cargo/mio@1.2.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4b18443e9c262bfe8fa82f51666e2642c53393f7e5c27b3e1aeab922cff5b9d8"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-32f419640b3f109a169d",
+      "name": "objc2-core-foundation",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 329, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.2",
+      "purl": "pkg:cargo/objc2-core-foundation@0.3.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2a180dd8642fa45cdb7dd721cd4c11b1cadd4929ce112ebd8b9f5803cc79d536"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-064c44650e1905069b7e",
+      "name": "objc2-system-configuration",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 338, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.2",
+      "purl": "pkg:cargo/objc2-system-configuration@0.3.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7216bd11cbda54ccabcab84d523dc93b858ec75ecfb3a7d89513fa22464da396"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-785c37073d0e0b0ffc49",
+      "name": "once_cell",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 347, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.21.4",
+      "purl": "pkg:cargo/once_cell@1.21.4",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-4727ee8b2ef727fe0165",
+      "name": "parking_lot",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 353, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.12.5",
+      "purl": "pkg:cargo/parking_lot@0.12.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "93857453250e3077bd71ff98b6a65ea6621a19bb0f559a85248955ac12c45a1a"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-0e6e2d750a77ab39284f",
+      "name": "parking_lot_core",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 363, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.9.12",
+      "purl": "pkg:cargo/parking_lot_core@0.9.12",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2621685985a2ebf1c516881c026032ac7deafcda1a2c9b7850dc81e3dfcb64c1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6c26c9a00ec6c7eefd3f",
+      "name": "percent-encoding",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 376, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "2.3.2",
+      "purl": "pkg:cargo/percent-encoding@2.3.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f0b440c59e1f0497c5db",
+      "name": "phf",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 382, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.13.1",
+      "purl": "pkg:cargo/phf@0.13.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c1562dc717473dbaa4c1f85a36410e03c047b2e7df7f45ee938fbef64ae7fadf"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-cac5a3c47f0a55c0772b",
+      "name": "phf_shared",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 392, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.13.1",
+      "purl": "pkg:cargo/phf_shared@0.13.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e57fef6bc5981e38c2ce2d63bfa546861309f875b8a75f092d1d54ae2d64f266"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-a8031210b162f8c70f5e",
+      "name": "pin-project-lite",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 401, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.17",
+      "purl": "pkg:cargo/pin-project-lite@0.2.17",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-d2db176a8c7dcd59ae0f",
+      "name": "platform-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 407, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/platform-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-458df5501015d24b2d63",
+      "name": "postgres-protocol",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 428, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.6.12",
+      "purl": "pkg:cargo/postgres-protocol@0.6.12",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "08808e3c483c46e999108051c78334f473d5adb59d78bb80a1268c7e6aa6c514"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-b5df48f1fbf7932ca082",
+      "name": "postgres-types",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 446, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.14",
+      "purl": "pkg:cargo/postgres-types@0.2.14",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "851ca9db4932932d69f3ea811b1abe63087a0f740a47692619dd40d4899b68be"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ebb7316bec0fea360b5f",
+      "name": "postgres",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 414, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.19.14",
+      "purl": "pkg:cargo/postgres@0.19.14",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "33ad20e0aa0b24f5a394eab4f78c781d248982b22b25cecc7e3aa46a681605bd"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-d820bc5580bd3aa1477f",
+      "name": "proc-macro2",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 457, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.107",
+      "purl": "pkg:cargo/proc-macro2@1.0.107",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ab9b38194fc42641bd6d",
+      "name": "quote",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 466, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.47",
+      "purl": "pkg:cargo/quote@1.0.47",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-02ab5f7026f26ec33f33",
+      "name": "r-efi",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 475, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "6.0.0",
+      "purl": "pkg:cargo/r-efi@6.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-5f1071b27f3c79c7a3d1",
+      "name": "rand",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 481, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.10.3",
+      "purl": "pkg:cargo/rand@0.10.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "65c9fb96cbc91e3478eaae79a69fcd3f1ae4ad052e471fe6732fff548984b4af"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-e1ade72e97894c545334",
+      "name": "rand_core",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 492, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.10.1",
+      "purl": "pkg:cargo/rand_core@0.10.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-25b154bb45b8eaa2f3e1",
+      "name": "redox_syscall",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 498, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.5.18",
+      "purl": "pkg:cargo/redox_syscall@0.5.18",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ed2bf2547551a7053d6fdfafda3f938979645c44812fbfcda098faae3f1a362d"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-8b842607de66b9d3e849",
+      "name": "resource-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 507, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/resource-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-123ab2531b17270eb8a5",
+      "name": "rustversion",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 514, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.23",
+      "purl": "pkg:cargo/rustversion@1.0.23",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-0b3a4bfd9c3b2beda367",
+      "name": "scopeguard",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 520, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.2.0",
+      "purl": "pkg:cargo/scopeguard@1.2.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-3c8b53184abeca3b5018",
+      "name": "seller-svc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 526, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/seller-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6c517d3022b0b71b43f5",
+      "name": "serde",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 534, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.229",
+      "purl": "pkg:cargo/serde@1.0.229",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-bfa23ed9dd1e539460bf",
+      "name": "serde_core",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 543, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.229",
+      "purl": "pkg:cargo/serde_core@1.0.229",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-8c4439c0484144cc8ce8",
+      "name": "serde_derive",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 552, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.229",
+      "purl": "pkg:cargo/serde_derive@1.0.229",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-77a135ff7e1b2ae5fd97",
+      "name": "sha2",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 563, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.11.0",
+      "purl": "pkg:cargo/sha2@0.11.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "446ba717509524cb3f22f17ecc096f10f4822d76ab5c0b9822c5f9c284e825f4"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-a68ac7c18b30cb6e67fe",
+      "name": "siphasher",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 574, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.4",
+      "purl": "pkg:cargo/siphasher@1.0.4",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "33f4fe9184a62d842c9ef383018f3306d8ba224fd9d836f56d7288308847c256"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6ef720777fa2691cb03c",
+      "name": "slab",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 580, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.4.12",
+      "purl": "pkg:cargo/slab@0.4.12",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-749f5b738d9f703631a2",
+      "name": "slice-runtime",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 586, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/slice-runtime@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6e55ee25d947e74274e4",
+      "name": "smallvec",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 593, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.16.2",
+      "purl": "pkg:cargo/smallvec@1.16.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f9395f0f0eee849a9b707b2f06bb92a6a422090e2123bb2ef8e87a0e61892a8e"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-d549b9fe5fbd05f23f0b",
+      "name": "socket2",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 599, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.6.5",
+      "purl": "pkg:cargo/socket2@0.6.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c3d1e2c7f27f8d4cb10542a02c49005dbd6e93095799d6f3be745fae9f8fedd4"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-2061a6f1b287a19bc9f7",
+      "name": "stringprep",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 609, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.5",
+      "purl": "pkg:cargo/stringprep@0.1.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7b4df3d392d81bd458a8a621b8bffbd2302a12ffe288a9d931670948749463b1"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-e28e76d005de3cf73691",
+      "name": "syn",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 620, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "3.0.6",
+      "purl": "pkg:cargo/syn@3.0.6",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-c4178888342f61dacd5d",
+      "name": "tinyvec",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 631, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.13.3",
+      "purl": "pkg:cargo/tinyvec@1.13.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f8ba62d5d5b8122e41cd",
+      "name": "tokio-postgres",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 651, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.7.18",
+      "purl": "pkg:cargo/tokio-postgres@0.7.18",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a528f7d280f6d5b9cd149635c8705b0dd049754bc67d81d31fa25169a93809d3"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-fa4f9fae46d0a4a0f39d",
+      "name": "tokio-util",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 677, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.7.19",
+      "purl": "pkg:cargo/tokio-util@0.7.19",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "494815d09bf52b5548659851081238f0ca39ff638363907596da739561c62c52"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-fc440f288497378276b3",
+      "name": "tokio",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 637, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.53.1",
+      "purl": "pkg:cargo/tokio@1.53.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6fa243660745bdcda93b",
+      "name": "typenum",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 691, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.20.1",
+      "purl": "pkg:cargo/typenum@1.20.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-b89c5a7162f48e913ca0",
+      "name": "unicode-bidi",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 697, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.18",
+      "purl": "pkg:cargo/unicode-bidi@0.3.18",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5c1cb5db39152898a79168971543b1cb5020dff7fe43c8dc468b0885f5e29df5"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ee2aa6131537409e5993",
+      "name": "unicode-ident",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 703, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.26",
+      "purl": "pkg:cargo/unicode-ident@1.0.26",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d245f478577f809a851594d02313b640fb437e0bb33866753cff937863096954"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-357792c750c677c9a3f7",
+      "name": "unicode-normalization",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 709, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.25",
+      "purl": "pkg:cargo/unicode-normalization@0.1.25",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-821de82029b1a645281a",
+      "name": "unicode-properties",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 718, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.4",
+      "purl": "pkg:cargo/unicode-properties@0.1.4",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7df058c713841ad818f1dc5d3fd88063241cc61f49f5fbea4b951e8cf5a8d71d"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-4b50e029cf9ac29b6959",
+      "name": "wasi",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 724, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.11.1+wasi-snapshot-preview1",
+      "purl": "pkg:cargo/wasi@0.11.1%2Bwasi-snapshot-preview1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ccf3ec651a847eb01de73ccad15eb7d99f80485de043efb2f370cd654f4ea44b"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-32fba889d361712ad42b",
+      "name": "wasi",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 730, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.14.7+wasi-0.2.4",
+      "purl": "pkg:cargo/wasi@0.14.7%2Bwasi-0.2.4",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "883478de20367e224c0090af9cf5f9fa85bed63a95c1abf3afc5c083ebc06e8c"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-76e4bf3b6854103f09c2",
+      "name": "wasip2",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 739, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.4+wasi-0.2.12",
+      "purl": "pkg:cargo/wasip2@1.0.4%2Bwasi-0.2.12",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b67efb37e106e55ce722a510d6b5f9c17f083e5fc79afc2badeb12cc313d9487"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-b7d7f0947f5ea08ea31f",
+      "name": "wasite",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 748, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.2",
+      "purl": "pkg:cargo/wasite@1.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "66fe902b4a6b8028a753d5424909b764ccf79b7a209eac9bf97e59cda9f71a42"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6fb6f7692ba5b7798bc3",
+      "name": "wasm-bindgen-macro-support",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 780, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.129",
+      "purl": "pkg:cargo/wasm-bindgen-macro-support@0.2.129",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6f501a8bc3719dba86ef8ae4728879c08001bea749eb1333ac5b91e040e2a6b7"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-bd54bb36f0a72809d0b7",
+      "name": "wasm-bindgen-macro",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 770, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.129",
+      "purl": "pkg:cargo/wasm-bindgen-macro@0.2.129",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2e29d0c35b16e224a7eeb5cd2d25e3e1968fbd65604117b44d3b789d00ee8535"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-de78bc62ca099781fe6b",
+      "name": "wasm-bindgen-shared",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 793, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.129",
+      "purl": "pkg:cargo/wasm-bindgen-shared@0.2.129",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "23f0c9c52aa7cd7d77769a4cfe2a9adb1b331f489a41d912ce14513d5ab995c6"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-a0b4725581312079c351",
+      "name": "wasm-bindgen",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 757, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.129",
+      "purl": "pkg:cargo/wasm-bindgen@0.2.129",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9bb54f33acc68fd454578d9820b0bde1a1a3d17aa17bb7b6595806d02886d409"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-dc74cbf585c403f13e97",
+      "name": "web-sys",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 802, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.106",
+      "purl": "pkg:cargo/web-sys@0.3.106",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "88261b9deccee56594c11a3460c462c41f58d148598fe70ad77070126a68aba4"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ee8941cfc00e9dd51488",
+      "name": "whoami",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 812, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "2.1.3",
+      "purl": "pkg:cargo/whoami@2.1.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "626c4bac6755d76ffc12cb01b2eac751db1996b9e0041de9aa02c8c211ddc82c"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-698d35e715c4ceb5f2db",
+      "name": "windows-link",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 825, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.1",
+      "purl": "pkg:cargo/windows-link@0.2.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-7b39f8292cbba829d69b",
+      "name": "windows-sys",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 831, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.61.2",
+      "purl": "pkg:cargo/windows-sys@0.61.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f69e3b7bb26f74efcb06",
+      "name": "wit-bindgen",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 840, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.57.1",
+      "purl": "pkg:cargo/wit-bindgen@0.57.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
+        }
+      ]
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-4aa0148988e62487a2bb",
+      "name": "debian",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"runtime\", \"versionConstraint\": \"bookworm-slim\"}"
+        }
+      ]
+    },
+    {
+      "type": "container",
+      "bom-ref": "component-e7d69ee7610bfa18e869",
+      "name": "rust",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"build\", \"versionConstraint\": \"1.96-slim\"}"
+        }
+      ]
+    },
+    {
+      "type": "framework",
+      "bom-ref": "component-d5062ca320f644722703",
+      "name": "flutter",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 10, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"runtime\"}"
+        }
+      ]
+    },
+    {
+      "type": "framework",
+      "bom-ref": "component-d0cdcd40646345021d5c",
+      "name": "flutter_test",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 14, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\"}"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-a918c6f303ac3cfdd0e8",
+      "name": "Git",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"git\", \"evidence\": [{\"detail\": \"Index snapshot and generated-file staging use the installed Git CLI\", \"line\": 38, \"path\": \"tools/Sync-Sbom.py\"}], \"notes\": [\"The repository does not pin the installed Git version.\"], \"scope\": \"build\"}"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-9fd7838cf359e50ff3e3",
+      "name": "@oxc-project/types",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 26, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@oxc-project/types.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "0.151.0",
+      "purl": "pkg:npm/%40oxc-project/types@0.151.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "275c97ac894d0d957313769d6b7d74c5e030ee71fcc820322cfb9422c8ca6ad14f99f9f96d2d685be70cf90b063ad5567799e14a96f0656c7faee7beaf967e3c"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-11ecce9903c8ab94790d",
+      "name": "@rolldown/binding-android-arm-eabi",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 36, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-android-arm-eabi.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "0399177c62af2965991344ed3eb7ecbd3faae18e5dd501bc806533a588c6c9d33e7c044cf4cb97f743eb5d85ded176ec0d5832c713731e8ea08828fdd1bb0537"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ce78f0fb00fb1cd12093",
+      "name": "@rolldown/binding-android-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 53, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-android-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-android-arm64@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cfa713c9ccfe889e0f564b8be071d6e037d37e8794ff69ea618b923ab4e61fbc872b96342c23a7034dd5e193716afc95694d683aa520220da494dfecf9448638"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-bd2163fe3dd8f3cafc1c",
+      "name": "@rolldown/binding-darwin-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 70, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-darwin-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8d286fa8db4feaf0c2ebf03924e0336d557e0e4807aa197f49c5422446edf93518e90633ed89d772b837b0bb450678aba347ff2dde7467009603a7fb2980f59d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-9c3f8db2790d889438e0",
+      "name": "@rolldown/binding-darwin-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 87, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-darwin-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7f68b6c62356ab5675976fbeab67ee85945d2c04f76aac43eaf44d9b5440c6952805c76a341dc2d2cd41b7e2be3db131d85e45e20429ea1a8a92984263fc45f7"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-53f61b34dd69618c64cb",
+      "name": "@rolldown/binding-freebsd-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 104, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-freebsd-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e08af915238a20032be2bd24131a6dd6cddb320cc9537ac0e39018387b50a65b34a0d7aa71804aad6325724ad81f82827c62df91f9f5b4dd5d9993cc56c757a3"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f0ab035333f10a637488",
+      "name": "@rolldown/binding-linux-arm-gnueabihf",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 121, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm-gnueabihf.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "fe09d10ccfb7f4144ecc037f9353998c33e70cc719c41ff4114c4a8ce34ee72564344be5b28303af118d2a0662fedb45ae24b683094337307ae69bcd6c539721"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-c0fe2294b074d970eab9",
+      "name": "@rolldown/binding-linux-arm64-gnu",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 138, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm64-gnu.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "3c568af07c2f0076da29b05c0cd42286330a62f16703986210dc7f979b698530f3d44d16169df697403b6aaee5c94c06b11c3fc52acd232fe020ae2d86b482af"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-8806c943eef2cea69b80",
+      "name": "@rolldown/binding-linux-arm64-musl",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 158, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm64-musl.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "02c93325420a44b3f192bb91d702ca7b019b3b0f8461f53ff653ab0458f8005ac403c84fa4a16738358dbb658b68db3440d9046fd40826e7e65596482ff6c996"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-1d3f71bc1240d187ff9f",
+      "name": "@rolldown/binding-linux-ppc64-gnu",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 178, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-ppc64-gnu.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "aa55060217a1db287c69f1fb401831d0fad11cdf3984a9cd77bf31f0c78c8578afb9ebe077cbe07fafc2b2d3b398d298fe52d31ef353acfcbdf1c2e702e83327"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-009a9ee2a9507817fbdb",
+      "name": "@rolldown/binding-linux-s390x-gnu",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 198, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-s390x-gnu.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b1e72911a77ed2f09b49f9fcba91724a40ec92ff9b18f9374c74834bd63cf72738adbe24cea1e9f039b277d064416e129e13570590a5ffa0ab3bffe165a84d25"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-5db76a396352574bbd5f",
+      "name": "@rolldown/binding-linux-x64-gnu",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 218, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-x64-gnu.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "98e5414f774fa645a6f170563e65386dff94e9d6032de328ffda235268ace0dd0be6ebb5d2aadae6f3b29e067bfcf49da04e06f4abd1b786e5a11c4d8cb6acec"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-46cee4254c5189b44088",
+      "name": "@rolldown/binding-linux-x64-musl",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 238, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-x64-musl.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "22cefc8bd03c522e12a9cc54c0527db8c9a30e7e7c21b5538c55987507acb451207ae1261cc2c636b8979d524a9301b6622663c3c70fd33093c8331d0c6b4e3a"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-dbf93afe3f480cf44e65",
+      "name": "@rolldown/binding-openharmony-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 258, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-openharmony-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7540979de67cec83543324340fe0b41eb1013543cd5c768f994e464e3c8a4c9122bacb30f4a6a3e4b9fc533b4f7b87a957f7dfbe034111a764b1d621996eb124"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ddb15ad04b93f7e4425d",
+      "name": "@rolldown/binding-win32-arm64-msvc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 275, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-win32-arm64-msvc.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8c1cb16faa9f77e6c7d7151dd2a9df1676f5ee2f6c5813d8dad39abc9d25ded76bdce4eef8abed9bc71dfc95799c5b7ae7b6f556a1a5b7183da253847e87d75b"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-5581920d7809cc4f7b87",
+      "name": "@rolldown/binding-win32-x64-msvc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 292, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-win32-x64-msvc.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "scope": "optional",
+      "purl": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "fcfccaab3009d378b5f68cb622d3efcaf6958ce8c108d9df689b3ccaf51d1812a68844a09eb2524366b077cd50cc56db9c09aeed83bd66726b0c26fd55224f44"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6be8d0e917cc23fe81b5",
+      "name": "@rolldown/pluginutils",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 309, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/pluginutils.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "1.0.1",
+      "purl": "pkg:npm/%40rolldown/pluginutils@1.0.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "da3f5b1ade4987c863faf3ed8333ed97bda3d324711c0cae9a8a3a4cd7c08ec2c1d3852da52bcf6cf703701331cfb9fef42601d1cd46c501716118368e29aa1b"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-d8e235b766f530158dd1",
+      "name": "@types/react-dom",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 18, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 326, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@types/react-dom.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "19.3.0",
+      "purl": "pkg:npm/%40types/react-dom@19.3.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "648edb538da66575ca1e7fea34b130d88adb888354ed7e7ebdf81d8b10479023696165e32a07d0fcffaec866f90a338b07d51c9d37a0debca542d5768729b8e1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-56afa9bf2b7656f9c7ce",
+      "name": "@types/react",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 17, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 316, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@types/react.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "19.3.0",
+      "purl": "pkg:npm/%40types/react@19.3.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "374ac50ae1fd628c46f7f9bad65f4c7e924a7e62ce554d1e9bb8a9233e9346049292f45e2c1f6f2fce4607ecabf01b3995eaa9be0f7a252c05e194b5b38be242"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-7ea209b2edc953fa69b1",
+      "name": "@typescript/typescript-aix-ppc64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 336, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-aix-ppc64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-aix-ppc64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "31328a91607ba7fd04f718b5775b47b59e4f88b90610c22af3ca4ad82b9b6633ac2ed6132ea8602208bacdea456bef461d9ea1d3934c0a443118a88f5ccc57b5"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-cf9e44e8e2fff4bce3e7",
+      "name": "@typescript/typescript-darwin-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 353, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-darwin-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-darwin-arm64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "828c336abf4cc12fda456a7a7f76b8294ab34630198ceb2618d08ce8b713817ba6f9d05f82c05530df8082f38209b82e5f289c93a2c986906ccf131e6c9f2cc8"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-8b8c400e7a423d15484b",
+      "name": "@typescript/typescript-darwin-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 370, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-darwin-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-darwin-x64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "499f716489ea02936534673db345b5552b24b5848e7bd705a8d388aa63751acf129a48ca65816dd35ec6e15c0fc404889ce0ee01d6d35bbb1788551ff3ddd180"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-8b4f13c0d092978d2d1f",
+      "name": "@typescript/typescript-freebsd-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 387, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-freebsd-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-freebsd-arm64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "5b9347e32fc9d29948212e5bdb1bd312453b245c72a9d3003a07fe225865d2f1d05ca3b9759a3177e0bf8c4b6ae7a738177c24ef5441e013114365dd23e6f061"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-c95db9af64211017f8fc",
+      "name": "@typescript/typescript-freebsd-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 404, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-freebsd-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-freebsd-x64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "50c183c79b13a73370dd688f79b1fb97dd0859f26080477e7a01edfeaea9eff0a6df3aa857b5719065edfb70f13c8c3c09c9af001d23dec5557db857f8ce13a7"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-725d960583c23c172e4f",
+      "name": "@typescript/typescript-linux-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 438, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-linux-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-linux-arm64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "421e1e538ff2df20e39df8e3c8f62284c8f9fce0c8966b7e073bb5ece23e7e24910d6e7b4265394a237addec4f44d24f294cdc73520d6b535776b27e32a1e351"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f149956167f66539819f",
+      "name": "@typescript/typescript-linux-arm",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 421, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-linux-arm.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-linux-arm@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "81f7d3df13f3f6c47b8ff6091319323e7b6b2343f610ff576cec96ced876fc6b3446cb4afbdd1105c3b49dc5e85f2fdb798965d525f0f38e8d7f6cdd9c4cf441"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6766f3030ce963b2ffed",
+      "name": "@typescript/typescript-linux-loong64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 455, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-linux-loong64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-linux-loong64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b841dc93d8bc8680335cf8984626f53bb9a23a7cf6dd2c4879597a1782d7a31faaa2fd4adf98c77045ba5472af648fa9caf97b7d910fe0c094e4b62f22ad46b9"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-a9e5d4a04686c5b917db",
+      "name": "@typescript/typescript-linux-mips64el",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 472, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-linux-mips64el.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-linux-mips64el@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "4782af00c9c4e375b941ea9bd0bcb9e8ede658c588020b0ccb3dfa0c26b271de676e0ffd9339b4962c3726871f46ac8963428f9b31636ecc28cd7c96d039c860"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-5feb07e3d303378e57b8",
+      "name": "@typescript/typescript-linux-ppc64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 489, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-linux-ppc64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-linux-ppc64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "0ce471e5bdec77fe12ede6b2c66e0542ff80ec2ae45081916878b023ca221d3008d5f00f5a1178274bc09640bc6e20251d2555c31310ded8d9dbf0d56e742288"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-162a0de9cdcc0b6ac738",
+      "name": "@typescript/typescript-linux-riscv64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 506, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-linux-riscv64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-linux-riscv64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c1fd23a840ce8eb3d19cac18472c890d1a35d4a31bbcc16b53eab8cea2b20a1383073be591b84d41f2af2f14027304e974369748765356e8742680ab28250c1d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6c374afeabb469a25385",
+      "name": "@typescript/typescript-linux-s390x",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 523, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-linux-s390x.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-linux-s390x@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "224c097372fbca1cad59dfdec23cb13437ce9acc029bd1963094ffb9efdd53869935bc1979801eb6ae365722e6b264a3be85fbcfbe17e996980adcc0af412e1b"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-29dc513653a17c5eedbe",
+      "name": "@typescript/typescript-linux-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 540, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-linux-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-linux-x64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "11875fd9c360eeb8025899f109d27e177577f4ef2285bdfb78702ed4b2bca00162ce04d06cf38aef31c75db3edf2b5f6e023aa3835de237b087f47c25c6ec7fc"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-232b1d2d431cbab4febb",
+      "name": "@typescript/typescript-netbsd-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 557, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-netbsd-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-netbsd-arm64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "fa9a25605e0c174e1a3e93b9153907ada9fdc94403497ab2e468920caa6c965e63cb7977fa0f502e1a5fdfd4fe78fb5e7e15cb386acb9744088e440fe959de94"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-8ede3b17d41fa84057ad",
+      "name": "@typescript/typescript-netbsd-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 574, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-netbsd-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-netbsd-x64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "f18213d041ccff776ad7464e545fc0ee973f61232d6dc79c72de2b5ad7b1ae74821ce3dca42d8a4cb5df4c247abc3a674a2635da178d6f51a237fc2ef93fc5c8"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-35fcde7583fe0a6b6c18",
+      "name": "@typescript/typescript-openbsd-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 591, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-openbsd-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-openbsd-arm64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "00f4fcf829589ee626d6ef7e920197a0c8f65735b37329b087680d4905724877e444318e4d592858b8c298e41268ef8fa2a439ec1d1f951a7d480fbb1a79e4cd"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6ce7f9aacdaa873fe67a",
+      "name": "@typescript/typescript-openbsd-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 608, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-openbsd-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-openbsd-x64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c97eecf90d03967d03b7db44cd9b008d75d1ffecad04cec096095aab278c3f142ccc9d4986525d67a8cb03e23395d1ed7e55fcd5e9bb9436a8d715eef9a45192"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-57a55c0786f9411d15c7",
+      "name": "@typescript/typescript-sunos-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 625, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-sunos-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-sunos-x64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "74b24319a2d9d43e073d09fadaed67f26043909444c0cb00902764c1de087aac3ec774d4c93b2a634622042b44e87e8ecf38069378ae677bc55914be13cfddd6"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-fa2cf9964c10691e1571",
+      "name": "@typescript/typescript-win32-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 642, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-win32-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-win32-arm64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "1b2975572e8eb167ac2f39aaf843f415bedbe0d89de76df602f700d9215c758ade95da4db58145a1f3e39edeb6cbd850cbb553699a7ae480898ee01045a55c21"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ee8228e1e7eb77b911f3",
+      "name": "@typescript/typescript-win32-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 659, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@typescript/typescript-win32-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "scope": "optional",
+      "purl": "pkg:npm/%40typescript/typescript-win32-x64@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "d014371e40071e528b4a9d6a46f7f7494846a46b03ba107f8e0170ef982ecaa6f126a11a4b40b0fd514ef22da71e094953340246d30c47f20100a137113302e2"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-c3dabc3ce648f33c17ff",
+      "name": "@vitejs/plugin-react",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 19, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 676, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"Unresolved npm peerDependencies: @rolldown/plugin-babel (^0.1.7 || ^0.2.0).\", \"Unresolved npm peerDependencies: babel-plugin-react-compiler (^1.0.0).\", \"Unresolved npm peerDependencies: oxc-transform-react (^0.145.0).\", \"npm lock location: node_modules/@vitejs/plugin-react.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "6.1.1",
+      "purl": "pkg:npm/%40vitejs/plugin-react@6.1.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cb12da415f609214bc7b326a08cebe9dd53b98363a82a020ef9350fb4223c0423c2183a64028244701ca5527d65d6d3be83b2a328d0393ed052b553e33946017"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-c4957a783c1a36fb78e5",
+      "name": "amisad-web-spa",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm project declaration\", \"line\": 2, \"path\": \"poc/components/apps/web-spa/package.json\"}], \"notes\": [], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:npm/amisad-web-spa@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6066aed6f7afc0b9c3f6",
+      "name": "cookie",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 706, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/cookie.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.1.1",
+      "purl": "pkg:npm/cookie@1.1.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "7a2f00a2cee36b4c1e469173267100f541c9ffb5d09aa8256d1c277f60138dc07d5aaf3be15287f647e38e2acce94854dbf1397c561a77297284595d72a4a275"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-b05903de4c965507bd39",
+      "name": "csstype",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 719, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/csstype.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "3.2.3",
+      "purl": "pkg:npm/csstype@3.2.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cf51c629c632db103c00641fc2b9f43c0cbe3c1ed7fc64a3dd45495bda8aca7e37c566be825e675e6538aaa2cc4735952c50bc2aeb145fc4ffd240a2398a4021"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-70d83d4fd89672101722",
+      "name": "detect-libc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 726, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/detect-libc.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "2.1.2",
+      "purl": "pkg:npm/detect-libc@2.1.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "06d8f604e38ef37a375b21f9f5ef0c817b3111055c6ab9143a9118aee6c1d2eaf09cdd74c90dfae2bb22072535d67665a966199b4e62fe87fb8a8e26ce2841b5"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f2e23564fca8a2eaf1ef",
+      "name": "fdir",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 736, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/fdir.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "6.5.0",
+      "purl": "pkg:npm/fdir@6.5.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "b486d8b596ee70eb340511aa3c992c84951874bf920c7edd54cf208f2f84469dd60148cb105244fb4da46a7c87b708d63a7c2b298062c0098cd29e242c90275e"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-18d53a31f9d7299c26ca",
+      "name": "fsevents",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 754, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/fsevents.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "2.3.3",
+      "scope": "optional",
+      "purl": "pkg:npm/fsevents@2.3.3",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "e71a037d7f9f2fb7da0139da82658fa5b16dc21fd1efb5a630caaa1c64bae42defbc1d181eb805f81d58999df8e35b4c8f99fade4d36d765cda09c339617df43"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-d684962aa9932d8abeb7",
+      "name": "lightningcss-android-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 799, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-android-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-android-arm64@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "804a514da94a768b29e016fca96b5cda23a013949e2079694b5ba9f5b16adb003262197551d4ce6d88877bdf3310cf5242f4a8a906752100f424da60dcc979a6"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-97c0013c7f80dd934325",
+      "name": "lightningcss-darwin-arm64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 820, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-darwin-arm64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-darwin-arm64@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "49c89acfc79e9cd4ca9fd6f7b7bfb1af48a94e9f58c4a418e27a704379ab46e2f404054704bc99c687e168a04056dce6b5167fcd3ca8d3fb68e01d6e586fc38e"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-2e7a83b80d59a1151420",
+      "name": "lightningcss-darwin-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 841, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-darwin-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-darwin-x64@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "67950f031ceb8e558d3721b2ea2eb9709cf3be02790f74fac0cbecfa05a963d77ba9184036bc6a029e8b871220661584c35f117c94c6711c63b8b201afe9bc5d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ff8a0d6e22e8cdbdd05a",
+      "name": "lightningcss-freebsd-x64",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 862, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-freebsd-x64.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-freebsd-x64@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "41033f4e2fe141a8c9c0263e4625ae099f6c76d23f5d093b9c32b9bc2f2491dc22c5ecce94382f0f1efe453f908cae857054f8329b2ea019c7228fcedd2b5146"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-2f1cdb21a682e062e676",
+      "name": "lightningcss-linux-arm-gnueabihf",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 883, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-linux-arm-gnueabihf.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-linux-arm-gnueabihf@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "37b15505eea24b6e0c94ce91ff84414f11a14217991aceed890f54df652d17be4dccfe50ef158f46a2c108ac65450464deb6358c220f2f3c7b5b33a1b942112d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6b907b19673561cb4a24",
+      "name": "lightningcss-linux-arm64-gnu",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 904, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-linux-arm64-gnu.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-linux-arm64-gnu@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8f6bff8ad9b2e0794dc6573abe829762006a362d0d8362d2860e33ec6b9fa4482cd393fedacb815728bd23a607ab9ba8545c7d1138a7dde08484b5725c64272a"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-b8f6b0fb171a46993ae9",
+      "name": "lightningcss-linux-arm64-musl",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 928, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-linux-arm64-musl.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-linux-arm64-musl@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "ca23b944e32e6108176c2eb4ca3654e4261215918a5cbd071404d7b7d987267d7ecd6e79a02b4c23d35f7158582cc1432fb815ee804fa27fc498c3068363afb5"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-a71ae5269d13933c8fb0",
+      "name": "lightningcss-linux-x64-gnu",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 952, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-linux-x64-gnu.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-linux-x64-gnu@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "6abf89bbb2e670dd09a381692f88691726f0346f7fdc0fc1af9296da7da3c8e0e0dcc1195da0d800375e9a8352f810cd7cc80abf29492e3e12e6dc9101cb6e02"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-1b6b99d7283726506010",
+      "name": "lightningcss-linux-x64-musl",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 976, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-linux-x64-musl.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-linux-x64-musl@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "4588986e4a24c34b6b7caaaacdf179e658229f010fac3dce2437d3b89cc5b3530aea21670de9dacf57ea2cbb57e084c6dce92d2505ce7936b0d5ac2b0409593f"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-80049060cf9ead9ed54f",
+      "name": "lightningcss-win32-arm64-msvc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1000, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-win32-arm64-msvc.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-win32-arm64-msvc@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "d4af8c3df2d2155a69873a5d6df92195693ac01ad339b0734b64fa75bd743cd399811f46a15b005b3c0dcae8546186d3a76de3fb846b9dc7ee8d9e2e0335efc0"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-db4e5adc66bf5c0128ce",
+      "name": "lightningcss-win32-x64-msvc",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1021, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss-win32-x64-msvc.\"], \"scope\": \"optional\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "scope": "optional",
+      "purl": "pkg:npm/lightningcss-win32-x64-msvc@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "3a5108083c7f5e5d05a92a786ebcbccc59c2bc6a628371a5e200aabaf6301eea892840b5fa7f4d8039e216fa871a632fd5992a0c9ac3a8a292ca44c35fe7a1b8"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-e3c68a8ebf6f2087a8ae",
+      "name": "lightningcss",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 769, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/lightningcss.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "1.33.0",
+      "purl": "pkg:npm/lightningcss@1.33.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "5a4503ae88ee26cd3192019fdae756c5adf21814713edc54901efd8ba68264b46073b3ccf1f65ef53a2c7cf0dcbc4a5065bb850129c762644b04b51b98b38820"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MPL-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-e937a5ef9b0e01c5a6d9",
+      "name": "nanoid",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1042, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/nanoid.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "3.3.19",
+      "purl": "pkg:npm/nanoid@3.3.19",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "636b54372e28bb0eadab9a0348a7906063b286450184d39c195ff4d8a0beea477d7831aa75977efa68cc8880e296b058be3127098bd5b6cb870ae3fea2449fba"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-0ab728d33acfaf72f005",
+      "name": "picocolors",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1061, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/picocolors.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "1.1.1",
+      "purl": "pkg:npm/picocolors@1.1.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c5c787dac9e1b5be4cf658aa0ec984c39ea57b7efa993664117fe311bfd1c4d1727a036e97b78db250973fd1438ff2dcbb45fc284c8c71e3f69eda5a1eb0c454"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "ISC"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-9e01adac92e1d6f47da8",
+      "name": "picomatch",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1068, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/picomatch.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "4.0.7",
+      "purl": "pkg:npm/picomatch@4.0.7",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "a9c26ef3c436216a89b030f9dbd24a31dc069bf76f2275b81ef427470887f49b62849bf318eb1c0ed1c4df1d6904a794393cac43c91598b9c9da426eef285c18"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-1434cfbc120afcc90429",
+      "name": "postcss",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1081, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/postcss.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "8.5.28",
+      "purl": "pkg:npm/postcss@8.5.28",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "451bb3a83b6de58f61deabb3e615a12be4cf9ec995b3a5b0494e8b90931e6381ecb54103b984c6f1425275ac0c4739b302d57e284a06f0ddd0836a8bcb9bccfc"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-6423968a78e396e24942",
+      "name": "react-dom",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm dependencies declaration\", \"line\": 13, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 1119, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/react-dom.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "19.3.0",
+      "purl": "pkg:npm/react-dom@19.3.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "24393c76089fe753a31680c4ef4f8e4fd202c98afeebd1e59a284dc29d7e36c7db9dadede6c22209af59264b43990e3fd5bfeb9f6ea1200476b985c332be6bd1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-31a3b6cc0c5d632967ed",
+      "name": "react-router-dom",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm dependencies declaration\", \"line\": 14, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 1153, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/react-router-dom.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "7.18.4",
+      "purl": "pkg:npm/react-router-dom@7.18.4",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "cab7e62472290c6eed682a6a2a34f51b907aab73b62be44df3f7e035fd254e30b088f6d0d1e8babd75fd663411fbb95df13afb679c66c8c9d9f1826ba6159053"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-62cfebf3d772ea070685",
+      "name": "react-router",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1131, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/react-router.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "7.18.4",
+      "purl": "pkg:npm/react-router@7.18.4",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "3d43d070c84c19102c94b72fb653f3fe49b304458f84b7602c5acbee92cd7a904be9d5f49568f8583d9c518560602b93de3c6f82160583cd5c0d38f8e0385eb5"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ba020b99df7f8f6b2f74",
+      "name": "react",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm dependencies declaration\", \"line\": 12, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 1110, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/react.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "19.3.0",
+      "purl": "pkg:npm/react@19.3.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "13c2d471bb415addb46db9766281dfc7864305dc554df38ab42667f5c0d227897afe7ba8029729201723e3bb76c19a155fc836647b8c1db892860091d53e52a2"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-768176e5c72901709e99",
+      "name": "rolldown",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1169, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/rolldown.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "1.2.11",
+      "purl": "pkg:npm/rolldown@1.2.11",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "aa94b0232cf48c742ae6a5c14cdc45984ebaeb8ac9ecefb84ef3c53a239a052af3f0838773592828a4aa4ccd87eaed541b5f93bdeb82eaf6831ca5c53af6f52b"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-13cefd51066630a2dde2",
+      "name": "scheduler",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1203, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/scheduler.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.28.0",
+      "purl": "pkg:npm/scheduler@0.28.0",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "8eea2b7c2988908c3cb53fa9e415d29ba3c98d017fc9c11898acb3511088b7f45a64884bf8fba56d0f58bb6cf51dd3890dda834e5c40d7ec4a0661d726c73303"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-5b31f737d3a8bb3fc727",
+      "name": "set-cookie-parser",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1209, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/set-cookie-parser.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "2.7.2",
+      "purl": "pkg:npm/set-cookie-parser@2.7.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "a1e33596953f52f853c70fa0ddc21fc571f225173fba275ddf22b53f6e368331ddb34b9d401633b37cbc8f8802096f9927b69dd3272d95df1160ef9b76eae5bf"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-fe3768e6234927a009ec",
+      "name": "source-map-js",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1215, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/source-map-js.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "1.2.1",
+      "purl": "pkg:npm/source-map-js@1.2.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "51758c2a12cec1529bef6f0852d40f5f17d853ebac7726ed52b2bff2e184f0240cbeb84ea70bf30c1c23d108522fb31073bbc8b084811bc550f3e203431a5f40"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "BSD-3-Clause"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-e1d0135b0a028a16f2ae",
+      "name": "tinyglobby",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1225, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/tinyglobby.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "0.2.17",
+      "purl": "pkg:npm/tinyglobby@0.2.17",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "c1747f758a5ca8a99f5a911d66388a24ec023459dd0f40cc9eb5bf7188d51adb449017d581c2c51e836b963e3b9a339589cf72c8dbbae5a96c805e0d4324dada"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-a8decdc9b6ad6fa1905d",
+      "name": "typescript",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 20, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 1242, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/typescript.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "7.0.2",
+      "purl": "pkg:npm/typescript@7.0.2",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "f0561abbdea8dcd28e85b8ca8bfa8dbc6fd6e63873c646dd9b9b23f406d9ff94f9b16aa7de12602df1b1dbbb11299593bf2cc23fc74b4414dfe6d05349155434"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-bec59f984cb93c3af331",
+      "name": "vite",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 7, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 1277, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"Unresolved npm peerDependencies: @types/node (^20.19.0 || >=22.12.0).\", \"Unresolved npm peerDependencies: @vitejs/devtools (^0.7.1).\", \"Unresolved npm peerDependencies: esbuild (^0.27.0 || ^0.28.0).\", \"Unresolved npm peerDependencies: jiti (>=1.21.0).\", \"Unresolved npm peerDependencies: less (^4.0.0).\", \"Unresolved npm peerDependencies: sass (^1.70.0).\", \"Unresolved npm peerDependencies: sass-embedded (^1.70.0).\", \"Unresolved npm peerDependencies: stylus (>=0.54.8).\", \"Unresolved npm peerDependencies: sugarss (^5.0.0).\", \"Unresolved npm peerDependencies: terser (^5.16.0).\", \"Unresolved npm peerDependencies: tsx (^4.8.1).\", \"Unresolved npm peerDependencies: yaml (^2.4.2).\", \"npm lock location: node_modules/vite.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "8.3.1",
+      "purl": "pkg:npm/vite@8.3.1",
+      "hashes": [
+        {
+          "alg": "SHA-512",
+          "content": "fdbbc7f44f6d9825d11a9dae5d8dd66ce95daa94f01646e16bff0035a110e95931847eb42b2a8bc2066aea51b6cbee2e4f9e71f7ef5e50732943bb869ce08a8c"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-ba46c8f92f85702f810e",
+      "name": "amisad_buyer",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Flutter/Dart package manifest\", \"line\": 1, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Pub/Gradle transitive packages are unresolved; platform scaffolding is generated.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:pub/amisad_buyer@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f2f86d61567c5542f0f4",
+      "name": "flutter_lints",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^4.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^4.0.0\"}"
+        }
+      ]
+    },
+    {
+      "type": "platform",
+      "bom-ref": "component-d4da385fc11f7e9f7d15",
+      "name": "Python",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"python\", \"evidence\": [{\"detail\": \"SBOM collector uses Python 3.11 tomllib and the standard library\", \"line\": 11, \"path\": \"tools/sbom_dependencies.py\"}], \"notes\": [\"No Python package installation is required.\"], \"scope\": \"build\", \"versionConstraint\": \">=3.11\"}"
+        }
+      ]
+    },
+    {
+      "type": "platform",
+      "bom-ref": "component-fc2ee4eda4cc40924b4c",
+      "name": "Bazel",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel toolchain pin\", \"line\": 1, \"path\": \"poc/.bazelversion\"}], \"notes\": [], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "7.7.1"
+    },
+    {
+      "type": "platform",
+      "bom-ref": "component-e0d7247c93c2dd3153ce",
+      "name": "Rust",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 19, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "1.96.1"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "repository-repository",
+      "dependsOn": [
+        "component-009a9ee2a9507817fbdb",
+        "component-02ab5f7026f26ec33f33",
+        "component-034c38c9330d51ebd208",
+        "component-053b555cf9191d41a62e",
+        "component-064c44650e1905069b7e",
+        "component-08faf646b9b39c46b560",
+        "component-0ab728d33acfaf72f005",
+        "component-0b3a4bfd9c3b2beda367",
+        "component-0c13b8454d7be5b5c3d3",
+        "component-0d2f85a06d20107be8e5",
+        "component-0e6e2d750a77ab39284f",
+        "component-108ce2cc57feb757cd3e",
+        "component-10c72c20b80ada8f1628",
+        "component-11ecce9903c8ab94790d",
+        "component-123ab2531b17270eb8a5",
+        "component-13cefd51066630a2dde2",
+        "component-1434cfbc120afcc90429",
+        "component-162a0de9cdcc0b6ac738",
+        "component-18d53a31f9d7299c26ca",
+        "component-1b6b99d7283726506010",
+        "component-1c5ef9ac358619b2a5ff",
+        "component-1d3f71bc1240d187ff9f",
+        "component-2061a6f1b287a19bc9f7",
+        "component-232b1d2d431cbab4febb",
+        "component-25b154bb45b8eaa2f3e1",
+        "component-29dc513653a17c5eedbe",
+        "component-2a77cfce14bb4554fc93",
+        "component-2dae99ffde412bc61d02",
+        "component-2e7a83b80d59a1151420",
+        "component-2f1cdb21a682e062e676",
+        "component-31a3b6cc0c5d632967ed",
+        "component-32f419640b3f109a169d",
+        "component-32fba889d361712ad42b",
+        "component-334ab6a1343ff5cf1aaf",
+        "component-34610dcfba7d04bf0a9e",
+        "component-34a71dbb96a0de0ca4c8",
+        "component-357792c750c677c9a3f7",
+        "component-35fcde7583fe0a6b6c18",
+        "component-376808d40295136911be",
+        "component-37fb8ad6a0df9eabe034",
+        "component-3c8b53184abeca3b5018",
+        "component-3d1ab4d9c0da045e029f",
+        "component-458df5501015d24b2d63",
+        "component-46cee4254c5189b44088",
+        "component-4727ee8b2ef727fe0165",
+        "component-4aa0148988e62487a2bb",
+        "component-4b50e029cf9ac29b6959",
+        "component-53f61b34dd69618c64cb",
+        "component-5581920d7809cc4f7b87",
+        "component-56afa9bf2b7656f9c7ce",
+        "component-57a55c0786f9411d15c7",
+        "component-5b31f737d3a8bb3fc727",
+        "component-5b87d470155010b330ab",
+        "component-5db76a396352574bbd5f",
+        "component-5f1071b27f3c79c7a3d1",
+        "component-5feb07e3d303378e57b8",
+        "component-6066aed6f7afc0b9c3f6",
+        "component-62cfebf3d772ea070685",
+        "component-6423968a78e396e24942",
+        "component-6766f3030ce963b2ffed",
+        "component-698d35e715c4ceb5f2db",
+        "component-6b907b19673561cb4a24",
+        "component-6be8d0e917cc23fe81b5",
+        "component-6c26c9a00ec6c7eefd3f",
+        "component-6c374afeabb469a25385",
+        "component-6c517d3022b0b71b43f5",
+        "component-6ce7f9aacdaa873fe67a",
+        "component-6e55ee25d947e74274e4",
+        "component-6ef720777fa2691cb03c",
+        "component-6fa243660745bdcda93b",
+        "component-6fb6f7692ba5b7798bc3",
+        "component-70d83d4fd89672101722",
+        "component-725d960583c23c172e4f",
+        "component-749f5b738d9f703631a2",
+        "component-750a15aeedbf42aa9578",
+        "component-768176e5c72901709e99",
+        "component-76e4bf3b6854103f09c2",
+        "component-775a3fe7c4501d999cfe",
+        "component-77a135ff7e1b2ae5fd97",
+        "component-77d833f1e6db334e658b",
+        "component-785c37073d0e0b0ffc49",
+        "component-7a55deaf00dcd91ceb1b",
+        "component-7b09dbf00f2621afb99e",
+        "component-7b39f8292cbba829d69b",
+        "component-7d49138d8a2fcea70a00",
+        "component-7ea209b2edc953fa69b1",
+        "component-80049060cf9ead9ed54f",
+        "component-81da6ac3475bd2365bd4",
+        "component-821de82029b1a645281a",
+        "component-8806c943eef2cea69b80",
+        "component-88e2bf77153405a7b3da",
+        "component-8b4f13c0d092978d2d1f",
+        "component-8b842607de66b9d3e849",
+        "component-8b8c400e7a423d15484b",
+        "component-8c4439c0484144cc8ce8",
+        "component-8c527eaa3590dc86a0ab",
+        "component-8d477c895cd989d2c12e",
+        "component-8ede3b17d41fa84057ad",
+        "component-9328c7589c6a3f437b1c",
+        "component-97041d09cf5f0ef0d825",
+        "component-97c0013c7f80dd934325",
+        "component-9c3f8db2790d889438e0",
+        "component-9e01adac92e1d6f47da8",
+        "component-9fd7838cf359e50ff3e3",
+        "component-a0b4725581312079c351",
+        "component-a54cc080f4eaffe67885",
+        "component-a68ac7c18b30cb6e67fe",
+        "component-a71ae5269d13933c8fb0",
+        "component-a8031210b162f8c70f5e",
+        "component-a8decdc9b6ad6fa1905d",
+        "component-a918c6f303ac3cfdd0e8",
+        "component-a9e5d4a04686c5b917db",
+        "component-aa040d9c7308a54cd032",
+        "component-ab9b38194fc42641bd6d",
+        "component-af8eee1897fb3c912fae",
+        "component-b05903de4c965507bd39",
+        "component-b5df48f1fbf7932ca082",
+        "component-b7d7f0947f5ea08ea31f",
+        "component-b89c5a7162f48e913ca0",
+        "component-b8f6b0fb171a46993ae9",
+        "component-ba020b99df7f8f6b2f74",
+        "component-ba46c8f92f85702f810e",
+        "component-bd2163fe3dd8f3cafc1c",
+        "component-bd54bb36f0a72809d0b7",
+        "component-bec59f984cb93c3af331",
+        "component-bfa23ed9dd1e539460bf",
+        "component-c0fe2294b074d970eab9",
+        "component-c3dabc3ce648f33c17ff",
+        "component-c4178888342f61dacd5d",
+        "component-c4957a783c1a36fb78e5",
+        "component-c7917f804d963de4d81d",
+        "component-c8e4f1b7e84c3b6b9bae",
+        "component-c95db9af64211017f8fc",
+        "component-ca671449c7f6168ed197",
+        "component-cac5a3c47f0a55c0772b",
+        "component-ce78f0fb00fb1cd12093",
+        "component-cf9e44e8e2fff4bce3e7",
+        "component-d0cdcd40646345021d5c",
+        "component-d2db176a8c7dcd59ae0f",
+        "component-d4da385fc11f7e9f7d15",
+        "component-d5062ca320f644722703",
+        "component-d549b9fe5fbd05f23f0b",
+        "component-d5ad57211a3879f5640c",
+        "component-d684962aa9932d8abeb7",
+        "component-d820bc5580bd3aa1477f",
+        "component-d8e235b766f530158dd1",
+        "component-da9cc9eee808cce14fa1",
+        "component-db4e5adc66bf5c0128ce",
+        "component-dbf93afe3f480cf44e65",
+        "component-dc74cbf585c403f13e97",
+        "component-ddb15ad04b93f7e4425d",
+        "component-de78bc62ca099781fe6b",
+        "component-e0d7247c93c2dd3153ce",
+        "component-e1ade72e97894c545334",
+        "component-e1d0135b0a028a16f2ae",
+        "component-e28e76d005de3cf73691",
+        "component-e3c68a8ebf6f2087a8ae",
+        "component-e6ac38308dd69428432b",
+        "component-e7d69ee7610bfa18e869",
+        "component-e937a5ef9b0e01c5a6d9",
+        "component-ebb7316bec0fea360b5f",
+        "component-ec838a8b0849d7ea3af1",
+        "component-ee2aa6131537409e5993",
+        "component-ee8228e1e7eb77b911f3",
+        "component-ee8941cfc00e9dd51488",
+        "component-f0ab035333f10a637488",
+        "component-f0b440c59e1f0497c5db",
+        "component-f149956167f66539819f",
+        "component-f19a9659c481a09a3447",
+        "component-f2e23564fca8a2eaf1ef",
+        "component-f2f86d61567c5542f0f4",
+        "component-f69e3b7bb26f74efcb06",
+        "component-f6bdd0ab9e59579351d9",
+        "component-f8ba62d5d5b8122e41cd",
+        "component-f9dec0ab39f2cf4d4b50",
+        "component-fa2cf9964c10691e1571",
+        "component-fa4f9fae46d0a4a0f39d",
+        "component-fc2ee4eda4cc40924b4c",
+        "component-fc440f288497378276b3",
+        "component-fe3768e6234927a009ec",
+        "component-ff8a0d6e22e8cdbdd05a"
+      ]
+    },
+    {
+      "ref": "component-5b87d470155010b330ab",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-81da6ac3475bd2365bd4",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-97041d09cf5f0ef0d825",
+      "dependsOn": [
+        "component-ab9b38194fc42641bd6d",
+        "component-d820bc5580bd3aa1477f",
+        "component-e28e76d005de3cf73691"
+      ]
+    },
+    {
+      "ref": "component-0c13b8454d7be5b5c3d3",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-775a3fe7c4501d999cfe",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-ca671449c7f6168ed197",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-7a55deaf00dcd91ceb1b",
+      "dependsOn": [
+        "component-7b09dbf00f2621afb99e"
+      ]
+    },
+    {
+      "ref": "component-34610dcfba7d04bf0a9e",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-1c5ef9ac358619b2a5ff",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-d5ad57211a3879f5640c",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-08faf646b9b39c46b560",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-053b555cf9191d41a62e",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-034c38c9330d51ebd208",
+      "dependsOn": [
+        "component-053b555cf9191d41a62e",
+        "component-af8eee1897fb3c912fae",
+        "component-e1ade72e97894c545334"
+      ]
+    },
+    {
+      "ref": "component-c7917f804d963de4d81d",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-8d477c895cd989d2c12e",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-77d833f1e6db334e658b",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-af8eee1897fb3c912fae",
+      "dependsOn": [
+        "component-34a71dbb96a0de0ca4c8"
+      ]
+    },
+    {
+      "ref": "component-2dae99ffde412bc61d02",
+      "dependsOn": [
+        "component-7b09dbf00f2621afb99e"
+      ]
+    },
+    {
+      "ref": "component-aa040d9c7308a54cd032",
+      "dependsOn": [
+        "component-c7917f804d963de4d81d"
+      ]
+    },
+    {
+      "ref": "component-da9cc9eee808cce14fa1",
+      "dependsOn": [
+        "component-2dae99ffde412bc61d02",
+        "component-77d833f1e6db334e658b",
+        "component-7a55deaf00dcd91ceb1b",
+        "component-aa040d9c7308a54cd032"
+      ]
+    },
+    {
+      "ref": "component-334ab6a1343ff5cf1aaf",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-f9dec0ab39f2cf4d4b50",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-c8e4f1b7e84c3b6b9bae",
+      "dependsOn": [
+        "component-2a77cfce14bb4554fc93",
+        "component-376808d40295136911be"
+      ]
+    },
+    {
+      "ref": "component-2a77cfce14bb4554fc93",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-376808d40295136911be",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-7d49138d8a2fcea70a00",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-8c527eaa3590dc86a0ab",
+      "dependsOn": [
+        "component-2a77cfce14bb4554fc93",
+        "component-376808d40295136911be",
+        "component-6ef720777fa2691cb03c",
+        "component-7d49138d8a2fcea70a00",
+        "component-a8031210b162f8c70f5e"
+      ]
+    },
+    {
+      "ref": "component-750a15aeedbf42aa9578",
+      "dependsOn": [
+        "component-02ab5f7026f26ec33f33",
+        "component-053b555cf9191d41a62e",
+        "component-34a71dbb96a0de0ca4c8",
+        "component-e1ade72e97894c545334"
+      ]
+    },
+    {
+      "ref": "component-f6bdd0ab9e59579351d9",
+      "dependsOn": [
+        "component-da9cc9eee808cce14fa1"
+      ]
+    },
+    {
+      "ref": "component-7b09dbf00f2621afb99e",
+      "dependsOn": [
+        "component-6fa243660745bdcda93b"
+      ]
+    },
+    {
+      "ref": "component-0d2f85a06d20107be8e5",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-10c72c20b80ada8f1628",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-88e2bf77153405a7b3da",
+      "dependsOn": [
+        "component-053b555cf9191d41a62e",
+        "component-8c527eaa3590dc86a0ab",
+        "component-a0b4725581312079c351"
+      ]
+    },
+    {
+      "ref": "component-e6ac38308dd69428432b",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4",
+        "component-ebb7316bec0fea360b5f"
+      ]
+    },
+    {
+      "ref": "component-34a71dbb96a0de0ca4c8",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-ec838a8b0849d7ea3af1",
+      "dependsOn": [
+        "component-34a71dbb96a0de0ca4c8"
+      ]
+    },
+    {
+      "ref": "component-37fb8ad6a0df9eabe034",
+      "dependsOn": [
+        "component-0b3a4bfd9c3b2beda367"
+      ]
+    },
+    {
+      "ref": "component-a54cc080f4eaffe67885",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-f19a9659c481a09a3447",
+      "dependsOn": [
+        "component-053b555cf9191d41a62e",
+        "component-da9cc9eee808cce14fa1"
+      ]
+    },
+    {
+      "ref": "component-108ce2cc57feb757cd3e",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-3d1ab4d9c0da045e029f",
+      "dependsOn": [
+        "component-34a71dbb96a0de0ca4c8",
+        "component-4b50e029cf9ac29b6959",
+        "component-7b39f8292cbba829d69b"
+      ]
+    },
+    {
+      "ref": "component-32f419640b3f109a169d",
+      "dependsOn": [
+        "component-ca671449c7f6168ed197"
+      ]
+    },
+    {
+      "ref": "component-064c44650e1905069b7e",
+      "dependsOn": [
+        "component-32f419640b3f109a169d"
+      ]
+    },
+    {
+      "ref": "component-785c37073d0e0b0ffc49",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-4727ee8b2ef727fe0165",
+      "dependsOn": [
+        "component-0e6e2d750a77ab39284f",
+        "component-37fb8ad6a0df9eabe034"
+      ]
+    },
+    {
+      "ref": "component-0e6e2d750a77ab39284f",
+      "dependsOn": [
+        "component-053b555cf9191d41a62e",
+        "component-25b154bb45b8eaa2f3e1",
+        "component-34a71dbb96a0de0ca4c8",
+        "component-698d35e715c4ceb5f2db",
+        "component-6e55ee25d947e74274e4"
+      ]
+    },
+    {
+      "ref": "component-6c26c9a00ec6c7eefd3f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-f0b440c59e1f0497c5db",
+      "dependsOn": [
+        "component-6c517d3022b0b71b43f5",
+        "component-cac5a3c47f0a55c0772b"
+      ]
+    },
+    {
+      "ref": "component-cac5a3c47f0a55c0772b",
+      "dependsOn": [
+        "component-a68ac7c18b30cb6e67fe"
+      ]
+    },
+    {
+      "ref": "component-a8031210b162f8c70f5e",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-d2db176a8c7dcd59ae0f",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-458df5501015d24b2d63",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-108ce2cc57feb757cd3e",
+        "component-2061a6f1b287a19bc9f7",
+        "component-5f1071b27f3c79c7a3d1",
+        "component-775a3fe7c4501d999cfe",
+        "component-77a135ff7e1b2ae5fd97",
+        "component-d5ad57211a3879f5640c",
+        "component-f19a9659c481a09a3447",
+        "component-f6bdd0ab9e59579351d9",
+        "component-f9dec0ab39f2cf4d4b50"
+      ]
+    },
+    {
+      "ref": "component-b5df48f1fbf7932ca082",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-458df5501015d24b2d63",
+        "component-f9dec0ab39f2cf4d4b50"
+      ]
+    },
+    {
+      "ref": "component-ebb7316bec0fea360b5f",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-8c527eaa3590dc86a0ab",
+        "component-a54cc080f4eaffe67885",
+        "component-f8ba62d5d5b8122e41cd",
+        "component-f9dec0ab39f2cf4d4b50",
+        "component-fc440f288497378276b3"
+      ]
+    },
+    {
+      "ref": "component-d820bc5580bd3aa1477f",
+      "dependsOn": [
+        "component-ee2aa6131537409e5993"
+      ]
+    },
+    {
+      "ref": "component-ab9b38194fc42641bd6d",
+      "dependsOn": [
+        "component-d820bc5580bd3aa1477f"
+      ]
+    },
+    {
+      "ref": "component-02ab5f7026f26ec33f33",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-5f1071b27f3c79c7a3d1",
+      "dependsOn": [
+        "component-034c38c9330d51ebd208",
+        "component-750a15aeedbf42aa9578",
+        "component-e1ade72e97894c545334"
+      ]
+    },
+    {
+      "ref": "component-e1ade72e97894c545334",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-25b154bb45b8eaa2f3e1",
+      "dependsOn": [
+        "component-ca671449c7f6168ed197"
+      ]
+    },
+    {
+      "ref": "component-8b842607de66b9d3e849",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-123ab2531b17270eb8a5",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-0b3a4bfd9c3b2beda367",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-3c8b53184abeca3b5018",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4",
+        "component-ebb7316bec0fea360b5f"
+      ]
+    },
+    {
+      "ref": "component-6c517d3022b0b71b43f5",
+      "dependsOn": [
+        "component-bfa23ed9dd1e539460bf"
+      ]
+    },
+    {
+      "ref": "component-bfa23ed9dd1e539460bf",
+      "dependsOn": [
+        "component-8c4439c0484144cc8ce8"
+      ]
+    },
+    {
+      "ref": "component-8c4439c0484144cc8ce8",
+      "dependsOn": [
+        "component-ab9b38194fc42641bd6d",
+        "component-d820bc5580bd3aa1477f",
+        "component-e28e76d005de3cf73691"
+      ]
+    },
+    {
+      "ref": "component-77a135ff7e1b2ae5fd97",
+      "dependsOn": [
+        "component-053b555cf9191d41a62e",
+        "component-af8eee1897fb3c912fae",
+        "component-da9cc9eee808cce14fa1"
+      ]
+    },
+    {
+      "ref": "component-a68ac7c18b30cb6e67fe",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-6ef720777fa2691cb03c",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-749f5b738d9f703631a2",
+      "dependsOn": [
+        "component-81da6ac3475bd2365bd4"
+      ]
+    },
+    {
+      "ref": "component-6e55ee25d947e74274e4",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-d549b9fe5fbd05f23f0b",
+      "dependsOn": [
+        "component-34a71dbb96a0de0ca4c8",
+        "component-7b39f8292cbba829d69b"
+      ]
+    },
+    {
+      "ref": "component-2061a6f1b287a19bc9f7",
+      "dependsOn": [
+        "component-357792c750c677c9a3f7",
+        "component-821de82029b1a645281a",
+        "component-b89c5a7162f48e913ca0"
+      ]
+    },
+    {
+      "ref": "component-e28e76d005de3cf73691",
+      "dependsOn": [
+        "component-ab9b38194fc42641bd6d",
+        "component-d820bc5580bd3aa1477f",
+        "component-ee2aa6131537409e5993"
+      ]
+    },
+    {
+      "ref": "component-c4178888342f61dacd5d",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-f8ba62d5d5b8122e41cd",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-458df5501015d24b2d63",
+        "component-4727ee8b2ef727fe0165",
+        "component-5f1071b27f3c79c7a3d1",
+        "component-6c26c9a00ec6c7eefd3f",
+        "component-8c527eaa3590dc86a0ab",
+        "component-97041d09cf5f0ef0d825",
+        "component-a54cc080f4eaffe67885",
+        "component-a8031210b162f8c70f5e",
+        "component-b5df48f1fbf7932ca082",
+        "component-c8e4f1b7e84c3b6b9bae",
+        "component-d549b9fe5fbd05f23f0b",
+        "component-d5ad57211a3879f5640c",
+        "component-ee8941cfc00e9dd51488",
+        "component-f0b440c59e1f0497c5db",
+        "component-f9dec0ab39f2cf4d4b50",
+        "component-fa4f9fae46d0a4a0f39d",
+        "component-fc440f288497378276b3"
+      ]
+    },
+    {
+      "ref": "component-fa4f9fae46d0a4a0f39d",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-2a77cfce14bb4554fc93",
+        "component-34a71dbb96a0de0ca4c8",
+        "component-376808d40295136911be",
+        "component-a8031210b162f8c70f5e",
+        "component-fc440f288497378276b3"
+      ]
+    },
+    {
+      "ref": "component-fc440f288497378276b3",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-34a71dbb96a0de0ca4c8",
+        "component-3d1ab4d9c0da045e029f",
+        "component-7b39f8292cbba829d69b",
+        "component-a8031210b162f8c70f5e",
+        "component-d549b9fe5fbd05f23f0b"
+      ]
+    },
+    {
+      "ref": "component-6fa243660745bdcda93b",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-b89c5a7162f48e913ca0",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-ee2aa6131537409e5993",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-357792c750c677c9a3f7",
+      "dependsOn": [
+        "component-c4178888342f61dacd5d"
+      ]
+    },
+    {
+      "ref": "component-821de82029b1a645281a",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-4b50e029cf9ac29b6959",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-32fba889d361712ad42b",
+      "dependsOn": [
+        "component-76e4bf3b6854103f09c2"
+      ]
+    },
+    {
+      "ref": "component-76e4bf3b6854103f09c2",
+      "dependsOn": [
+        "component-f69e3b7bb26f74efcb06"
+      ]
+    },
+    {
+      "ref": "component-b7d7f0947f5ea08ea31f",
+      "dependsOn": [
+        "component-32fba889d361712ad42b"
+      ]
+    },
+    {
+      "ref": "component-6fb6f7692ba5b7798bc3",
+      "dependsOn": [
+        "component-34610dcfba7d04bf0a9e",
+        "component-ab9b38194fc42641bd6d",
+        "component-d820bc5580bd3aa1477f",
+        "component-de78bc62ca099781fe6b",
+        "component-e28e76d005de3cf73691"
+      ]
+    },
+    {
+      "ref": "component-bd54bb36f0a72809d0b7",
+      "dependsOn": [
+        "component-6fb6f7692ba5b7798bc3",
+        "component-ab9b38194fc42641bd6d"
+      ]
+    },
+    {
+      "ref": "component-de78bc62ca099781fe6b",
+      "dependsOn": [
+        "component-ee2aa6131537409e5993"
+      ]
+    },
+    {
+      "ref": "component-a0b4725581312079c351",
+      "dependsOn": [
+        "component-053b555cf9191d41a62e",
+        "component-123ab2531b17270eb8a5",
+        "component-785c37073d0e0b0ffc49",
+        "component-bd54bb36f0a72809d0b7",
+        "component-de78bc62ca099781fe6b"
+      ]
+    },
+    {
+      "ref": "component-dc74cbf585c403f13e97",
+      "dependsOn": [
+        "component-88e2bf77153405a7b3da",
+        "component-a0b4725581312079c351"
+      ]
+    },
+    {
+      "ref": "component-ee8941cfc00e9dd51488",
+      "dependsOn": [
+        "component-064c44650e1905069b7e",
+        "component-34a71dbb96a0de0ca4c8",
+        "component-b7d7f0947f5ea08ea31f",
+        "component-dc74cbf585c403f13e97",
+        "component-ec838a8b0849d7ea3af1"
+      ]
+    },
+    {
+      "ref": "component-698d35e715c4ceb5f2db",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-7b39f8292cbba829d69b",
+      "dependsOn": [
+        "component-698d35e715c4ceb5f2db"
+      ]
+    },
+    {
+      "ref": "component-f69e3b7bb26f74efcb06",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-9fd7838cf359e50ff3e3",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-11ecce9903c8ab94790d",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-ce78f0fb00fb1cd12093",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-bd2163fe3dd8f3cafc1c",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-9c3f8db2790d889438e0",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-53f61b34dd69618c64cb",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-f0ab035333f10a637488",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-c0fe2294b074d970eab9",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-8806c943eef2cea69b80",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-1d3f71bc1240d187ff9f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-009a9ee2a9507817fbdb",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-5db76a396352574bbd5f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-46cee4254c5189b44088",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-dbf93afe3f480cf44e65",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-ddb15ad04b93f7e4425d",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-5581920d7809cc4f7b87",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-6be8d0e917cc23fe81b5",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-d8e235b766f530158dd1",
+      "dependsOn": [
+        "component-56afa9bf2b7656f9c7ce"
+      ]
+    },
+    {
+      "ref": "component-56afa9bf2b7656f9c7ce",
+      "dependsOn": [
+        "component-b05903de4c965507bd39"
+      ]
+    },
+    {
+      "ref": "component-7ea209b2edc953fa69b1",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-cf9e44e8e2fff4bce3e7",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-8b8c400e7a423d15484b",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-8b4f13c0d092978d2d1f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-c95db9af64211017f8fc",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-725d960583c23c172e4f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-f149956167f66539819f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-6766f3030ce963b2ffed",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-a9e5d4a04686c5b917db",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-5feb07e3d303378e57b8",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-162a0de9cdcc0b6ac738",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-6c374afeabb469a25385",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-29dc513653a17c5eedbe",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-232b1d2d431cbab4febb",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-8ede3b17d41fa84057ad",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-35fcde7583fe0a6b6c18",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-6ce7f9aacdaa873fe67a",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-57a55c0786f9411d15c7",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-fa2cf9964c10691e1571",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-ee8228e1e7eb77b911f3",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-c3dabc3ce648f33c17ff",
+      "dependsOn": [
+        "component-6be8d0e917cc23fe81b5",
+        "component-bec59f984cb93c3af331"
+      ]
+    },
+    {
+      "ref": "component-c4957a783c1a36fb78e5",
+      "dependsOn": [
+        "component-31a3b6cc0c5d632967ed",
+        "component-56afa9bf2b7656f9c7ce",
+        "component-6423968a78e396e24942",
+        "component-a8decdc9b6ad6fa1905d",
+        "component-ba020b99df7f8f6b2f74",
+        "component-bec59f984cb93c3af331",
+        "component-c3dabc3ce648f33c17ff",
+        "component-d8e235b766f530158dd1"
+      ]
+    },
+    {
+      "ref": "component-6066aed6f7afc0b9c3f6",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-b05903de4c965507bd39",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-70d83d4fd89672101722",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-f2e23564fca8a2eaf1ef",
+      "dependsOn": [
+        "component-9e01adac92e1d6f47da8"
+      ]
+    },
+    {
+      "ref": "component-18d53a31f9d7299c26ca",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-d684962aa9932d8abeb7",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-97c0013c7f80dd934325",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-2e7a83b80d59a1151420",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-ff8a0d6e22e8cdbdd05a",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-2f1cdb21a682e062e676",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-6b907b19673561cb4a24",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-b8f6b0fb171a46993ae9",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-a71ae5269d13933c8fb0",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-1b6b99d7283726506010",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-80049060cf9ead9ed54f",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-db4e5adc66bf5c0128ce",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-e3c68a8ebf6f2087a8ae",
+      "dependsOn": [
+        "component-1b6b99d7283726506010",
+        "component-2e7a83b80d59a1151420",
+        "component-2f1cdb21a682e062e676",
+        "component-6b907b19673561cb4a24",
+        "component-70d83d4fd89672101722",
+        "component-80049060cf9ead9ed54f",
+        "component-97c0013c7f80dd934325",
+        "component-a71ae5269d13933c8fb0",
+        "component-b8f6b0fb171a46993ae9",
+        "component-d684962aa9932d8abeb7",
+        "component-db4e5adc66bf5c0128ce",
+        "component-ff8a0d6e22e8cdbdd05a"
+      ]
+    },
+    {
+      "ref": "component-e937a5ef9b0e01c5a6d9",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-0ab728d33acfaf72f005",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-9e01adac92e1d6f47da8",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-1434cfbc120afcc90429",
+      "dependsOn": [
+        "component-0ab728d33acfaf72f005",
+        "component-e937a5ef9b0e01c5a6d9",
+        "component-fe3768e6234927a009ec"
+      ]
+    },
+    {
+      "ref": "component-6423968a78e396e24942",
+      "dependsOn": [
+        "component-13cefd51066630a2dde2",
+        "component-ba020b99df7f8f6b2f74"
+      ]
+    },
+    {
+      "ref": "component-31a3b6cc0c5d632967ed",
+      "dependsOn": [
+        "component-62cfebf3d772ea070685",
+        "component-6423968a78e396e24942",
+        "component-ba020b99df7f8f6b2f74"
+      ]
+    },
+    {
+      "ref": "component-62cfebf3d772ea070685",
+      "dependsOn": [
+        "component-5b31f737d3a8bb3fc727",
+        "component-6066aed6f7afc0b9c3f6",
+        "component-6423968a78e396e24942",
+        "component-ba020b99df7f8f6b2f74"
+      ]
+    },
+    {
+      "ref": "component-ba020b99df7f8f6b2f74",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-768176e5c72901709e99",
+      "dependsOn": [
+        "component-009a9ee2a9507817fbdb",
+        "component-11ecce9903c8ab94790d",
+        "component-1d3f71bc1240d187ff9f",
+        "component-46cee4254c5189b44088",
+        "component-53f61b34dd69618c64cb",
+        "component-5581920d7809cc4f7b87",
+        "component-5db76a396352574bbd5f",
+        "component-6be8d0e917cc23fe81b5",
+        "component-8806c943eef2cea69b80",
+        "component-9c3f8db2790d889438e0",
+        "component-9fd7838cf359e50ff3e3",
+        "component-bd2163fe3dd8f3cafc1c",
+        "component-c0fe2294b074d970eab9",
+        "component-ce78f0fb00fb1cd12093",
+        "component-dbf93afe3f480cf44e65",
+        "component-ddb15ad04b93f7e4425d",
+        "component-f0ab035333f10a637488"
+      ]
+    },
+    {
+      "ref": "component-13cefd51066630a2dde2",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-5b31f737d3a8bb3fc727",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-fe3768e6234927a009ec",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-e1d0135b0a028a16f2ae",
+      "dependsOn": [
+        "component-9e01adac92e1d6f47da8",
+        "component-f2e23564fca8a2eaf1ef"
+      ]
+    },
+    {
+      "ref": "component-a8decdc9b6ad6fa1905d",
+      "dependsOn": [
+        "component-162a0de9cdcc0b6ac738",
+        "component-232b1d2d431cbab4febb",
+        "component-29dc513653a17c5eedbe",
+        "component-35fcde7583fe0a6b6c18",
+        "component-57a55c0786f9411d15c7",
+        "component-5feb07e3d303378e57b8",
+        "component-6766f3030ce963b2ffed",
+        "component-6c374afeabb469a25385",
+        "component-6ce7f9aacdaa873fe67a",
+        "component-725d960583c23c172e4f",
+        "component-7ea209b2edc953fa69b1",
+        "component-8b4f13c0d092978d2d1f",
+        "component-8b8c400e7a423d15484b",
+        "component-8ede3b17d41fa84057ad",
+        "component-a9e5d4a04686c5b917db",
+        "component-c95db9af64211017f8fc",
+        "component-cf9e44e8e2fff4bce3e7",
+        "component-ee8228e1e7eb77b911f3",
+        "component-f149956167f66539819f",
+        "component-fa2cf9964c10691e1571"
+      ]
+    },
+    {
+      "ref": "component-bec59f984cb93c3af331",
+      "dependsOn": [
+        "component-1434cfbc120afcc90429",
+        "component-18d53a31f9d7299c26ca",
+        "component-768176e5c72901709e99",
+        "component-9e01adac92e1d6f47da8",
+        "component-e1d0135b0a028a16f2ae",
+        "component-e3c68a8ebf6f2087a8ae"
+      ]
+    },
+    {
+      "ref": "component-ba46c8f92f85702f810e",
+      "dependsOn": [
+        "component-d0cdcd40646345021d5c",
+        "component-d5062ca320f644722703",
+        "component-f2f86d61567c5542f0f4"
+      ]
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "incomplete",
+      "assemblies": [
+        "repository-repository"
+      ]
+    }
+  ]
+}

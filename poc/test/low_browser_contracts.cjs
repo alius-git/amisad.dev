@@ -1,3 +1,5 @@
+// LICENSEURI https://yuruna.link/license
+// Copyright (c) 2019-2026 by Alisson Sol et al.
 const fs=require('node:fs'),http=require('node:http'),path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE || '/home/ytest/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright-core');
 const root=path.resolve(__dirname,'../components/apps/web-spa/dist');

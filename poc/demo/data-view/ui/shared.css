@@ -7,8 +7,8 @@
    Baseline is Safari 13.1 / iPadOS 13: no flexbox `gap` (grid-gap only), no
    :is()/:where()/:has(), no container queries, no logical properties. Spacing
    inside flex rows is done with margins for that reason. Navigation and form
-   controls are >=44px;
-   timeline cells stay dense so the demo can show the whole sequence. */
+   controls keep their 44px height floor; full interactive timeline cells
+   are 44px square. The read-only mini timeline stays dense. */
 :root {
   --amisad-navy: #2b3a67;
   --amisad-terracotta: #e2725b;
@@ -39,9 +39,9 @@
   --act-2: #6b4ea8;
   --act-3: #0f6f83;
 
-  --cell: 15px;
+  --cell: 44px;
   --cell-mini: 9px;
-  --lane-h: 26px;
+  --lane-h: 44px;
   --lane-h-mini: 12px;
   --label-w: 108px;
   --label-w-mini: 66px;
@@ -199,9 +199,8 @@ select {
 }
 .tl-label.on { color: var(--amisad-terracotta); font-weight: 700; }
 .tl-cells { display: flex; align-items: center; }
-/* The cell fills the lane height so a finger has something to hit; the visible
-   bar is the ::before inside it. Without that the tap target would be the
-   13px bar itself, which no tablet user can reliably reach. */
+/* The cell fills the lane so the interactive target is larger than its
+   inset status bar. Mini cells are read-only and keep their compact size. */
 .tl-cell {
   width: var(--cell);
   min-width: var(--cell);
@@ -210,7 +209,7 @@ select {
   border: 0;
   padding: 0;
   margin: 0;
-  min-height: 0;
+  min-height: 44px;
   background: transparent;
   cursor: pointer;
   -webkit-appearance: none;
@@ -231,6 +230,7 @@ select {
   width: var(--cell-mini);
   min-width: var(--cell-mini);
   height: var(--lane-h-mini);
+  min-height: 0;
   cursor: default;
 }
 .tl--mini .tl-cell::before { top: 2px; bottom: 2px; }

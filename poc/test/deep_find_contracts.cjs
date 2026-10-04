@@ -1,3 +1,5 @@
+// LICENSEURI https://yuruna.link/license
+// Copyright (c) 2019-2026 by Alisson Sol et al.
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
 const source=fs.readFileSync(path.join(__dirname,'../demo/data-view/ui/shared.js'),'utf8');
 const start=source.indexOf('  function deepFindAll('),end=source.indexOf('\n\n',start);

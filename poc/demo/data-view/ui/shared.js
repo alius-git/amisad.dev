@@ -1243,7 +1243,7 @@ var AD = (function () {
       var sc = SCENARIOS[i];
       var count = 0;
       for (var j = 0; j < STEPS.length; j++) { if (STEPS[j].scenario === sc.id) count++; }
-      var cellW = mini ? 9 : 15;
+      var cellW = mini ? 9 : 44;
       var blk = document.createElement("div");
       blk.className = "tl-sc";
       blk.style.width = (count * cellW) + "px";

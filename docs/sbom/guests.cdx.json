@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:6c0d43ad-27d7-55d0-b70c-0fa89001e027",
+  "serialNumber": "urn:uuid:5b344253-3147-5087-9d1d-57077af4b5af",
   "version": 1,
   "metadata": {
     "component": {
@@ -11,7 +11,7 @@
       "properties": [
         {
           "name": "yuruna:source-inputs-sha256",
-          "value": "8908669c84d29fa3c673c0c76956cdbccc429d4fe489b13802b4621d5c3cbecf"
+          "value": "c5ef7b7bf279672b41022bce9ba8c944f86b2eb76280f1b3c96064b6e8c2ec1c"
         },
         {
           "name": "yuruna:inventory-kind",
@@ -164,7 +164,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ads-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/ads-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ads-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/ads-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -176,7 +176,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/audit-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/audit-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/audit-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/audit-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -188,7 +188,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/connect-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/connect-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/connect-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/connect-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -200,7 +200,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/fabric-coordinator:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/fabric-coordinator/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/fabric-coordinator:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/fabric-coordinator/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -212,7 +212,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/identity-mock:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/identity-mock/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/identity-mock:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/identity-mock/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -224,7 +224,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/insights-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/insights-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/insights-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/insights-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -236,7 +236,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ledger-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/ledger-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ledger-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/ledger-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -248,7 +248,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/platform-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/platform-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/platform-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/platform-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -260,7 +260,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/resource-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/resource-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/resource-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/resource-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"
@@ -272,7 +272,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/seller-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/seller-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/seller-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/seller-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
         }
       ],
       "group": "amisad.dev:guests:shared-or-configured"

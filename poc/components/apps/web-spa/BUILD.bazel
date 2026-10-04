@@ -1,3 +1,5 @@
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2019-2026 by Alisson Sol et al.
 # The SPA builds with the native Vite toolchain; the wrapper delegates to npm.
 # Invoke with: bazel run //components/apps/web-spa:build
 sh_binary(

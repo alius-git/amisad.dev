@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-guests",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/8908669c84d29fa3c673c0c76956cdbccc429d4fe489b13802b4621d5c3cbecf",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/c5ef7b7bf279672b41022bce9ba8c944f86b2eb76280f1b3c96064b6e8c2ec1c",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,7 +25,7 @@
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared guests inventory; source-inputs SHA256 8908669c84d29fa3c673c0c76956cdbccc429d4fe489b13802b4621d5c3cbecf. Not an installed-system scan.",
+      "comment": "Declared guests inventory; source-inputs SHA256 c5ef7b7bf279672b41022bce9ba8c944f86b2eb76280f1b3c96064b6e8c2ec1c. Not an installed-system scan.",
       "versionInfo": "2026.10.04"
     },
     {
@@ -149,7 +149,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ads-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/ads-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ads-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/ads-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/audit-svc",
@@ -159,7 +159,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/audit-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/audit-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/audit-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/audit-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/connect-svc",
@@ -169,7 +169,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/connect-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/connect-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/connect-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/connect-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/fabric-coordinator",
@@ -179,7 +179,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/fabric-coordinator:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/fabric-coordinator/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/fabric-coordinator:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/fabric-coordinator/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/identity-mock",
@@ -189,7 +189,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/identity-mock:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/identity-mock/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/identity-mock:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/identity-mock/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/insights-svc",
@@ -199,7 +199,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/insights-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/insights-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/insights-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/insights-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/ledger-svc",
@@ -209,7 +209,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ledger-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/ledger-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/ledger-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/ledger-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/platform-svc",
@@ -219,7 +219,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/platform-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/platform-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/platform-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/platform-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/resource-svc",
@@ -229,7 +229,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/resource-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/resource-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/resource-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/resource-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "localhost:5000/amisad/seller-svc",
@@ -239,7 +239,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/seller-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 2, \"path\": \"poc/workloads/services/seller-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/seller-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 4, \"path\": \"poc/workloads/services/seller-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
       "name": "registry",

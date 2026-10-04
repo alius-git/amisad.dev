@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:d04ac590-d3ec-53d7-95b2-51a3c8f9cb6d",
+  "serialNumber": "urn:uuid:049664fd-2217-55a6-95f0-5fa28d0bb4d1",
   "version": 1,
   "metadata": {
     "component": {
@@ -11,7 +11,7 @@
       "properties": [
         {
           "name": "yuruna:source-inputs-sha256",
-          "value": "8908669c84d29fa3c673c0c76956cdbccc429d4fe489b13802b4621d5c3cbecf"
+          "value": "c5ef7b7bf279672b41022bce9ba8c944f86b2eb76280f1b3c96064b6e8c2ec1c"
         },
         {
           "name": "yuruna:inventory-kind",
@@ -29,7 +29,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 3, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}"
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}"
         }
       ],
       "version": "0.71.3"
@@ -41,7 +41,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -54,7 +54,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 8, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 12, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 12, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -86,7 +86,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 27, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 27, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -175,7 +175,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 61, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 61, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -283,7 +283,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 103, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 103, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -391,7 +391,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 155, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 155, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -575,7 +575,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 239, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 239, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -588,7 +588,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 246, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 246, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -620,7 +620,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 264, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 264, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -937,7 +937,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 407, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 407, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -988,7 +988,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 414, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 414, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.19.14",
@@ -1121,7 +1121,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 507, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 507, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -1172,7 +1172,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 526, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 526, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -1299,7 +1299,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 2, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 586, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 586, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -1828,7 +1828,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 10, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"runtime\"}"
         }
       ]
     },
@@ -1839,7 +1839,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 14, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\"}"
+          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\"}"
         }
       ]
     },
@@ -3649,7 +3649,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Flutter/Dart package manifest\", \"line\": 1, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Pub/Gradle transitive packages are unresolved; platform scaffolding is generated.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Flutter/Dart package manifest\", \"line\": 3, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Pub/Gradle transitive packages are unresolved; platform scaffolding is generated.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -3662,7 +3662,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^4.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^4.0.0\"}"
+          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 18, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^4.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^4.0.0\"}"
         }
       ]
     },
@@ -3696,7 +3696,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 19, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}"
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 21, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}"
         }
       ],
       "version": "1.96.1"

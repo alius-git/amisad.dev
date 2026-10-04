@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="flutter_lints" tagId="urn:uuid:af8649e5-f4c2-57bd-972e-4143150c22c6" version="unspecified" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;unresolved&quot;, &quot;ecosystem&quot;: &quot;pub&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;Declared dependency&quot;, &quot;line&quot;: 16, &quot;path&quot;: &quot;poc/components/apps/buyer-flutter/pubspec.yaml&quot;}], &quot;notes&quot;: [&quot;Declared Dart constraint: ^4.0.0.&quot;, &quot;No tracked pub lockfile was resolved.&quot;], &quot;scope&quot;: &quot;test&quot;, &quot;versionConstraint&quot;: &quot;^4.0.0&quot;}" />
+</SoftwareIdentity>

@@ -217,7 +217,7 @@ types into the launch command, over SSH, never against anything the download
 itself carries. That protects the launched script and nothing it fetches
 afterwards. The guest scripts here fetch more -- a project tarball they extract and
 build, a SQL file they run as the `postgres` superuser, a binaries tarball they
-turn into images that run as root -- over the status service's plain HTTP, where
+turn into images that run as root -- over the status and stash services' plain HTTP, where
 whatever answers the request decides the bytes. So every such input is checked
 against a SHA-256 carried by the **same launch command** (the `command:` of the
 `sshFetchAndExecute` step), computed on the host at step time, and **before** it

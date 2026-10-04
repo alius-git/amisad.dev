@@ -177,6 +177,11 @@
   }
   body.on-divider .edge:disabled { background: transparent; color: rgba(255, 255, 255, 0.14); }
   @media (prefers-reduced-motion: reduce) { .edge { transition: none; } }
+
+  /* A touch pointer can coexist with a mouse on a wide viewport. */
+  @media (any-pointer: coarse) {
+    :root { --edge: clamp(44px, 4vw, 68px); }
+  }
 </style>
 </head>
 <body>
