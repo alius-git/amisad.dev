@@ -2,7 +2,7 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "c5ef7b7bf279672b41022bce9ba8c944f86b2eb76280f1b3c96064b6e8c2ec1c",
+  "sourceInputsSha256": "6204dd94dd0b51692bb1f4ff52d04d1d0ef75e5d1cd6cdc591ec7c0a9f0ef935",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "b22301ffbb1693887165f83e78741cbdfc5752a46535bb49186fae9d05282146",
@@ -279,7 +279,7 @@
     "tools/githooks/pre-commit": "d7e7ce9b2d86603d30aa773a0b4b2022d1b3c9a68ae7f25eebf4b043e6c4f7e7",
     "tools/sbom-policy.json": "cdc277504a623dee2979c41bfc0d59fb4f0660f48a7d5ed87f66df3058487044",
     "tools/sbom_dependencies.py": "614daf5f409c91357850a8eae20d8b3459ecaae41a9fb1bf662ecc93524a668b",
-    "tools/sbom_provisioning.py": "52023b2f36ad73695fe088880e77e23af8a8a62595bfaa0581b4f5ee642a7015"
+    "tools/sbom_provisioning.py": "d3f309eeefb272267b1068ff14e74345edd67fcf74429c7e21d751a43dd9b781"
   },
   "counts": {
     "repository": 181,

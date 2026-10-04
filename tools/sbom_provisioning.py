@@ -40,9 +40,11 @@ def _eligible(path: str) -> bool:
         return False
     if any(token in lower for token in (".tests.", ".test.", "_test.", "test_", "fixture")):
         return False
-    # This helper is shipped into example guests and starts their registry.
-    # Maintenance tools and test runners do not provision installed software.
-    if lower.startswith("tools/") and lower != "tools/example-workload.sh":
+    # Maintenance tools and test runners do not provision installed software;
+    # two tools do. example-workload.sh is shipped into example guests and
+    # starts their registry, and Install-TestModule.ps1 is run by every host
+    # installer to install Pester and PSScriptAnalyzer.
+    if lower.startswith("tools/") and lower not in {"tools/example-workload.sh", "tools/install-testmodule.ps1"}:
         return False
     if lower.startswith("test/") and not (
         lower.startswith("test/service/") or lower.startswith("test/lab/")

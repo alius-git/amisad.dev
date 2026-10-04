@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-hosts",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/hosts/4b0cd95d6cbdd3c46ff0373b18bec0e48da759f00439a1cfecd5ccd12fe45631",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/hosts/c5ef7b7bf279672b41022bce9ba8c944f86b2eb76280f1b3c96064b6e8c2ec1c",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,7 +25,7 @@
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared hosts inventory; source-inputs SHA256 4b0cd95d6cbdd3c46ff0373b18bec0e48da759f00439a1cfecd5ccd12fe45631. Not an installed-system scan.",
+      "comment": "Declared hosts inventory; source-inputs SHA256 c5ef7b7bf279672b41022bce9ba8c944f86b2eb76280f1b3c96064b6e8c2ec1c. Not an installed-system scan.",
       "versionInfo": "2026.10.04"
     }
   ],
