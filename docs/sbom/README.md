@@ -86,4 +86,4 @@ LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
 
-Last review: 2026.10.03
+Last review: 2026.10.11
