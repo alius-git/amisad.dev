@@ -12,6 +12,12 @@ From `poc/`, run `cargo build --workspace --locked`,
 are outside `target/debug`. Tests start isolated loopback processes and stubs;
 the deadline case takes about 20 seconds. They require no VM or temporary commit.
 
+`cargo test` keeps the armed-environment abort case offline with a sender owned
+by that test. Run `python3 test/slice_runtime_http_contracts.py -v` to check the
+production binary's eight HTTP lifecycle posts to isolated ledger and telemetry
+peers, with successful and failed responses. Both checks require the abort to
+keep the envelope sealed and omit match and shortlist records.
+
 Run `python3 test/http_shutdown_contracts.py -v` for the
 [shared HTTP lifecycle checks](test/http_shutdown_contracts.py). They compile a
 std-only fixture in a temporary directory with `rustc` (`RUSTC` can select the

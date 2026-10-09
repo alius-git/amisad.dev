@@ -15,10 +15,15 @@ use std::io::Read;
 use std::sync::OnceLock;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+#[cfg(test)]
+type HttpSender = Box<dyn FnMut(&str, &str, Option<&str>) -> Result<(u16, String), String>>;
+
 struct State {
     egress: Vec<String>,
     ingress: Vec<String>,
     armed_faults: i64,
+    #[cfg(test)]
+    http_sender: Option<HttpSender>,
 }
 
 fn ledger_url() -> String {
@@ -144,7 +149,14 @@ fn auto_closable(need: &json::Json, offer: &json::Json) -> bool {
 fn post_out(state: &mut State, kind: &str, url: &str, body: &json::Json) {
     let text = body.dump();
     state.egress.push(format!("{kind}:{text}"));
-    match request("POST", url, Some(&text)) {
+    #[cfg(test)]
+    let result = match state.http_sender.as_mut() {
+        Some(send) => send("POST", url, Some(&text)),
+        None => request("POST", url, Some(&text)),
+    };
+    #[cfg(not(test))]
+    let result = request("POST", url, Some(&text));
+    match result {
         Err(e) => eprintln!("egress {kind} to {url} failed: {e}"),
         // The ledger 503s when its durable store is down; silence here would
         // drop attestations/instructions without a trace.
@@ -447,6 +459,8 @@ fn main() -> std::io::Result<()> {
             egress: Vec::new(),
             ingress: Vec::new(),
             armed_faults: 0,
+            #[cfg(test)]
+            http_sender: None,
         },
         handle,
     )
@@ -549,12 +563,18 @@ mod tests {
 
     #[test]
     fn armed_environment_aborts_without_opening_the_envelope() {
-        // Offline: the attest/telemetry posts fail fast (unresolvable hosts)
-        // and post_out only logs - the abort semantics are what's under test.
+        // The sender belongs to this state, so parallel tests cannot change
+        // its peers or depend on an external resolver to reject a hostname.
+        let attempts = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+        let recorded = attempts.clone();
         let mut state = State {
             egress: Vec::new(),
             ingress: Vec::new(),
             armed_faults: 1,
+            http_sender: Some(Box::new(move |method, url, body| {
+                recorded.borrow_mut().push((method.to_string(), url.to_string(), body.unwrap().to_string()));
+                Err(String::from("fixture peer unavailable"))
+            })),
         };
         let response = handle(
             &mut state,
@@ -576,6 +596,21 @@ mod tests {
         let egress = state.egress.join("\n");
         assert!(!egress.contains("match-record"));
         assert!(!egress.contains("housewares"));
+        assert!(!egress.contains("shortlist-record"));
+        let attempts = attempts.borrow();
+        assert_eq!(attempts.len(), 8, "every lifecycle attempts attestation and telemetry");
+        for (index, lifecycle) in ["created", "attested", "aborted", "destroyed"].iter().enumerate() {
+            for (offset, endpoint, field) in [(0, "/v1/attestations", "lifecycle"), (1, "/v1/telemetry", "event")] {
+                let (method, url, payload) = &attempts[index * 2 + offset];
+                assert_eq!(method, "POST");
+                assert!(url.ends_with(endpoint), "{url}");
+                let payload = json::parse(payload).unwrap();
+                assert_eq!(payload.str_of(field), Some(*lifecycle));
+                assert_eq!(payload.str_of("environment_id"), body.str_of("environment_id"));
+                assert_eq!(payload.str_of("fault"), if *lifecycle == "aborted" { Some("isolation") } else { None });
+                assert!(!payload.dump().contains("housewares"));
+            }
+        }
     }
 
     #[test]
@@ -584,6 +619,7 @@ mod tests {
             egress: Vec::new(),
             ingress: Vec::new(),
             armed_faults: 0,
+            http_sender: None,
         };
         let req = |body: &str| Request {
             method: "POST".to_string(),

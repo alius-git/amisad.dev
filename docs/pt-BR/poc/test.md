@@ -16,6 +16,13 @@ Na pasta `poc/`, execute `cargo build --workspace --locked`,
 estiverem fora de `target/debug`. Os testes iniciam processos isolados em loopback e implementações de teste;
 o caso de prazo limite leva cerca de 20 segundos. Eles não precisam de VM nem de commit temporário.
 
+`cargo test` mantém o caso de aborto do ambiente armado sem acesso à rede, com um
+emissor exclusivo desse teste. Execute `python3 test/slice_runtime_http_contracts.py -v`
+para verificar os oito envios HTTP do ciclo de vida pelo binário de produção a
+serviços isolados de ledger e telemetria, com respostas de sucesso e de falha.
+As duas verificações exigem que o aborto mantenha o envelope lacrado e não gere
+registros de correspondência nem de lista de candidatos.
+
 Execute `python3 test/http_shutdown_contracts.py -v` para as
 [verificações compartilhadas do ciclo de vida HTTP](../../../poc/test/http_shutdown_contracts.py).
 Elas compilam uma implementação de teste que usa apenas a biblioteca padrão em uma
