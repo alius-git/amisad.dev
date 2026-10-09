@@ -18,4 +18,5 @@ _site/
 Gemfile.lock
 # poc/Cargo.lock is checked in (crate_universe pins from it - poc/README.md)
 poc/MODULE.bazel.lock
+/poc/test/__pycache__/
 out.txt

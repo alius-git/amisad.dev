@@ -22,6 +22,52 @@ BeforeAll {
     [void](New-Item -ItemType Directory -Path $script:Logs)
 }
 
+Describe 'AmisAd guest deployment contracts' {
+    BeforeAll {
+        $script:ContractPython = $null
+        foreach ($candidate in @(Get-Command python3, python -CommandType Application -ErrorAction SilentlyContinue)) {
+            if ($candidate.Source -match '[\\/]WindowsApps[\\/]') { continue }
+            $probe = [Diagnostics.Process]::new()
+            $started = $false
+            try {
+                $probe.StartInfo = [Diagnostics.ProcessStartInfo]::new()
+                $probe.StartInfo.FileName = $candidate.Source
+                $probe.StartInfo.UseShellExecute = $false
+                $probe.StartInfo.RedirectStandardOutput = $true
+                $probe.StartInfo.RedirectStandardError = $true
+                $probe.StartInfo.ArgumentList.Add('-c')
+                $probe.StartInfo.ArgumentList.Add('import sys; print(sys.version_info[0])')
+                $started = $probe.Start()
+                if ($started -and $probe.WaitForExit(5000) -and $probe.ExitCode -eq 0 -and
+                    $probe.StandardOutput.ReadToEnd().Trim() -eq '3') {
+                    $script:ContractPython = $candidate.Source
+                    break
+                }
+            } catch {
+                # A launcher or unavailable alias is not a usable interpreter.
+                $script:ContractPython = $null
+            } finally {
+                if ($started -and -not $probe.HasExited) { $probe.Kill($true) }
+                $probe.Dispose()
+            }
+        }
+    }
+
+    It 'passes the native <Suite> contracts' -TestCases @(
+        @{ Suite = 'bash_contracts.py' }
+        @{ Suite = 'cluster_ready_contracts.py' }
+        @{ Suite = 'image_import_contracts.py' }
+    ) {
+        param($Suite)
+        if (-not $script:ContractPython) {
+            Set-ItResult -Skipped -Because 'A runnable Python 3 interpreter is required.'
+            return
+        }
+        $output = & $script:ContractPython -B (Join-Path $script:RepoRoot "poc/test/$Suite") -v 2>&1
+        $LASTEXITCODE | Should -Be 0 -Because ($output -join "`n")
+    }
+}
+
 Describe 'AmisAd child process boundaries' {
     BeforeAll {
         $script:Sweep = Join-Path $script:FixtureRoot 'sweep.ps1'
@@ -483,8 +529,8 @@ Describe 'AmisAd demo key hand-off' {
             $run.Code | Should -Be 0 -Because $run.Output
             $run.Lines | Should -Be @($script:PublicLine)
             if ($IsLinux -or $IsMacOS) {
-                (Get-Item -LiteralPath $run.Dir).UnixMode | Should -Be 'drwx------'
-                (Get-Item -LiteralPath $run.Keys).UnixMode | Should -Be '-rw-------'
+                (Get-Item -Force -LiteralPath $run.Dir).UnixMode | Should -Be 'drwx------'
+                (Get-Item -Force -LiteralPath $run.Keys).UnixMode | Should -Be '-rw-------'
             }
         }
 

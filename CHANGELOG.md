@@ -11,6 +11,10 @@ framework that can deploy it.
 
 ## Unreleased
 
+- Core deployment imports the ten service images in one archive, sharing their
+  common base layers. Restore readiness retains its API, current-boot Flannel,
+  rollout and NodePort gates while bounding HTTP requests, polling startup gates
+  more frequently and avoiding duplicate successful probes.
 - The core->edge demo SSH key is generated inside vm-core and its private half
   never leaves that VM. Earlier versions generated the pair on the host under the
   status service's served `handoff/` directory and had the guests download it, so

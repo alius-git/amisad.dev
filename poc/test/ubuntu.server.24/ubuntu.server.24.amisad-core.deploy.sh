@@ -237,6 +237,7 @@ NODE_IP=$(hostname -I | awk '{print $1}')
 # docker.io is unreachable in this lab: distroless base from gcr.io, thin images
 # from the prebuilt binaries, imported straight into the cluster's containerd
 # (no registry), charts pinned pullPolicy=Never.
+IMAGES=()
 for svc in $SERVICES; do
     ctx="/tmp/ctx-${svc}"
     rm -rf "$ctx" && mkdir -p "$ctx"
@@ -244,8 +245,13 @@ for svc in $SERVICES; do
     printf 'FROM gcr.io/distroless/cc-debian12\nCOPY %s /usr/local/bin/%s\nENV PORT=8080\nEXPOSE 8080\nENTRYPOINT ["/usr/local/bin/%s"]\n' \
         "$svc" "$svc" "$svc" > "$ctx/Dockerfile"
     docker build -t "amisad/${svc}:poc" "$ctx"
-    docker save "amisad/${svc}:poc" | sudo ctr -n k8s.io images import -
+    IMAGES+=("amisad/${svc}:poc")
     rm -rf "$ctx"
+done
+# One archive carries the shared distroless layers once. Import every tag
+# before Helm can create a pod whose pullPolicy forbids a registry fallback.
+docker save "${IMAGES[@]}" | sudo ctr -n k8s.io images import -
+for svc in $SERVICES; do
     EXTRA=()
     case "$svc" in
         ledger-svc|seller-svc) EXTRA=(--set-string "databaseUrl=${DATABASE_URL}") ;;

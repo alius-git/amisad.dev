@@ -409,6 +409,22 @@ Esses testes criam registros e reiniciam seus próprios processos locais de serv
 `python3 test/build_contracts.py`, `python3 test/nats_installer_contracts.py` e
 `pwsh test/host_contracts.ps1` usam caminhos descartáveis e comandos nativos substituídos por implementações de teste;
 eles não modificam o firewall do hospedeiro, não instalam serviços de sistema nem implantam VMs.
+Execute `python3 test/bash_contracts.py -v`, `python3 test/cluster_ready_contracts.py -v` e
+`python3 test/image_import_contracts.py -v` para verificar a prontidão do cluster
+restaurado e a entrega das imagens leves. Os testes cobrem requisições à API e
+aos NodePorts com prazo limitado, evidências do Flannel na inicialização atual,
+desvio de proxies, recuperação por novas tentativas e falhas antes que o Helm
+implante uma imagem que não foi importada. A prontidão continua exigindo o rollout
+de cada implantação e todos os dez NodePorts; cada verificação de inicialização
+ou HTTP mantém seu limite de 300 segundos. O arquivo
+`test/AmisAd.Regression.Tests.ps1` do repositório também executa as três suítes.
+Elas exigem Python 3 e um Bash funcional; uma verificação com prazo limitado em
+um sistema de arquivos privado ignora iniciadores ausentes ou incompatíveis.
+A verificação cobre caminhos com espaços, comandos de teste sem extensão e as
+ferramentas POSIX necessárias. Os casos HTTP reais também exigem curl e sockets
+loopback isolados. Os casos com o cliente real da API usam kubectl, e seu ambiente
+privado de autenticação usa OpenSSL. A ausência de ferramentas faz os casos
+correspondentes serem ignorados.
 Execute `flutter test` e `flutter analyze` em `components/apps/buyer-flutter` para
 verificar prazos limite de requisição, navegação/liberação de recursos e respostas desatualizadas.
 
