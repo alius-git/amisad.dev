@@ -12,6 +12,17 @@ From `poc/`, run `cargo build --workspace --locked`,
 are outside `target/debug`. Tests start isolated loopback processes and stubs;
 the deadline case takes about 20 seconds. They require no VM or temporary commit.
 
+Run `python3 test/http_shutdown_contracts.py -v` for the
+[shared HTTP lifecycle checks](test/http_shutdown_contracts.py). They compile a
+std-only fixture in a temporary directory with `rustc` (`RUSTC` can select the
+compiler; `AMISAD_LIFECYCLE_BINARY` can select a prebuilt fixture). Normal HTTP
+checks run on Windows too. Unix checks require SIGTERM to stop new intake,
+finish the active write and response, drop service state, and preserve the journal
+across restart. Linux also checks the real PID 1 behavior in private `unshare`
+namespaces; those cases skip when unprivileged namespaces are unavailable.
+The services retain their request deadlines, Kubernetes termination grace, and
+single-writer `Recreate` deployment policy.
+
 To check durable recovery, initialize an **empty disposable PostgreSQL database**
 with `db/schema.sql`, set `AMISAD_TEST_DATABASE_URL` to its connection URL, and run
 `python3 test/service_contracts.py DurableContracts -v`. This explicit suite writes

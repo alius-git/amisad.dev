@@ -16,6 +16,20 @@ Na pasta `poc/`, execute `cargo build --workspace --locked`,
 estiverem fora de `target/debug`. Os testes iniciam processos isolados em loopback e implementações de teste;
 o caso de prazo limite leva cerca de 20 segundos. Eles não precisam de VM nem de commit temporário.
 
+Execute `python3 test/http_shutdown_contracts.py -v` para as
+[verificações compartilhadas do ciclo de vida HTTP](../../../poc/test/http_shutdown_contracts.py).
+Elas compilam uma implementação de teste que usa apenas a biblioteca padrão em uma
+pasta temporária com `rustc` (`RUSTC` pode selecionar o compilador;
+`AMISAD_LIFECYCLE_BINARY` pode selecionar uma implementação de teste já compilada).
+As verificações HTTP comuns também são executadas no Windows. As verificações Unix
+exigem que SIGTERM interrompa a aceitação de novas solicitações, conclua a gravação
+e a resposta ativas, descarte o estado do serviço e preserve o diário após uma
+reinicialização. No Linux, também verificam o comportamento real do PID 1 em
+namespaces privados de `unshare`; esses casos são ignorados quando namespaces sem
+privilégios estão indisponíveis. Os serviços mantêm seus prazos para solicitações,
+o período de encerramento do Kubernetes e a política de implantação `Recreate`
+com um único gravador.
+
 Para verificar a recuperação persistente, inicialize um **banco de dados PostgreSQL vazio e descartável**
 com `db/schema.sql`, defina `AMISAD_TEST_DATABASE_URL` com sua URL de conexão e execute
 `python3 test/service_contracts.py DurableContracts -v`. Essa suíte explícita grava

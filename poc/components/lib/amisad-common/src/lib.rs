@@ -12,6 +12,8 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 mod i18n;
+#[cfg(unix)]
+mod shutdown;
 
 pub struct ServiceInfo {
     pub name: &'static str,
@@ -171,7 +173,8 @@ fn write_response(stream: &TcpStream, response: &Response) {
 /// Bind 0.0.0.0:$PORT (default 8080); /health and /version are built in,
 /// everything else dispatches to `handler` with mutable service state.
 /// Single-threaded by design: the POC call graph is acyclic, so sequential
-/// request handling cannot deadlock.
+/// request handling cannot deadlock. On Unix, SIGTERM stops intake after the
+/// current request finishes, allowing service state to drop before exit.
 pub fn serve_app<S>(
     info: ServiceInfo,
     mut state: S,
@@ -180,12 +183,40 @@ pub fn serve_app<S>(
     let port = std::env::var("PORT").unwrap_or_else(|_| String::from("8080"));
     let addr = format!("0.0.0.0:{port}");
     let listener = TcpListener::bind(&addr)?;
+    #[cfg(unix)]
+    {
+        shutdown::install()?;
+        listener.set_nonblocking(true)?;
+    }
     println!("{} {} listening on {addr}", info.name, info.version);
-    for stream in listener.incoming() {
-        let stream = match stream {
-            Ok(s) => s,
+    loop {
+        #[cfg(unix)]
+        if shutdown::requested() { return Ok(()); }
+        let stream = match listener.accept() {
+            Ok((stream, _)) => stream,
+            #[cfg(unix)]
+            Err(error) if error.kind() == ErrorKind::WouldBlock => {
+                shutdown::wait_for_connection(&listener)?;
+                continue;
+            }
+            Err(error) if error.kind() == ErrorKind::Interrupted => continue,
+            #[cfg(unix)]
+            Err(error) if shutdown::transient_accept_error(&error) => {
+                sleep(Duration::from_millis(10));
+                continue;
+            }
+            #[cfg(not(unix))]
             Err(_) => continue,
+            #[cfg(unix)]
+            Err(error) => return Err(error),
         };
+        #[cfg(unix)]
+        {
+            if shutdown::requested() { return Ok(()); }
+            // Accepted sockets inherit listener flags on some Unix targets;
+            // the request deadline reader requires blocking socket reads.
+            stream.set_nonblocking(false)?;
+        }
         let _ = stream.set_write_timeout(Some(Duration::from_secs(5)));
         let mut locale = i18n::negotiate(&std::env::var("AMISAD_LOCALE").unwrap_or_default());
         let request = match read_request(&stream, &mut locale) {
@@ -212,7 +243,6 @@ pub fn serve_app<S>(
         };
         write_response(&stream, &response.localized(&locale));
     }
-    Ok(())
 }
 
 /// Legacy skeleton entry point: /health and /version only.
