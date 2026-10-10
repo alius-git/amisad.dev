@@ -2,7 +2,7 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "b28c92d6f362ff57885fcadbb23458c737a0395582aab9516c2bc3c90c6b945e",
+  "sourceInputsSha256": "eecd2132a381c79e27e86736f4ecd0e19bf14768983be6f5f6f0b90e9527530f",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
@@ -40,39 +40,39 @@
     "plan/personas.md": "d692a47e9dd5712a208aca5b5757abfc6e1f9054114210485498b1fd0263034d",
     "plan/prompts.txt": "914b4e3a887c83aeb3ac78927437dc22df59c30afba208bdc27155f6d56c190e",
     "plan/scenarios.md": "a5f5afdaf51d2e714240c15e1cbac02948a4615c45b8fb77aedb412e5db6c59e",
-    "poc/.bazelrc": "e68811434d53cf500bfc473e361cc862bf12eb6d52f1773dc2a6851d98505f3f",
-    "poc/.bazelversion": "2080871d1a0d5cc3d3a304acff946cb083f90a6cae0b8291fe399b1d4fd83369",
+    "poc/.bazelrc": "cdf41772f403272271a926b340e80dafb54413dcaeed7620f11ca74acf0aa822",
+    "poc/.bazelversion": "14ebdd5f5d8dfccb0fc574ea9aabecc07d7cdd99d53e4fc01e58f9c3d23d18ef",
     "poc/.dockerignore": "6c3aa38c25893c8008c339a577cd8dff854769fffb1e183ccc044e8d05bdfe05",
     "poc/.gitignore": "96be5462d0193b7f7550fd82821252288b03c40e37fc7efb9f4ee4024a973b9f",
     "poc/BUILD.bazel": "3d4eb22f5951a0b77094d3b2b037b97ef290aed184eeb4e6515e9b1e1fa56858",
-    "poc/Cargo.lock": "55d47313f6c7169e75b7c76521316ab0aeaeff6cd6477da1a41d10a25c4635c1",
+    "poc/Cargo.lock": "c4cac02e79f8273a708197cdf73181c71162bf7d194eaf749cc81ef540408813",
     "poc/Cargo.toml": "f3b22e7d35758053dc9f84b7dbadbc37f2a4d49b626b96bacf20eaabadf7c536",
-    "poc/MODULE.bazel": "0dde173cc36c04d416618c5144bb7e282c2730433caf3bc2bdaea6d1d085fd62",
-    "poc/README.md": "79f61d92b6eff73d6df98c13c281eb6c2e0aced1c52b9a4542a95549954fbdc1",
+    "poc/MODULE.bazel": "994452716958dc2644be6538dfc98c4707995bd8a76a8578b58cded33a8a8d48",
+    "poc/README.md": "8edd974dc1482470a7e297133848168fdc4c51d765fb488660625fca656c57cf",
     "poc/STATUS.s001.fulfillment.md": "485d352b5e494d58d0a0adc37e637fbfc87f3e96edd16afdcd381d9972630691",
     "poc/build/Publish-ProjectArchive.ps1": "1e3a741dc770def78b5a5e2d88ac56503be208f9adbe5091dfe90faee4965087",
     "poc/build/build-all.ps1": "1158e0b67f01bc38dc07f54e050b9d54514a6dd67ee502c46c9c4b690180252f",
-    "poc/build/doctor.ps1": "7c85128e5b47f685c1539863ee13776ade92659fd1d0169e73d7e775160090be",
+    "poc/build/doctor.ps1": "742063a902b01722cd4fee7fadc7a6df1c9d569ddd19c5f7024f867e633546b7",
     "poc/build/images.ps1": "533818b82193d4858ee2ae60580805a77074bf9808807b11b925f03a8fe402e3",
     "poc/build/run-tests.ps1": "6154f49bfe594986862254889390a3d642c03e2bcfdf1145da7ff1bcf8c26172",
     "poc/build/serve-local.ps1": "f2672b6843bd250eaaaaac5f8d76d10a7443a4e073aeca4b85f397a6f7d4517f",
     "poc/components/apps/buyer-client/BUILD.bazel": "26879d35a3e8b72103971b4bae2f5bae081b378399ab7a47fcf6588fc5e8af08",
     "poc/components/apps/buyer-client/Cargo.toml": "2ebceaec4a8e8610f6799d3e398129c85eb0493c0a2e6825378bc3614b27dc4b",
     "poc/components/apps/buyer-client/src/main.rs": "307b9849bbbf9cf44bb259d107fa6dfcb575488eb56a02bc98097e84158695ce",
-    "poc/components/apps/buyer-flutter/BUILD.bazel": "b22c46e6b5102e9fec4ba75640f52ea3a1d2800e2cdd0370fe12e74990876075",
+    "poc/components/apps/buyer-flutter/BUILD.bazel": "6a646df49abfa12421e6fbbd105a70fc99f90ed9bd3d2760ac8ff011c94ea49a",
     "poc/components/apps/buyer-flutter/README.md": "0687736032bcda4ef8bb9ea5f4034daed09e30964c61ad33d7e3ddc9c8dde0cb",
     "poc/components/apps/buyer-flutter/analysis_options.yaml": "0cd9754e0c56727ca13668dbc59925faf9cc9a7a3e85219841ee78834bccb0c0",
     "poc/components/apps/buyer-flutter/assets/icon-64.png": "56dc53a5ce9210e8fba09db3f06f11bc5d16a82adfc40582305fc5b2e3194235",
     "poc/components/apps/buyer-flutter/build.sh": "f5d6d8f3f6ba1235873e86a4f69a3306c75fbee8a8d48b861941aeda0411431d",
     "poc/components/apps/buyer-flutter/lib/main.dart": "8603576df110c4af2bf0765dfc1b1f3c272aa096a173d9400f139ccea0c3f06b",
-    "poc/components/apps/buyer-flutter/pubspec.yaml": "81e9cdb355a5df79e11fb2983990bb869cd23d4d99bea6411e3544f9f9d0c935",
+    "poc/components/apps/buyer-flutter/pubspec.yaml": "e5028bea8dd5d554628639ec418801492fa928d01b2ed8e80da6cfec7ded9869",
     "poc/components/apps/buyer-flutter/test/http_deadline_test.dart": "0937017eb75989339ee19c3563d96098d59dfc65b1a5ea7791508c3efc334aaa",
     "poc/components/apps/buyer-flutter/test/request_lifecycle_test.dart": "6d5780d462e5e844798df1aa49bf0f04a04d41cfec540c9b8ced9c325436da59",
-    "poc/components/apps/web-spa/BUILD.bazel": "629f62b80fcd04af8a96cc1fa1836ba8c9db816722453f1b0027be89f088312f",
+    "poc/components/apps/web-spa/BUILD.bazel": "e13788488d8fa60a6b71fd137e83580ee79ce8337635b005687307f6ea51150c",
     "poc/components/apps/web-spa/build.sh": "3d86ea5aaede4ec847f15c392cf0f216d05a8b4181cf404ff6854adc40586e48",
     "poc/components/apps/web-spa/index.html": "5f9cabd2dd5f8cb5984b462e645d8d8b642a93664a4311e103001f8797aa2745",
-    "poc/components/apps/web-spa/package-lock.json": "570e9c3a0237c64dccbeebbbb6d5234f4279fe71facfc263a17497efeb1c279c",
-    "poc/components/apps/web-spa/package.json": "69ae2a9cf49d76254125a259e4e1ae18edbbda90db73f09ea1ff55caed0d0974",
+    "poc/components/apps/web-spa/package-lock.json": "cc62ce3c071908da3e1f926c236f98ea471872f9808a8e7aa0c31416ab6860f7",
+    "poc/components/apps/web-spa/package.json": "1099ce1370d217cf526fb068483b2d87ae4af2322f71cad2e59b5cd9df33d139",
     "poc/components/apps/web-spa/public/icon-64.png": "56dc53a5ce9210e8fba09db3f06f11bc5d16a82adfc40582305fc5b2e3194235",
     "poc/components/apps/web-spa/public/icon.svg": "f731b21593b473beea525b8e000316cc0f4f9f27538d96be40e6e3fb1e2fc48b",
     "poc/components/apps/web-spa/src/App.tsx": "242ea0915541255cf57fd4ce671a0bbff86158512bad440ee9540a0c38fb9890",
@@ -90,9 +90,9 @@
     "poc/components/art/palette.json": "c4292f8ea397838c7812411d77e779ba034ecc90d297e1b42a2c66f544a86021",
     "poc/components/edge/slice-runtime/BUILD.bazel": "7e3589e4be5df9b3db065e5c894a1657e83028f0b42604aec4704a78bd8798cf",
     "poc/components/edge/slice-runtime/Cargo.toml": "1c61d27be23f290e7dfe0dc54f2c67129aca89992f4ccd36d877bd5f7fb816bf",
-    "poc/components/edge/slice-runtime/Dockerfile": "1456274fa410ce9a8568ff41b6e64cb8ea4759c47565ea85b9948e7609bf99de",
+    "poc/components/edge/slice-runtime/Dockerfile": "5c1a75b310bbfe55de1de87a0b7dd3148a186d373a7287f6233f83a168600bae",
     "poc/components/edge/slice-runtime/src/main.rs": "6ff054030094558132713f8acafdae22f66907e7e8f01373368282ae1a290784",
-    "poc/components/lib/amisad-common/BUILD.bazel": "0bbac92eac389e83c0bd96a993f6a90ac1611d51a1720137317cb37aa364cc6f",
+    "poc/components/lib/amisad-common/BUILD.bazel": "fc45327615689d99eb1e4ccda4cd47cbad3a9fa7ce0e45b031c08e3a08198e76",
     "poc/components/lib/amisad-common/Cargo.toml": "1d211cd3a570b47ba40ae58cd174e09535d2c63c20cfcb40314fb89493b3dc65",
     "poc/components/lib/amisad-common/locales/en-US.json": "70dc45d617a7a5b3788adda931c3c3b53abc710eb92659e7abb3fa9412bc339e",
     "poc/components/lib/amisad-common/locales/he-IL.json": "4fb9a7960b9f29b402531f0122c8f740d422e39375c9397fc58e726f86e0d15a",
@@ -104,43 +104,43 @@
     "poc/components/lib/amisad-common/src/shutdown.rs": "64d91a9cf6474eb4cc312f75d93cdf8990aa591d308c0e62df767f4bd046523d",
     "poc/components/services/ads-svc/BUILD.bazel": "67c8b816be9e965e62863ac497712e74e5fa6e79761aca44e8b3bfde54bad650",
     "poc/components/services/ads-svc/Cargo.toml": "2cddd8c1cf6b60924e6b9c811f70154130d38622b267bbb01c27cc416caa14ba",
-    "poc/components/services/ads-svc/Dockerfile": "873bcc904d842165fdc5dca98556818351cdc8eb0959fa37ab74d66a638dfab9",
+    "poc/components/services/ads-svc/Dockerfile": "bf7cf0f13a19072b6f1fcfc3719c6a9508d7c6bb0d7c6b923b9dd065dc606392",
     "poc/components/services/ads-svc/src/main.rs": "d92d6711297ca0c9fdd1dcf1449f54550ba6f57f5974f5d9d05860f1772a45d9",
     "poc/components/services/audit-svc/BUILD.bazel": "4eedb1742f20f4043a4cd56d31b631ee479fdcdef5f2b981421d08892219feec",
     "poc/components/services/audit-svc/Cargo.toml": "8230734eb436bea205d1fd93ce38d84f9548c07ec7978fe66755a9c62cf8364b",
-    "poc/components/services/audit-svc/Dockerfile": "500b5ede9fc00a52e942980d46d6547695cbd07109c34fd550d9f2527a1b15b0",
+    "poc/components/services/audit-svc/Dockerfile": "35d2376502685c9a7170fc4d32c25402a2e0673bf7ba8900ea8f39805b97365b",
     "poc/components/services/audit-svc/src/main.rs": "e87f24a0de1234b17278d364fe192f6e3bfd07277141bd57b746a4a23ddd5fd0",
     "poc/components/services/connect-svc/BUILD.bazel": "78d6a5deee292b713802a2df787cd910c16d99c53b31604e317e67d34ff15bee",
     "poc/components/services/connect-svc/Cargo.toml": "2053943cc8b13a33770bfb7407a1730235804cc382ed8224beec630454a6bd6b",
-    "poc/components/services/connect-svc/Dockerfile": "6d472215ae5bbbe60b48573b0044814c6021942ad642e14a74825e1a6fb8bd13",
+    "poc/components/services/connect-svc/Dockerfile": "4566055e84f28b3f8a4a44605c04fd6e7a77f15d2066a2fb021c5fdbce1ee13a",
     "poc/components/services/connect-svc/src/main.rs": "a99e1c6d6ef4b6f588c34519edd518d664dbbdb542d3fa23a87b0e1be00832e4",
     "poc/components/services/fabric-coordinator/BUILD.bazel": "9a6516317bc1492a435ac9f872eb16e31c1d6e115193c965571a6604f334764f",
     "poc/components/services/fabric-coordinator/Cargo.toml": "9dc0fb9d39a8e0f87d0a0152b02847ddd734819f78cb30a7c012192ed935d07d",
-    "poc/components/services/fabric-coordinator/Dockerfile": "976bec438791a5df24639bf11119015259fa2848d5debca068684b9d0319c895",
+    "poc/components/services/fabric-coordinator/Dockerfile": "edb90b83212a7c4b4e40d377313619e9d30e689cfd6712a920fc39950addd92a",
     "poc/components/services/fabric-coordinator/src/main.rs": "b7cf5f20c13ba14a19af9548e62b94ade219b1da7799fc3effd0809d614c125c",
     "poc/components/services/identity-mock/BUILD.bazel": "8351ea51fba08855e1f82809eb079a6f2ef3d98e058c8b9d7412b0ce761bccfa",
     "poc/components/services/identity-mock/Cargo.toml": "57e352c234d08c36f01c38dcc76cc8ffc279f195052e0b40d5480651314007f1",
-    "poc/components/services/identity-mock/Dockerfile": "08bac4a7309f6b8c78fa5e5a9349398f2d1072f762b2490922d5ae8ccb5864eb",
+    "poc/components/services/identity-mock/Dockerfile": "362ff3673a2c3be27e1b30bb3e53754bcd233118cff4930e5359bb01b11a808b",
     "poc/components/services/identity-mock/src/main.rs": "701b905fe2150cca298a9ed954c8eb1ea902a271d29481dd21ddfe77ac5cfb9f",
     "poc/components/services/insights-svc/BUILD.bazel": "d2ff6c7b394fce5298ecb1e548e9083c07f8ff83875ca852e625eb2c143558ce",
     "poc/components/services/insights-svc/Cargo.toml": "2ef3255ebc1ff3ce02332a4ec6e133e587bd485d5b83cc94178b9b61be0d0f80",
-    "poc/components/services/insights-svc/Dockerfile": "0e8485d119b9e47ed9c8531a18f8760c62c1458b42e19f824f888e1eb104b250",
+    "poc/components/services/insights-svc/Dockerfile": "edbcb8356cb3ba56c152a57fc456084d136ab6b044eecce3253619eeed80df66",
     "poc/components/services/insights-svc/src/main.rs": "57af5e70cd7ac2ecdcefa148b11f28e80adb5892fd4e011ad46b77299b19060c",
     "poc/components/services/ledger-svc/BUILD.bazel": "0edd8e8415d126b7137e2ba31486487a10787dd29568c04dc07401714a7dce21",
-    "poc/components/services/ledger-svc/Cargo.toml": "0c8e48ffe4fa7d532dbe156b68476e329966644321a44d390cd639a3318de9d7",
-    "poc/components/services/ledger-svc/Dockerfile": "334d2e94e93f5c500db60a65b44c9b7f8a2990ce9126eb215a17aa7ad77ad52b",
+    "poc/components/services/ledger-svc/Cargo.toml": "639bad96a8ac4ed19d78b7eff3270144c2eb2159209478afcd8763db5237d3e8",
+    "poc/components/services/ledger-svc/Dockerfile": "230cb7d4ad37d17c13eecbe1fa2acbfc0a0d27e4107264677c63af491c5c0d4d",
     "poc/components/services/ledger-svc/src/main.rs": "b29e965dadc36dc9494cd9d2bec80119b446130f29cbc01469bf254fd127b543",
     "poc/components/services/platform-svc/BUILD.bazel": "321c3c14fd43a7cf368b2af7a34ccbf9c8bfe9224c9b6de711d657293b51164c",
     "poc/components/services/platform-svc/Cargo.toml": "03789981b202f3a11a69fedcb1b6f2203b70653990e23b2dae483be10ade5a67",
-    "poc/components/services/platform-svc/Dockerfile": "abba68ee07f667f20cbf08c06c6bce56464fd80a4e6eb83a34fdc3eb835c70f5",
+    "poc/components/services/platform-svc/Dockerfile": "3b301a660c73b6edebb6d035116a9d5c3f8c0db0fb61e0cf074a429da2a7d28b",
     "poc/components/services/platform-svc/src/main.rs": "3573d7cf87669adf27763495686219004996642820be032d0329ffd792e71e8a",
     "poc/components/services/resource-svc/BUILD.bazel": "ad9a6c4496b9fdd66686938fa4fd97a69d01a6846bed6cd620cee0d28fdde126",
     "poc/components/services/resource-svc/Cargo.toml": "79fb77c12bc518e85dc9cac81df335af17cc0970b1ca105ef82469376cf25f28",
-    "poc/components/services/resource-svc/Dockerfile": "00625993bcfffa25cf8992186cbf32238b7acfb5acf17a04f509259d90ecd559",
+    "poc/components/services/resource-svc/Dockerfile": "d6a0db5bce7e25de72039f107f99bf0eb21dda172e5dcf85d621a88e7f1cba4c",
     "poc/components/services/resource-svc/src/main.rs": "4434e7899c41c7002422839545a9b763bc7ca175ffb8148993f43468cfff0cd3",
     "poc/components/services/seller-svc/BUILD.bazel": "62beebee346284937d8723420780829c4d4893b5a9ce6920c79691bd58c7b259",
-    "poc/components/services/seller-svc/Cargo.toml": "6fb5e73da8ff15e72237c1c22f31e21c87747cc5e04ce16468d35efebdfae697",
-    "poc/components/services/seller-svc/Dockerfile": "e85902169fb164f0026e64195184b7582d73aa1462dee6606d476a85bc5a3ffc",
+    "poc/components/services/seller-svc/Cargo.toml": "9b997684add575a687a100441a565241fa33e239459c631ab3ddccba3987870b",
+    "poc/components/services/seller-svc/Dockerfile": "89f9cf8364c617c6b2417c006e89fe58c8885c60213f34322c89082e585c65aa",
     "poc/components/services/seller-svc/src/main.rs": "f8459337eb3c7d46b90f2f9a286be3d082f8b03bf9da7afac9c4316c0478f88f",
     "poc/config/localhost/components.yml": "c0279595017b6f38f65109df4829d6b3b06a23903ef17c7f5b6540dfce3b14d3",
     "poc/config/localhost/resources.yml": "5de6d6c63e0d1d5897829f150b0d2ebd2f1e35a86692698e7f88379b502ca8ab",
@@ -197,20 +197,20 @@
     "poc/test/cluster_ready_contracts.py": "c0b900a6eb2dfca9f29d9d8037fcbde61fd3f0eac7bd1410d217d470f3a5ff72",
     "poc/test/database_policy_contracts.py": "7f5954de1b262484298af5341199888279ad49d90ba3d42dd63c8bd8fef58473",
     "poc/test/deep_find_contracts.cjs": "3b4c685fea8841bb194e21d84221c734016a5dc03b0fe789ac353d33e962c592",
-    "poc/test/download_contracts.py": "1e1b845d06ad9c2c759386d33b262ad53830530e09f07af1868257c5e3ec0a64",
+    "poc/test/download_contracts.py": "b7cd0fbb05115be91df6c719b758e2bb7599c841290615f84895e4674a869aeb",
     "poc/test/fixtures/http_lifecycle.rs": "2bcda1dc1d01e300c490a8f1dbc81c611cf426097b5ca132a5659b204ad1759b",
-    "poc/test/host_contracts.ps1": "c9ae6675f4edbd05832b04871e1c59fda08855231488c8f198038c41fbc42fb4",
+    "poc/test/host_contracts.ps1": "93e0907ae1c453169c77a79d8e47caa15ba18e2266039c2b3205926aedb8c011",
     "poc/test/http_shutdown_contracts.py": "c92e1e976432724666cbc9c67147c8036fe3503d896aeeac7c5052bdcb292b1b",
     "poc/test/image_import_contracts.py": "0d9de5f5c01c44b79340e07a278b25d57e3e92291a043172e0c9f3c43833efc8",
     "poc/test/low_browser_contracts.cjs": "3189a2feb1e4cd0d0bc7b9afd6cb2e2f74533a5e1b97a88c0892370734175a17",
-    "poc/test/nats_installer_contracts.py": "4344c26d80b997d311fd3275fd73e25676ff712487a66515da1057efba30e6a5",
+    "poc/test/nats_installer_contracts.py": "aec1c9c9a5d5f682b2920e8eaf67287440ca60e5ad68bfe753b8154e0fa989b0",
     "poc/test/service_contracts.py": "4100fa5f2ad641fd17c0614d8319a656be736718f06682744a7b431fced49d4d",
     "poc/test/slice_runtime_http_contracts.py": "19ae6cf550e0f3b66d060ea496815ee6a8904b3ce63c6dd6a0e18b0e124d6593",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh": "7d44a92f4e89ae231e0f3461f3ec8fbc8fac263d24d537f81cb898935921f697",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh": "06b35cbc8c97b31c9744cceb633835291791ca287850a6cb2dd6cd0cf00a4460",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh": "d174c648abe846a0989a3205076a5b217f76d688fd5ee74c8de511d6f049295c",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh": "7b8acd6482224568fc7886171d8eda906c841edfc80fa8c5650ac25790befe27",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh": "a83eebc371beea4550c9dace0fcdb5a254c69dc01e1927ca12a83821245e7431",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh": "a006e0f2618cc233f1baea0024dc49651c3ce11a7dca88e3c86125cc1b4e6762",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh": "aeba060f8ad75b5469731b9d3fd5da33bdd6f24cde1935f8c3a20a7db8fc0d04",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh": "38d3b2b58084df7e176a1c3fe0c534bdc2efdcc0bde80e93c218fc7e4d34dcb2",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh": "f75244a163f0c636f3df724de1183f351d99e70039d52bb90b26ef5aa2a492fe",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s001.fulfillment.sh": "c4a3fe8a05e011ac92bdc33d6d81a19c066219735d5c9340d3c8175f0beba9e2",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s002.fitting.sh": "ef110154beebee4c49e51fbbea5d322675d525efd6e8ada9ebb826be43460da1",
@@ -286,11 +286,11 @@
     "tools/Test-DocTranslation.py": "4ae360c987d26e7412f47258fd0c4f60b0e411f88c0f6d0658ce712c66d4dfcc",
     "tools/githooks/pre-commit": "d7e7ce9b2d86603d30aa773a0b4b2022d1b3c9a68ae7f25eebf4b043e6c4f7e7",
     "tools/sbom-policy.json": "cdc277504a623dee2979c41bfc0d59fb4f0660f48a7d5ed87f66df3058487044",
-    "tools/sbom_dependencies.py": "614daf5f409c91357850a8eae20d8b3459ecaae41a9fb1bf662ecc93524a668b",
-    "tools/sbom_provisioning.py": "7396fa1c04d81c5062eb56eeea0dcb817a2df99d75ba9bbac513b4af168b9a98"
+    "tools/sbom_dependencies.py": "0d9996f03969b568adf0a0d9d03b58c3a2ad8ecf08f9fd618e99c25f9fe154ec",
+    "tools/sbom_provisioning.py": "e730f08b6ce55c29b74af6af8aa31de316d254795e32be976a6ea3690aca8991"
   },
   "counts": {
-    "repository": 181,
+    "repository": 182,
     "hosts": 0,
     "guests": 24
   },
@@ -314,7 +314,27 @@
         "notes": [
           "Bazel registry transitive dependencies are unresolved without a tracked module lock."
         ],
-        "version": "0.71.3"
+        "version": "0.74.0"
+      },
+      {
+        "name": "rules_shell",
+        "kind": "library",
+        "ecosystem": "bazel",
+        "scope": "build",
+        "evidence": [
+          {
+            "path": "poc/MODULE.bazel",
+            "line": 15,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [],
+        "dependencies": [],
+        "completeness": "declared",
+        "notes": [
+          "Bazel registry transitive dependencies are unresolved without a tracked module lock."
+        ],
+        "version": "0.8.0"
       },
       {
         "name": "ads-svc",
@@ -451,7 +471,7 @@
         "dependencies": [
           "cargo:proc-macro2@1.0.107",
           "cargo:quote@1.0.47",
-          "cargo:syn@3.0.6"
+          "cargo:syn@3.0.7"
         ],
         "completeness": "locked",
         "notes": [
@@ -829,7 +849,7 @@
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.189"
+          "cargo:libc@0.2.190"
         ],
         "completeness": "locked",
         "notes": [
@@ -881,7 +901,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "7d5515a3834141de9eafb9717ad39eea8247b5674e6066c404e8c4b365d2a29e"
+            "content": "03bb0e1cc970d482d121d9a1744999169b69a07470b3d644a7894e53fcaf4574"
           }
         ],
         "dependencies": [
@@ -891,8 +911,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.4.2",
-        "purl": "pkg:cargo/ctutils@0.4.2"
+        "version": "0.4.3",
+        "purl": "pkg:cargo/ctutils@0.4.3"
       },
       {
         "name": "digest",
@@ -916,7 +936,7 @@
           "cargo:block-buffer@0.12.1",
           "cargo:const-oid@0.10.2",
           "cargo:crypto-common@0.2.2",
-          "cargo:ctutils@0.4.2"
+          "cargo:ctutils@0.4.3"
         ],
         "completeness": "locked",
         "notes": [
@@ -1138,7 +1158,7 @@
         ],
         "dependencies": [
           "cargo:cfg-if@1.0.5",
-          "cargo:libc@0.2.189",
+          "cargo:libc@0.2.190",
           "cargo:r-efi@6.0.0",
           "cargo:rand_core@0.10.1"
         ],
@@ -1335,7 +1355,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+            "content": "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
           }
         ],
         "dependencies": [],
@@ -1343,8 +1363,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.2.189",
-        "purl": "pkg:cargo/libc@0.2.189"
+        "version": "0.2.190",
+        "purl": "pkg:cargo/libc@0.2.190"
       },
       {
         "name": "libredox",
@@ -1365,7 +1385,7 @@
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.189"
+          "cargo:libc@0.2.190"
         ],
         "completeness": "locked",
         "notes": [
@@ -1498,11 +1518,11 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "4b18443e9c262bfe8fa82f51666e2642c53393f7e5c27b3e1aeab922cff5b9d8"
+            "content": "1788edb87fdc09c7e26304471e2f5be8cdefb1b6930d6e3985fc02ff53bf86ee"
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.189",
+          "cargo:libc@0.2.190",
           "cargo:wasi@0.11.1+wasi-snapshot-preview1",
           "cargo:windows-sys@0.61.2"
         ],
@@ -1510,8 +1530,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "1.2.3",
-        "purl": "pkg:cargo/mio@1.2.3"
+        "version": "1.2.4",
+        "purl": "pkg:cargo/mio@1.2.4"
       },
       {
         "name": "objc2-core-foundation",
@@ -1644,9 +1664,9 @@
         ],
         "dependencies": [
           "cargo:cfg-if@1.0.5",
-          "cargo:libc@0.2.189",
+          "cargo:libc@0.2.190",
           "cargo:redox_syscall@0.5.18",
-          "cargo:smallvec@1.16.2",
+          "cargo:smallvec@1.16.3",
           "cargo:windows-link@0.2.1"
         ],
         "completeness": "locked",
@@ -1894,7 +1914,7 @@
           "cargo:futures-util@0.3.34",
           "cargo:log@0.4.34",
           "cargo:tokio-postgres@0.7.18",
-          "cargo:tokio@1.53.1"
+          "cargo:tokio@1.53.2"
         ],
         "completeness": "locked",
         "notes": [
@@ -2255,7 +2275,7 @@
         "dependencies": [
           "cargo:proc-macro2@1.0.107",
           "cargo:quote@1.0.47",
-          "cargo:syn@3.0.6"
+          "cargo:syn@3.0.7"
         ],
         "completeness": "locked",
         "notes": [
@@ -2389,7 +2409,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "f9395f0f0eee849a9b707b2f06bb92a6a422090e2123bb2ef8e87a0e61892a8e"
+            "content": "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
           }
         ],
         "dependencies": [],
@@ -2397,8 +2417,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "1.16.2",
-        "purl": "pkg:cargo/smallvec@1.16.2"
+        "version": "1.16.3",
+        "purl": "pkg:cargo/smallvec@1.16.3"
       },
       {
         "name": "socket2",
@@ -2419,7 +2439,7 @@
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.189",
+          "cargo:libc@0.2.190",
           "cargo:windows-sys@0.61.2"
         ],
         "completeness": "locked",
@@ -2474,7 +2494,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee"
+            "content": "d62a2e0561533f2ca2561d0cf27fd9fedb640a1bf2616ff5d5c80d99017faadc"
           }
         ],
         "dependencies": [
@@ -2486,8 +2506,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "3.0.6",
-        "purl": "pkg:cargo/syn@3.0.6"
+        "version": "3.0.7",
+        "purl": "pkg:cargo/syn@3.0.7"
       },
       {
         "name": "tinyvec",
@@ -2549,8 +2569,8 @@
           "cargo:postgres-types@0.2.14",
           "cargo:rand@0.10.3",
           "cargo:socket2@0.6.5",
-          "cargo:tokio-util@0.7.19",
-          "cargo:tokio@1.53.1",
+          "cargo:tokio-util@0.7.20",
+          "cargo:tokio@1.53.2",
           "cargo:whoami@2.1.3"
         ],
         "completeness": "locked",
@@ -2575,23 +2595,23 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "494815d09bf52b5548659851081238f0ca39ff638363907596da739561c62c52"
+            "content": "e464cf451ba96ebfc6f9b6542f17ee8b8956e33f1e40d9690624e59d7a7f8a4b"
           }
         ],
         "dependencies": [
           "cargo:bytes@1.12.1",
           "cargo:futures-core@0.3.34",
           "cargo:futures-sink@0.3.34",
-          "cargo:libc@0.2.189",
+          "cargo:libc@0.2.190",
           "cargo:pin-project-lite@0.2.17",
-          "cargo:tokio@1.53.1"
+          "cargo:tokio@1.53.2"
         ],
         "completeness": "locked",
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.7.19",
-        "purl": "pkg:cargo/tokio-util@0.7.19"
+        "version": "0.7.20",
+        "purl": "pkg:cargo/tokio-util@0.7.20"
       },
       {
         "name": "tokio",
@@ -2608,13 +2628,13 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+            "content": "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
           }
         ],
         "dependencies": [
           "cargo:bytes@1.12.1",
-          "cargo:libc@0.2.189",
-          "cargo:mio@1.2.3",
+          "cargo:libc@0.2.190",
+          "cargo:mio@1.2.4",
           "cargo:pin-project-lite@0.2.17",
           "cargo:socket2@0.6.5",
           "cargo:windows-sys@0.61.2"
@@ -2623,8 +2643,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "1.53.1",
-        "purl": "pkg:cargo/tokio@1.53.1"
+        "version": "1.53.2",
+        "purl": "pkg:cargo/tokio@1.53.2"
       },
       {
         "name": "typenum",
@@ -2890,7 +2910,7 @@
           "cargo:bumpalo@3.20.3",
           "cargo:proc-macro2@1.0.107",
           "cargo:quote@1.0.47",
-          "cargo:syn@3.0.6",
+          "cargo:syn@3.0.7",
           "cargo:wasm-bindgen-shared@0.2.129"
         ],
         "completeness": "locked",
@@ -3037,7 +3057,7 @@
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.189",
+          "cargo:libc@0.2.190",
           "cargo:libredox@0.1.25",
           "cargo:objc2-system-configuration@0.3.2",
           "cargo:wasite@1.0.2",
@@ -3268,7 +3288,7 @@
         "notes": [
           "Container OS/package contents were not scanned; tag-only images are mutable."
         ],
-        "versionConstraint": "1.96-slim"
+        "versionConstraint": "1.98-slim-bookworm"
       },
       {
         "name": "flutter",
@@ -3342,7 +3362,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "275c97ac894d0d957313769d6b7d74c5e030ee71fcc820322cfb9422c8ca6ad14f99f9f96d2d685be70cf90b063ad5567799e14a96f0656c7faee7beaf967e3c"
+            "content": "8d236b448caf3d52cbe44d73fed4b9ccb029ae8b06cff16e2353d6c043b3e7d8f71384d34f34a9a8a6ff4431aa261856d101d8212197c6ae7cdb01b1e93d754f"
           }
         ],
         "dependencies": [],
@@ -3350,9 +3370,9 @@
         "notes": [
           "npm lock location: node_modules/@oxc-project/types."
         ],
-        "version": "0.151.0",
+        "version": "0.153.0",
         "license": "MIT",
-        "purl": "pkg:npm/%40oxc-project/types@0.151.0"
+        "purl": "pkg:npm/%40oxc-project/types@0.153.0"
       },
       {
         "name": "@rolldown/binding-android-arm-eabi",
@@ -3369,7 +3389,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "0399177c62af2965991344ed3eb7ecbd3faae18e5dd501bc806533a588c6c9d33e7c044cf4cb97f743eb5d85ded176ec0d5832c713731e8ea08828fdd1bb0537"
+            "content": "56efcd202ae0751bd439e689648c81d853fadece9f3bfe2e77997c7579b10f1f720f29fe98dd32fa0b2fb15be24a58be4f7eb502aa34878e84b8ca286ebc1ac0"
           }
         ],
         "dependencies": [],
@@ -3377,9 +3397,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-android-arm-eabi."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.13"
       },
       {
         "name": "@rolldown/binding-android-arm64",
@@ -3396,7 +3416,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "cfa713c9ccfe889e0f564b8be071d6e037d37e8794ff69ea618b923ab4e61fbc872b96342c23a7034dd5e193716afc95694d683aa520220da494dfecf9448638"
+            "content": "e8b12822b1b2e6fbc27766e8367bf6b283d25198ff3d1be1a7c47fb7d2a55fe9886714e1204fd9ab1ac65f19ae357d05baf405bcb759afb4b81eb62960156111"
           }
         ],
         "dependencies": [],
@@ -3404,9 +3424,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-android-arm64."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-android-arm64@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-android-arm64@1.2.13"
       },
       {
         "name": "@rolldown/binding-darwin-arm64",
@@ -3423,7 +3443,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "8d286fa8db4feaf0c2ebf03924e0336d557e0e4807aa197f49c5422446edf93518e90633ed89d772b837b0bb450678aba347ff2dde7467009603a7fb2980f59d"
+            "content": "09a252473950e90fb390331503d3a45710635683d1083104defd05489f64210060463140a40dd28b88a385b3555238bb649b7e3df3b47b8eaacb89cf2271d43c"
           }
         ],
         "dependencies": [],
@@ -3431,9 +3451,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-darwin-arm64."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.13"
       },
       {
         "name": "@rolldown/binding-darwin-x64",
@@ -3450,7 +3470,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "7f68b6c62356ab5675976fbeab67ee85945d2c04f76aac43eaf44d9b5440c6952805c76a341dc2d2cd41b7e2be3db131d85e45e20429ea1a8a92984263fc45f7"
+            "content": "7b8af7e342398714b32640f7609071833abfac9df0c31c1d2cb6f614fb75669c9e9b6d27ad03d3d750c310491acf0c5a1ee987f30a6096ca7f3b3823ff04fa9b"
           }
         ],
         "dependencies": [],
@@ -3458,9 +3478,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-darwin-x64."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.13"
       },
       {
         "name": "@rolldown/binding-freebsd-x64",
@@ -3477,7 +3497,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "e08af915238a20032be2bd24131a6dd6cddb320cc9537ac0e39018387b50a65b34a0d7aa71804aad6325724ad81f82827c62df91f9f5b4dd5d9993cc56c757a3"
+            "content": "8680560d9e3f2bf98929531bb2051dd637e90360e23ab279e26a5e80e6d4f53047041aed5f814b2172494110cf67fd839fdd46bcfa1bf99da1c0a2737f813949"
           }
         ],
         "dependencies": [],
@@ -3485,9 +3505,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-freebsd-x64."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.13"
       },
       {
         "name": "@rolldown/binding-linux-arm-gnueabihf",
@@ -3504,7 +3524,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "fe09d10ccfb7f4144ecc037f9353998c33e70cc719c41ff4114c4a8ce34ee72564344be5b28303af118d2a0662fedb45ae24b683094337307ae69bcd6c539721"
+            "content": "a05f5f66edef4d69d38950240c5c54f4f24bb759e1db42bd451a6e1ec47b6671362fb5e8a2405b0c154ba2309548b19bbed4a5c5e50d9e3023e836cdb0acb36e"
           }
         ],
         "dependencies": [],
@@ -3512,9 +3532,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-arm-gnueabihf."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.13"
       },
       {
         "name": "@rolldown/binding-linux-arm64-gnu",
@@ -3531,7 +3551,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "3c568af07c2f0076da29b05c0cd42286330a62f16703986210dc7f979b698530f3d44d16169df697403b6aaee5c94c06b11c3fc52acd232fe020ae2d86b482af"
+            "content": "0d3a5bffe8cc8aa58c3e0a619f892c5b5cd6f972c9e9d249f4532f9c893d236f752e109cb4c3e131826b3f9b7da7a0bda9adca5da7437541191c168f87790dc5"
           }
         ],
         "dependencies": [],
@@ -3539,9 +3559,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-arm64-gnu."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.13"
       },
       {
         "name": "@rolldown/binding-linux-arm64-musl",
@@ -3558,7 +3578,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "02c93325420a44b3f192bb91d702ca7b019b3b0f8461f53ff653ab0458f8005ac403c84fa4a16738358dbb658b68db3440d9046fd40826e7e65596482ff6c996"
+            "content": "c54f8abeff4dd80dd2637e73161d45596363c5b69d13f04a7aa9e45deeef49c538199b30ef9ec19559832c84d912af033e993a9bbba80d890aecffb1fee5393b"
           }
         ],
         "dependencies": [],
@@ -3566,9 +3586,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-arm64-musl."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.13"
       },
       {
         "name": "@rolldown/binding-linux-ppc64-gnu",
@@ -3585,7 +3605,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "aa55060217a1db287c69f1fb401831d0fad11cdf3984a9cd77bf31f0c78c8578afb9ebe077cbe07fafc2b2d3b398d298fe52d31ef353acfcbdf1c2e702e83327"
+            "content": "5cc93f867861db9a10ef9e8b7256f5435d61e25974c42d04b1ae70e15ce9fa6004d92dc018981e3344a89eb22063c7c78636ab6fa85ca13bb0a051b45553f68a"
           }
         ],
         "dependencies": [],
@@ -3593,9 +3613,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-ppc64-gnu."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.13"
       },
       {
         "name": "@rolldown/binding-linux-s390x-gnu",
@@ -3612,7 +3632,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "b1e72911a77ed2f09b49f9fcba91724a40ec92ff9b18f9374c74834bd63cf72738adbe24cea1e9f039b277d064416e129e13570590a5ffa0ab3bffe165a84d25"
+            "content": "5350684c7626972c04da7dc75168f367ef0442c2abf8ec29c58b8359ab9bc78dad50bf1048bee73aa473fcd5476a789b6c53f7335471ba9af3ff035c6cc2a3ab"
           }
         ],
         "dependencies": [],
@@ -3620,9 +3640,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-s390x-gnu."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.13"
       },
       {
         "name": "@rolldown/binding-linux-x64-gnu",
@@ -3639,7 +3659,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "98e5414f774fa645a6f170563e65386dff94e9d6032de328ffda235268ace0dd0be6ebb5d2aadae6f3b29e067bfcf49da04e06f4abd1b786e5a11c4d8cb6acec"
+            "content": "278726f343dceb0130579019e36a3adac21080393e63b476b3ae3a8c8c2ebcefb8578e90079f0de2f56e30f58205a360babb172e999458957ffd640090fbc705"
           }
         ],
         "dependencies": [],
@@ -3647,9 +3667,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-x64-gnu."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.13"
       },
       {
         "name": "@rolldown/binding-linux-x64-musl",
@@ -3666,7 +3686,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "22cefc8bd03c522e12a9cc54c0527db8c9a30e7e7c21b5538c55987507acb451207ae1261cc2c636b8979d524a9301b6622663c3c70fd33093c8331d0c6b4e3a"
+            "content": "5b47ae652e3453857a2649849d50885fd99cb0be9c6d74385fc736c3e30c3888c583af135d45bebb7453fb67b5b75a6ff6683f10fde90ed2b73ce5dd43b471cb"
           }
         ],
         "dependencies": [],
@@ -3674,9 +3694,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-x64-musl."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.13"
       },
       {
         "name": "@rolldown/binding-openharmony-arm64",
@@ -3693,7 +3713,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "7540979de67cec83543324340fe0b41eb1013543cd5c768f994e464e3c8a4c9122bacb30f4a6a3e4b9fc533b4f7b87a957f7dfbe034111a764b1d621996eb124"
+            "content": "768fc017fe27f4c46c8626b76b9697a32f3133673a9a07d3e83ec7fdd63a9b2e73fa17c2211e1a6fb9a4e08463fbe9ec110a4acb7f647740d09c3abeafaf76b7"
           }
         ],
         "dependencies": [],
@@ -3701,9 +3721,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-openharmony-arm64."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.13"
       },
       {
         "name": "@rolldown/binding-win32-arm64-msvc",
@@ -3720,7 +3740,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "8c1cb16faa9f77e6c7d7151dd2a9df1676f5ee2f6c5813d8dad39abc9d25ded76bdce4eef8abed9bc71dfc95799c5b7ae7b6f556a1a5b7183da253847e87d75b"
+            "content": "e85b547f67096686eeb497719c6617f33d2fb5b82a5346f6bfcbdf0619176fdc29d8ca69305b64ba713e21a3a7b728b4d6b9084283d6d861c006d7f3b02d0145"
           }
         ],
         "dependencies": [],
@@ -3728,9 +3748,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-win32-arm64-msvc."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.13"
       },
       {
         "name": "@rolldown/binding-win32-x64-msvc",
@@ -3747,7 +3767,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "fcfccaab3009d378b5f68cb622d3efcaf6958ce8c108d9df689b3ccaf51d1812a68844a09eb2524366b077cd50cc56db9c09aeed83bd66726b0c26fd55224f44"
+            "content": "50a8456994de4dc6caadbde253cda6d7b8d570f100a2a0e408de4c06a80fc994b0a7f7109a26f6d5cad34b40dd1fb4f507bc19456108f3d61000e24c7ade7286"
           }
         ],
         "dependencies": [],
@@ -3755,9 +3775,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-win32-x64-msvc."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.11"
+        "purl": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.13"
       },
       {
         "name": "@rolldown/pluginutils",
@@ -4414,23 +4434,23 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "cb12da415f609214bc7b326a08cebe9dd53b98363a82a020ef9350fb4223c0423c2183a64028244701ca5527d65d6d3be83b2a328d0393ed052b553e33946017"
+            "content": "7e124d19476c7106b81e4234c45c70a275b28675517823c36d723b147ee39b3a67542ac5408ecf46b85679c3b6eb7eb5d2f3abb3db6bd98e3171ff2e01d1716f"
           }
         ],
         "dependencies": [
           "npm:@rolldown/pluginutils@1.0.1",
-          "npm:vite@8.3.1"
+          "npm:vite@8.3.4"
         ],
         "completeness": "locked",
         "notes": [
           "Unresolved npm peerDependencies: @rolldown/plugin-babel (^0.1.7 || ^0.2.0).",
           "Unresolved npm peerDependencies: babel-plugin-react-compiler (^1.0.0).",
-          "Unresolved npm peerDependencies: oxc-transform-react (^0.145.0).",
+          "Unresolved npm peerDependencies: oxc-transform-react (^0.152.0).",
           "npm lock location: node_modules/@vitejs/plugin-react."
         ],
-        "version": "6.1.1",
+        "version": "6.1.2",
         "license": "MIT",
-        "purl": "pkg:npm/%40vitejs/plugin-react@6.1.1"
+        "purl": "pkg:npm/%40vitejs/plugin-react@6.1.2"
       },
       {
         "name": "amisad-web-spa",
@@ -4448,12 +4468,12 @@
         "dependencies": [
           "npm:@types/react-dom@19.3.0",
           "npm:@types/react@19.3.0",
-          "npm:@vitejs/plugin-react@6.1.1",
+          "npm:@vitejs/plugin-react@6.1.2",
           "npm:react-dom@19.3.0",
           "npm:react-router-dom@7.18.4",
           "npm:react@19.3.0",
           "npm:typescript@7.0.2",
-          "npm:vite@8.3.1"
+          "npm:vite@8.3.4"
         ],
         "completeness": "declared",
         "notes": [],
@@ -4949,7 +4969,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "636b54372e28bb0eadab9a0348a7906063b286450184d39c195ff4d8a0beea477d7831aa75977efa68cc8880e296b058be3127098bd5b6cb870ae3fea2449fba"
+            "content": "b8a760d86dc63422909fd6f260ea716c6aab4f67c63b9291b7927ff1bde9a24f2b4faab119617a871332262118b407fe155c98b83f6145a0ea5f9b8f15827865"
           }
         ],
         "dependencies": [],
@@ -4957,9 +4977,9 @@
         "notes": [
           "npm lock location: node_modules/nanoid."
         ],
-        "version": "3.3.19",
+        "version": "3.3.20",
         "license": "MIT",
-        "purl": "pkg:npm/nanoid@3.3.19"
+        "purl": "pkg:npm/nanoid@3.3.20"
       },
       {
         "name": "picocolors",
@@ -5030,21 +5050,21 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "451bb3a83b6de58f61deabb3e615a12be4cf9ec995b3a5b0494e8b90931e6381ecb54103b984c6f1425275ac0c4739b302d57e284a06f0ddd0836a8bcb9bccfc"
+            "content": "e3d7068546d78fc41e9efd224ccc40d5c141cf15e872da42f548ddefbb7559c6c922bea717f788ee0ffc320c6b62574546e017be36bbc504706afa16ee482bc5"
           }
         ],
         "dependencies": [
-          "npm:nanoid@3.3.19",
+          "npm:nanoid@3.3.20",
           "npm:picocolors@1.1.1",
-          "npm:source-map-js@1.2.1"
+          "npm:source-map-js@1.2.2"
         ],
         "completeness": "locked",
         "notes": [
           "npm lock location: node_modules/postcss."
         ],
-        "version": "8.5.28",
+        "version": "8.5.29",
         "license": "MIT",
-        "purl": "pkg:npm/postcss@8.5.28"
+        "purl": "pkg:npm/postcss@8.5.29"
       },
       {
         "name": "react-dom",
@@ -5196,35 +5216,35 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "aa94b0232cf48c742ae6a5c14cdc45984ebaeb8ac9ecefb84ef3c53a239a052af3f0838773592828a4aa4ccd87eaed541b5f93bdeb82eaf6831ca5c53af6f52b"
+            "content": "ff96a93a4c16c6d002710b59e5696b02c292e09c175538503c967746a22bb9163d506f4cf1ed15957374ebcc6e9bf251280e1a214a09d778217bf9060af89d89"
           }
         ],
         "dependencies": [
-          "npm:@oxc-project/types@0.151.0",
-          "npm:@rolldown/binding-android-arm-eabi@1.2.11",
-          "npm:@rolldown/binding-android-arm64@1.2.11",
-          "npm:@rolldown/binding-darwin-arm64@1.2.11",
-          "npm:@rolldown/binding-darwin-x64@1.2.11",
-          "npm:@rolldown/binding-freebsd-x64@1.2.11",
-          "npm:@rolldown/binding-linux-arm-gnueabihf@1.2.11",
-          "npm:@rolldown/binding-linux-arm64-gnu@1.2.11",
-          "npm:@rolldown/binding-linux-arm64-musl@1.2.11",
-          "npm:@rolldown/binding-linux-ppc64-gnu@1.2.11",
-          "npm:@rolldown/binding-linux-s390x-gnu@1.2.11",
-          "npm:@rolldown/binding-linux-x64-gnu@1.2.11",
-          "npm:@rolldown/binding-linux-x64-musl@1.2.11",
-          "npm:@rolldown/binding-openharmony-arm64@1.2.11",
-          "npm:@rolldown/binding-win32-arm64-msvc@1.2.11",
-          "npm:@rolldown/binding-win32-x64-msvc@1.2.11",
+          "npm:@oxc-project/types@0.153.0",
+          "npm:@rolldown/binding-android-arm-eabi@1.2.13",
+          "npm:@rolldown/binding-android-arm64@1.2.13",
+          "npm:@rolldown/binding-darwin-arm64@1.2.13",
+          "npm:@rolldown/binding-darwin-x64@1.2.13",
+          "npm:@rolldown/binding-freebsd-x64@1.2.13",
+          "npm:@rolldown/binding-linux-arm-gnueabihf@1.2.13",
+          "npm:@rolldown/binding-linux-arm64-gnu@1.2.13",
+          "npm:@rolldown/binding-linux-arm64-musl@1.2.13",
+          "npm:@rolldown/binding-linux-ppc64-gnu@1.2.13",
+          "npm:@rolldown/binding-linux-s390x-gnu@1.2.13",
+          "npm:@rolldown/binding-linux-x64-gnu@1.2.13",
+          "npm:@rolldown/binding-linux-x64-musl@1.2.13",
+          "npm:@rolldown/binding-openharmony-arm64@1.2.13",
+          "npm:@rolldown/binding-win32-arm64-msvc@1.2.13",
+          "npm:@rolldown/binding-win32-x64-msvc@1.2.13",
           "npm:@rolldown/pluginutils@1.0.1"
         ],
         "completeness": "locked",
         "notes": [
           "npm lock location: node_modules/rolldown."
         ],
-        "version": "1.2.11",
+        "version": "1.2.13",
         "license": "MIT",
-        "purl": "pkg:npm/rolldown@1.2.11"
+        "purl": "pkg:npm/rolldown@1.2.13"
       },
       {
         "name": "scheduler",
@@ -5295,7 +5315,7 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "51758c2a12cec1529bef6f0852d40f5f17d853ebac7726ed52b2bff2e184f0240cbeb84ea70bf30c1c23d108522fb31073bbc8b084811bc550f3e203431a5f40"
+            "content": "2868fff18e37c77e5a6550edb7e27898ad61a0b18750b3187d290e0c93508cd0c2de85b53ea3e8c4cc28d292d4b1633f5041b338dfcdc5e1f2c047cd5cd3f757"
           }
         ],
         "dependencies": [],
@@ -5303,9 +5323,9 @@
         "notes": [
           "npm lock location: node_modules/source-map-js."
         ],
-        "version": "1.2.1",
+        "version": "1.2.2",
         "license": "BSD-3-Clause",
-        "purl": "pkg:npm/source-map-js@1.2.1"
+        "purl": "pkg:npm/source-map-js@1.2.2"
       },
       {
         "name": "tinyglobby",
@@ -5410,15 +5430,15 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "fdbbc7f44f6d9825d11a9dae5d8dd66ce95daa94f01646e16bff0035a110e95931847eb42b2a8bc2066aea51b6cbee2e4f9e71f7ef5e50732943bb869ce08a8c"
+            "content": "21fb4b13ca6126174d44818d115e09082bdf35272865055f71768df1342ba2958626d38772efa2001f691dcb86be611bfe475dc342c17bf8d2f33b5d0bac5d89"
           }
         ],
         "dependencies": [
           "npm:fsevents@2.3.3",
           "npm:lightningcss@1.33.0",
           "npm:picomatch@4.0.7",
-          "npm:postcss@8.5.28",
-          "npm:rolldown@1.2.11",
+          "npm:postcss@8.5.29",
+          "npm:rolldown@1.2.13",
           "npm:tinyglobby@0.2.17"
         ],
         "completeness": "locked",
@@ -5437,9 +5457,9 @@
           "Unresolved npm peerDependencies: yaml (^2.4.2).",
           "npm lock location: node_modules/vite."
         ],
-        "version": "8.3.1",
+        "version": "8.3.4",
         "license": "MIT",
-        "purl": "pkg:npm/vite@8.3.1"
+        "purl": "pkg:npm/vite@8.3.4"
       },
       {
         "name": "amisad_buyer",
@@ -5482,10 +5502,10 @@
         "dependencies": [],
         "completeness": "unresolved",
         "notes": [
-          "Declared Dart constraint: ^4.0.0.",
+          "Declared Dart constraint: ^6.0.0.",
           "No tracked pub lockfile was resolved."
         ],
-        "versionConstraint": "^4.0.0"
+        "versionConstraint": "^6.0.0"
       },
       {
         "name": "Python",
@@ -5497,7 +5517,7 @@
         "evidence": [
           {
             "path": "tools/sbom_dependencies.py",
-            "line": 11,
+            "line": 12,
             "detail": "SBOM collector uses Python 3.11 tomllib and the standard library"
           }
         ],
@@ -5521,7 +5541,7 @@
         "dependencies": [],
         "completeness": "declared",
         "notes": [],
-        "version": "7.7.1"
+        "version": "9.3.0"
       },
       {
         "name": "Rust",
@@ -5531,7 +5551,7 @@
         "evidence": [
           {
             "path": "poc/MODULE.bazel",
-            "line": 21,
+            "line": 22,
             "detail": "Bazel Rust toolchain pin"
           }
         ],
@@ -5539,7 +5559,7 @@
         "dependencies": [],
         "completeness": "declared",
         "notes": [],
-        "version": "1.96.1"
+        "version": "1.98.0"
       }
     ],
     "hosts": [],
@@ -5703,12 +5723,12 @@
         "evidence": [
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
-            "line": 110,
+            "line": 123,
             "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-amd64; installed payload dependencies unresolved"
           },
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
-            "line": 110,
+            "line": 123,
             "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-arm64; installed payload dependencies unresolved"
           }
         ],
@@ -5730,22 +5750,22 @@
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh",
             "line": 63,
-            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz; installed payload dependencies unresolved"
+            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-amd64.tar.gz; installed payload dependencies unresolved"
           },
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh",
             "line": 65,
-            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz; installed payload dependencies unresolved"
+            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-amd64.tar.gz; installed payload dependencies unresolved"
           },
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh",
             "line": 63,
-            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-arm64.tar.gz; installed payload dependencies unresolved"
+            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-arm64.tar.gz; installed payload dependencies unresolved"
           },
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh",
             "line": 65,
-            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-arm64.tar.gz; installed payload dependencies unresolved"
+            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-arm64.tar.gz; installed payload dependencies unresolved"
           }
         ],
         "hashes": [],
@@ -5754,7 +5774,7 @@
         "notes": [
           "Conditional source declaration; installed state and transitive dependencies are not resolved."
         ],
-        "version": "2.15.0"
+        "version": "2.15.1"
       },
       {
         "name": "rustup-init",
@@ -6094,57 +6114,57 @@
           {
             "path": "poc/components/edge/slice-runtime/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/ads-svc/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/audit-svc/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/connect-svc/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/fabric-coordinator/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/identity-mock/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/insights-svc/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/ledger-svc/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/platform-svc/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/resource-svc/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/seller-svc/Dockerfile",
             "line": 5,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
           }
         ],
         "hashes": [],
@@ -6153,7 +6173,7 @@
         "notes": [
           "Conditional source declaration; installed state and transitive dependencies are not resolved."
         ],
-        "versionConstraint": "1.96-slim"
+        "versionConstraint": "1.98-slim-bookworm"
       },
       {
         "name": "rust",
@@ -6162,6 +6182,11 @@
         "group": "amisad.dev:guests:ubuntu-server-24",
         "scope": "runtime",
         "evidence": [
+          {
+            "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
+            "line": 104,
+            "detail": "target=ubuntu-server-24; action=rustup toolchain install; requested=1.98.0; release channel may be floating"
+          },
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
             "line": 86,
@@ -6174,7 +6199,7 @@
         "notes": [
           "Conditional source declaration; installed state and transitive dependencies are not resolved."
         ],
-        "version": "1.96.1"
+        "version": "1.98.0"
       }
     ]
   },
@@ -6206,7 +6231,7 @@
     {
       "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
       "line": 86,
-      "detail": "installer/action requires source or artifact resolution: \"$work/rustup-init\" -y --default-toolchain 1.96.1 || rc=$?",
+      "detail": "installer/action requires source or artifact resolution: \"$work/rustup-init\" -y --default-toolchain 1.98.0 || rc=$?",
       "status": "unresolved"
     },
     {

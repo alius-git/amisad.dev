@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="Rust" tagId="urn:uuid:44cbac9c-8706-52b7-857e-5e67c2c2625f" version="1.98.0" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+  <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
+  <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;declared&quot;, &quot;ecosystem&quot;: &quot;toolchain&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;Bazel Rust toolchain pin&quot;, &quot;line&quot;: 22, &quot;path&quot;: &quot;poc/MODULE.bazel&quot;}], &quot;notes&quot;: [], &quot;scope&quot;: &quot;build&quot;}" />
+</SoftwareIdentity>

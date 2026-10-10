@@ -2,6 +2,8 @@
 # Copyright (c) 2019-2026 by Alisson Sol et al.
 # Flutter has no mature Bazel rules; the wrapper delegates to the Flutter CLI.
 # Invoke with: bazel run //components/apps/buyer-flutter:build
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+
 sh_binary(
     name = "build",
     srcs = ["build.sh"],

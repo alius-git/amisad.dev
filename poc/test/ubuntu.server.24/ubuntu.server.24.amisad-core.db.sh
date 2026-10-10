@@ -116,8 +116,8 @@ amisad_host_fetch "$SCHEMA" "yuruna-repo/project/poc/db/schema.sql?nocache=${RAN
 amisad_verify_download "$SCHEMA" "${AMISAD_SCHEMA_SHA256:-}" \
     "the database schema (poc/db/schema.sql)" AMISAD_SCHEMA_SHA256 || exit 7
 
-# Self-sufficient PostgreSQL install (Ubuntu's default packages): the
-# framework's pgdg-based script raced its own cluster re-init.
+# Keep this database step self-contained and use Ubuntu's supported default
+# PostgreSQL packages without requiring a separate framework installation.
 if ! command -v psql >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
     sudo apt-get update -y

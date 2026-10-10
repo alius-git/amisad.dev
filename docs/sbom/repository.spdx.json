@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-repository",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/repository/b28c92d6f362ff57885fcadbb23458c737a0395582aab9516c2bc3c90c6b945e",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/repository/eecd2132a381c79e27e86736f4ecd0e19bf14768983be6f5f6f0b90e9527530f",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,19 +25,30 @@
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared repository inventory; source-inputs SHA256 b28c92d6f362ff57885fcadbb23458c737a0395582aab9516c2bc3c90c6b945e. Not an installed-system scan.",
+      "comment": "Declared repository inventory; source-inputs SHA256 eecd2132a381c79e27e86736f4ecd0e19bf14768983be6f5f6f0b90e9527530f. Not an installed-system scan.",
       "versionInfo": "2026.10.11"
     },
     {
       "name": "rules_rust",
-      "SPDXID": "SPDXRef-9328c7589c6a3f437b1c",
+      "SPDXID": "SPDXRef-4a30a4d0502f7c9a64e5",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}",
-      "versionInfo": "0.71.3"
+      "versionInfo": "0.74.0"
+    },
+    {
+      "name": "rules_shell",
+      "SPDXID": "SPDXRef-ad8e4eee9f54790d067f",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 15, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}",
+      "versionInfo": "0.8.0"
     },
     {
       "name": "ads-svc",
@@ -443,25 +454,25 @@
     },
     {
       "name": "ctutils",
-      "SPDXID": "SPDXRef-aa040d9c7308a54cd032",
+      "SPDXID": "SPDXRef-36c8c27f93de8f762982",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 134, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
-      "versionInfo": "0.4.2",
+      "versionInfo": "0.4.3",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "7d5515a3834141de9eafb9717ad39eea8247b5674e6066c404e8c4b365d2a29e"
+          "checksumValue": "03bb0e1cc970d482d121d9a1744999169b69a07470b3d644a7894e53fcaf4574"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:cargo/ctutils@0.4.2"
+          "referenceLocator": "pkg:cargo/ctutils@0.4.3"
         }
       ]
     },
@@ -803,25 +814,25 @@
     },
     {
       "name": "libc",
-      "SPDXID": "SPDXRef-34a71dbb96a0de0ca4c8",
+      "SPDXID": "SPDXRef-0f0cff7a49f65ef4c7e0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 272, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
-      "versionInfo": "0.2.189",
+      "versionInfo": "0.2.190",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+          "checksumValue": "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:cargo/libc@0.2.189"
+          "referenceLocator": "pkg:cargo/libc@0.2.190"
         }
       ]
     },
@@ -947,25 +958,25 @@
     },
     {
       "name": "mio",
-      "SPDXID": "SPDXRef-3d1ab4d9c0da045e029f",
+      "SPDXID": "SPDXRef-61ce5153b3c3e63ab43b",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 318, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
-      "versionInfo": "1.2.3",
+      "versionInfo": "1.2.4",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "4b18443e9c262bfe8fa82f51666e2642c53393f7e5c27b3e1aeab922cff5b9d8"
+          "checksumValue": "1788edb87fdc09c7e26304471e2f5be8cdefb1b6930d6e3985fc02ff53bf86ee"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:cargo/mio@1.2.3"
+          "referenceLocator": "pkg:cargo/mio@1.2.4"
         }
       ]
     },
@@ -1667,25 +1678,25 @@
     },
     {
       "name": "smallvec",
-      "SPDXID": "SPDXRef-6e55ee25d947e74274e4",
+      "SPDXID": "SPDXRef-abbc6e614bbf7abca5c9",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 593, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
-      "versionInfo": "1.16.2",
+      "versionInfo": "1.16.3",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "f9395f0f0eee849a9b707b2f06bb92a6a422090e2123bb2ef8e87a0e61892a8e"
+          "checksumValue": "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:cargo/smallvec@1.16.2"
+          "referenceLocator": "pkg:cargo/smallvec@1.16.3"
         }
       ]
     },
@@ -1739,25 +1750,25 @@
     },
     {
       "name": "syn",
-      "SPDXID": "SPDXRef-e28e76d005de3cf73691",
+      "SPDXID": "SPDXRef-b22e4a8a1043bf1e4bee",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 620, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
-      "versionInfo": "3.0.6",
+      "versionInfo": "3.0.7",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee"
+          "checksumValue": "d62a2e0561533f2ca2561d0cf27fd9fedb640a1bf2616ff5d5c80d99017faadc"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:cargo/syn@3.0.6"
+          "referenceLocator": "pkg:cargo/syn@3.0.7"
         }
       ]
     },
@@ -1811,49 +1822,49 @@
     },
     {
       "name": "tokio-util",
-      "SPDXID": "SPDXRef-fa4f9fae46d0a4a0f39d",
+      "SPDXID": "SPDXRef-36c5c8e3aaa4261a674d",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 677, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
-      "versionInfo": "0.7.19",
+      "versionInfo": "0.7.20",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "494815d09bf52b5548659851081238f0ca39ff638363907596da739561c62c52"
+          "checksumValue": "e464cf451ba96ebfc6f9b6542f17ee8b8956e33f1e40d9690624e59d7a7f8a4b"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:cargo/tokio-util@0.7.19"
+          "referenceLocator": "pkg:cargo/tokio-util@0.7.20"
         }
       ]
     },
     {
       "name": "tokio",
-      "SPDXID": "SPDXRef-fc440f288497378276b3",
+      "SPDXID": "SPDXRef-a487fc4ab2dda702d0a6",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 637, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
-      "versionInfo": "1.53.1",
+      "versionInfo": "1.53.2",
       "checksums": [
         {
           "algorithm": "SHA256",
-          "checksumValue": "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+          "checksumValue": "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:cargo/tokio@1.53.1"
+          "referenceLocator": "pkg:cargo/tokio@1.53.2"
         }
       ]
     },
@@ -2307,7 +2318,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"build\", \"versionConstraint\": \"1.96-slim\"}"
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"build\", \"versionConstraint\": \"1.98-slim-bookworm\"}"
     },
     {
       "name": "flutter",
@@ -2341,385 +2352,385 @@
     },
     {
       "name": "@oxc-project/types",
-      "SPDXID": "SPDXRef-9fd7838cf359e50ff3e3",
+      "SPDXID": "SPDXRef-88e16e04a8872e4741b7",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 26, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@oxc-project/types.\"], \"scope\": \"build\"}",
-      "versionInfo": "0.151.0",
+      "versionInfo": "0.153.0",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "275c97ac894d0d957313769d6b7d74c5e030ee71fcc820322cfb9422c8ca6ad14f99f9f96d2d685be70cf90b063ad5567799e14a96f0656c7faee7beaf967e3c"
+          "checksumValue": "8d236b448caf3d52cbe44d73fed4b9ccb029ae8b06cff16e2353d6c043b3e7d8f71384d34f34a9a8a6ff4431aa261856d101d8212197c6ae7cdb01b1e93d754f"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40oxc-project/types@0.151.0"
+          "referenceLocator": "pkg:npm/%40oxc-project/types@0.153.0"
         }
       ]
     },
     {
       "name": "@rolldown/binding-android-arm-eabi",
-      "SPDXID": "SPDXRef-11ecce9903c8ab94790d",
+      "SPDXID": "SPDXRef-26f3529688393b508e03",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 36, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-android-arm-eabi.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "0399177c62af2965991344ed3eb7ecbd3faae18e5dd501bc806533a588c6c9d33e7c044cf4cb97f743eb5d85ded176ec0d5832c713731e8ea08828fdd1bb0537"
+          "checksumValue": "56efcd202ae0751bd439e689648c81d853fadece9f3bfe2e77997c7579b10f1f720f29fe98dd32fa0b2fb15be24a58be4f7eb502aa34878e84b8ca286ebc1ac0"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-android-arm64",
-      "SPDXID": "SPDXRef-ce78f0fb00fb1cd12093",
+      "SPDXID": "SPDXRef-8ef69596b3c47daa420b",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 53, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-android-arm64.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "cfa713c9ccfe889e0f564b8be071d6e037d37e8794ff69ea618b923ab4e61fbc872b96342c23a7034dd5e193716afc95694d683aa520220da494dfecf9448638"
+          "checksumValue": "e8b12822b1b2e6fbc27766e8367bf6b283d25198ff3d1be1a7c47fb7d2a55fe9886714e1204fd9ab1ac65f19ae357d05baf405bcb759afb4b81eb62960156111"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-android-arm64@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-android-arm64@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-darwin-arm64",
-      "SPDXID": "SPDXRef-bd2163fe3dd8f3cafc1c",
+      "SPDXID": "SPDXRef-3e5f0fcf7b7d96196931",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 70, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-darwin-arm64.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "8d286fa8db4feaf0c2ebf03924e0336d557e0e4807aa197f49c5422446edf93518e90633ed89d772b837b0bb450678aba347ff2dde7467009603a7fb2980f59d"
+          "checksumValue": "09a252473950e90fb390331503d3a45710635683d1083104defd05489f64210060463140a40dd28b88a385b3555238bb649b7e3df3b47b8eaacb89cf2271d43c"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-darwin-x64",
-      "SPDXID": "SPDXRef-9c3f8db2790d889438e0",
+      "SPDXID": "SPDXRef-2d32558a928063bc9b9b",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 87, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-darwin-x64.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "7f68b6c62356ab5675976fbeab67ee85945d2c04f76aac43eaf44d9b5440c6952805c76a341dc2d2cd41b7e2be3db131d85e45e20429ea1a8a92984263fc45f7"
+          "checksumValue": "7b8af7e342398714b32640f7609071833abfac9df0c31c1d2cb6f614fb75669c9e9b6d27ad03d3d750c310491acf0c5a1ee987f30a6096ca7f3b3823ff04fa9b"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-freebsd-x64",
-      "SPDXID": "SPDXRef-53f61b34dd69618c64cb",
+      "SPDXID": "SPDXRef-b87e46b1351e27f1e58b",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 104, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-freebsd-x64.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "e08af915238a20032be2bd24131a6dd6cddb320cc9537ac0e39018387b50a65b34a0d7aa71804aad6325724ad81f82827c62df91f9f5b4dd5d9993cc56c757a3"
+          "checksumValue": "8680560d9e3f2bf98929531bb2051dd637e90360e23ab279e26a5e80e6d4f53047041aed5f814b2172494110cf67fd839fdd46bcfa1bf99da1c0a2737f813949"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-linux-arm-gnueabihf",
-      "SPDXID": "SPDXRef-f0ab035333f10a637488",
+      "SPDXID": "SPDXRef-f9b63bdf793ceee3188d",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 121, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm-gnueabihf.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "fe09d10ccfb7f4144ecc037f9353998c33e70cc719c41ff4114c4a8ce34ee72564344be5b28303af118d2a0662fedb45ae24b683094337307ae69bcd6c539721"
+          "checksumValue": "a05f5f66edef4d69d38950240c5c54f4f24bb759e1db42bd451a6e1ec47b6671362fb5e8a2405b0c154ba2309548b19bbed4a5c5e50d9e3023e836cdb0acb36e"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-linux-arm64-gnu",
-      "SPDXID": "SPDXRef-c0fe2294b074d970eab9",
+      "SPDXID": "SPDXRef-5a794405e0464e37242c",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 138, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm64-gnu.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "3c568af07c2f0076da29b05c0cd42286330a62f16703986210dc7f979b698530f3d44d16169df697403b6aaee5c94c06b11c3fc52acd232fe020ae2d86b482af"
+          "checksumValue": "0d3a5bffe8cc8aa58c3e0a619f892c5b5cd6f972c9e9d249f4532f9c893d236f752e109cb4c3e131826b3f9b7da7a0bda9adca5da7437541191c168f87790dc5"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-linux-arm64-musl",
-      "SPDXID": "SPDXRef-8806c943eef2cea69b80",
+      "SPDXID": "SPDXRef-e17dbebbb27c4045d588",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 158, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm64-musl.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "02c93325420a44b3f192bb91d702ca7b019b3b0f8461f53ff653ab0458f8005ac403c84fa4a16738358dbb658b68db3440d9046fd40826e7e65596482ff6c996"
+          "checksumValue": "c54f8abeff4dd80dd2637e73161d45596363c5b69d13f04a7aa9e45deeef49c538199b30ef9ec19559832c84d912af033e993a9bbba80d890aecffb1fee5393b"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-linux-ppc64-gnu",
-      "SPDXID": "SPDXRef-1d3f71bc1240d187ff9f",
+      "SPDXID": "SPDXRef-fdc05f7156de95a7f75a",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 178, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-ppc64-gnu.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "aa55060217a1db287c69f1fb401831d0fad11cdf3984a9cd77bf31f0c78c8578afb9ebe077cbe07fafc2b2d3b398d298fe52d31ef353acfcbdf1c2e702e83327"
+          "checksumValue": "5cc93f867861db9a10ef9e8b7256f5435d61e25974c42d04b1ae70e15ce9fa6004d92dc018981e3344a89eb22063c7c78636ab6fa85ca13bb0a051b45553f68a"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-linux-s390x-gnu",
-      "SPDXID": "SPDXRef-009a9ee2a9507817fbdb",
+      "SPDXID": "SPDXRef-12a420e0dcef3953f742",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 198, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-s390x-gnu.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "b1e72911a77ed2f09b49f9fcba91724a40ec92ff9b18f9374c74834bd63cf72738adbe24cea1e9f039b277d064416e129e13570590a5ffa0ab3bffe165a84d25"
+          "checksumValue": "5350684c7626972c04da7dc75168f367ef0442c2abf8ec29c58b8359ab9bc78dad50bf1048bee73aa473fcd5476a789b6c53f7335471ba9af3ff035c6cc2a3ab"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-linux-x64-gnu",
-      "SPDXID": "SPDXRef-5db76a396352574bbd5f",
+      "SPDXID": "SPDXRef-6b2d81d52478f6b2a7a5",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 218, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-x64-gnu.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "98e5414f774fa645a6f170563e65386dff94e9d6032de328ffda235268ace0dd0be6ebb5d2aadae6f3b29e067bfcf49da04e06f4abd1b786e5a11c4d8cb6acec"
+          "checksumValue": "278726f343dceb0130579019e36a3adac21080393e63b476b3ae3a8c8c2ebcefb8578e90079f0de2f56e30f58205a360babb172e999458957ffd640090fbc705"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-linux-x64-musl",
-      "SPDXID": "SPDXRef-46cee4254c5189b44088",
+      "SPDXID": "SPDXRef-4de1e721d14b63e85c2c",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 238, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-x64-musl.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "22cefc8bd03c522e12a9cc54c0527db8c9a30e7e7c21b5538c55987507acb451207ae1261cc2c636b8979d524a9301b6622663c3c70fd33093c8331d0c6b4e3a"
+          "checksumValue": "5b47ae652e3453857a2649849d50885fd99cb0be9c6d74385fc736c3e30c3888c583af135d45bebb7453fb67b5b75a6ff6683f10fde90ed2b73ce5dd43b471cb"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-openharmony-arm64",
-      "SPDXID": "SPDXRef-dbf93afe3f480cf44e65",
+      "SPDXID": "SPDXRef-fea4f4779ffeff3da9b0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 258, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-openharmony-arm64.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "7540979de67cec83543324340fe0b41eb1013543cd5c768f994e464e3c8a4c9122bacb30f4a6a3e4b9fc533b4f7b87a957f7dfbe034111a764b1d621996eb124"
+          "checksumValue": "768fc017fe27f4c46c8626b76b9697a32f3133673a9a07d3e83ec7fdd63a9b2e73fa17c2211e1a6fb9a4e08463fbe9ec110a4acb7f647740d09c3abeafaf76b7"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-win32-arm64-msvc",
-      "SPDXID": "SPDXRef-ddb15ad04b93f7e4425d",
+      "SPDXID": "SPDXRef-3d333e1be5724abe8c61",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 275, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-win32-arm64-msvc.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "8c1cb16faa9f77e6c7d7151dd2a9df1676f5ee2f6c5813d8dad39abc9d25ded76bdce4eef8abed9bc71dfc95799c5b7ae7b6f556a1a5b7183da253847e87d75b"
+          "checksumValue": "e85b547f67096686eeb497719c6617f33d2fb5b82a5346f6bfcbdf0619176fdc29d8ca69305b64ba713e21a3a7b728b4d6b9084283d6d861c006d7f3b02d0145"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.13"
         }
       ]
     },
     {
       "name": "@rolldown/binding-win32-x64-msvc",
-      "SPDXID": "SPDXRef-5581920d7809cc4f7b87",
+      "SPDXID": "SPDXRef-f1d13de8bd349c1f6669",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 292, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-win32-x64-msvc.\"], \"scope\": \"optional\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "fcfccaab3009d378b5f68cb622d3efcaf6958ce8c108d9df689b3ccaf51d1812a68844a09eb2524366b077cd50cc56db9c09aeed83bd66726b0c26fd55224f44"
+          "checksumValue": "50a8456994de4dc6caadbde253cda6d7b8d570f100a2a0e408de4c06a80fc994b0a7f7109a26f6d5cad34b40dd1fb4f507bc19456108f3d61000e24c7ade7286"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.11"
+          "referenceLocator": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.13"
         }
       ]
     },
@@ -3277,25 +3288,25 @@
     },
     {
       "name": "@vitejs/plugin-react",
-      "SPDXID": "SPDXRef-c3dabc3ce648f33c17ff",
+      "SPDXID": "SPDXRef-76a9567d53f8f08aba59",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 19, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 676, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"Unresolved npm peerDependencies: @rolldown/plugin-babel (^0.1.7 || ^0.2.0).\", \"Unresolved npm peerDependencies: babel-plugin-react-compiler (^1.0.0).\", \"Unresolved npm peerDependencies: oxc-transform-react (^0.145.0).\", \"npm lock location: node_modules/@vitejs/plugin-react.\"], \"scope\": \"build\"}",
-      "versionInfo": "6.1.1",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 19, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 676, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"Unresolved npm peerDependencies: @rolldown/plugin-babel (^0.1.7 || ^0.2.0).\", \"Unresolved npm peerDependencies: babel-plugin-react-compiler (^1.0.0).\", \"Unresolved npm peerDependencies: oxc-transform-react (^0.152.0).\", \"npm lock location: node_modules/@vitejs/plugin-react.\"], \"scope\": \"build\"}",
+      "versionInfo": "6.1.2",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "cb12da415f609214bc7b326a08cebe9dd53b98363a82a020ef9350fb4223c0423c2183a64028244701ca5527d65d6d3be83b2a328d0393ed052b553e33946017"
+          "checksumValue": "7e124d19476c7106b81e4234c45c70a275b28675517823c36d723b147ee39b3a67542ac5408ecf46b85679c3b6eb7eb5d2f3abb3db6bd98e3171ff2e01d1716f"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/%40vitejs/plugin-react@6.1.1"
+          "referenceLocator": "pkg:npm/%40vitejs/plugin-react@6.1.2"
         }
       ]
     },
@@ -3727,25 +3738,25 @@
     },
     {
       "name": "nanoid",
-      "SPDXID": "SPDXRef-e937a5ef9b0e01c5a6d9",
+      "SPDXID": "SPDXRef-f220b808b47aa5b52ee4",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1042, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/nanoid.\"], \"scope\": \"build\"}",
-      "versionInfo": "3.3.19",
+      "versionInfo": "3.3.20",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "636b54372e28bb0eadab9a0348a7906063b286450184d39c195ff4d8a0beea477d7831aa75977efa68cc8880e296b058be3127098bd5b6cb870ae3fea2449fba"
+          "checksumValue": "b8a760d86dc63422909fd6f260ea716c6aab4f67c63b9291b7927ff1bde9a24f2b4faab119617a871332262118b407fe155c98b83f6145a0ea5f9b8f15827865"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/nanoid@3.3.19"
+          "referenceLocator": "pkg:npm/nanoid@3.3.20"
         }
       ]
     },
@@ -3799,25 +3810,25 @@
     },
     {
       "name": "postcss",
-      "SPDXID": "SPDXRef-1434cfbc120afcc90429",
+      "SPDXID": "SPDXRef-22d583bac5767e5f44ef",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1081, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/postcss.\"], \"scope\": \"build\"}",
-      "versionInfo": "8.5.28",
+      "versionInfo": "8.5.29",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "451bb3a83b6de58f61deabb3e615a12be4cf9ec995b3a5b0494e8b90931e6381ecb54103b984c6f1425275ac0c4739b302d57e284a06f0ddd0836a8bcb9bccfc"
+          "checksumValue": "e3d7068546d78fc41e9efd224ccc40d5c141cf15e872da42f548ddefbb7559c6c922bea717f788ee0ffc320c6b62574546e017be36bbc504706afa16ee482bc5"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/postcss@8.5.28"
+          "referenceLocator": "pkg:npm/postcss@8.5.29"
         }
       ]
     },
@@ -3919,25 +3930,25 @@
     },
     {
       "name": "rolldown",
-      "SPDXID": "SPDXRef-768176e5c72901709e99",
+      "SPDXID": "SPDXRef-2453f16b03a7f9d5b1c0",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1169, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/rolldown.\"], \"scope\": \"build\"}",
-      "versionInfo": "1.2.11",
+      "versionInfo": "1.2.13",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "aa94b0232cf48c742ae6a5c14cdc45984ebaeb8ac9ecefb84ef3c53a239a052af3f0838773592828a4aa4ccd87eaed541b5f93bdeb82eaf6831ca5c53af6f52b"
+          "checksumValue": "ff96a93a4c16c6d002710b59e5696b02c292e09c175538503c967746a22bb9163d506f4cf1ed15957374ebcc6e9bf251280e1a214a09d778217bf9060af89d89"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/rolldown@1.2.11"
+          "referenceLocator": "pkg:npm/rolldown@1.2.13"
         }
       ]
     },
@@ -3991,25 +4002,25 @@
     },
     {
       "name": "source-map-js",
-      "SPDXID": "SPDXRef-fe3768e6234927a009ec",
+      "SPDXID": "SPDXRef-6e63dd3e4d4ed470be7f",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "BSD-3-Clause",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1215, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/source-map-js.\"], \"scope\": \"build\"}",
-      "versionInfo": "1.2.1",
+      "versionInfo": "1.2.2",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "51758c2a12cec1529bef6f0852d40f5f17d853ebac7726ed52b2bff2e184f0240cbeb84ea70bf30c1c23d108522fb31073bbc8b084811bc550f3e203431a5f40"
+          "checksumValue": "2868fff18e37c77e5a6550edb7e27898ad61a0b18750b3187d290e0c93508cd0c2de85b53ea3e8c4cc28d292d4b1633f5041b338dfcdc5e1f2c047cd5cd3f757"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/source-map-js@1.2.1"
+          "referenceLocator": "pkg:npm/source-map-js@1.2.2"
         }
       ]
     },
@@ -4063,25 +4074,25 @@
     },
     {
       "name": "vite",
-      "SPDXID": "SPDXRef-bec59f984cb93c3af331",
+      "SPDXID": "SPDXRef-f53c990d24bc787dea82",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 7, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 1277, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"Unresolved npm peerDependencies: @types/node (^20.19.0 || >=22.12.0).\", \"Unresolved npm peerDependencies: @vitejs/devtools (^0.7.1).\", \"Unresolved npm peerDependencies: esbuild (^0.27.0 || ^0.28.0).\", \"Unresolved npm peerDependencies: jiti (>=1.21.0).\", \"Unresolved npm peerDependencies: less (^4.0.0).\", \"Unresolved npm peerDependencies: sass (^1.70.0).\", \"Unresolved npm peerDependencies: sass-embedded (^1.70.0).\", \"Unresolved npm peerDependencies: stylus (>=0.54.8).\", \"Unresolved npm peerDependencies: sugarss (^5.0.0).\", \"Unresolved npm peerDependencies: terser (^5.16.0).\", \"Unresolved npm peerDependencies: tsx (^4.8.1).\", \"Unresolved npm peerDependencies: yaml (^2.4.2).\", \"npm lock location: node_modules/vite.\"], \"scope\": \"build\"}",
-      "versionInfo": "8.3.1",
+      "versionInfo": "8.3.4",
       "checksums": [
         {
           "algorithm": "SHA512",
-          "checksumValue": "fdbbc7f44f6d9825d11a9dae5d8dd66ce95daa94f01646e16bff0035a110e95931847eb42b2a8bc2066aea51b6cbee2e4f9e71f7ef5e50732943bb869ce08a8c"
+          "checksumValue": "21fb4b13ca6126174d44818d115e09082bdf35272865055f71768df1342ba2958626d38772efa2001f691dcb86be611bfe475dc342c17bf8d2f33b5d0bac5d89"
         }
       ],
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
-          "referenceLocator": "pkg:npm/vite@8.3.1"
+          "referenceLocator": "pkg:npm/vite@8.3.4"
         }
       ]
     },
@@ -4111,7 +4122,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 18, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^4.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^4.0.0\"}"
+      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 18, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^6.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^6.0.0\"}"
     },
     {
       "name": "Python",
@@ -4121,29 +4132,29 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"python\", \"evidence\": [{\"detail\": \"SBOM collector uses Python 3.11 tomllib and the standard library\", \"line\": 11, \"path\": \"tools/sbom_dependencies.py\"}], \"notes\": [\"No Python package installation is required.\"], \"scope\": \"build\", \"versionConstraint\": \">=3.11\"}"
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"python\", \"evidence\": [{\"detail\": \"SBOM collector uses Python 3.11 tomllib and the standard library\", \"line\": 12, \"path\": \"tools/sbom_dependencies.py\"}], \"notes\": [\"No Python package installation is required.\"], \"scope\": \"build\", \"versionConstraint\": \">=3.11\"}"
     },
     {
       "name": "Bazel",
-      "SPDXID": "SPDXRef-fc2ee4eda4cc40924b4c",
+      "SPDXID": "SPDXRef-b123bc100584e990546c",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
       "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel toolchain pin\", \"line\": 1, \"path\": \"poc/.bazelversion\"}], \"notes\": [], \"scope\": \"build\"}",
-      "versionInfo": "7.7.1"
+      "versionInfo": "9.3.0"
     },
     {
       "name": "Rust",
-      "SPDXID": "SPDXRef-e0d7247c93c2dd3153ce",
+      "SPDXID": "SPDXRef-64c42a94810285c49c17",
       "downloadLocation": "NOASSERTION",
       "filesAnalyzed": false,
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 21, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}",
-      "versionInfo": "1.96.1"
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 22, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}",
+      "versionInfo": "1.98.0"
     }
   ],
   "relationships": [
@@ -4155,7 +4166,12 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-9328c7589c6a3f437b1c"
+      "relatedSpdxElement": "SPDXRef-4a30a4d0502f7c9a64e5"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-ad8e4eee9f54790d067f"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4190,7 +4206,7 @@
     {
       "spdxElementId": "SPDXRef-97041d09cf5f0ef0d825",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-e28e76d005de3cf73691"
+      "relatedSpdxElement": "SPDXRef-b22e4a8a1043bf1e4bee"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4300,7 +4316,7 @@
     {
       "spdxElementId": "SPDXRef-af8eee1897fb3c912fae",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4315,10 +4331,10 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-aa040d9c7308a54cd032"
+      "relatedSpdxElement": "SPDXRef-36c8c27f93de8f762982"
     },
     {
-      "spdxElementId": "SPDXRef-aa040d9c7308a54cd032",
+      "spdxElementId": "SPDXRef-36c8c27f93de8f762982",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-c7917f804d963de4d81d"
     },
@@ -4345,7 +4361,7 @@
     {
       "spdxElementId": "SPDXRef-da9cc9eee808cce14fa1",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-aa040d9c7308a54cd032"
+      "relatedSpdxElement": "SPDXRef-36c8c27f93de8f762982"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4435,7 +4451,7 @@
     {
       "spdxElementId": "SPDXRef-750a15aeedbf42aa9578",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
       "spdxElementId": "SPDXRef-750a15aeedbf42aa9578",
@@ -4525,7 +4541,7 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4535,7 +4551,7 @@
     {
       "spdxElementId": "SPDXRef-ec838a8b0849d7ea3af1",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4575,20 +4591,20 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-3d1ab4d9c0da045e029f"
+      "relatedSpdxElement": "SPDXRef-61ce5153b3c3e63ab43b"
     },
     {
-      "spdxElementId": "SPDXRef-3d1ab4d9c0da045e029f",
+      "spdxElementId": "SPDXRef-61ce5153b3c3e63ab43b",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
-      "spdxElementId": "SPDXRef-3d1ab4d9c0da045e029f",
+      "spdxElementId": "SPDXRef-61ce5153b3c3e63ab43b",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-4b50e029cf9ac29b6959"
     },
     {
-      "spdxElementId": "SPDXRef-3d1ab4d9c0da045e029f",
+      "spdxElementId": "SPDXRef-61ce5153b3c3e63ab43b",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-7b39f8292cbba829d69b"
     },
@@ -4645,7 +4661,7 @@
     {
       "spdxElementId": "SPDXRef-0e6e2d750a77ab39284f",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
       "spdxElementId": "SPDXRef-0e6e2d750a77ab39284f",
@@ -4655,7 +4671,7 @@
     {
       "spdxElementId": "SPDXRef-0e6e2d750a77ab39284f",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-6e55ee25d947e74274e4"
+      "relatedSpdxElement": "SPDXRef-abbc6e614bbf7abca5c9"
     },
     {
       "spdxElementId": "SPDXRef-0e6e2d750a77ab39284f",
@@ -4815,7 +4831,7 @@
     {
       "spdxElementId": "SPDXRef-ebb7316bec0fea360b5f",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fc440f288497378276b3"
+      "relatedSpdxElement": "SPDXRef-a487fc4ab2dda702d0a6"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4950,7 +4966,7 @@
     {
       "spdxElementId": "SPDXRef-8c4439c0484144cc8ce8",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-e28e76d005de3cf73691"
+      "relatedSpdxElement": "SPDXRef-b22e4a8a1043bf1e4bee"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4995,7 +5011,7 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-6e55ee25d947e74274e4"
+      "relatedSpdxElement": "SPDXRef-abbc6e614bbf7abca5c9"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5005,7 +5021,7 @@
     {
       "spdxElementId": "SPDXRef-d549b9fe5fbd05f23f0b",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
       "spdxElementId": "SPDXRef-d549b9fe5fbd05f23f0b",
@@ -5035,20 +5051,20 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-e28e76d005de3cf73691"
+      "relatedSpdxElement": "SPDXRef-b22e4a8a1043bf1e4bee"
     },
     {
-      "spdxElementId": "SPDXRef-e28e76d005de3cf73691",
+      "spdxElementId": "SPDXRef-b22e4a8a1043bf1e4bee",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-d820bc5580bd3aa1477f"
     },
     {
-      "spdxElementId": "SPDXRef-e28e76d005de3cf73691",
+      "spdxElementId": "SPDXRef-b22e4a8a1043bf1e4bee",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-ab9b38194fc42641bd6d"
     },
     {
-      "spdxElementId": "SPDXRef-e28e76d005de3cf73691",
+      "spdxElementId": "SPDXRef-b22e4a8a1043bf1e4bee",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-ee2aa6131537409e5993"
     },
@@ -5140,12 +5156,12 @@
     {
       "spdxElementId": "SPDXRef-f8ba62d5d5b8122e41cd",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fa4f9fae46d0a4a0f39d"
+      "relatedSpdxElement": "SPDXRef-36c5c8e3aaa4261a674d"
     },
     {
       "spdxElementId": "SPDXRef-f8ba62d5d5b8122e41cd",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fc440f288497378276b3"
+      "relatedSpdxElement": "SPDXRef-a487fc4ab2dda702d0a6"
     },
     {
       "spdxElementId": "SPDXRef-f8ba62d5d5b8122e41cd",
@@ -5155,70 +5171,70 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fa4f9fae46d0a4a0f39d"
+      "relatedSpdxElement": "SPDXRef-36c5c8e3aaa4261a674d"
     },
     {
-      "spdxElementId": "SPDXRef-fa4f9fae46d0a4a0f39d",
+      "spdxElementId": "SPDXRef-36c5c8e3aaa4261a674d",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
     },
     {
-      "spdxElementId": "SPDXRef-fa4f9fae46d0a4a0f39d",
+      "spdxElementId": "SPDXRef-36c5c8e3aaa4261a674d",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-2a77cfce14bb4554fc93"
     },
     {
-      "spdxElementId": "SPDXRef-fa4f9fae46d0a4a0f39d",
+      "spdxElementId": "SPDXRef-36c5c8e3aaa4261a674d",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-376808d40295136911be"
     },
     {
-      "spdxElementId": "SPDXRef-fa4f9fae46d0a4a0f39d",
+      "spdxElementId": "SPDXRef-36c5c8e3aaa4261a674d",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
-      "spdxElementId": "SPDXRef-fa4f9fae46d0a4a0f39d",
+      "spdxElementId": "SPDXRef-36c5c8e3aaa4261a674d",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-a8031210b162f8c70f5e"
     },
     {
-      "spdxElementId": "SPDXRef-fa4f9fae46d0a4a0f39d",
+      "spdxElementId": "SPDXRef-36c5c8e3aaa4261a674d",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fc440f288497378276b3"
+      "relatedSpdxElement": "SPDXRef-a487fc4ab2dda702d0a6"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fc440f288497378276b3"
+      "relatedSpdxElement": "SPDXRef-a487fc4ab2dda702d0a6"
     },
     {
-      "spdxElementId": "SPDXRef-fc440f288497378276b3",
+      "spdxElementId": "SPDXRef-a487fc4ab2dda702d0a6",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
     },
     {
-      "spdxElementId": "SPDXRef-fc440f288497378276b3",
+      "spdxElementId": "SPDXRef-a487fc4ab2dda702d0a6",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
-      "spdxElementId": "SPDXRef-fc440f288497378276b3",
+      "spdxElementId": "SPDXRef-a487fc4ab2dda702d0a6",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-3d1ab4d9c0da045e029f"
+      "relatedSpdxElement": "SPDXRef-61ce5153b3c3e63ab43b"
     },
     {
-      "spdxElementId": "SPDXRef-fc440f288497378276b3",
+      "spdxElementId": "SPDXRef-a487fc4ab2dda702d0a6",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-a8031210b162f8c70f5e"
     },
     {
-      "spdxElementId": "SPDXRef-fc440f288497378276b3",
+      "spdxElementId": "SPDXRef-a487fc4ab2dda702d0a6",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-d549b9fe5fbd05f23f0b"
     },
     {
-      "spdxElementId": "SPDXRef-fc440f288497378276b3",
+      "spdxElementId": "SPDXRef-a487fc4ab2dda702d0a6",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-7b39f8292cbba829d69b"
     },
@@ -5310,7 +5326,7 @@
     {
       "spdxElementId": "SPDXRef-6fb6f7692ba5b7798bc3",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-e28e76d005de3cf73691"
+      "relatedSpdxElement": "SPDXRef-b22e4a8a1043bf1e4bee"
     },
     {
       "spdxElementId": "SPDXRef-6fb6f7692ba5b7798bc3",
@@ -5395,7 +5411,7 @@
     {
       "spdxElementId": "SPDXRef-ee8941cfc00e9dd51488",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-34a71dbb96a0de0ca4c8"
+      "relatedSpdxElement": "SPDXRef-0f0cff7a49f65ef4c7e0"
     },
     {
       "spdxElementId": "SPDXRef-ee8941cfc00e9dd51488",
@@ -5465,82 +5481,82 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-9fd7838cf359e50ff3e3"
+      "relatedSpdxElement": "SPDXRef-88e16e04a8872e4741b7"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-11ecce9903c8ab94790d"
+      "relatedSpdxElement": "SPDXRef-26f3529688393b508e03"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-ce78f0fb00fb1cd12093"
+      "relatedSpdxElement": "SPDXRef-8ef69596b3c47daa420b"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-bd2163fe3dd8f3cafc1c"
+      "relatedSpdxElement": "SPDXRef-3e5f0fcf7b7d96196931"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-9c3f8db2790d889438e0"
+      "relatedSpdxElement": "SPDXRef-2d32558a928063bc9b9b"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-53f61b34dd69618c64cb"
+      "relatedSpdxElement": "SPDXRef-b87e46b1351e27f1e58b"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-f0ab035333f10a637488"
+      "relatedSpdxElement": "SPDXRef-f9b63bdf793ceee3188d"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-c0fe2294b074d970eab9"
+      "relatedSpdxElement": "SPDXRef-5a794405e0464e37242c"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-8806c943eef2cea69b80"
+      "relatedSpdxElement": "SPDXRef-e17dbebbb27c4045d588"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-1d3f71bc1240d187ff9f"
+      "relatedSpdxElement": "SPDXRef-fdc05f7156de95a7f75a"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-009a9ee2a9507817fbdb"
+      "relatedSpdxElement": "SPDXRef-12a420e0dcef3953f742"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-5db76a396352574bbd5f"
+      "relatedSpdxElement": "SPDXRef-6b2d81d52478f6b2a7a5"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-46cee4254c5189b44088"
+      "relatedSpdxElement": "SPDXRef-4de1e721d14b63e85c2c"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-dbf93afe3f480cf44e65"
+      "relatedSpdxElement": "SPDXRef-fea4f4779ffeff3da9b0"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-ddb15ad04b93f7e4425d"
+      "relatedSpdxElement": "SPDXRef-3d333e1be5724abe8c61"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-5581920d7809cc4f7b87"
+      "relatedSpdxElement": "SPDXRef-f1d13de8bd349c1f6669"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5670,17 +5686,17 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-c3dabc3ce648f33c17ff"
+      "relatedSpdxElement": "SPDXRef-76a9567d53f8f08aba59"
     },
     {
-      "spdxElementId": "SPDXRef-c3dabc3ce648f33c17ff",
+      "spdxElementId": "SPDXRef-76a9567d53f8f08aba59",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-6be8d0e917cc23fe81b5"
     },
     {
-      "spdxElementId": "SPDXRef-c3dabc3ce648f33c17ff",
+      "spdxElementId": "SPDXRef-76a9567d53f8f08aba59",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-bec59f984cb93c3af331"
+      "relatedSpdxElement": "SPDXRef-f53c990d24bc787dea82"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5700,7 +5716,7 @@
     {
       "spdxElementId": "SPDXRef-c4957a783c1a36fb78e5",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-c3dabc3ce648f33c17ff"
+      "relatedSpdxElement": "SPDXRef-76a9567d53f8f08aba59"
     },
     {
       "spdxElementId": "SPDXRef-c4957a783c1a36fb78e5",
@@ -5725,7 +5741,7 @@
     {
       "spdxElementId": "SPDXRef-c4957a783c1a36fb78e5",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-bec59f984cb93c3af331"
+      "relatedSpdxElement": "SPDXRef-f53c990d24bc787dea82"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5880,7 +5896,7 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-e937a5ef9b0e01c5a6d9"
+      "relatedSpdxElement": "SPDXRef-f220b808b47aa5b52ee4"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5895,22 +5911,22 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-1434cfbc120afcc90429"
+      "relatedSpdxElement": "SPDXRef-22d583bac5767e5f44ef"
     },
     {
-      "spdxElementId": "SPDXRef-1434cfbc120afcc90429",
+      "spdxElementId": "SPDXRef-22d583bac5767e5f44ef",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-e937a5ef9b0e01c5a6d9"
+      "relatedSpdxElement": "SPDXRef-f220b808b47aa5b52ee4"
     },
     {
-      "spdxElementId": "SPDXRef-1434cfbc120afcc90429",
+      "spdxElementId": "SPDXRef-22d583bac5767e5f44ef",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-0ab728d33acfaf72f005"
     },
     {
-      "spdxElementId": "SPDXRef-1434cfbc120afcc90429",
+      "spdxElementId": "SPDXRef-22d583bac5767e5f44ef",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fe3768e6234927a009ec"
+      "relatedSpdxElement": "SPDXRef-6e63dd3e4d4ed470be7f"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5980,90 +5996,90 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-768176e5c72901709e99"
+      "relatedSpdxElement": "SPDXRef-2453f16b03a7f9d5b1c0"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-9fd7838cf359e50ff3e3"
+      "relatedSpdxElement": "SPDXRef-88e16e04a8872e4741b7"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-11ecce9903c8ab94790d"
+      "relatedSpdxElement": "SPDXRef-26f3529688393b508e03"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-ce78f0fb00fb1cd12093"
+      "relatedSpdxElement": "SPDXRef-8ef69596b3c47daa420b"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-bd2163fe3dd8f3cafc1c"
+      "relatedSpdxElement": "SPDXRef-3e5f0fcf7b7d96196931"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-9c3f8db2790d889438e0"
+      "relatedSpdxElement": "SPDXRef-2d32558a928063bc9b9b"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-53f61b34dd69618c64cb"
+      "relatedSpdxElement": "SPDXRef-b87e46b1351e27f1e58b"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-f0ab035333f10a637488"
+      "relatedSpdxElement": "SPDXRef-f9b63bdf793ceee3188d"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-c0fe2294b074d970eab9"
+      "relatedSpdxElement": "SPDXRef-5a794405e0464e37242c"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-8806c943eef2cea69b80"
+      "relatedSpdxElement": "SPDXRef-e17dbebbb27c4045d588"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-1d3f71bc1240d187ff9f"
+      "relatedSpdxElement": "SPDXRef-fdc05f7156de95a7f75a"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-009a9ee2a9507817fbdb"
+      "relatedSpdxElement": "SPDXRef-12a420e0dcef3953f742"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-5db76a396352574bbd5f"
+      "relatedSpdxElement": "SPDXRef-6b2d81d52478f6b2a7a5"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-46cee4254c5189b44088"
+      "relatedSpdxElement": "SPDXRef-4de1e721d14b63e85c2c"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-dbf93afe3f480cf44e65"
+      "relatedSpdxElement": "SPDXRef-fea4f4779ffeff3da9b0"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-ddb15ad04b93f7e4425d"
+      "relatedSpdxElement": "SPDXRef-3d333e1be5724abe8c61"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-5581920d7809cc4f7b87"
+      "relatedSpdxElement": "SPDXRef-f1d13de8bd349c1f6669"
     },
     {
-      "spdxElementId": "SPDXRef-768176e5c72901709e99",
+      "spdxElementId": "SPDXRef-2453f16b03a7f9d5b1c0",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-6be8d0e917cc23fe81b5"
     },
@@ -6080,7 +6096,7 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fe3768e6234927a009ec"
+      "relatedSpdxElement": "SPDXRef-6e63dd3e4d4ed470be7f"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -6205,35 +6221,35 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-bec59f984cb93c3af331"
+      "relatedSpdxElement": "SPDXRef-f53c990d24bc787dea82"
     },
     {
-      "spdxElementId": "SPDXRef-bec59f984cb93c3af331",
+      "spdxElementId": "SPDXRef-f53c990d24bc787dea82",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-18d53a31f9d7299c26ca"
     },
     {
-      "spdxElementId": "SPDXRef-bec59f984cb93c3af331",
+      "spdxElementId": "SPDXRef-f53c990d24bc787dea82",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-e3c68a8ebf6f2087a8ae"
     },
     {
-      "spdxElementId": "SPDXRef-bec59f984cb93c3af331",
+      "spdxElementId": "SPDXRef-f53c990d24bc787dea82",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-9e01adac92e1d6f47da8"
     },
     {
-      "spdxElementId": "SPDXRef-bec59f984cb93c3af331",
+      "spdxElementId": "SPDXRef-f53c990d24bc787dea82",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-1434cfbc120afcc90429"
+      "relatedSpdxElement": "SPDXRef-22d583bac5767e5f44ef"
     },
     {
-      "spdxElementId": "SPDXRef-bec59f984cb93c3af331",
+      "spdxElementId": "SPDXRef-f53c990d24bc787dea82",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-768176e5c72901709e99"
+      "relatedSpdxElement": "SPDXRef-2453f16b03a7f9d5b1c0"
     },
     {
-      "spdxElementId": "SPDXRef-bec59f984cb93c3af331",
+      "spdxElementId": "SPDXRef-f53c990d24bc787dea82",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-e1d0135b0a028a16f2ae"
     },
@@ -6270,12 +6286,12 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-fc2ee4eda4cc40924b4c"
+      "relatedSpdxElement": "SPDXRef-b123bc100584e990546c"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-e0d7247c93c2dd3153ce"
+      "relatedSpdxElement": "SPDXRef-64c42a94810285c49c17"
     }
   ]
 }

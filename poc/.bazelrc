@@ -1,3 +1,8 @@
 # AmisAd POC Bazel defaults. Keep minimal and cloud-agnostic.
 build --verbose_failures
 test --test_output=errors
+# The Linux build image provides the GNU linker; Bazel does not expose the
+# bundled Rust LLD wrapper through the C toolchain search path.
+common --enable_platform_specific_config
+build:linux --linkopt=-fuse-ld=bfd
+build:linux --host_linkopt=-fuse-ld=bfd

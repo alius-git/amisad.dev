@@ -2,7 +2,7 @@
 # Copyright (c) 2026 by Alisson Sol et al.
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/fabric-coordinator/Dockerfile -t amisad/fabric-coordinator .
-FROM rust:1.96-slim AS build
+FROM rust:1.98-slim-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY components ./components

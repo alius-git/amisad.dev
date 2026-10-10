@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="rules_rust" tagId="urn:uuid:86af291e-3a06-5358-8a44-9529a9e129fc" version="0.71.3" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="rules_rust" tagId="urn:uuid:608b8810-4532-52cd-a77c-602db8fd92e3" version="0.74.0" versionScheme="alphanumeric" tagVersion="0" corpus="true">
   <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
   <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="repository" sbom:inventory-kind="declared-source" sbom:declaration="{&quot;completeness&quot;: &quot;declared&quot;, &quot;ecosystem&quot;: &quot;bazel&quot;, &quot;evidence&quot;: [{&quot;detail&quot;: &quot;Declared dependency&quot;, &quot;line&quot;: 5, &quot;path&quot;: &quot;poc/MODULE.bazel&quot;}], &quot;notes&quot;: [&quot;Bazel registry transitive dependencies are unresolved without a tracked module lock.&quot;], &quot;scope&quot;: &quot;build&quot;}" />
 </SoftwareIdentity>

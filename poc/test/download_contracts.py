@@ -327,7 +327,7 @@ class PinnedUpstreamDownloads(Contract):
         setup = f'RUSTUP_VERSION=1.29.1; RUSTUP_SHA256_X86_64={digest}; RUSTUP_SHA256_AARCH64={digest}'
         out, _, left, ran = self.install('amisad_install_rustup', setup, self.FAKE_RUSTUP)
         self.assertIn('rc=0', out)
-        self.assertEqual(ran, '-y --default-toolchain 1.96.1')
+        self.assertEqual(ran, '-y --default-toolchain 1.98.0')
         self.assertEqual(left, [], 'the private download directory was left behind')
 
         other = sha256(b'some other release')
@@ -349,6 +349,33 @@ class PinnedUpstreamDownloads(Contract):
                                             after='[ -e "$BAZELISK_DIR/bazelisk" ] && echo present || echo absent\n')
                 self.assertIn(expected_rc, out)
                 self.assertIn(expected_file, out)
+
+    def select_toolchain(self, installed, install_exit=0):
+        with tempfile.TemporaryDirectory() as directory:
+            script = ('set -u\n' + function_text(TOOLS, 'amisad_select_rust_toolchain') + '\n'
+                      'rustc() { printf "rustc %s (fixture)\\n" "$INSTALLED"; }\n'
+                      'amisad_retry() { shift; "$@"; }\n'
+                      'rustup() { echo "$*" >> calls; '
+                      'if [ "$1" = toolchain ]; then return "$INSTALL_EXIT"; fi; }\n'
+                      'amisad_select_rust_toolchain; echo "rc=$?"\n')
+            result = run_bash(script, directory, {'INSTALLED': installed, 'INSTALL_EXIT': str(install_exit)})
+            calls = Path(directory, 'calls')
+            return result.stdout, calls.read_text().splitlines() if calls.exists() else []
+
+    def test_existing_older_toolchain_is_installed_and_selected(self):
+        out, calls = self.select_toolchain('1.96.1')
+        self.assertIn('rc=0', out)
+        self.assertEqual(calls, ['toolchain install 1.98.0 --profile minimal', 'default 1.98.0'])
+
+    def test_current_toolchain_needs_no_network_or_default_change(self):
+        out, calls = self.select_toolchain('1.98.0')
+        self.assertIn('rc=0', out)
+        self.assertEqual(calls, [])
+
+    def test_failed_toolchain_install_keeps_the_existing_default(self):
+        out, calls = self.select_toolchain('1.96.1', install_exit=23)
+        self.assertIn('rc=23', out)
+        self.assertEqual(calls, ['toolchain install 1.98.0 --profile minimal'])
 
 
 class ScriptsVerifyBeforeUse(Contract):

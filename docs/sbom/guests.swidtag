@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="amisad.dev-guests" tagId="urn:uuid:068b8c4d-3596-54bf-aa04-70f7ff29b86b" version="2026.10.11" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="amisad.dev-guests" tagId="urn:uuid:39497ab7-1270-5c39-99d1-8102f9bfef6f" version="2026.10.11" versionScheme="alphanumeric" tagVersion="0" corpus="true">
   <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
   <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="guests" sbom:inventory-kind="declared-source" />
   <Link rel="requires" href="swid/guests-91c5fcad2df9fd2bc18d.swidtag" />
@@ -10,7 +10,7 @@
   <Link rel="requires" href="swid/guests-2a214e234ca892fc378e.swidtag" />
   <Link rel="requires" href="swid/guests-f5d83d9f93e7446aa6c3.swidtag" />
   <Link rel="requires" href="swid/guests-d48a7b8b6893e4729828.swidtag" />
-  <Link rel="requires" href="swid/guests-43381493987b67930afb.swidtag" />
+  <Link rel="requires" href="swid/guests-a2a25e519124fb33a401.swidtag" />
   <Link rel="requires" href="swid/guests-dc4f18c560c1aac8ce82.swidtag" />
   <Link rel="requires" href="swid/guests-1f908889d63fa2f253e0.swidtag" />
   <Link rel="requires" href="swid/guests-38b90e0a39fc8aedf063.swidtag" />
@@ -25,5 +25,5 @@
   <Link rel="requires" href="swid/guests-c4802700a054cd605e9d.swidtag" />
   <Link rel="requires" href="swid/guests-caefaced660302525654.swidtag" />
   <Link rel="requires" href="swid/guests-53af0dac7859137f8fbd.swidtag" />
-  <Link rel="requires" href="swid/guests-95b4912553adadf68dfc.swidtag" />
+  <Link rel="requires" href="swid/guests-779372e02791e5cd38f8.swidtag" />
 </SoftwareIdentity>

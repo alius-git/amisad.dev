@@ -38,9 +38,9 @@ amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
 # releases API, which 403s behind the shared NAT egress. Bump by editing these
 # lines: the version and both digests together. The digests are the release's own
 # SHA256SUMS entries for the two linux tarballs.
-NATS_VERSION=v2.15.0
-NATS_SHA256_AMD64=5d2c51caca950333aba84911df7d377f826f3a59ec36061c6539105084f65c92
-NATS_SHA256_ARM64=cdc208f5a3f42963a52b6ab06ef65626bb870315dc936e26ba571780c6351112
+NATS_VERSION=v2.15.1
+NATS_SHA256_AMD64=bf5edc7b1ce98e885c368cb43a886eb148dc5d0551d99f3cf6141fb5e1954c70
+NATS_SHA256_ARM64=e2fbab4cad7d3c76e3052eb959570393c9d73ba756b70bf8e9eea61e9ae6d49c
 ARCH=$(uname -m)
 case "$ARCH" in
     x86_64) NARCH=amd64; NATS_SHA256=$NATS_SHA256_AMD64 ;;

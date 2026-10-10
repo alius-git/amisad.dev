@@ -45,11 +45,11 @@ class NatsInstaller(unittest.TestCase):
             # tar -xzf <file> -C <dir>: unpacks a fake release into <dir>.
             'tar': 'dir=.\nwhile [ $# -gt 0 ]; do case "$1" in -C) dir="$2"; shift 2 ;; *) shift ;; esac; done\n'
                    'echo tar >> "$FIXTURE/actions"\n'
-                   'mkdir -p "$dir/nats-server-v2.15.0-linux-amd64"\n'
-                   'printf \'#!/bin/sh\\necho "nats-server: v2.15.0"\\n\' > "$dir/nats-server-v2.15.0-linux-amd64/nats-server"\n'
-                   'chmod +x "$dir/nats-server-v2.15.0-linux-amd64/nats-server"',
+                   'mkdir -p "$dir/nats-server-v2.15.1-linux-amd64"\n'
+                   'printf \'#!/bin/sh\\necho "nats-server: v2.15.1"\\n\' > "$dir/nats-server-v2.15.1-linux-amd64/nats-server"\n'
+                   'chmod +x "$dir/nats-server-v2.15.1-linux-amd64/nats-server"',
             'uname': 'echo x86_64',
-            'systemctl': 'echo "$*" >> "$FIXTURE/actions"\nif [ "$1" = restart ]; then echo 2.15.0 > "$FIXTURE/runtime"; fi',
+            'systemctl': 'echo "$*" >> "$FIXTURE/actions"\nif [ "$1" = restart ]; then echo 2.15.1 > "$FIXTURE/runtime"; fi',
             'curl': 'case "$*" in *varz*) printf \'{"version":"%s"}\\n\' "$(cat "$FIXTURE/runtime")";; esac',
             'sleep': ':', 'sync': ':',
             # The health probe pipes JSON through python3; run it with the interpreter
@@ -78,7 +78,7 @@ class NatsInstaller(unittest.TestCase):
             def run():
                 return self.run_installer(root, env)
             result = run(); self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertIn('v2.15.0', subprocess.check_output(['bash', str(installed), '--version'], text=True))
+            self.assertIn('v2.15.1', subprocess.check_output(['bash', str(installed), '--version'], text=True))
             self.assertEqual((root/'actions').read_text().count('restart nats'), 1)
             result = run(); self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual((root/'actions').read_text().count('restart nats'), 1)

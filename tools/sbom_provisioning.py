@@ -296,6 +296,48 @@ class _Collector:
         if note not in self.coverage:
             self.coverage.append(note)
 
+    def requirements(self, path: str, text: str):
+        """Record probe floors separately from versions installed by a provider."""
+        tool = None
+        for number, raw in enumerate(_without_comments(text).splitlines(), 1):
+            entry = re.fullmatch(r'\s*-\s+tool:\s*(.+?)\s*', raw)
+            if entry:
+                tool = entry[1].strip("\"'")
+                continue
+            floor = re.fullmatch(r'\s*version:\s*(.+?)\s*', raw)
+            if tool and floor:
+                version = re.search(r'\d+(?:\.\d+)+', floor[1])
+                if version:
+                    self.add(path, number, tool, "generic",
+                             "Host requirement floor; platform applicability and probe are declared in this manifest; not an installed version",
+                             bucket="hosts", constraint=">=" + version[0])
+                else:
+                    self.note(path, number, f"Host requirement {tool}: unparsed version floor {floor[1]}")
+                tool = None
+
+    def guest_pins(self, path: str, text: str):
+        """Keep exact installer pins and floating release lines distinguishable."""
+        pins = {
+            "YURUNA_K8S_MINOR": ("Kubernetes", "generic", False),
+            "YURUNA_OPENTOFU_VERSION": ("OpenTofu", "generic", True),
+            "YURUNA_HELM_VERSION": ("Helm", "generic", True),
+            "YURUNA_NVM_VERSION": ("nvm-sh/nvm", "download", True),
+            "YURUNA_NODE_MAJOR": ("node", "nvm", False),
+        }
+        for number, raw in enumerate(_without_comments(text).splitlines(), 1):
+            entry = re.fullmatch(r'\s*(?:export\s+)?(YURUNA_\w+)=([^\s]+)\s*', raw)
+            if not entry or entry[1] not in pins:
+                continue
+            name, ecosystem, exact = pins[entry[1]]
+            requested = entry[2].strip("\"'")
+            if not re.fullmatch(r'\d+(?:\.\d+)*', requested):
+                self.note(path, number, f"Guest pin {entry[1]}: unresolved version {requested}")
+                continue
+            version = requested if exact and re.fullmatch(r'\d+\.\d+\.\d+', requested) else None
+            self.add(path, number, name, ecosystem,
+                     f"Central guest provisioning declaration {entry[1]}; " + ("exact installer pin" if version else "floating release line"),
+                     version, "platform", bucket="guests", constraint=None if version else requested)
+
     def add(self, path: str, line: int, name: str, ecosystem: str, detail: str,
             version: str | None = None, kind: str = "application", scope: str = "runtime",
             bucket: str | None = None, hashes: list | None = None, constraint: str | None = None):
@@ -667,5 +709,9 @@ def collect_provisioning(files: dict[str, bytes], repo_name: str) -> dict:
         text = data.decode("utf-8", errors="replace")
         if "\ufffd" in text:
             collector.note(path, 1, "source is not valid UTF-8; some installer declarations may be unavailable", "unparsed")
+        if path == "automation/Yuruna.Requirement.yml":
+            collector.requirements(path, text)
+        if path == "automation/yuruna-versions.sh":
+            collector.guest_pins(path, text)
         collector.scan(path, text, common)
     return collector.result()

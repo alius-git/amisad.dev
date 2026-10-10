@@ -83,16 +83,29 @@ amisad_install_rustup() {
         chmod 0755 "$work/rustup-init"
         # Rust version in lockstep with poc/MODULE.bazel rust.toolchain (see the
         # comment there) and the rust:*-slim Dockerfiles; bump all together.
-        "$work/rustup-init" -y --default-toolchain 1.96.1 || rc=$?
+        "$work/rustup-init" -y --default-toolchain 1.98.0 || rc=$?
     fi
     rm -rf -- "$work"
     return "$rc"
 }
 
-if ! command -v cargo >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/cargo" ]; then
+if ! command -v rustup >/dev/null 2>&1 && [ ! -x "$HOME/.cargo/bin/rustup" ]; then
     amisad_retry rustup_install amisad_install_rustup
 fi
+# shellcheck disable=SC1091
 . "$HOME/.cargo/env"
+
+# Existing snapshots may carry an older default toolchain even when rustup is installed.
+# --- REGION: amisad_select_rust_toolchain
+amisad_select_rust_toolchain() {
+    local current
+    current=$(rustc --version 2>/dev/null || true)
+    if [[ "$current" != "rustc 1.98.0 "* ]]; then
+        amisad_retry rust_toolchain rustup toolchain install 1.98.0 --profile minimal || return $?
+        rustup default 1.98.0
+    fi
+}
+amisad_select_rust_toolchain
 cargo --version
 rustc --version
 

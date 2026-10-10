@@ -44,8 +44,8 @@ build/images.ps1        # docker images (optional; Docker required)
 `bazel build //...` builds the entire Rust workspace via rules_rust. Cargo
 works directly too (`cargo build --workspace`) -- the two share the same
 sources. Cargo container builds use `--locked`. The doctor rejects failed native
-version probes, requires Rust/Cargo 1.96.1 or newer, and accepts Node 20.19+ on
-20.x or Node 22.12+ on newer supported lines.
+version probes, requires Bazel 9.3.0 and Rust/Cargo 1.98.0 or newer, and accepts
+Node 20.19+ on 20.x or Node 22.12+ on newer supported lines.
 
 ## Deliberate skeleton choices
 
