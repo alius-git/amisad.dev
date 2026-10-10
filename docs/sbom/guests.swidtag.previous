@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="amisad.dev-guests" tagId="urn:uuid:5f5ff6d0-8909-5429-9afe-1944fb580447" version="2026.10.11" versionScheme="alphanumeric" tagVersion="0" corpus="true">
+<SoftwareIdentity xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd" xmlns:sbom="urn:yuruna:sbom:1" name="amisad.dev-guests" tagId="urn:uuid:85b49025-93c7-50e1-a81b-dab26b01d9b9" version="2026.10.11" versionScheme="alphanumeric" tagVersion="0" corpus="true">
   <Entity name="Alisson Sol et al." regid="amisad.dev" role="tagCreator" />
   <Meta sbom:generator="tools/Sync-Sbom.py" sbom:scope="guests" sbom:inventory-kind="declared-source" />
   <Link rel="requires" href="swid/guests-91c5fcad2df9fd2bc18d.swidtag" />

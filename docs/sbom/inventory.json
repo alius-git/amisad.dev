@@ -2,7 +2,7 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "003a23b208d47b759e14b49ae66e25662edda6f7c320958bdf9a406959a9999e",
+  "sourceInputsSha256": "b28c92d6f362ff57885fcadbb23458c737a0395582aab9516c2bc3c90c6b945e",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
@@ -282,12 +282,12 @@
     "test/demo-polling.test.js": "594d6a61d2cc735a65d1d0943c92a6528855d2b06a85c441a72b22cb58ffbecd",
     "test/initialize-lab.yml": "bba67eebf676fb490c387b47973d31c56cc5e5a75cea3443a1c7a722768a9227",
     "test/test.runner.yml": "08309213dc1b069edec5f044d30d465710944b30295df333209766eadf6daf34",
-    "tools/Sync-Sbom.py": "958d4ab6906d62aed413b1b3e96e4a39232f5a78a8beb3c5893028ae04dda9d8",
+    "tools/Sync-Sbom.py": "011170678f77e5baf9340a02ae8772522e5c2fdd13769283b2ccd3228221b4d0",
     "tools/Test-DocTranslation.py": "4ae360c987d26e7412f47258fd0c4f60b0e411f88c0f6d0658ce712c66d4dfcc",
     "tools/githooks/pre-commit": "d7e7ce9b2d86603d30aa773a0b4b2022d1b3c9a68ae7f25eebf4b043e6c4f7e7",
     "tools/sbom-policy.json": "cdc277504a623dee2979c41bfc0d59fb4f0660f48a7d5ed87f66df3058487044",
     "tools/sbom_dependencies.py": "614daf5f409c91357850a8eae20d8b3459ecaae41a9fb1bf662ecc93524a668b",
-    "tools/sbom_provisioning.py": "d3f309eeefb272267b1068ff14e74345edd67fcf74429c7e21d751a43dd9b781"
+    "tools/sbom_provisioning.py": "7396fa1c04d81c5062eb56eeea0dcb817a2df99d75ba9bbac513b4af168b9a98"
   },
   "counts": {
     "repository": 181,

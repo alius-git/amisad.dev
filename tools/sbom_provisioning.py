@@ -23,7 +23,7 @@ _MANAGERS = re.compile(
     r"(?P<action>install|add|groupinstall|toolchain\s+install|tool\s+install)\b",
     re.I,
 )
-_PS_INSTALL = re.compile(r"(?<![\w.-])(Install-Module|Install-PSResource|Install-PackageProvider|Install-WingetPackage)\b", re.I)
+_PS_INSTALL = re.compile(r"(?<![\w.-])(Install-Module|Install-PSResource|Install-PackageProvider|Install-WingetPackage|Invoke-GuestWingetInstall)\b", re.I)
 _CONTAINER = re.compile(r"(?<![\w.-])(?:docker|podman)\s+(pull|run|create)\b", re.I)
 _DOWNLOAD = re.compile(r"(?<![\w.-])(?:curl(?:_retry)?|wget(?:_try)?|Invoke-WebRequest|Start-BitsTransfer|Save-CachedHttpUri|Save-YurunaImage|Save-ImageWithChecksum)\b", re.I)
 _URL = re.compile(r"https?://[^\s\"'<>`]+")
@@ -139,7 +139,13 @@ def _logical_lines(text: str):
                 continue
             if discard:
                 continue
-        marker = re.search(r"<<-?\s*['\"]?([A-Za-z_][\w]*)['\"]?", raw)
+        # Quoted status text, shell here strings and arithmetic shifts do not
+        # open heredocs and must not hide subsequent provisioning commands.
+        marker = None
+        if "<<" in raw:
+            marker = next((match for match in _active_matches(
+                re.compile(r"(?<!<)<<(?!<)-?\s*['\"]?([A-Za-z_][\w]*)['\"]?"), raw,
+            ) if not re.search(r"\(\([^)]*$", raw[:match.start()])), None)
         if marker:
             heredoc = marker[1]
             # File/script construction and PowerShell input are executable
@@ -417,14 +423,16 @@ class _Collector:
                     continue
                 self.packages(path, line, command[match.end():], "nuget" if manager == "dotnet" else manager, action, values)
             for match in _active_matches(_PS_INSTALL, command):
+                if re.search(r"\bfunction\s+(?:(?:global|local|script|private):)?$", command[:match.start()], re.I):
+                    continue
                 args = command[match.end():]
                 tokens = _tokens(args)
-                name = self._option(tokens, {"-name", "-id"})
+                name = self._option(tokens, {"-name", "-id", "-packageid"})
                 if not name:
                     name = next((item for item in tokens if not item.startswith("-")), "")
                 version = self._option(tokens, {"-requiredversion", "-version"})
                 if name:
-                    manager = "winget" if match[1].lower() == "install-wingetpackage" else "psgallery"
+                    manager = "winget" if match[1].lower() in {"install-wingetpackage", "invoke-guestwingetinstall"} else "psgallery"
                     self.packages(path, line, name, manager, match[1], values, version=version)
             for match in re.finditer(r"(?<![\w.-])(brew_ensure_formula|brew_ensure_cask|yuruna_service_packages)\s+([^;|]+)", command):
                 manager = "brew" if match[1].startswith("brew_") else "apt"
