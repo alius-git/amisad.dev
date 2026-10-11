@@ -17,7 +17,7 @@ Repository and deployment software declarations are recorded in the
 |------|----------|
 | `MODULE.bazel`, `.bazelversion`, `BUILD.bazel` | Bazel root (bzlmod, pinned via bazelisk) |
 | `build/` | `doctor.ps1` (toolchain check), `build-all.ps1`, `images.ps1`, `run-tests.ps1` (the scenario driver), `Publish-ProjectArchive.ps1` (optional manual HEAD archive) |
-| `contracts/` | OpenAPI specs per service -- real `/v1` routes for the implemented scenarios, `/health`/`/version` stubs for the rest -- + event-schema placeholders |
+| `contracts/` | OpenAPI specs per service -- real `/v1` routes for the implemented scenarios, plus `/health`/`/version` -- + event-schema placeholders |
 | `components/services/` | 10 Rust services (seller, resource, ads, insights, platform, audit, connect, fabric-coordinator, identity-mock, ledger) |
 | `components/edge/slice-runtime/` | Stateless edge match runtime (Rust) |
 | `components/apps/buyer-client/` | Headless buyer (Rust CLI) -- drives the s001-s010 buyer, delegate, campaign, and disclosure paths |
