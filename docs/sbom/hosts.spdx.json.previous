@@ -26,7 +26,7 @@
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
       "comment": "Declared hosts inventory; source-inputs SHA256 b28c92d6f362ff57885fcadbb23458c737a0395582aab9516c2bc3c90c6b945e. Not an installed-system scan.",
-      "versionInfo": "2026.10.11.1"
+      "versionInfo": "2026.10.18"
     }
   ],
   "relationships": [
