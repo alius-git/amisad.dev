@@ -9,7 +9,7 @@ Versions track the framework release the material was last exercised against,
 not an independent release line -- the POC is only meaningful paired with a
 framework that can deploy it.
 
-## 2026.10.18
+## 2026.10.11.1
 
 - Core deployment imports the ten service images in one archive, sharing their
   common base layers. Restore readiness retains its API, current-boot Flannel,
@@ -34,7 +34,7 @@ framework that can deploy it.
 - `poc/test/nats_installer_contracts.py` now runs under Git Bash as well as on
   Linux, and `poc/test/download_contracts.py` holds the verification contracts.
 
-## 2026.10.11
+## 2026.10.04
 
 - Shared HTTP helpers moved out of the two demo servers into
   `poc/demo/AmisAd.DemoHost.psm1`, which both already imported.
@@ -55,6 +55,6 @@ LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2019-2026 by Alisson Sol et al.
 
-Last review: 2026.10.18
+Last review: 2026.10.11.1
 
 Back to [Yuruna](https://yuruna.com)
