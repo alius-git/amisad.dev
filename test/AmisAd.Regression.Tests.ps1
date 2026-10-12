@@ -808,3 +808,79 @@ Describe 'AmisAd key handling policy' {
         $usingTheKey | Should -BeGreaterOrEqual 9 -Because 'the scenarios that start slice-runtime on an edge all log in with the key'
     }
 }
+
+
+Describe 'Stash dependency failure evidence' {
+    BeforeAll {
+        Import-Module (Join-Path $PSScriptRoot 'AmisAd.StashService.psm1') -Force -DisableNameChecking
+        $script:StashFramework = Join-Path $TestDrive 'stash-framework'
+        $extensionDir = Join-Path $script:StashFramework 'test/extension/stash-service'
+        New-Item -ItemType Directory -Path $extensionDir -Force | Out-Null
+        @'
+function Test-StashServiceHost { param([string]$Address) return $Address -eq '10.0.0.10' }
+function Publish-StashServiceHost { param([string]$Address) $env:AMISAD_TEST_STASH_PUBLISHED = $Address }
+Export-ModuleMember -Function Test-StashServiceHost, Publish-StashServiceHost
+'@ | Set-Content -LiteralPath (Join-Path $extensionDir 'default.psm1')
+        $modulesDir = Join-Path $script:StashFramework 'test/modules'
+        New-Item -ItemType Directory -Path $modulesDir -Force | Out-Null
+        @'
+function Get-ExtensionHostAddress {
+    param([string]$HostType)
+    if ($env:AMISAD_TEST_STASH_MODE -eq 'discovery-error') { throw 'Aggregator request failed' }
+    if ($env:AMISAD_TEST_STASH_MODE -eq 'unreachable') { return '10.0.0.9' }
+    if ($env:AMISAD_TEST_STASH_MODE -eq 'healthy') { return '10.0.0.10' }
+    return @()
+}
+function Get-ExtensionHostLastOutcome {
+    return @{ Area = 'stash-service'; Outcome = 'no-host'; Detail = '404 -- no live host'; Uri = 'http://pool/api/extension-hosts?area=stash-service' }
+}
+Export-ModuleMember -Function Get-ExtensionHostAddress, Get-ExtensionHostLastOutcome
+'@ | Set-Content -LiteralPath (Join-Path $modulesDir 'Test.Extension.psm1')
+        $script:SavedStashPin = $env:YURUNA_STASH_SERVICE_HOST
+    }
+    BeforeEach {
+        $env:YURUNA_STASH_SERVICE_HOST = ''
+        $env:AMISAD_TEST_STASH_PUBLISHED = ''
+        Mock -ModuleName AmisAd.StashService Start-Sleep {}
+    }
+    AfterAll {
+        $env:YURUNA_STASH_SERVICE_HOST = $script:SavedStashPin
+        $env:AMISAD_TEST_STASH_MODE = ''
+        $env:AMISAD_TEST_STASH_PUBLISHED = ''
+        Remove-Module Test.Extension, default, AmisAd.StashService -ErrorAction SilentlyContinue
+    }
+    It 'retains the discovery endpoint and its no-host response for every failed attempt' {
+        $env:AMISAD_TEST_STASH_MODE = 'no-host'
+        $r = Resolve-StashService -YurunaRoot $script:StashFramework
+        $r.Address | Should -BeNullOrEmpty
+        $r.Failures.Count | Should -Be 4
+        $r.Failures[3].area | Should -Be 'stash-service'
+        $r.Failures[3].outcome | Should -Be 'no-host'
+        $r.Failures[3].endpoint | Should -Be 'http://pool/api/extension-hosts?area=stash-service'
+        $r.Failures[3].detail | Should -Be '404 -- no live host'
+        $r.Failures[3].attempt | Should -Be 4
+    }
+    It 'retains a discovery exception instead of reusing an unrelated pool outcome' {
+        $env:AMISAD_TEST_STASH_MODE = 'discovery-error'
+        $r = Resolve-StashService -YurunaRoot $script:StashFramework
+        $r.Failures[0].outcome | Should -Be 'discovery-error'
+        $r.Failures[0].detail | Should -Be 'Aggregator request failed'
+    }
+    It 'retains the health endpoint when a discovered stash does not answer' {
+        $env:AMISAD_TEST_STASH_MODE = 'unreachable'
+        $r = Resolve-StashService -YurunaRoot $script:StashFramework
+        $r.Address | Should -BeNullOrEmpty
+        $r.Failures[0].area | Should -Be 'stash-service'
+        $r.Failures[0].address | Should -Be '10.0.0.9'
+        $r.Failures[0].endpoint | Should -Be 'http://10.0.0.9/healthz'
+        $r.Failures[0].outcome | Should -Be 'unreachable'
+        $env:AMISAD_TEST_STASH_PUBLISHED | Should -BeNullOrEmpty
+    }
+    It 'still publishes a verified stash and returns no failure evidence' {
+        $env:AMISAD_TEST_STASH_MODE = 'healthy'
+        $r = Resolve-StashService -YurunaRoot $script:StashFramework
+        $r.Address | Should -Be '10.0.0.10'
+        $r.Failures.Count | Should -Be 0
+        $env:AMISAD_TEST_STASH_PUBLISHED | Should -Be '10.0.0.10'
+    }
+}

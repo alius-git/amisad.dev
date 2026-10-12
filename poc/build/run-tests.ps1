@@ -127,6 +127,7 @@ foreach ($line in (Remove-LegacyDemoKey -YurunaRoot $YurunaRoot -Confirm:$false)
 $stash = Resolve-StashService -YurunaRoot $YurunaRoot
 foreach ($line in $stash.Lines) { Write-Information $line }
 if (-not $stash.Address) {
+    Write-AmisAdStashFailure -YurunaRoot $YurunaRoot -Result $stash -HostType $HostType
     Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and amisad-core has nowhere to fetch them - stopping before the provisioning stages. " +
         "Start one on this host (Start-StashServiceVM.ps1), join a pool that runs one, or pin an address with `$env:YURUNA_STASH_SERVICE_HOST.")
     exit 1

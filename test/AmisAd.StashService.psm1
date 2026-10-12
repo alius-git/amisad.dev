@@ -41,7 +41,8 @@ function Resolve-StashService {
         Address to use INSTEAD of discovery, or '' to discover.
     .OUTPUTS
         [hashtable] @{ Address [string] ('' when nothing answered);
-                       Lines [string[]] (the caller prints them verbatim) }
+                       Lines [string[]] (the caller prints them verbatim);
+                       Failures [hashtable[]] (service/discovery evidence) }
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -51,14 +52,19 @@ function Resolve-StashService {
     )
 
     $lines = [System.Collections.Generic.List[string]]::new()
-    $result = @{ Address = ''; Lines = @() }
+    $failures = [System.Collections.Generic.List[hashtable]]::new()
+    $result = @{ Address = ''; Lines = @(); Failures = $failures }
 
     $module = Join-Path $YurunaRoot 'test/extension/stash-service/default.psm1'
     Import-Module $module -Force -Global -DisableNameChecking -ErrorAction Stop
     if (-not (Get-Command Test-StashServiceHost -ErrorAction SilentlyContinue) -or
         -not (Get-Command Publish-StashServiceHost -ErrorAction SilentlyContinue)) {
-        Write-Warning "The stash-service extension at $module has no reachability/publish verbs; the pre-flight cannot verify a stash."
+        $lines.Add("The stash-service extension at $module has no reachability/publish verbs; the pre-flight cannot verify a stash.")
+        Write-Warning $lines[-1]
+        $failures.Add(@{ area = 'stash-service'; address = ''; endpoint = ''; outcome = 'extension-unavailable'
+            detail = 'The stash-service extension has no reachability/publish verbs'; attempt = 0 })
         $result.Lines = $lines.ToArray()
+        $result.Failures = $failures.ToArray()
         return $result
     }
     # The framework's extension-host lookup: with no address of our own, this is
@@ -85,6 +91,7 @@ function Resolve-StashService {
 
     for ($attempt = 1; $attempt -le $attemptCount; $attempt++) {
         $candidates = [System.Collections.Generic.List[hashtable]]::new()
+        $discoveryError = ''
         if (-not [string]::IsNullOrWhiteSpace($Pin)) {
             $candidates.Add(@{ Address = $Pin.Trim(); Source = 'pinned' })
         } elseif (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_SERVICE_HOST)) {
@@ -94,7 +101,8 @@ function Resolve-StashService {
             # iterating THAT walks its characters.
             $discovered = @()
             try { $discovered = @(Get-ExtensionHostAddress -HostType 'stash-service') } catch {
-                Write-Verbose "Get-ExtensionHostAddress stash-service: $($_.Exception.Message)"
+                $discoveryError = $_.Exception.Message
+                Write-Verbose "Get-ExtensionHostAddress stash-service: $discoveryError"
             }
             foreach ($address in $discovered) {
                 $candidates.Add(@{ Address = $address; Source = 'discovered (this host, or the pool)' })
@@ -108,9 +116,17 @@ function Resolve-StashService {
                 $lines.Add("Stash service: $($candidate.Address) -- published for this cycle.")
                 $result.Address = $candidate.Address
                 $result.Lines = $lines.ToArray()
+                $result.Failures = $failures.ToArray()
                 return $result
             }
             $lines.Add(("  [FAIL] {0} ({1}) did not answer /healthz" -f $candidate.Address, $candidate.Source))
+            $authority = [string]$candidate.Address
+            if ($authority.Contains(':') -and -not $authority.StartsWith('[') -and ($authority -split ':').Count -gt 2) {
+                $authority = "[$authority]"
+            }
+            $failures.Add(@{ area = 'stash-service'; address = [string]$candidate.Address
+                endpoint = "http://$authority/healthz"; source = [string]$candidate.Source
+                outcome = 'unreachable'; detail = 'No HTTP 200 from /healthz'; attempt = $attempt })
         }
         if ($candidates.Count -eq 0) {
             # "found none" covers two very different situations and the operator
@@ -118,13 +134,26 @@ function Resolve-StashService {
             # is a registration problem, one that could not be reached at all is
             # this host's link. Name whichever it was.
             $why = ''
-            if (Get-Command Get-PoolExtensionHostLastOutcome -ErrorAction SilentlyContinue) {
+            $poolOutcome = @{ Outcome = 'discovery-unavailable'; Detail = 'No pool lookup outcome available'; Uri = '' }
+            if ($discoveryError) {
+                $poolOutcome = @{ Outcome = 'discovery-error'; Detail = $discoveryError; Uri = '' }
+                $why = ' [discovery-error: ' + $discoveryError + ']'
+            } elseif (Get-Command Get-ExtensionHostLastOutcome -ErrorAction SilentlyContinue) {
+                $lookupOutcome = Get-ExtensionHostLastOutcome
+                if ($lookupOutcome.Area -eq 'stash-service') { $poolOutcome = $lookupOutcome }
+                $why = ' [pool: ' + $poolOutcome.Outcome
+                if ($poolOutcome.Detail) { $why += ' -- ' + $poolOutcome.Detail }
+                $why += ']'
+            } elseif (Get-Command Get-PoolExtensionHostLastOutcome -ErrorAction SilentlyContinue) {
                 $poolOutcome = Get-PoolExtensionHostLastOutcome
                 $why = ' [pool: ' + $poolOutcome.Outcome
                 if ($poolOutcome.Detail) { $why += ' -- ' + $poolOutcome.Detail }
                 $why += ']'
             }
             $lines.Add('  [FAIL] no candidate at all: nothing pinned, and discovery (this host, the pool) found none.' + $why)
+            $failures.Add(@{ area = 'stash-service'; address = ''; endpoint = [string]$poolOutcome.Uri
+                source = 'discovery'; outcome = [string]$poolOutcome.Outcome; detail = [string]$poolOutcome.Detail
+                attempt = $attempt })
         }
 
         if ($attempt -lt $attemptCount) {
@@ -137,7 +166,46 @@ function Resolve-StashService {
     # sequences cannot resolve one this cycle never confirmed.
     $null = Publish-StashServiceHost -Address ''
     $result.Lines = $lines.ToArray()
+    $result.Failures = $failures.ToArray()
     return $result
 }
 
-Export-ModuleMember -Function Resolve-StashService
+# --- REGION: Write-AmisAdStashFailure
+function Write-AmisAdStashFailure {
+    <#
+    .SYNOPSIS
+        Preserve a failed stash pre-flight as a classified cycle dependency failure.
+    .PARAMETER YurunaRoot
+        Framework checkout providing the shared failure record writer.
+    .PARAMETER Result
+        Failed Resolve-StashService result, including discovery and health evidence.
+    .PARAMETER HostType
+        Detected host type for the failure record.
+    #>
+    [CmdletBinding()]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Writes diagnostic evidence for a pre-flight that has already failed; no lab resource is modified.')]
+    param(
+        [Parameter(Mandatory)][string]$YurunaRoot,
+        [Parameter(Mandatory)][hashtable]$Result,
+        [Parameter(Mandatory)][string]$HostType
+    )
+    if ($Result.Address -or [string]::IsNullOrWhiteSpace($env:YURUNA_LOG_DIR)) { return }
+    try {
+        # Host actions run in a child process, so the parent's loaded builders
+        # are not inherited even though its log directory is.
+        foreach ($moduleName in 'Test.SequenceFailureState.psm1', 'Test.StateFile.psm1', 'Test.RunnerInnerLoop.psm1') {
+            Import-Module (Join-Path $YurunaRoot "test/modules/$moduleName") -Global -DisableNameChecking -ErrorAction Stop
+        }
+        $message = if ($Result.Failures.Count -gt 0) {
+            $last = $Result.Failures[-1]
+            "$($last.area): $($last.outcome) -- $($last.detail)"
+        } else { $Result.Lines -join [Environment]::NewLine }
+        Write-CycleInfraFailure -Stage 'Resolve-StashService' -FailureClass 'lab_dependency_down' -Severity 'hard' `
+            -GuestKey '(orchestration)' -ErrorMessage $message -HostType $HostType -DependencyFailures @($Result.Failures)
+    } catch {
+        Write-Verbose "Write-AmisAdStashFailure: $($_.Exception.Message)"
+    }
+}
+
+Export-ModuleMember -Function Resolve-StashService, Write-AmisAdStashFailure
