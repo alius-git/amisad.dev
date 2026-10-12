@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:068b8c4d-3596-54bf-aa04-70f7ff29b86b",
+  "serialNumber": "urn:uuid:39497ab7-1270-5c39-99d1-8102f9bfef6f",
   "version": 1,
   "metadata": {
     "component": {
@@ -11,7 +11,7 @@
       "properties": [
         {
           "name": "yuruna:source-inputs-sha256",
-          "value": "b28c92d6f362ff57885fcadbb23458c737a0395582aab9516c2bc3c90c6b945e"
+          "value": "eecd2132a381c79e27e86736f4ecd0e19bf14768983be6f5f6f0b90e9527530f"
         },
         {
           "name": "yuruna:inventory-kind",
@@ -113,7 +113,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-amd64; installed payload dependencies unresolved\", \"line\": 110, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-arm64; installed payload dependencies unresolved\", \"line\": 110, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-amd64; installed payload dependencies unresolved\", \"line\": 123, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-arm64; installed payload dependencies unresolved\", \"line\": 123, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.29.0",
@@ -121,15 +121,15 @@
     },
     {
       "type": "application",
-      "bom-ref": "component-43381493987b67930afb",
+      "bom-ref": "component-a2a25e519124fb33a401",
       "name": "nats-io/nats-server",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 63, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 65, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 63, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.0/nats-server-v2.15.0-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 65, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 63, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 65, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 63, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 65, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "2.15.0",
+      "version": "2.15.1",
       "group": "amisad.dev:guests:ubuntu-server-24"
     },
     {
@@ -296,22 +296,22 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.96-slim; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"group\": \"amisad.dev:guests:container\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"build\", \"versionConstraint\": \"1.96-slim\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"group\": \"amisad.dev:guests:container\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"build\", \"versionConstraint\": \"1.98-slim-bookworm\"}"
         }
       ],
       "group": "amisad.dev:guests:container"
     },
     {
       "type": "platform",
-      "bom-ref": "component-95b4912553adadf68dfc",
+      "bom-ref": "component-779372e02791e5cd38f8",
       "name": "rust",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"rustup\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=rustup-init --default-toolchain; compiler/toolchain declaration\", \"line\": 86, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"rustup\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=rustup toolchain install; requested=1.98.0; release channel may be floating\", \"line\": 104, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=rustup-init --default-toolchain; compiler/toolchain declaration\", \"line\": 86, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "1.96.1",
+      "version": "1.98.0",
       "group": "amisad.dev:guests:ubuntu-server-24"
     }
   ],
@@ -327,13 +327,13 @@
         "component-2a214e234ca892fc378e",
         "component-2bf35518bbd1a849d403",
         "component-38b90e0a39fc8aedf063",
-        "component-43381493987b67930afb",
         "component-53af0dac7859137f8fbd",
+        "component-779372e02791e5cd38f8",
         "component-82640629edd6f708814f",
         "component-91ae6752004639211caf",
         "component-91c5fcad2df9fd2bc18d",
-        "component-95b4912553adadf68dfc",
         "component-9aeb1463104ba2d20372",
+        "component-a2a25e519124fb33a401",
         "component-bb4c45de1346dc273729",
         "component-c25f6b79aef28b3a1919",
         "component-c4802700a054cd605e9d",

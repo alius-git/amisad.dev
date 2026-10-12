@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:8a574b79-7ad3-5f25-afca-bf6b7cc031e1",
+  "serialNumber": "urn:uuid:5702fc91-1fff-5498-ab17-7ecbe04ec412",
   "version": 1,
   "metadata": {
     "component": {
@@ -11,7 +11,7 @@
       "properties": [
         {
           "name": "yuruna:source-inputs-sha256",
-          "value": "b28c92d6f362ff57885fcadbb23458c737a0395582aab9516c2bc3c90c6b945e"
+          "value": "eecd2132a381c79e27e86736f4ecd0e19bf14768983be6f5f6f0b90e9527530f"
         },
         {
           "name": "yuruna:inventory-kind",
@@ -24,7 +24,7 @@
   "components": [
     {
       "type": "library",
-      "bom-ref": "component-9328c7589c6a3f437b1c",
+      "bom-ref": "component-4a30a4d0502f7c9a64e5",
       "name": "rules_rust",
       "properties": [
         {
@@ -32,7 +32,19 @@
           "value": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}"
         }
       ],
-      "version": "0.71.3"
+      "version": "0.74.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ad8e4eee9f54790d067f",
+      "name": "rules_shell",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 15, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}"
+        }
+      ],
+      "version": "0.8.0"
     },
     {
       "type": "application",
@@ -348,7 +360,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-aa040d9c7308a54cd032",
+      "bom-ref": "component-36c8c27f93de8f762982",
       "name": "ctutils",
       "properties": [
         {
@@ -356,12 +368,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 134, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "0.4.2",
-      "purl": "pkg:cargo/ctutils@0.4.2",
+      "version": "0.4.3",
+      "purl": "pkg:cargo/ctutils@0.4.3",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "7d5515a3834141de9eafb9717ad39eea8247b5674e6066c404e8c4b365d2a29e"
+          "content": "03bb0e1cc970d482d121d9a1744999169b69a07470b3d644a7894e53fcaf4574"
         }
       ]
     },
@@ -628,7 +640,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-34a71dbb96a0de0ca4c8",
+      "bom-ref": "component-0f0cff7a49f65ef4c7e0",
       "name": "libc",
       "properties": [
         {
@@ -636,12 +648,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 272, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "0.2.189",
-      "purl": "pkg:cargo/libc@0.2.189",
+      "version": "0.2.190",
+      "purl": "pkg:cargo/libc@0.2.190",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+          "content": "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
         }
       ]
     },
@@ -742,7 +754,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-3d1ab4d9c0da045e029f",
+      "bom-ref": "component-61ce5153b3c3e63ab43b",
       "name": "mio",
       "properties": [
         {
@@ -750,12 +762,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 318, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "1.2.3",
-      "purl": "pkg:cargo/mio@1.2.3",
+      "version": "1.2.4",
+      "purl": "pkg:cargo/mio@1.2.4",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "4b18443e9c262bfe8fa82f51666e2642c53393f7e5c27b3e1aeab922cff5b9d8"
+          "content": "1788edb87fdc09c7e26304471e2f5be8cdefb1b6930d6e3985fc02ff53bf86ee"
         }
       ]
     },
@@ -1307,7 +1319,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-6e55ee25d947e74274e4",
+      "bom-ref": "component-abbc6e614bbf7abca5c9",
       "name": "smallvec",
       "properties": [
         {
@@ -1315,12 +1327,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 593, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "1.16.2",
-      "purl": "pkg:cargo/smallvec@1.16.2",
+      "version": "1.16.3",
+      "purl": "pkg:cargo/smallvec@1.16.3",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "f9395f0f0eee849a9b707b2f06bb92a6a422090e2123bb2ef8e87a0e61892a8e"
+          "content": "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
         }
       ]
     },
@@ -1364,7 +1376,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-e28e76d005de3cf73691",
+      "bom-ref": "component-b22e4a8a1043bf1e4bee",
       "name": "syn",
       "properties": [
         {
@@ -1372,12 +1384,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 620, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "3.0.6",
-      "purl": "pkg:cargo/syn@3.0.6",
+      "version": "3.0.7",
+      "purl": "pkg:cargo/syn@3.0.7",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee"
+          "content": "d62a2e0561533f2ca2561d0cf27fd9fedb640a1bf2616ff5d5c80d99017faadc"
         }
       ]
     },
@@ -1421,7 +1433,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-fa4f9fae46d0a4a0f39d",
+      "bom-ref": "component-36c5c8e3aaa4261a674d",
       "name": "tokio-util",
       "properties": [
         {
@@ -1429,18 +1441,18 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 677, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "0.7.19",
-      "purl": "pkg:cargo/tokio-util@0.7.19",
+      "version": "0.7.20",
+      "purl": "pkg:cargo/tokio-util@0.7.20",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "494815d09bf52b5548659851081238f0ca39ff638363907596da739561c62c52"
+          "content": "e464cf451ba96ebfc6f9b6542f17ee8b8956e33f1e40d9690624e59d7a7f8a4b"
         }
       ]
     },
     {
       "type": "library",
-      "bom-ref": "component-fc440f288497378276b3",
+      "bom-ref": "component-a487fc4ab2dda702d0a6",
       "name": "tokio",
       "properties": [
         {
@@ -1448,12 +1460,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 637, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
-      "version": "1.53.1",
-      "purl": "pkg:cargo/tokio@1.53.1",
+      "version": "1.53.2",
+      "purl": "pkg:cargo/tokio@1.53.2",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+          "content": "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
         }
       ]
     },
@@ -1817,7 +1829,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"build\", \"versionConstraint\": \"1.96-slim\"}"
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"build\", \"versionConstraint\": \"1.98-slim-bookworm\"}"
         }
       ]
     },
@@ -1856,7 +1868,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-9fd7838cf359e50ff3e3",
+      "bom-ref": "component-88e16e04a8872e4741b7",
       "name": "@oxc-project/types",
       "properties": [
         {
@@ -1864,12 +1876,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 26, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@oxc-project/types.\"], \"scope\": \"build\"}"
         }
       ],
-      "version": "0.151.0",
-      "purl": "pkg:npm/%40oxc-project/types@0.151.0",
+      "version": "0.153.0",
+      "purl": "pkg:npm/%40oxc-project/types@0.153.0",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "275c97ac894d0d957313769d6b7d74c5e030ee71fcc820322cfb9422c8ca6ad14f99f9f96d2d685be70cf90b063ad5567799e14a96f0656c7faee7beaf967e3c"
+          "content": "8d236b448caf3d52cbe44d73fed4b9ccb029ae8b06cff16e2353d6c043b3e7d8f71384d34f34a9a8a6ff4431aa261856d101d8212197c6ae7cdb01b1e93d754f"
         }
       ],
       "licenses": [
@@ -1880,7 +1892,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-11ecce9903c8ab94790d",
+      "bom-ref": "component-26f3529688393b508e03",
       "name": "@rolldown/binding-android-arm-eabi",
       "properties": [
         {
@@ -1888,13 +1900,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 36, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-android-arm-eabi.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "0399177c62af2965991344ed3eb7ecbd3faae18e5dd501bc806533a588c6c9d33e7c044cf4cb97f743eb5d85ded176ec0d5832c713731e8ea08828fdd1bb0537"
+          "content": "56efcd202ae0751bd439e689648c81d853fadece9f3bfe2e77997c7579b10f1f720f29fe98dd32fa0b2fb15be24a58be4f7eb502aa34878e84b8ca286ebc1ac0"
         }
       ],
       "licenses": [
@@ -1905,7 +1917,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-ce78f0fb00fb1cd12093",
+      "bom-ref": "component-8ef69596b3c47daa420b",
       "name": "@rolldown/binding-android-arm64",
       "properties": [
         {
@@ -1913,13 +1925,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 53, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-android-arm64.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-android-arm64@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-android-arm64@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "cfa713c9ccfe889e0f564b8be071d6e037d37e8794ff69ea618b923ab4e61fbc872b96342c23a7034dd5e193716afc95694d683aa520220da494dfecf9448638"
+          "content": "e8b12822b1b2e6fbc27766e8367bf6b283d25198ff3d1be1a7c47fb7d2a55fe9886714e1204fd9ab1ac65f19ae357d05baf405bcb759afb4b81eb62960156111"
         }
       ],
       "licenses": [
@@ -1930,7 +1942,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-bd2163fe3dd8f3cafc1c",
+      "bom-ref": "component-3e5f0fcf7b7d96196931",
       "name": "@rolldown/binding-darwin-arm64",
       "properties": [
         {
@@ -1938,13 +1950,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 70, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-darwin-arm64.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "8d286fa8db4feaf0c2ebf03924e0336d557e0e4807aa197f49c5422446edf93518e90633ed89d772b837b0bb450678aba347ff2dde7467009603a7fb2980f59d"
+          "content": "09a252473950e90fb390331503d3a45710635683d1083104defd05489f64210060463140a40dd28b88a385b3555238bb649b7e3df3b47b8eaacb89cf2271d43c"
         }
       ],
       "licenses": [
@@ -1955,7 +1967,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-9c3f8db2790d889438e0",
+      "bom-ref": "component-2d32558a928063bc9b9b",
       "name": "@rolldown/binding-darwin-x64",
       "properties": [
         {
@@ -1963,13 +1975,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 87, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-darwin-x64.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "7f68b6c62356ab5675976fbeab67ee85945d2c04f76aac43eaf44d9b5440c6952805c76a341dc2d2cd41b7e2be3db131d85e45e20429ea1a8a92984263fc45f7"
+          "content": "7b8af7e342398714b32640f7609071833abfac9df0c31c1d2cb6f614fb75669c9e9b6d27ad03d3d750c310491acf0c5a1ee987f30a6096ca7f3b3823ff04fa9b"
         }
       ],
       "licenses": [
@@ -1980,7 +1992,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-53f61b34dd69618c64cb",
+      "bom-ref": "component-b87e46b1351e27f1e58b",
       "name": "@rolldown/binding-freebsd-x64",
       "properties": [
         {
@@ -1988,13 +2000,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 104, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-freebsd-x64.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "e08af915238a20032be2bd24131a6dd6cddb320cc9537ac0e39018387b50a65b34a0d7aa71804aad6325724ad81f82827c62df91f9f5b4dd5d9993cc56c757a3"
+          "content": "8680560d9e3f2bf98929531bb2051dd637e90360e23ab279e26a5e80e6d4f53047041aed5f814b2172494110cf67fd839fdd46bcfa1bf99da1c0a2737f813949"
         }
       ],
       "licenses": [
@@ -2005,7 +2017,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-f0ab035333f10a637488",
+      "bom-ref": "component-f9b63bdf793ceee3188d",
       "name": "@rolldown/binding-linux-arm-gnueabihf",
       "properties": [
         {
@@ -2013,13 +2025,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 121, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm-gnueabihf.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "fe09d10ccfb7f4144ecc037f9353998c33e70cc719c41ff4114c4a8ce34ee72564344be5b28303af118d2a0662fedb45ae24b683094337307ae69bcd6c539721"
+          "content": "a05f5f66edef4d69d38950240c5c54f4f24bb759e1db42bd451a6e1ec47b6671362fb5e8a2405b0c154ba2309548b19bbed4a5c5e50d9e3023e836cdb0acb36e"
         }
       ],
       "licenses": [
@@ -2030,7 +2042,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-c0fe2294b074d970eab9",
+      "bom-ref": "component-5a794405e0464e37242c",
       "name": "@rolldown/binding-linux-arm64-gnu",
       "properties": [
         {
@@ -2038,13 +2050,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 138, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm64-gnu.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "3c568af07c2f0076da29b05c0cd42286330a62f16703986210dc7f979b698530f3d44d16169df697403b6aaee5c94c06b11c3fc52acd232fe020ae2d86b482af"
+          "content": "0d3a5bffe8cc8aa58c3e0a619f892c5b5cd6f972c9e9d249f4532f9c893d236f752e109cb4c3e131826b3f9b7da7a0bda9adca5da7437541191c168f87790dc5"
         }
       ],
       "licenses": [
@@ -2055,7 +2067,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-8806c943eef2cea69b80",
+      "bom-ref": "component-e17dbebbb27c4045d588",
       "name": "@rolldown/binding-linux-arm64-musl",
       "properties": [
         {
@@ -2063,13 +2075,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 158, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-arm64-musl.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "02c93325420a44b3f192bb91d702ca7b019b3b0f8461f53ff653ab0458f8005ac403c84fa4a16738358dbb658b68db3440d9046fd40826e7e65596482ff6c996"
+          "content": "c54f8abeff4dd80dd2637e73161d45596363c5b69d13f04a7aa9e45deeef49c538199b30ef9ec19559832c84d912af033e993a9bbba80d890aecffb1fee5393b"
         }
       ],
       "licenses": [
@@ -2080,7 +2092,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-1d3f71bc1240d187ff9f",
+      "bom-ref": "component-fdc05f7156de95a7f75a",
       "name": "@rolldown/binding-linux-ppc64-gnu",
       "properties": [
         {
@@ -2088,13 +2100,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 178, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-ppc64-gnu.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "aa55060217a1db287c69f1fb401831d0fad11cdf3984a9cd77bf31f0c78c8578afb9ebe077cbe07fafc2b2d3b398d298fe52d31ef353acfcbdf1c2e702e83327"
+          "content": "5cc93f867861db9a10ef9e8b7256f5435d61e25974c42d04b1ae70e15ce9fa6004d92dc018981e3344a89eb22063c7c78636ab6fa85ca13bb0a051b45553f68a"
         }
       ],
       "licenses": [
@@ -2105,7 +2117,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-009a9ee2a9507817fbdb",
+      "bom-ref": "component-12a420e0dcef3953f742",
       "name": "@rolldown/binding-linux-s390x-gnu",
       "properties": [
         {
@@ -2113,13 +2125,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 198, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-s390x-gnu.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "b1e72911a77ed2f09b49f9fcba91724a40ec92ff9b18f9374c74834bd63cf72738adbe24cea1e9f039b277d064416e129e13570590a5ffa0ab3bffe165a84d25"
+          "content": "5350684c7626972c04da7dc75168f367ef0442c2abf8ec29c58b8359ab9bc78dad50bf1048bee73aa473fcd5476a789b6c53f7335471ba9af3ff035c6cc2a3ab"
         }
       ],
       "licenses": [
@@ -2130,7 +2142,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-5db76a396352574bbd5f",
+      "bom-ref": "component-6b2d81d52478f6b2a7a5",
       "name": "@rolldown/binding-linux-x64-gnu",
       "properties": [
         {
@@ -2138,13 +2150,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 218, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-x64-gnu.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "98e5414f774fa645a6f170563e65386dff94e9d6032de328ffda235268ace0dd0be6ebb5d2aadae6f3b29e067bfcf49da04e06f4abd1b786e5a11c4d8cb6acec"
+          "content": "278726f343dceb0130579019e36a3adac21080393e63b476b3ae3a8c8c2ebcefb8578e90079f0de2f56e30f58205a360babb172e999458957ffd640090fbc705"
         }
       ],
       "licenses": [
@@ -2155,7 +2167,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-46cee4254c5189b44088",
+      "bom-ref": "component-4de1e721d14b63e85c2c",
       "name": "@rolldown/binding-linux-x64-musl",
       "properties": [
         {
@@ -2163,13 +2175,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 238, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-linux-x64-musl.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "22cefc8bd03c522e12a9cc54c0527db8c9a30e7e7c21b5538c55987507acb451207ae1261cc2c636b8979d524a9301b6622663c3c70fd33093c8331d0c6b4e3a"
+          "content": "5b47ae652e3453857a2649849d50885fd99cb0be9c6d74385fc736c3e30c3888c583af135d45bebb7453fb67b5b75a6ff6683f10fde90ed2b73ce5dd43b471cb"
         }
       ],
       "licenses": [
@@ -2180,7 +2192,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-dbf93afe3f480cf44e65",
+      "bom-ref": "component-fea4f4779ffeff3da9b0",
       "name": "@rolldown/binding-openharmony-arm64",
       "properties": [
         {
@@ -2188,13 +2200,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 258, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-openharmony-arm64.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "7540979de67cec83543324340fe0b41eb1013543cd5c768f994e464e3c8a4c9122bacb30f4a6a3e4b9fc533b4f7b87a957f7dfbe034111a764b1d621996eb124"
+          "content": "768fc017fe27f4c46c8626b76b9697a32f3133673a9a07d3e83ec7fdd63a9b2e73fa17c2211e1a6fb9a4e08463fbe9ec110a4acb7f647740d09c3abeafaf76b7"
         }
       ],
       "licenses": [
@@ -2205,7 +2217,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-ddb15ad04b93f7e4425d",
+      "bom-ref": "component-3d333e1be5724abe8c61",
       "name": "@rolldown/binding-win32-arm64-msvc",
       "properties": [
         {
@@ -2213,13 +2225,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 275, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-win32-arm64-msvc.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "8c1cb16faa9f77e6c7d7151dd2a9df1676f5ee2f6c5813d8dad39abc9d25ded76bdce4eef8abed9bc71dfc95799c5b7ae7b6f556a1a5b7183da253847e87d75b"
+          "content": "e85b547f67096686eeb497719c6617f33d2fb5b82a5346f6bfcbdf0619176fdc29d8ca69305b64ba713e21a3a7b728b4d6b9084283d6d861c006d7f3b02d0145"
         }
       ],
       "licenses": [
@@ -2230,7 +2242,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-5581920d7809cc4f7b87",
+      "bom-ref": "component-f1d13de8bd349c1f6669",
       "name": "@rolldown/binding-win32-x64-msvc",
       "properties": [
         {
@@ -2238,13 +2250,13 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 292, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/@rolldown/binding-win32-x64-msvc.\"], \"scope\": \"optional\"}"
         }
       ],
-      "version": "1.2.11",
+      "version": "1.2.13",
       "scope": "optional",
-      "purl": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.11",
+      "purl": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "fcfccaab3009d378b5f68cb622d3efcaf6958ce8c108d9df689b3ccaf51d1812a68844a09eb2524366b077cd50cc56db9c09aeed83bd66726b0c26fd55224f44"
+          "content": "50a8456994de4dc6caadbde253cda6d7b8d570f100a2a0e408de4c06a80fc994b0a7f7109a26f6d5cad34b40dd1fb4f507bc19456108f3d61000e24c7ade7286"
         }
       ],
       "licenses": [
@@ -2827,20 +2839,20 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-c3dabc3ce648f33c17ff",
+      "bom-ref": "component-76a9567d53f8f08aba59",
       "name": "@vitejs/plugin-react",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 19, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 676, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"Unresolved npm peerDependencies: @rolldown/plugin-babel (^0.1.7 || ^0.2.0).\", \"Unresolved npm peerDependencies: babel-plugin-react-compiler (^1.0.0).\", \"Unresolved npm peerDependencies: oxc-transform-react (^0.145.0).\", \"npm lock location: node_modules/@vitejs/plugin-react.\"], \"scope\": \"build\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 19, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 676, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"Unresolved npm peerDependencies: @rolldown/plugin-babel (^0.1.7 || ^0.2.0).\", \"Unresolved npm peerDependencies: babel-plugin-react-compiler (^1.0.0).\", \"Unresolved npm peerDependencies: oxc-transform-react (^0.152.0).\", \"npm lock location: node_modules/@vitejs/plugin-react.\"], \"scope\": \"build\"}"
         }
       ],
-      "version": "6.1.1",
-      "purl": "pkg:npm/%40vitejs/plugin-react@6.1.1",
+      "version": "6.1.2",
+      "purl": "pkg:npm/%40vitejs/plugin-react@6.1.2",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "cb12da415f609214bc7b326a08cebe9dd53b98363a82a020ef9350fb4223c0423c2183a64028244701ca5527d65d6d3be83b2a328d0393ed052b553e33946017"
+          "content": "7e124d19476c7106b81e4234c45c70a275b28675517823c36d723b147ee39b3a67542ac5408ecf46b85679c3b6eb7eb5d2f3abb3db6bd98e3171ff2e01d1716f"
         }
       ],
       "licenses": [
@@ -3284,7 +3296,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-e937a5ef9b0e01c5a6d9",
+      "bom-ref": "component-f220b808b47aa5b52ee4",
       "name": "nanoid",
       "properties": [
         {
@@ -3292,12 +3304,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1042, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/nanoid.\"], \"scope\": \"build\"}"
         }
       ],
-      "version": "3.3.19",
-      "purl": "pkg:npm/nanoid@3.3.19",
+      "version": "3.3.20",
+      "purl": "pkg:npm/nanoid@3.3.20",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "636b54372e28bb0eadab9a0348a7906063b286450184d39c195ff4d8a0beea477d7831aa75977efa68cc8880e296b058be3127098bd5b6cb870ae3fea2449fba"
+          "content": "b8a760d86dc63422909fd6f260ea716c6aab4f67c63b9291b7927ff1bde9a24f2b4faab119617a871332262118b407fe155c98b83f6145a0ea5f9b8f15827865"
         }
       ],
       "licenses": [
@@ -3356,7 +3368,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-1434cfbc120afcc90429",
+      "bom-ref": "component-22d583bac5767e5f44ef",
       "name": "postcss",
       "properties": [
         {
@@ -3364,12 +3376,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1081, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/postcss.\"], \"scope\": \"build\"}"
         }
       ],
-      "version": "8.5.28",
-      "purl": "pkg:npm/postcss@8.5.28",
+      "version": "8.5.29",
+      "purl": "pkg:npm/postcss@8.5.29",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "451bb3a83b6de58f61deabb3e615a12be4cf9ec995b3a5b0494e8b90931e6381ecb54103b984c6f1425275ac0c4739b302d57e284a06f0ddd0836a8bcb9bccfc"
+          "content": "e3d7068546d78fc41e9efd224ccc40d5c141cf15e872da42f548ddefbb7559c6c922bea717f788ee0ffc320c6b62574546e017be36bbc504706afa16ee482bc5"
         }
       ],
       "licenses": [
@@ -3476,7 +3488,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-768176e5c72901709e99",
+      "bom-ref": "component-2453f16b03a7f9d5b1c0",
       "name": "rolldown",
       "properties": [
         {
@@ -3484,12 +3496,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1169, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/rolldown.\"], \"scope\": \"build\"}"
         }
       ],
-      "version": "1.2.11",
-      "purl": "pkg:npm/rolldown@1.2.11",
+      "version": "1.2.13",
+      "purl": "pkg:npm/rolldown@1.2.13",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "aa94b0232cf48c742ae6a5c14cdc45984ebaeb8ac9ecefb84ef3c53a239a052af3f0838773592828a4aa4ccd87eaed541b5f93bdeb82eaf6831ca5c53af6f52b"
+          "content": "ff96a93a4c16c6d002710b59e5696b02c292e09c175538503c967746a22bb9163d506f4cf1ed15957374ebcc6e9bf251280e1a214a09d778217bf9060af89d89"
         }
       ],
       "licenses": [
@@ -3548,7 +3560,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-fe3768e6234927a009ec",
+      "bom-ref": "component-6e63dd3e4d4ed470be7f",
       "name": "source-map-js",
       "properties": [
         {
@@ -3556,12 +3568,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm lockfile package\", \"line\": 1215, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"npm lock location: node_modules/source-map-js.\"], \"scope\": \"build\"}"
         }
       ],
-      "version": "1.2.1",
-      "purl": "pkg:npm/source-map-js@1.2.1",
+      "version": "1.2.2",
+      "purl": "pkg:npm/source-map-js@1.2.2",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "51758c2a12cec1529bef6f0852d40f5f17d853ebac7726ed52b2bff2e184f0240cbeb84ea70bf30c1c23d108522fb31073bbc8b084811bc550f3e203431a5f40"
+          "content": "2868fff18e37c77e5a6550edb7e27898ad61a0b18750b3187d290e0c93508cd0c2de85b53ea3e8c4cc28d292d4b1633f5041b338dfcdc5e1f2c047cd5cd3f757"
         }
       ],
       "licenses": [
@@ -3620,7 +3632,7 @@
     },
     {
       "type": "library",
-      "bom-ref": "component-bec59f984cb93c3af331",
+      "bom-ref": "component-f53c990d24bc787dea82",
       "name": "vite",
       "properties": [
         {
@@ -3628,12 +3640,12 @@
           "value": "{\"completeness\": \"locked\", \"ecosystem\": \"npm\", \"evidence\": [{\"detail\": \"npm devDependencies declaration\", \"line\": 7, \"path\": \"poc/components/apps/web-spa/package.json\"}, {\"detail\": \"npm lockfile package\", \"line\": 1277, \"path\": \"poc/components/apps/web-spa/package-lock.json\"}], \"notes\": [\"Unresolved npm peerDependencies: @types/node (^20.19.0 || >=22.12.0).\", \"Unresolved npm peerDependencies: @vitejs/devtools (^0.7.1).\", \"Unresolved npm peerDependencies: esbuild (^0.27.0 || ^0.28.0).\", \"Unresolved npm peerDependencies: jiti (>=1.21.0).\", \"Unresolved npm peerDependencies: less (^4.0.0).\", \"Unresolved npm peerDependencies: sass (^1.70.0).\", \"Unresolved npm peerDependencies: sass-embedded (^1.70.0).\", \"Unresolved npm peerDependencies: stylus (>=0.54.8).\", \"Unresolved npm peerDependencies: sugarss (^5.0.0).\", \"Unresolved npm peerDependencies: terser (^5.16.0).\", \"Unresolved npm peerDependencies: tsx (^4.8.1).\", \"Unresolved npm peerDependencies: yaml (^2.4.2).\", \"npm lock location: node_modules/vite.\"], \"scope\": \"build\"}"
         }
       ],
-      "version": "8.3.1",
-      "purl": "pkg:npm/vite@8.3.1",
+      "version": "8.3.4",
+      "purl": "pkg:npm/vite@8.3.4",
       "hashes": [
         {
           "alg": "SHA-512",
-          "content": "fdbbc7f44f6d9825d11a9dae5d8dd66ce95daa94f01646e16bff0035a110e95931847eb42b2a8bc2066aea51b6cbee2e4f9e71f7ef5e50732943bb869ce08a8c"
+          "content": "21fb4b13ca6126174d44818d115e09082bdf35272865055f71768df1342ba2958626d38772efa2001f691dcb86be611bfe475dc342c17bf8d2f33b5d0bac5d89"
         }
       ],
       "licenses": [
@@ -3662,7 +3674,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 18, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^4.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^4.0.0\"}"
+          "value": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 18, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^6.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^6.0.0\"}"
         }
       ]
     },
@@ -3673,13 +3685,13 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"python\", \"evidence\": [{\"detail\": \"SBOM collector uses Python 3.11 tomllib and the standard library\", \"line\": 11, \"path\": \"tools/sbom_dependencies.py\"}], \"notes\": [\"No Python package installation is required.\"], \"scope\": \"build\", \"versionConstraint\": \">=3.11\"}"
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"python\", \"evidence\": [{\"detail\": \"SBOM collector uses Python 3.11 tomllib and the standard library\", \"line\": 12, \"path\": \"tools/sbom_dependencies.py\"}], \"notes\": [\"No Python package installation is required.\"], \"scope\": \"build\", \"versionConstraint\": \">=3.11\"}"
         }
       ]
     },
     {
       "type": "platform",
-      "bom-ref": "component-fc2ee4eda4cc40924b4c",
+      "bom-ref": "component-b123bc100584e990546c",
       "name": "Bazel",
       "properties": [
         {
@@ -3687,26 +3699,25 @@
           "value": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel toolchain pin\", \"line\": 1, \"path\": \"poc/.bazelversion\"}], \"notes\": [], \"scope\": \"build\"}"
         }
       ],
-      "version": "7.7.1"
+      "version": "9.3.0"
     },
     {
       "type": "platform",
-      "bom-ref": "component-e0d7247c93c2dd3153ce",
+      "bom-ref": "component-64c42a94810285c49c17",
       "name": "Rust",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 21, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}"
+          "value": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 22, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}"
         }
       ],
-      "version": "1.96.1"
+      "version": "1.98.0"
     }
   ],
   "dependencies": [
     {
       "ref": "repository-repository",
       "dependsOn": [
-        "component-009a9ee2a9507817fbdb",
         "component-02ab5f7026f26ec33f33",
         "component-034c38c9330d51ebd208",
         "component-053b555cf9191d41a62e",
@@ -3717,22 +3728,25 @@
         "component-0c13b8454d7be5b5c3d3",
         "component-0d2f85a06d20107be8e5",
         "component-0e6e2d750a77ab39284f",
+        "component-0f0cff7a49f65ef4c7e0",
         "component-108ce2cc57feb757cd3e",
         "component-10c72c20b80ada8f1628",
-        "component-11ecce9903c8ab94790d",
         "component-123ab2531b17270eb8a5",
+        "component-12a420e0dcef3953f742",
         "component-13cefd51066630a2dde2",
-        "component-1434cfbc120afcc90429",
         "component-162a0de9cdcc0b6ac738",
         "component-18d53a31f9d7299c26ca",
         "component-1b6b99d7283726506010",
         "component-1c5ef9ac358619b2a5ff",
-        "component-1d3f71bc1240d187ff9f",
         "component-2061a6f1b287a19bc9f7",
+        "component-22d583bac5767e5f44ef",
         "component-232b1d2d431cbab4febb",
+        "component-2453f16b03a7f9d5b1c0",
         "component-25b154bb45b8eaa2f3e1",
+        "component-26f3529688393b508e03",
         "component-29dc513653a17c5eedbe",
         "component-2a77cfce14bb4554fc93",
+        "component-2d32558a928063bc9b9b",
         "component-2dae99ffde412bc61d02",
         "component-2e7a83b80d59a1151420",
         "component-2f1cdb21a682e062e676",
@@ -3741,39 +3755,43 @@
         "component-32fba889d361712ad42b",
         "component-334ab6a1343ff5cf1aaf",
         "component-34610dcfba7d04bf0a9e",
-        "component-34a71dbb96a0de0ca4c8",
         "component-357792c750c677c9a3f7",
         "component-35fcde7583fe0a6b6c18",
+        "component-36c5c8e3aaa4261a674d",
+        "component-36c8c27f93de8f762982",
         "component-376808d40295136911be",
         "component-37fb8ad6a0df9eabe034",
         "component-3c8b53184abeca3b5018",
-        "component-3d1ab4d9c0da045e029f",
+        "component-3d333e1be5724abe8c61",
+        "component-3e5f0fcf7b7d96196931",
         "component-458df5501015d24b2d63",
-        "component-46cee4254c5189b44088",
         "component-4727ee8b2ef727fe0165",
+        "component-4a30a4d0502f7c9a64e5",
         "component-4aa0148988e62487a2bb",
         "component-4b50e029cf9ac29b6959",
-        "component-53f61b34dd69618c64cb",
-        "component-5581920d7809cc4f7b87",
+        "component-4de1e721d14b63e85c2c",
         "component-56afa9bf2b7656f9c7ce",
         "component-57a55c0786f9411d15c7",
+        "component-5a794405e0464e37242c",
         "component-5b31f737d3a8bb3fc727",
         "component-5b87d470155010b330ab",
-        "component-5db76a396352574bbd5f",
         "component-5f1071b27f3c79c7a3d1",
         "component-5feb07e3d303378e57b8",
         "component-6066aed6f7afc0b9c3f6",
+        "component-61ce5153b3c3e63ab43b",
         "component-62cfebf3d772ea070685",
         "component-6423968a78e396e24942",
+        "component-64c42a94810285c49c17",
         "component-6766f3030ce963b2ffed",
         "component-698d35e715c4ceb5f2db",
+        "component-6b2d81d52478f6b2a7a5",
         "component-6b907b19673561cb4a24",
         "component-6be8d0e917cc23fe81b5",
         "component-6c26c9a00ec6c7eefd3f",
         "component-6c374afeabb469a25385",
         "component-6c517d3022b0b71b43f5",
         "component-6ce7f9aacdaa873fe67a",
-        "component-6e55ee25d947e74274e4",
+        "component-6e63dd3e4d4ed470be7f",
         "component-6ef720777fa2691cb03c",
         "component-6fa243660745bdcda93b",
         "component-6fb6f7692ba5b7798bc3",
@@ -3781,7 +3799,7 @@
         "component-725d960583c23c172e4f",
         "component-749f5b738d9f703631a2",
         "component-750a15aeedbf42aa9578",
-        "component-768176e5c72901709e99",
+        "component-76a9567d53f8f08aba59",
         "component-76e4bf3b6854103f09c2",
         "component-775a3fe7c4501d999cfe",
         "component-77a135ff7e1b2ae5fd97",
@@ -3795,7 +3813,7 @@
         "component-80049060cf9ead9ed54f",
         "component-81da6ac3475bd2365bd4",
         "component-821de82029b1a645281a",
-        "component-8806c943eef2cea69b80",
+        "component-88e16e04a8872e4741b7",
         "component-88e2bf77153405a7b3da",
         "component-8b4f13c0d092978d2d1f",
         "component-8b842607de66b9d3e849",
@@ -3804,13 +3822,12 @@
         "component-8c527eaa3590dc86a0ab",
         "component-8d477c895cd989d2c12e",
         "component-8ede3b17d41fa84057ad",
-        "component-9328c7589c6a3f437b1c",
+        "component-8ef69596b3c47daa420b",
         "component-97041d09cf5f0ef0d825",
         "component-97c0013c7f80dd934325",
-        "component-9c3f8db2790d889438e0",
         "component-9e01adac92e1d6f47da8",
-        "component-9fd7838cf359e50ff3e3",
         "component-a0b4725581312079c351",
+        "component-a487fc4ab2dda702d0a6",
         "component-a54cc080f4eaffe67885",
         "component-a68ac7c18b30cb6e67fe",
         "component-a71ae5269d13933c8fb0",
@@ -3818,22 +3835,22 @@
         "component-a8decdc9b6ad6fa1905d",
         "component-a918c6f303ac3cfdd0e8",
         "component-a9e5d4a04686c5b917db",
-        "component-aa040d9c7308a54cd032",
         "component-ab9b38194fc42641bd6d",
+        "component-abbc6e614bbf7abca5c9",
+        "component-ad8e4eee9f54790d067f",
         "component-af8eee1897fb3c912fae",
         "component-b05903de4c965507bd39",
+        "component-b123bc100584e990546c",
+        "component-b22e4a8a1043bf1e4bee",
         "component-b5df48f1fbf7932ca082",
         "component-b7d7f0947f5ea08ea31f",
+        "component-b87e46b1351e27f1e58b",
         "component-b89c5a7162f48e913ca0",
         "component-b8f6b0fb171a46993ae9",
         "component-ba020b99df7f8f6b2f74",
         "component-ba46c8f92f85702f810e",
-        "component-bd2163fe3dd8f3cafc1c",
         "component-bd54bb36f0a72809d0b7",
-        "component-bec59f984cb93c3af331",
         "component-bfa23ed9dd1e539460bf",
-        "component-c0fe2294b074d970eab9",
-        "component-c3dabc3ce648f33c17ff",
         "component-c4178888342f61dacd5d",
         "component-c4957a783c1a36fb78e5",
         "component-c7917f804d963de4d81d",
@@ -3841,7 +3858,6 @@
         "component-c95db9af64211017f8fc",
         "component-ca671449c7f6168ed197",
         "component-cac5a3c47f0a55c0772b",
-        "component-ce78f0fb00fb1cd12093",
         "component-cf9e44e8e2fff4bce3e7",
         "component-d0cdcd40646345021d5c",
         "component-d2db176a8c7dcd59ae0f",
@@ -3854,38 +3870,35 @@
         "component-d8e235b766f530158dd1",
         "component-da9cc9eee808cce14fa1",
         "component-db4e5adc66bf5c0128ce",
-        "component-dbf93afe3f480cf44e65",
         "component-dc74cbf585c403f13e97",
-        "component-ddb15ad04b93f7e4425d",
         "component-de78bc62ca099781fe6b",
-        "component-e0d7247c93c2dd3153ce",
+        "component-e17dbebbb27c4045d588",
         "component-e1ade72e97894c545334",
         "component-e1d0135b0a028a16f2ae",
-        "component-e28e76d005de3cf73691",
         "component-e3c68a8ebf6f2087a8ae",
         "component-e6ac38308dd69428432b",
         "component-e7d69ee7610bfa18e869",
-        "component-e937a5ef9b0e01c5a6d9",
         "component-ebb7316bec0fea360b5f",
         "component-ec838a8b0849d7ea3af1",
         "component-ee2aa6131537409e5993",
         "component-ee8228e1e7eb77b911f3",
         "component-ee8941cfc00e9dd51488",
-        "component-f0ab035333f10a637488",
         "component-f0b440c59e1f0497c5db",
         "component-f149956167f66539819f",
         "component-f19a9659c481a09a3447",
+        "component-f1d13de8bd349c1f6669",
+        "component-f220b808b47aa5b52ee4",
         "component-f2e23564fca8a2eaf1ef",
         "component-f2f86d61567c5542f0f4",
+        "component-f53c990d24bc787dea82",
         "component-f69e3b7bb26f74efcb06",
         "component-f6bdd0ab9e59579351d9",
         "component-f8ba62d5d5b8122e41cd",
+        "component-f9b63bdf793ceee3188d",
         "component-f9dec0ab39f2cf4d4b50",
         "component-fa2cf9964c10691e1571",
-        "component-fa4f9fae46d0a4a0f39d",
-        "component-fc2ee4eda4cc40924b4c",
-        "component-fc440f288497378276b3",
-        "component-fe3768e6234927a009ec",
+        "component-fdc05f7156de95a7f75a",
+        "component-fea4f4779ffeff3da9b0",
         "component-ff8a0d6e22e8cdbdd05a"
       ]
     },
@@ -3903,8 +3916,8 @@
       "ref": "component-97041d09cf5f0ef0d825",
       "dependsOn": [
         "component-ab9b38194fc42641bd6d",
-        "component-d820bc5580bd3aa1477f",
-        "component-e28e76d005de3cf73691"
+        "component-b22e4a8a1043bf1e4bee",
+        "component-d820bc5580bd3aa1477f"
       ]
     },
     {
@@ -3974,7 +3987,7 @@
     {
       "ref": "component-af8eee1897fb3c912fae",
       "dependsOn": [
-        "component-34a71dbb96a0de0ca4c8"
+        "component-0f0cff7a49f65ef4c7e0"
       ]
     },
     {
@@ -3984,7 +3997,7 @@
       ]
     },
     {
-      "ref": "component-aa040d9c7308a54cd032",
+      "ref": "component-36c8c27f93de8f762982",
       "dependsOn": [
         "component-c7917f804d963de4d81d"
       ]
@@ -3993,9 +4006,9 @@
       "ref": "component-da9cc9eee808cce14fa1",
       "dependsOn": [
         "component-2dae99ffde412bc61d02",
+        "component-36c8c27f93de8f762982",
         "component-77d833f1e6db334e658b",
-        "component-7a55deaf00dcd91ceb1b",
-        "component-aa040d9c7308a54cd032"
+        "component-7a55deaf00dcd91ceb1b"
       ]
     },
     {
@@ -4042,7 +4055,7 @@
       "dependsOn": [
         "component-02ab5f7026f26ec33f33",
         "component-053b555cf9191d41a62e",
-        "component-34a71dbb96a0de0ca4c8",
+        "component-0f0cff7a49f65ef4c7e0",
         "component-e1ade72e97894c545334"
       ]
     },
@@ -4086,13 +4099,13 @@
       ]
     },
     {
-      "ref": "component-34a71dbb96a0de0ca4c8",
+      "ref": "component-0f0cff7a49f65ef4c7e0",
       "dependsOn": []
     },
     {
       "ref": "component-ec838a8b0849d7ea3af1",
       "dependsOn": [
-        "component-34a71dbb96a0de0ca4c8"
+        "component-0f0cff7a49f65ef4c7e0"
       ]
     },
     {
@@ -4117,9 +4130,9 @@
       "dependsOn": []
     },
     {
-      "ref": "component-3d1ab4d9c0da045e029f",
+      "ref": "component-61ce5153b3c3e63ab43b",
       "dependsOn": [
-        "component-34a71dbb96a0de0ca4c8",
+        "component-0f0cff7a49f65ef4c7e0",
         "component-4b50e029cf9ac29b6959",
         "component-7b39f8292cbba829d69b"
       ]
@@ -4151,10 +4164,10 @@
       "ref": "component-0e6e2d750a77ab39284f",
       "dependsOn": [
         "component-053b555cf9191d41a62e",
+        "component-0f0cff7a49f65ef4c7e0",
         "component-25b154bb45b8eaa2f3e1",
-        "component-34a71dbb96a0de0ca4c8",
         "component-698d35e715c4ceb5f2db",
-        "component-6e55ee25d947e74274e4"
+        "component-abbc6e614bbf7abca5c9"
       ]
     },
     {
@@ -4212,10 +4225,10 @@
       "dependsOn": [
         "component-08faf646b9b39c46b560",
         "component-8c527eaa3590dc86a0ab",
+        "component-a487fc4ab2dda702d0a6",
         "component-a54cc080f4eaffe67885",
         "component-f8ba62d5d5b8122e41cd",
-        "component-f9dec0ab39f2cf4d4b50",
-        "component-fc440f288497378276b3"
+        "component-f9dec0ab39f2cf4d4b50"
       ]
     },
     {
@@ -4289,8 +4302,8 @@
       "ref": "component-8c4439c0484144cc8ce8",
       "dependsOn": [
         "component-ab9b38194fc42641bd6d",
-        "component-d820bc5580bd3aa1477f",
-        "component-e28e76d005de3cf73691"
+        "component-b22e4a8a1043bf1e4bee",
+        "component-d820bc5580bd3aa1477f"
       ]
     },
     {
@@ -4316,13 +4329,13 @@
       ]
     },
     {
-      "ref": "component-6e55ee25d947e74274e4",
+      "ref": "component-abbc6e614bbf7abca5c9",
       "dependsOn": []
     },
     {
       "ref": "component-d549b9fe5fbd05f23f0b",
       "dependsOn": [
-        "component-34a71dbb96a0de0ca4c8",
+        "component-0f0cff7a49f65ef4c7e0",
         "component-7b39f8292cbba829d69b"
       ]
     },
@@ -4335,7 +4348,7 @@
       ]
     },
     {
-      "ref": "component-e28e76d005de3cf73691",
+      "ref": "component-b22e4a8a1043bf1e4bee",
       "dependsOn": [
         "component-ab9b38194fc42641bd6d",
         "component-d820bc5580bd3aa1477f",
@@ -4350,12 +4363,14 @@
       "ref": "component-f8ba62d5d5b8122e41cd",
       "dependsOn": [
         "component-08faf646b9b39c46b560",
+        "component-36c5c8e3aaa4261a674d",
         "component-458df5501015d24b2d63",
         "component-4727ee8b2ef727fe0165",
         "component-5f1071b27f3c79c7a3d1",
         "component-6c26c9a00ec6c7eefd3f",
         "component-8c527eaa3590dc86a0ab",
         "component-97041d09cf5f0ef0d825",
+        "component-a487fc4ab2dda702d0a6",
         "component-a54cc080f4eaffe67885",
         "component-a8031210b162f8c70f5e",
         "component-b5df48f1fbf7932ca082",
@@ -4364,28 +4379,26 @@
         "component-d5ad57211a3879f5640c",
         "component-ee8941cfc00e9dd51488",
         "component-f0b440c59e1f0497c5db",
-        "component-f9dec0ab39f2cf4d4b50",
-        "component-fa4f9fae46d0a4a0f39d",
-        "component-fc440f288497378276b3"
+        "component-f9dec0ab39f2cf4d4b50"
       ]
     },
     {
-      "ref": "component-fa4f9fae46d0a4a0f39d",
+      "ref": "component-36c5c8e3aaa4261a674d",
       "dependsOn": [
         "component-08faf646b9b39c46b560",
+        "component-0f0cff7a49f65ef4c7e0",
         "component-2a77cfce14bb4554fc93",
-        "component-34a71dbb96a0de0ca4c8",
         "component-376808d40295136911be",
-        "component-a8031210b162f8c70f5e",
-        "component-fc440f288497378276b3"
+        "component-a487fc4ab2dda702d0a6",
+        "component-a8031210b162f8c70f5e"
       ]
     },
     {
-      "ref": "component-fc440f288497378276b3",
+      "ref": "component-a487fc4ab2dda702d0a6",
       "dependsOn": [
         "component-08faf646b9b39c46b560",
-        "component-34a71dbb96a0de0ca4c8",
-        "component-3d1ab4d9c0da045e029f",
+        "component-0f0cff7a49f65ef4c7e0",
+        "component-61ce5153b3c3e63ab43b",
         "component-7b39f8292cbba829d69b",
         "component-a8031210b162f8c70f5e",
         "component-d549b9fe5fbd05f23f0b"
@@ -4440,9 +4453,9 @@
       "dependsOn": [
         "component-34610dcfba7d04bf0a9e",
         "component-ab9b38194fc42641bd6d",
+        "component-b22e4a8a1043bf1e4bee",
         "component-d820bc5580bd3aa1477f",
-        "component-de78bc62ca099781fe6b",
-        "component-e28e76d005de3cf73691"
+        "component-de78bc62ca099781fe6b"
       ]
     },
     {
@@ -4479,7 +4492,7 @@
       "ref": "component-ee8941cfc00e9dd51488",
       "dependsOn": [
         "component-064c44650e1905069b7e",
-        "component-34a71dbb96a0de0ca4c8",
+        "component-0f0cff7a49f65ef4c7e0",
         "component-b7d7f0947f5ea08ea31f",
         "component-dc74cbf585c403f13e97",
         "component-ec838a8b0849d7ea3af1"
@@ -4500,67 +4513,67 @@
       "dependsOn": []
     },
     {
-      "ref": "component-9fd7838cf359e50ff3e3",
+      "ref": "component-88e16e04a8872e4741b7",
       "dependsOn": []
     },
     {
-      "ref": "component-11ecce9903c8ab94790d",
+      "ref": "component-26f3529688393b508e03",
       "dependsOn": []
     },
     {
-      "ref": "component-ce78f0fb00fb1cd12093",
+      "ref": "component-8ef69596b3c47daa420b",
       "dependsOn": []
     },
     {
-      "ref": "component-bd2163fe3dd8f3cafc1c",
+      "ref": "component-3e5f0fcf7b7d96196931",
       "dependsOn": []
     },
     {
-      "ref": "component-9c3f8db2790d889438e0",
+      "ref": "component-2d32558a928063bc9b9b",
       "dependsOn": []
     },
     {
-      "ref": "component-53f61b34dd69618c64cb",
+      "ref": "component-b87e46b1351e27f1e58b",
       "dependsOn": []
     },
     {
-      "ref": "component-f0ab035333f10a637488",
+      "ref": "component-f9b63bdf793ceee3188d",
       "dependsOn": []
     },
     {
-      "ref": "component-c0fe2294b074d970eab9",
+      "ref": "component-5a794405e0464e37242c",
       "dependsOn": []
     },
     {
-      "ref": "component-8806c943eef2cea69b80",
+      "ref": "component-e17dbebbb27c4045d588",
       "dependsOn": []
     },
     {
-      "ref": "component-1d3f71bc1240d187ff9f",
+      "ref": "component-fdc05f7156de95a7f75a",
       "dependsOn": []
     },
     {
-      "ref": "component-009a9ee2a9507817fbdb",
+      "ref": "component-12a420e0dcef3953f742",
       "dependsOn": []
     },
     {
-      "ref": "component-5db76a396352574bbd5f",
+      "ref": "component-6b2d81d52478f6b2a7a5",
       "dependsOn": []
     },
     {
-      "ref": "component-46cee4254c5189b44088",
+      "ref": "component-4de1e721d14b63e85c2c",
       "dependsOn": []
     },
     {
-      "ref": "component-dbf93afe3f480cf44e65",
+      "ref": "component-fea4f4779ffeff3da9b0",
       "dependsOn": []
     },
     {
-      "ref": "component-ddb15ad04b93f7e4425d",
+      "ref": "component-3d333e1be5724abe8c61",
       "dependsOn": []
     },
     {
-      "ref": "component-5581920d7809cc4f7b87",
+      "ref": "component-f1d13de8bd349c1f6669",
       "dependsOn": []
     },
     {
@@ -4660,10 +4673,10 @@
       "dependsOn": []
     },
     {
-      "ref": "component-c3dabc3ce648f33c17ff",
+      "ref": "component-76a9567d53f8f08aba59",
       "dependsOn": [
         "component-6be8d0e917cc23fe81b5",
-        "component-bec59f984cb93c3af331"
+        "component-f53c990d24bc787dea82"
       ]
     },
     {
@@ -4672,11 +4685,11 @@
         "component-31a3b6cc0c5d632967ed",
         "component-56afa9bf2b7656f9c7ce",
         "component-6423968a78e396e24942",
+        "component-76a9567d53f8f08aba59",
         "component-a8decdc9b6ad6fa1905d",
         "component-ba020b99df7f8f6b2f74",
-        "component-bec59f984cb93c3af331",
-        "component-c3dabc3ce648f33c17ff",
-        "component-d8e235b766f530158dd1"
+        "component-d8e235b766f530158dd1",
+        "component-f53c990d24bc787dea82"
       ]
     },
     {
@@ -4763,7 +4776,7 @@
       ]
     },
     {
-      "ref": "component-e937a5ef9b0e01c5a6d9",
+      "ref": "component-f220b808b47aa5b52ee4",
       "dependsOn": []
     },
     {
@@ -4775,11 +4788,11 @@
       "dependsOn": []
     },
     {
-      "ref": "component-1434cfbc120afcc90429",
+      "ref": "component-22d583bac5767e5f44ef",
       "dependsOn": [
         "component-0ab728d33acfaf72f005",
-        "component-e937a5ef9b0e01c5a6d9",
-        "component-fe3768e6234927a009ec"
+        "component-6e63dd3e4d4ed470be7f",
+        "component-f220b808b47aa5b52ee4"
       ]
     },
     {
@@ -4811,25 +4824,25 @@
       "dependsOn": []
     },
     {
-      "ref": "component-768176e5c72901709e99",
+      "ref": "component-2453f16b03a7f9d5b1c0",
       "dependsOn": [
-        "component-009a9ee2a9507817fbdb",
-        "component-11ecce9903c8ab94790d",
-        "component-1d3f71bc1240d187ff9f",
-        "component-46cee4254c5189b44088",
-        "component-53f61b34dd69618c64cb",
-        "component-5581920d7809cc4f7b87",
-        "component-5db76a396352574bbd5f",
+        "component-12a420e0dcef3953f742",
+        "component-26f3529688393b508e03",
+        "component-2d32558a928063bc9b9b",
+        "component-3d333e1be5724abe8c61",
+        "component-3e5f0fcf7b7d96196931",
+        "component-4de1e721d14b63e85c2c",
+        "component-5a794405e0464e37242c",
+        "component-6b2d81d52478f6b2a7a5",
         "component-6be8d0e917cc23fe81b5",
-        "component-8806c943eef2cea69b80",
-        "component-9c3f8db2790d889438e0",
-        "component-9fd7838cf359e50ff3e3",
-        "component-bd2163fe3dd8f3cafc1c",
-        "component-c0fe2294b074d970eab9",
-        "component-ce78f0fb00fb1cd12093",
-        "component-dbf93afe3f480cf44e65",
-        "component-ddb15ad04b93f7e4425d",
-        "component-f0ab035333f10a637488"
+        "component-88e16e04a8872e4741b7",
+        "component-8ef69596b3c47daa420b",
+        "component-b87e46b1351e27f1e58b",
+        "component-e17dbebbb27c4045d588",
+        "component-f1d13de8bd349c1f6669",
+        "component-f9b63bdf793ceee3188d",
+        "component-fdc05f7156de95a7f75a",
+        "component-fea4f4779ffeff3da9b0"
       ]
     },
     {
@@ -4841,7 +4854,7 @@
       "dependsOn": []
     },
     {
-      "ref": "component-fe3768e6234927a009ec",
+      "ref": "component-6e63dd3e4d4ed470be7f",
       "dependsOn": []
     },
     {
@@ -4877,11 +4890,11 @@
       ]
     },
     {
-      "ref": "component-bec59f984cb93c3af331",
+      "ref": "component-f53c990d24bc787dea82",
       "dependsOn": [
-        "component-1434cfbc120afcc90429",
         "component-18d53a31f9d7299c26ca",
-        "component-768176e5c72901709e99",
+        "component-22d583bac5767e5f44ef",
+        "component-2453f16b03a7f9d5b1c0",
         "component-9e01adac92e1d6f47da8",
         "component-e1d0135b0a028a16f2ae",
         "component-e3c68a8ebf6f2087a8ae"

@@ -58,7 +58,7 @@ body {
 }
 .mono { font-family: "SF Mono", "Cascadia Mono", Consolas, "Roboto Mono", monospace; }
 
-/* ---------- header chrome (both windows) ---------- */
+/* REGION: header chrome (both windows) */
 .bar {
   display: flex;
   align-items: center;
@@ -93,7 +93,7 @@ body {
 .chip.good { color: #9df5c8; opacity: 1; }
 .bar a { color: var(--amisad-white); font-size: 0.8rem; display: inline-flex; align-items: center; min-height: 44px; }
 
-/* ---------- controls ---------- */
+/* REGION: controls */
 button {
   font: inherit;
   font-size: 0.85rem;
@@ -135,7 +135,7 @@ select {
   appearance: none;
 }
 
-/* ---------- panels ---------- */
+/* REGION: panels */
 .panel {
   background: var(--card);
   border: 1px solid var(--line);
@@ -154,7 +154,7 @@ select {
 }
 .hint { font-size: 0.75rem; color: var(--muted); margin: 4px 0 0 0; line-height: 1.45; }
 
-/* ---------- swimlane timeline (shared: full + mini) ---------- */
+/* REGION: swimlane timeline (shared: full + mini) */
 .tl-wrap {
   overflow-x: auto;
   overflow-y: hidden;
@@ -270,7 +270,7 @@ select {
   margin: 0 1px;
 }
 
-/* ---------- status pills ---------- */
+/* REGION: status pills */
 .pill {
   display: inline-block;
   font-family: "SF Mono", Consolas, monospace;
@@ -284,7 +284,7 @@ select {
 .pill.warn { background: #fdf0da; color: var(--warn); }
 .pill.bad { background: #fbe0dd; color: var(--bad); }
 
-/* ---------- dark theme: the data window ---------- */
+/* REGION: dark theme: the data window */
 .theme-dark {
   background: var(--d-void);
   color: var(--d-text);
@@ -319,7 +319,7 @@ select {
 .theme-dark button:hover { background: #2f4180; }
 .theme-dark button.danger { background: var(--amisad-terracotta); color: #fff; }
 
-/* ---------- reduced motion ---------- */
+/* REGION: reduced motion */
 @media (prefers-reduced-motion: reduce) {
   * {
     -webkit-animation: none !important;
