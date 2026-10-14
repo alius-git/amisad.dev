@@ -385,9 +385,10 @@ These tests create records and restart their own local service processes.
 `python3 test/build_contracts.py`, `python3 test/nats_installer_contracts.py`, and
 `pwsh test/host_contracts.ps1` use disposable paths and native command fixtures;
 they do not modify the host firewall, install system services, or deploy VMs.
-Run `python3 test/bash_contracts.py -v`, `python3 test/cluster_ready_contracts.py -v`, and
-`python3 test/image_import_contracts.py -v` for restored-cluster readiness and
-thin-image delivery checks. They cover bounded API and NodePort requests,
+Run `python3 test/bash_contracts.py -v`, `python3 test/cluster_ready_contracts.py -v`,
+`python3 test/image_import_contracts.py -v`, and `python3 test/slice_runtime_stop_contracts.py -v`
+for restored-cluster readiness, thin-image delivery, and edge slice-runtime stop
+checks. They cover bounded API and NodePort requests,
 current-boot Flannel evidence, proxy bypass, retry recovery, and failures before
 Helm can deploy an image that was not imported. Readiness still requires every
 deployment rollout and all ten NodePorts; each startup or HTTP gate keeps its

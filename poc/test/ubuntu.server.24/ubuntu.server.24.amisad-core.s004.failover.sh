@@ -42,8 +42,8 @@ start_slice() { # <edge-hostname> <region>
         exit 7
     fi
     host="${edge}-admin@${ip}"
-    ssh "${SSH_OPTS[@]}" "$host" "pkill -x slice-runtime 2>/dev/null || true" \
-        || { echo "ssh to ${edge} (${ip}) failed" >&2; exit 7; }
+    amisad_stop_slice_runtime "$host" "${SSH_OPTS[@]}" \
+        || { echo "stopping slice-runtime on ${edge} (${ip}) failed" >&2; exit 7; }
     scp "${SSH_OPTS[@]}" target/release/slice-runtime "${host}:/tmp/slice-runtime" \
         || { echo "scp slice-runtime to ${edge} failed" >&2; exit 7; }
     ssh "${SSH_OPTS[@]}" "$host" \

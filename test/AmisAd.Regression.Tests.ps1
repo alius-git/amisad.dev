@@ -57,6 +57,7 @@ Describe 'AmisAd guest deployment contracts' {
         @{ Suite = 'bash_contracts.py' }
         @{ Suite = 'cluster_ready_contracts.py' }
         @{ Suite = 'image_import_contracts.py' }
+        @{ Suite = 'slice_runtime_stop_contracts.py' }
     ) {
         param($Suite)
         if (-not $script:ContractPython) {

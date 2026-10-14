@@ -35,10 +35,7 @@ if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
 fi
 if [ -n "${EDGE_HOST:-}" ]; then
     echo "edge: ${EDGE_HOST}"
-    # Kill any running slice-runtime BEFORE the scp: overwriting an executing
-    # binary fails with ETXTBSY (the edge stays up across scenarios - s001's
-    # instance is still running when s002 delivers its copy).
-    ssh "${SSH_OPTS[@]}" "$EDGE_HOST" "pkill -x slice-runtime 2>/dev/null || true"
+    amisad_stop_slice_runtime "$EDGE_HOST" "${SSH_OPTS[@]}"
     scp "${SSH_OPTS[@]}" target/release/slice-runtime "${EDGE_HOST}:/tmp/slice-runtime"
     ssh "${SSH_OPTS[@]}" "$EDGE_HOST" \
         "PORT=8080 LEDGER_URL=$LEDGER RESOURCE_URL=$RESOURCE nohup /tmp/slice-runtime >/tmp/slice-runtime.log 2>&1 & sleep 1; echo edge-started"
@@ -52,8 +49,7 @@ else
         exit 4
     fi
     echo "edge unresolved - slice-runtime on this VM (single-VM degraded fallback)"
-    # pkill by process NAME: this script's own text contains "slice-runtime".
-    pkill -x slice-runtime 2>/dev/null || true
+    amisad_stop_slice_runtime ''
     PORT=8090 LEDGER_URL="$LEDGER" RESOURCE_URL="$RESOURCE" \
         nohup target/release/slice-runtime >/tmp/slice-runtime.log 2>&1 &
     sleep 1
