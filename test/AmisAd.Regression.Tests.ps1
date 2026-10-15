@@ -147,11 +147,15 @@ Describe 'AmisAd shared VM start helper' {
         @'
 $script:Accept = $true
 $script:State = 'running'
+$script:Kind = ''
+$script:ControlHung = $false
 function Start-VM {
     [CmdletBinding(SupportsShouldProcess)]
     param([string]$VMName)
     if ($PSCmdlet.ShouldProcess($VMName, 'fixture start')) {
-        return @{ success = $script:Accept; errorMessage = 'fixture refused' }
+        $record = @{ success = $script:Accept; errorMessage = 'fixture refused' }
+        if ($script:Kind) { $record['kind'] = $script:Kind; $record['controlHung'] = $script:ControlHung }
+        return $record
     }
 }
 function Get-VMState {
@@ -184,6 +188,27 @@ Export-ModuleMember -Function Start-VM, Get-VMState
         $result = Start-VMConfirmed -Name 'fixture-vm' -RunningTimeoutSeconds 0 -Confirm:$false
         $result.started | Should -BeFalse
         $result.reason | Should -Match "VM is 'stopped'"
+        $result.kind | Should -Be 'not-running'
+        $result.controlHung | Should -BeFalse
+    }
+
+    It 'reads the failure kind and the control verdict a driver puts in its record' {
+        & (Get-Module AmisAdFixtureHost) { $script:Accept = $false; $script:State = 'stopped'; $script:Kind = 'apple-event'; $script:ControlHung = $true }
+        try {
+            $result = Start-VMConfirmed -Name 'fixture-vm' -Confirm:$false
+            $result.started | Should -BeFalse
+            $result.kind | Should -Be 'apple-event'
+            $result.controlHung | Should -BeTrue
+        } finally {
+            & (Get-Module AmisAdFixtureHost) { $script:Kind = ''; $script:ControlHung = $false }
+        }
+    }
+
+    It 'reads a record without those fields as an ordinary refusal' {
+        & (Get-Module AmisAdFixtureHost) { $script:Accept = $false; $script:State = 'stopped' }
+        $result = Start-VMConfirmed -Name 'fixture-vm' -Confirm:$false
+        $result.kind | Should -Be 'none'
+        $result.controlHung | Should -BeFalse
     }
 }
 
@@ -252,6 +277,187 @@ Describe 'AmisAd edge admission' {
         $null = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -WhatIf
         Should -Invoke Remove-Item -ModuleName AmisAd.Lab -Times 0 -Exactly
         Should -Invoke Start-VMConfirmed -ModuleName AmisAd.Lab -Times 0 -Exactly
+    }
+
+    It 'stops at a start that reports the control channel hung and skips the remaining edge' {
+        Mock Start-VMConfirmed -ModuleName AmisAd.Lab -ParameterFilter { $Name -eq 'amisad-edge-a' } -MockWith {
+            return @{ started = $false; reason = 'UTM control channel stopped acting'; kind = 'apple-event'; controlHung = $true }
+        }
+        $result = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -Confirm:$false
+        $result.Ok | Should -BeFalse
+        $result.ControlHung | Should -BeTrue
+        $result.HungEdge | Should -Be 'amisad-edge-a'
+        $result.Missing | Should -Contain 'amisad-edge-a'
+        $result.Missing | Should -Contain 'amisad-edge-b'
+        $result.State['amisad-edge-a'].Kind | Should -Be 'apple-event'
+        $result.State['amisad-edge-a'].Attempts | Should -Be 1
+        $result.State['amisad-edge-b'].Reason | Should -Match 'not attempted.*amisad-edge-a'
+        $result.State['amisad-edge-b'].Attempts | Should -Be 0
+        Should -Invoke Start-VMConfirmed -ModuleName AmisAd.Lab -ParameterFilter { $Name -eq 'amisad-edge-a' } -Times 1 -Exactly
+        Should -Invoke Start-VMConfirmed -ModuleName AmisAd.Lab -ParameterFilter { $Name -eq 'amisad-edge-b' } -Times 0 -Exactly
+        ($result.Lines -join "`n") | Should -Match 'no further start is attempted'
+    }
+
+    It 'keeps retrying a refusal that does not report the channel hung' {
+        Mock Start-VMConfirmed -ModuleName AmisAd.Lab -ParameterFilter { $Name -eq 'amisad-edge-b' } -MockWith {
+            return @{ started = $false; reason = 'denied'; kind = 'apple-event'; controlHung = $false }
+        }
+        $result = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -Confirm:$false
+        $result.Ok | Should -BeFalse
+        $result.ControlHung | Should -BeFalse
+        $result.State['amisad-edge-b'].Kind | Should -Be 'apple-event'
+        $result.State['amisad-edge-b'].Attempts | Should -Be 3
+        Should -Invoke Start-VMConfirmed -ModuleName AmisAd.Lab -ParameterFilter { $Name -eq 'amisad-edge-b' } -Times 3 -Exactly
+    }
+}
+
+Describe 'AmisAd edge failure classification' {
+    BeforeAll {
+        function Get-EdgeStartupFixture {
+            param([hashtable]$State, [string[]]$Missing, [bool]$ControlHung = $false, [string]$HungEdge = '')
+            return @{ Ok = $false; State = $State; Address = @{}; Missing = $Missing; Lines = [string[]]@(); ControlHung = $ControlHung; HungEdge = $HungEdge }
+        }
+    }
+
+    It 'files a hung control channel as hypervisor_unresponsive, naming the edge that saw it' {
+        $startup = Get-EdgeStartupFixture -ControlHung $true -HungEdge 'amisad-edge-a' -Missing @('amisad-edge-a', 'amisad-edge-b') -State @{
+            'amisad-edge-a' = @{ Started = $false; Ready = $false; Reason = 'control channel stopped acting'; Kind = 'apple-event'; Attempts = 1 }
+            'amisad-edge-b' = @{ Started = $false; Ready = $false; Reason = 'not attempted: the hypervisor control channel stopped acting on start requests (reported for amisad-edge-a)'; Kind = 'apple-event'; Attempts = 0 }
+        }
+        $failure = Get-AmisAdEdgeFailure -EdgeStartup $startup
+        $failure.FailureClass | Should -Be 'hypervisor_unresponsive'
+        $failure.ErrorMessage | Should -Match 'first seen on amisad-edge-a'
+        $failure.ErrorMessage | Should -Match 'amisad-edge-b \(not attempted'
+        $failure.DependencyFailures.Count | Should -Be 2
+        $failure.DependencyFailures[0].area | Should -Be 'amisad-edge'
+        $failure.DependencyFailures[0].vmName | Should -Be 'amisad-edge-a'
+        $failure.DependencyFailures[0].outcome | Should -Be 'start-not-acted'
+        $failure.DependencyFailures[0].kind | Should -Be 'apple-event'
+        $failure.DependencyFailures[0].attempts | Should -Be 1
+    }
+
+    It 'files every other way an edge stays down as provisioning_failure with one row per edge' {
+        $startup = Get-EdgeStartupFixture -Missing @('amisad-edge-a', 'amisad-edge-b') -State @{
+            'amisad-edge-a' = @{ Started = $true; Ready = $false; Reason = 'started but never reported a fresh valid IP address'; Kind = 'none'; Attempts = 1 }
+            'amisad-edge-b' = @{ Started = $false; Ready = $false; Reason = "start reported success but the VM is 'stopped' after 60s"; Kind = 'not-running'; Attempts = 3 }
+        }
+        $failure = Get-AmisAdEdgeFailure -EdgeStartup $startup
+        $failure.FailureClass | Should -Be 'provisioning_failure'
+        $failure.ErrorMessage | Should -Match '^Region edges are not live: amisad-edge-a \(started but never reported'
+        $rows = @{}
+        foreach ($row in $failure.DependencyFailures) { $rows[$row.vmName] = $row }
+        $rows['amisad-edge-a'].outcome | Should -Be 'no-ip-report'
+        $rows['amisad-edge-b'].outcome | Should -Be 'start-failed'
+        $rows['amisad-edge-b'].attempts | Should -Be 3
+        $rows['amisad-edge-b'].detail | Should -Match "VM is 'stopped'"
+    }
+
+    It 'reads a state recorded by an older module without the new fields' {
+        $startup = Get-EdgeStartupFixture -Missing @('amisad-edge-b') -State @{ 'amisad-edge-b' = @{ Started = $false; Ready = $false; Reason = 'fixture start denied' } }
+        $startup.Remove('ControlHung'); $startup.Remove('HungEdge')
+        $failure = Get-AmisAdEdgeFailure -EdgeStartup $startup
+        $failure.FailureClass | Should -Be 'provisioning_failure'
+        $failure.DependencyFailures[0].kind | Should -Be 'none'
+        $failure.DependencyFailures[0].attempts | Should -Be 0
+    }
+}
+
+Describe 'AmisAd lab failure record' {
+    BeforeAll {
+        $script:RecordFramework = Join-Path $TestDrive 'record-framework'
+        $modulesDir = Join-Path $script:RecordFramework 'test/modules'
+        New-Item -ItemType Directory -Path $modulesDir -Force | Out-Null
+        foreach ($name in 'Test.SequenceFailureState', 'Test.StateFile') {
+            "function Get-$($name -replace '\.', '')Marker { return '$name' }`nExport-ModuleMember -Function Get-$($name -replace '\.', '')Marker" |
+                Set-Content -LiteralPath (Join-Path $modulesDir "$name.psm1")
+        }
+        @'
+function Write-CycleInfraFailure {
+    param([string]$Stage, [string]$FailureClass, [string]$Severity, [string]$GuestKey, [string]$VMName, [string]$ErrorMessage, [string]$HostType, [hashtable]$HostMemory, [hashtable[]]$DependencyFailures = @())
+    $captured = @{ Stage = $Stage; FailureClass = $FailureClass; Severity = $Severity; GuestKey = $GuestKey; ErrorMessage = $ErrorMessage; HostType = $HostType; DependencyFailures = @($DependencyFailures) }
+    $captured | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $env:YURUNA_LOG_DIR 'captured.json')
+}
+Export-ModuleMember -Function Write-CycleInfraFailure
+'@ | Set-Content -LiteralPath (Join-Path $modulesDir 'Test.RunnerInnerLoop.psm1')
+        $script:SavedLogDir = $env:YURUNA_LOG_DIR
+    }
+    AfterAll {
+        $env:YURUNA_LOG_DIR = $script:SavedLogDir
+        Remove-Module Test.SequenceFailureState, Test.StateFile, Test.RunnerInnerLoop -Force -ErrorAction SilentlyContinue
+    }
+
+    It 'hands the classified record, its rows and the host type to the framework writer' {
+        $env:YURUNA_LOG_DIR = Join-Path $TestDrive 'record-log'
+        New-Item -ItemType Directory -Path $env:YURUNA_LOG_DIR -Force | Out-Null
+        $rows = [hashtable[]]@(@{ area = 'amisad-edge'; vmName = 'amisad-edge-b'; outcome = 'start-not-acted'; detail = 'hung'; kind = 'apple-event'; attempts = 1 })
+        $written = Write-AmisAdLabFailure -YurunaRoot $script:RecordFramework -HostType 'host.macos.utm' -Stage 'Start-AmisAdEdge' `
+            -FailureClass 'hypervisor_unresponsive' -ErrorMessage 'The hypervisor control channel stopped acting' -DependencyFailures $rows
+        $written | Should -BeTrue
+        $captured = Get-Content -Raw -LiteralPath (Join-Path $env:YURUNA_LOG_DIR 'captured.json') | ConvertFrom-Json
+        $captured.Stage | Should -Be 'Start-AmisAdEdge'
+        $captured.FailureClass | Should -Be 'hypervisor_unresponsive'
+        $captured.Severity | Should -Be 'hard'
+        $captured.GuestKey | Should -Be '(orchestration)'
+        $captured.HostType | Should -Be 'host.macos.utm'
+        $captured.ErrorMessage | Should -Be 'The hypervisor control channel stopped acting'
+        @($captured.DependencyFailures).Count | Should -Be 1
+        $captured.DependencyFailures[0].vmName | Should -Be 'amisad-edge-b'
+    }
+
+    It 'writes nothing and reports so outside a cycle' {
+        $env:YURUNA_LOG_DIR = ''
+        $written = Write-AmisAdLabFailure -YurunaRoot $script:RecordFramework -HostType 'host.macos.utm' -Stage 'Start-AmisAdEdge' `
+            -FailureClass 'provisioning_failure' -ErrorMessage 'no cycle'
+        $written | Should -BeFalse
+    }
+
+    It 'never fails the stage when the framework writer is missing' {
+        $env:YURUNA_LOG_DIR = Join-Path $TestDrive 'record-log-missing'
+        New-Item -ItemType Directory -Path $env:YURUNA_LOG_DIR -Force | Out-Null
+        $written = Write-AmisAdLabFailure -YurunaRoot (Join-Path $TestDrive 'no-such-framework') -HostType 'host.macos.utm' -Stage 'Start-AmisAdEdge' `
+            -FailureClass 'provisioning_failure' -ErrorMessage 'no framework'
+        $written | Should -BeFalse
+    }
+}
+
+Describe 'AmisAd control snapshot' {
+    AfterEach {
+        if (Test-Path -LiteralPath 'function:global:Save-UtmControlSnapshot') { Remove-Item -LiteralPath 'function:global:Save-UtmControlSnapshot' -Force }
+    }
+    BeforeAll {
+        $script:SnapshotStartup = @{
+            Ok = $false; Address = @{}; Lines = [string[]]@(); ControlHung = $true; HungEdge = 'amisad-edge-b'
+            Missing = @('amisad-edge-a', 'amisad-edge-b')
+            State = @{
+                'amisad-edge-a' = @{ Started = $true; Ready = $false; Reason = 'started but never reported a fresh valid IP address'; Kind = 'none'; Attempts = 1 }
+                'amisad-edge-b' = @{ Started = $false; Ready = $false; Reason = 'hung'; Kind = 'apple-event'; Attempts = 1 }
+            }
+        }
+    }
+
+    It 'records nothing on a host whose driver has no snapshot verb' {
+        $result = Save-AmisAdControlSnapshot -EdgeStartup $script:SnapshotStartup -LogDir $script:Logs
+        $result | Should -BeNullOrEmpty
+    }
+
+    It 'asks the driver for the stage log directory and the edge that started but never reported' {
+        $script:SnapshotArgs = $null
+        Set-Item -Path 'function:global:Save-UtmControlSnapshot' -Value {
+            [CmdletBinding(SupportsShouldProcess)] param([string]$OutputDirectory, [string]$Trigger, [string]$VMName)
+            $script:SnapshotArgs = @{ OutputDirectory = $OutputDirectory; Trigger = $Trigger; VMName = $VMName }
+            return [pscustomobject]@{ Written = $true; Path = (Join-Path $OutputDirectory "utm-control-snapshot.$Trigger.json") }
+        }
+        $result = Save-AmisAdControlSnapshot -EdgeStartup $script:SnapshotStartup -LogDir $script:Logs
+        $result.Written | Should -BeTrue
+        $script:SnapshotArgs.OutputDirectory | Should -Be $script:Logs
+        $script:SnapshotArgs.Trigger | Should -Be 'initialize-lab-edge-start'
+        $script:SnapshotArgs.VMName | Should -Be 'amisad-edge-a'
+    }
+
+    It 'never fails the stage when the driver verb throws' {
+        Set-Item -Path 'function:global:Save-UtmControlSnapshot' -Value { [CmdletBinding(SupportsShouldProcess)] param([string]$OutputDirectory, [string]$Trigger, [string]$VMName) $null = @($OutputDirectory, $Trigger, $VMName); throw 'no evidence today' }
+        $result = Save-AmisAdControlSnapshot -EdgeStartup $script:SnapshotStartup -LogDir $script:Logs
+        $result | Should -BeNullOrEmpty
     }
 }
 

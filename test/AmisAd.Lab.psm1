@@ -181,16 +181,21 @@ function Start-VMConfirmed {
     try {
         $record = @(Start-VM -VMName $Name -ErrorAction Stop) | Select-Object -Last 1
     } catch {
-        return @{ started = $false; reason = $_.Exception.Message }
+        return @{ started = $false; reason = $_.Exception.Message; kind = 'error'; controlHung = $false }
     }
-    if ($record -isnot [hashtable]) { return @{ started = $false; reason = 'Start-VM returned no status record' } }
-    if (-not $record.success) { return @{ started = $false; reason = "$($record.errorMessage)" } }
+    if ($record -isnot [hashtable]) { return @{ started = $false; reason = 'Start-VM returned no status record'; kind = 'error'; controlHung = $false } }
+    # The host contract's record may name the failure kind and whether the
+    # hypervisor's control channel stopped acting; a driver that does not
+    # report them reads as 'none', so the caller's retry policy is unchanged.
+    $kind = if ($record.Contains('kind') -and -not [string]::IsNullOrWhiteSpace("$($record['kind'])")) { [string]$record['kind'] } else { 'none' }
+    $controlHung = $record.Contains('controlHung') -and [bool]$record['controlHung']
+    if (-not $record.success) { return @{ started = $false; reason = "$($record.errorMessage)"; kind = $kind; controlHung = $controlHung } }
     $deadline = (Get-Date).AddSeconds($RunningTimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
-        if ((Get-VMState -VMName $Name) -eq 'running') { return @{ started = $true; reason = $null } }
+        if ((Get-VMState -VMName $Name) -eq 'running') { return @{ started = $true; reason = $null; kind = 'none'; controlHung = $false } }
         Start-Sleep -Seconds 2
     }
-    return @{ started = $false; reason = "start reported success but the VM is '$(Get-VMState -VMName $Name)' after ${RunningTimeoutSeconds}s" }
+    return @{ started = $false; reason = "start reported success but the VM is '$(Get-VMState -VMName $Name)' after ${RunningTimeoutSeconds}s"; kind = 'not-running'; controlHung = $false }
 }
 
 # --- REGION: Start-AmisAdEdge
@@ -212,20 +217,40 @@ function Start-AmisAdEdge {
     $state = @{}
     $address = @{}
     $lines = [System.Collections.Generic.List[string]]::new()
+    # Once a start reports that the hypervisor's control channel stopped
+    # acting, every further start would wait out the same timeout against the
+    # same hung channel: the remaining attempts and edges are skipped, and the
+    # verdict names the edge that saw it.
+    $controlHung = $false
+    $hungEdge = ''
     foreach ($edge in $Name) {
         $report = Join-Path $LogRoot "handoff/$edge.ip.txt"
-        $state[$edge] = @{ IpFile = $report; Start = (Get-Date); Started = $false; Ready = $false; Reason = 'not attempted' }
+        $state[$edge] = @{ IpFile = $report; Start = (Get-Date); Started = $false; Ready = $false; Reason = 'not attempted'; Kind = 'none'; Attempts = 0 }
         if (-not $PSCmdlet.ShouldProcess($edge, 'Remove stale IP report and start VM')) { continue }
+        if ($controlHung) {
+            $state[$edge].Reason = "not attempted: the hypervisor control channel stopped acting on start requests (reported for $hungEdge)"
+            $state[$edge].Kind = 'apple-event'
+            $lines.Add("Start-VM $edge skipped: $($state[$edge].Reason)")
+            continue
+        }
         Remove-Item -LiteralPath $report -Force -ErrorAction SilentlyContinue
         $state[$edge].Start = Get-Date
         foreach ($attempt in 1..3) {
             $started = Start-VMConfirmed -Name $edge -Confirm:$false
             $state[$edge].Reason = $started.reason
+            $state[$edge].Attempts = $attempt
+            if ($started.Contains('kind') -and $started.kind) { $state[$edge].Kind = [string]$started.kind }
             if ($started.started) {
                 $state[$edge].Started = $true
                 break
             }
             $lines.Add("Start-VM $edge attempt ${attempt}/3 failed: $($started.reason)")
+            if ($started.Contains('controlHung') -and [bool]$started.controlHung) {
+                $controlHung = $true
+                $hungEdge = $edge
+                $lines.Add("Start-VM $edge`: the hypervisor control channel is not acting on start requests; no further start is attempted.")
+                break
+            }
             if ($attempt -lt 3) { Start-Sleep -Seconds $PollSeconds }
         }
     }
@@ -251,7 +276,150 @@ function Start-AmisAdEdge {
         if (-not $state[$edge].Ready) { $state[$edge].Reason = 'started but never reported a fresh valid IP address' }
     }
     $missing = @($Name | Where-Object { -not $state[$_].Ready })
-    return @{ Ok = $missing.Count -eq 0; State = $state; Address = $address; Missing = $missing; Lines = [string[]]$lines }
+    return @{ Ok = $missing.Count -eq 0; State = $state; Address = $address; Missing = $missing; Lines = [string[]]$lines
+              ControlHung = $controlHung; HungEdge = $hungEdge }
+}
+
+# --- REGION: Get-AmisAdEdgeFailure
+function Get-AmisAdEdgeFailure {
+    <#
+    .SYNOPSIS
+        Turn a failed Start-AmisAdEdge result into the classified failure the
+        cycle record and the remediation loop can route on.
+    .DESCRIPTION
+        A hypervisor whose control channel stopped acting on start requests is
+        `hypervisor_unresponsive`: nothing about the edges is wrong, retrying
+        waits out the same timeouts, and only restarting the hypervisor
+        application repairs it. Every other way an edge fails to come up --
+        a refused start, a VM that never reached running, a boot that never
+        reported its address -- is `provisioning_failure`, the class the
+        framework's own Start-VM stage uses. One row per missing edge carries
+        what was observed, so the record names the edge and its reason rather
+        than only the stage.
+    .OUTPUTS
+        [hashtable] FailureClass, ErrorMessage, DependencyFailures ([hashtable[]]).
+    #>
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param([Parameter(Mandatory)][hashtable]$EdgeStartup)
+    $controlHung = $EdgeStartup.Contains('ControlHung') -and [bool]$EdgeStartup['ControlHung']
+    $rows = [System.Collections.Generic.List[hashtable]]::new()
+    foreach ($edge in @($EdgeStartup['Missing'])) {
+        $edgeState = $EdgeStartup['State'][$edge]
+        $kind = if ($edgeState -and $edgeState.Contains('Kind')) { [string]$edgeState['Kind'] } else { 'none' }
+        $outcome = if ($edgeState -and $edgeState['Started']) { 'no-ip-report' }
+                   elseif ($kind -eq 'apple-event') { 'start-not-acted' }
+                   else { 'start-failed' }
+        $rows.Add(@{
+            area     = 'amisad-edge'
+            vmName   = [string]$edge
+            outcome  = $outcome
+            detail   = [string]$edgeState['Reason']
+            kind     = $kind
+            attempts = [int]$(if ($edgeState -and $edgeState.Contains('Attempts')) { $edgeState['Attempts'] } else { 0 })
+        })
+    }
+    $detail = (@($EdgeStartup['Missing'] | ForEach-Object { "$_ ($($EdgeStartup['State'][$_]['Reason']))" })) -join '; '
+    $failureClass = if ($controlHung) { 'hypervisor_unresponsive' } else { 'provisioning_failure' }
+    $message = if ($controlHung) {
+        "The hypervisor control channel stopped acting on start requests while bringing up the region edges (first seen on $($EdgeStartup['HungEdge'])): $detail"
+    } else {
+        "Region edges are not live: $detail"
+    }
+    return @{ FailureClass = $failureClass; ErrorMessage = $message; DependencyFailures = [hashtable[]]$rows.ToArray() }
+}
+
+# --- REGION: Write-AmisAdLabFailure
+function Write-AmisAdLabFailure {
+    <#
+    .SYNOPSIS
+        Preserve a failed warm-up stage as a classified cycle failure record.
+    .DESCRIPTION
+        Initialize-Lab runs as a host action in a child process: its exit code
+        reaches the orchestrator, its Write-Error text reaches only the
+        transcript, and the cycle's failure record would otherwise say no more
+        than "exited 1". The framework's infra-stage writer puts a schema-v2
+        last_failure.json and a step_failure event in place, and the
+        orchestrator inherits the class and description from that file. The
+        same path the stash pre-flight uses; nothing here can fail the stage.
+    .PARAMETER YurunaRoot
+        Framework checkout providing the shared failure record writer.
+    .PARAMETER HostType
+        Detected host type for the failure record.
+    .PARAMETER Stage
+        The warm-up stage that failed, recorded as the action.
+    .PARAMETER FailureClass
+        A canonical class from the framework's failure taxonomy.
+    .PARAMETER ErrorMessage
+        What the stage saw, as the record's description.
+    .PARAMETER DependencyFailures
+        Per-item evidence rows, kept under context.dependencyFailures.
+    .OUTPUTS
+        [bool] $true when the record was handed to the framework writer.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Writes diagnostic evidence for a stage that has already failed; no lab resource is modified.')]
+    param(
+        [Parameter(Mandatory)][string]$YurunaRoot,
+        [Parameter(Mandatory)][string]$HostType,
+        [Parameter(Mandatory)][string]$Stage,
+        [Parameter(Mandatory)][string]$FailureClass,
+        [Parameter(Mandatory)][string]$ErrorMessage,
+        [hashtable[]]$DependencyFailures = @()
+    )
+    if ([string]::IsNullOrWhiteSpace($env:YURUNA_LOG_DIR)) { return $false }
+    try {
+        # Host actions run in a child process, so the parent's loaded builders
+        # are not inherited even though its log directory is.
+        foreach ($moduleName in 'Test.SequenceFailureState.psm1', 'Test.StateFile.psm1', 'Test.RunnerInnerLoop.psm1') {
+            Import-Module (Join-Path $YurunaRoot "test/modules/$moduleName") -Global -DisableNameChecking -ErrorAction Stop
+        }
+        Write-CycleInfraFailure -Stage $Stage -FailureClass $FailureClass -Severity 'hard' `
+            -GuestKey '(orchestration)' -ErrorMessage $ErrorMessage -HostType $HostType -DependencyFailures $DependencyFailures
+        return $true
+    } catch {
+        Write-Verbose "Write-AmisAdLabFailure: $($_.Exception.Message)"
+        return $false
+    }
+}
+
+# --- REGION: Save-AmisAdControlSnapshot
+function Save-AmisAdControlSnapshot {
+    <#
+    .SYNOPSIS
+        Record the hypervisor's control-channel state beside the stage logs
+        when the edges failed to come up, on a host whose driver can.
+    .DESCRIPTION
+        The macOS driver records UTM's process census, its listing, recent
+        crash reports and a unified-log excerpt; the screenshot is of the edge
+        that was started but never reported, the one whose console is the
+        only remaining witness. Drivers without the verb record nothing, and
+        nothing here can fail the stage.
+    .OUTPUTS
+        The driver's snapshot result, or $null when no driver verb exists.
+    #>
+    [CmdletBinding()]
+    [OutputType([object])]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Writes diagnostic evidence for a stage that has already failed; no lab resource is modified.')]
+    param(
+        [Parameter(Mandatory)][hashtable]$EdgeStartup,
+        [Parameter(Mandatory)][string]$LogDir
+    )
+    if (-not (Get-Command -Name Save-UtmControlSnapshot -ErrorAction SilentlyContinue)) { return $null }
+    $witness = ''
+    foreach ($edge in @($EdgeStartup['Missing'])) {
+        $edgeState = $EdgeStartup['State'][$edge]
+        if ($edgeState -and $edgeState['Started'] -and -not $edgeState['Ready']) { $witness = [string]$edge; break }
+    }
+    try {
+        return (Save-UtmControlSnapshot -OutputDirectory $LogDir -Trigger 'initialize-lab-edge-start' -VMName $witness -Confirm:$false)
+    } catch {
+        Write-Verbose "Save-AmisAdControlSnapshot: $($_.Exception.Message)"
+        return $null
+    }
 }
 
 # --- REGION: Remove-LegacyDemoKey
@@ -523,6 +691,6 @@ function Sync-AmisAdDemoKey {
 }
 
 Export-ModuleMember -Function Invoke-AmisAdScript, Invoke-AmisAdStage, Invoke-AmisAdCleanup,
-    Remove-InstallMedia, Set-EdgeMemory, Start-VMConfirmed, Start-AmisAdEdge, Remove-LegacyDemoKey,
+    Remove-InstallMedia, Set-EdgeMemory, Start-VMConfirmed, Start-AmisAdEdge, Get-AmisAdEdgeFailure, Write-AmisAdLabFailure, Save-AmisAdControlSnapshot, Remove-LegacyDemoKey,
     ConvertTo-AmisAdDemoPublicKey, Get-AmisAdKeyFingerprint, Get-AmisAdAuthorizeKeyCommand,
     Get-AmisAdEdgeLoginCommand, Sync-AmisAdDemoKey

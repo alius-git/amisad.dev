@@ -164,8 +164,16 @@ $edges = 'amisad-edge-a', 'amisad-edge-b'
 $edgeStartup = Start-AmisAdEdge -Name $edges -LogRoot $logRoot -Confirm:$false
 foreach ($line in $edgeStartup.Lines) { Write-Information $line }
 if (-not $edgeStartup.Ok) {
-    $detail = ($edgeStartup.Missing | ForEach-Object { "$_ ($($edgeStartup.State[$_].Reason))" }) -join '; '
-    Write-Error "Region edges are not live: $detail. Stopping before the scenarios; VMs are left as-is for debugging."
+    # The classified record is what the cycle keeps: the orchestrator reads
+    # its class and description back, where this script's exit code alone
+    # would leave the failure as "exited 1". The control snapshot keeps what
+    # the hypervisor looked like while it still looks that way.
+    $edgeFailure = Get-AmisAdEdgeFailure -EdgeStartup $edgeStartup
+    $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage 'Start-AmisAdEdge' `
+        -FailureClass $edgeFailure.FailureClass -ErrorMessage $edgeFailure.ErrorMessage -DependencyFailures $edgeFailure.DependencyFailures
+    $snapshot = Save-AmisAdControlSnapshot -EdgeStartup $edgeStartup -LogDir $LogDir
+    if ($snapshot -and $snapshot.Written) { Write-Information "Hypervisor control snapshot: $($snapshot.Path)" }
+    Write-Error "$($edgeFailure.ErrorMessage). Stopping before the scenarios; VMs are left as-is for debugging."
     exit 1
 }
 
@@ -181,6 +189,8 @@ $edgeAddress = $edgeStartup.Address
 $keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
 foreach ($line in $keyHandoff.Lines) { Write-Information $line }
 if (-not $keyHandoff.Ok) {
+    $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage 'Sync-AmisAdDemoKey' -FailureClass 'provisioning_failure' `
+        -ErrorMessage "The edges do not trust vm-core's demo key: $($keyHandoff.Reason)"
     Write-Error "The edges do not trust vm-core's demo key: $($keyHandoff.Reason). Stopping the warm-up instead of handing the scenarios edges they cannot reach."
     exit 1
 }
