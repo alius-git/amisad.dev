@@ -9,7 +9,7 @@
 #>
 
 #requires -version 7
-# Run with Invoke-Pester -Path test/AmisAd.Regression.Tests.ps1 (PowerShell 7, Pester 5).
+# Run with Invoke-Pester -Path test/AmisAd.Regression.Tests.ps1 (PowerShell 7, Pester 6).
 # Fixtures never import a real vault or run Docker/VM commands.
 
 BeforeAll {
