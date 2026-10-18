@@ -260,13 +260,17 @@ region appears in no view anywhere downstream.
 s010.certification is the capstone: audit-svc independently re-verifies the
 evidence trail across FOUR dimensions - attestation continuity (every
 environment's created -> attested -> executed|aborted -> destroyed lifecycle),
-residency (region satisfies jurisdiction), consent (chain integrity across
-every grant type), and settlement evidence (every party and amount matches
+residency (region satisfies jurisdiction), consent (the chain is intact, and
+replaying it shows every match was backed by a consent that held when it
+executed: participation not revoked, or an active in-scope mandate within its
+cap or approved, and every disclosure delivered inside its case and window),
+and settlement evidence (every party and amount matches
 its instruction, payments and refunds are complete, and cases do not conflict)
 -- trusting no self-report from the ledger (it recomputes the sha256 chains
 from the raw dumps). Because each scenario restores a fresh snapshot, s010 self-seeds a
 representative corpus (a completed match + an injected abort, consent
-grant/revoke, a mandate, a disclosure + adjustment) and certifies THAT. It
+grant/revoke, a mandate, a disclosure + adjustment, each match and delivery
+leaving its consent "use" entry) and certifies THAT. It
 localizes a deliberate tamper to the exact modified record, delivers findings
 to Priya in the platform, and its own access log proves it only ever read -
 no writes, no personal-data scope.

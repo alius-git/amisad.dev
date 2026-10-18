@@ -196,13 +196,15 @@ class Contracts(unittest.TestCase):
             with self.subTest(lose_response=lose_response), peer(lambda *_: (200, {})) as sink, service('seller-svc', COORDINATOR_URL=sink, CONNECT_URL=sink) as seller, service('ledger-svc') as ledger:
                 call(seller, '/v1/offers', OFFER)
                 failed = [False]
+                dispatched = [0]
                 def upstream(path, body):
                     if path == '/v1/verify':
                         return 200, dict(actor='buyer', **{'class': 'person'})
                     if path == '/v1/placements':
                         return 200, dict(endpoint=stub)
                     if path == '/v1/environments':
-                        return 201, dict(environment_id='e1', need_context='dress', shortlist=[OFFER])
+                        dispatched[0] += 1
+                        return 201, dict(environment_id=f'e{dispatched[0]}', need_context='dress', shortlist=[OFFER])
                     if path.startswith('/v1/campaigns/'):
                         return 200, dict(campaigns=[])
                     if path == '/v1/orders' and not failed[0]:
@@ -222,6 +224,19 @@ class Contracts(unittest.TestCase):
                     self.assertEqual(len(call(coordinator, '/v1/notifications/' + need['handle'])[1]['notifications']), 2)
                     self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
                     self.assertEqual(call(ledger, '/v1/settlements/match/' + result['match_id'])[1]['value_cents'], 100)
+                    uses = [e['payload'] for e in call(ledger, '/v1/consents')[1]['entries'] if e['payload']['action'] == 'use']
+                    self.assertTrue(uses and all(u['grant_type'] == 'participation' and u['match_id'] == result['match_id'] for u in uses), uses)
+                    with service('audit-svc', LEDGER_URL=ledger) as audit:
+                        self.assertTrue(call(audit, '/v1/certify', {})[1]['consent']['ok'])
+                    # A shortlist issued before a revoke cannot be booked after it.
+                    status, later = call(coordinator, '/v1/needs', dict(token='token', jurisdiction='eu', envelope='sealed-later'))
+                    self.assertEqual(status, 201, later)
+                    call(coordinator, '/v1/consents', dict(token='token', grant_type='participation', action='revoke'))
+                    status, refused = call(coordinator, '/v1/bookings', dict(handle=later['handle'], offer_id='o1'))
+                    self.assertEqual((status, refused.get('reason')), (403, 'participation revoked'), refused)
+                    after = [e['payload'] for e in call(ledger, '/v1/consents')[1]['entries'] if e['payload']['action'] == 'use']
+                    self.assertEqual(after, uses)
+                    self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
 
     def test_http_exact_body_boundary_truncation_and_language(self):
         with service('connect-svc') as url:
@@ -285,8 +300,9 @@ class Contracts(unittest.TestCase):
             for e in ['created', 'attested', 'executed', 'destroyed']]
         splits = [dict(match_id='m1', party=p, amount_cents=n) for p, n in parties.items()]
         refund = [dict(match_id='m1', party=p, amount_cents=-n, entry_type='adjustment', case_id='c1') for p, n in parties.items()]
+        use = dict(subject='s1', grant_type='participation', action='use', match_id='m1', ts=2)
         evidence = {'/v1/attestations': chain(events), '/v1/settlements': chain(splits),
-                    '/v1/consents': chain([]), '/v1/settlements/instructions': instructions}
+                    '/v1/consents': chain([use]), '/v1/settlements/instructions': instructions}
         with peer(lambda path, _: (200, evidence[path])) as ledger, service('audit-svc', LEDGER_URL=ledger) as audit:
             for broken in [list(reversed(events)), events + [events[-1]], events[:2] + [events[0]] + events[2:]]:
                 evidence['/v1/attestations'] = chain(broken)
@@ -298,6 +314,12 @@ class Contracts(unittest.TestCase):
             for valid in [splits, splits + refund]:
                 evidence['/v1/settlements'] = chain(valid)
                 self.assertTrue(call(audit, '/v1/certify', {})[1]['certified'])
+            revoke = dict(subject='s1', grant_type='participation', action='revoke', ts=1)
+            for broken in [[], [revoke, use], [{**use, 'match_id': 'm2'}]]:
+                evidence['/v1/consents'] = chain(broken)
+                result = call(audit, '/v1/certify', {})[1]
+                self.assertFalse(result['consent']['ok'], broken)
+                self.assertFalse(result['certified'], broken)
 
 
 class DurableContracts(unittest.TestCase):

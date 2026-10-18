@@ -170,9 +170,16 @@ fi
 echo "ASSERT no delegated action after revocation OK"
 
 echo "== TVP: consent ledger holds the mandate grant + revoke; chains verify =="
-MANDATE_ROWS=$(PSQL "SELECT count(*) FROM ledger.consent_ledger WHERE grant_type='mandate'")
+MANDATE_ROWS=$(PSQL "SELECT count(*) FROM ledger.consent_ledger WHERE grant_type='mandate' AND payload::jsonb->>'action' IN ('grant','revoke')")
 if [ "$MANDATE_ROWS" != "2" ]; then
     echo "expected 2 mandate consent rows (grant+revoke), got ${MANDATE_ROWS}" >&2
+    exit 9
+fi
+# Each delegated commit records the mandate use it executed under; the
+# refused attempts (out of scope, after revocation) record none.
+MANDATE_USES=$(PSQL "SELECT payload::jsonb->>'via' FROM ledger.consent_ledger WHERE grant_type='mandate' AND payload::jsonb->>'action' = 'use' ORDER BY id" | paste -sd, -)
+if [ "$MANDATE_USES" != "delegate,approval" ]; then
+    echo "expected mandate uses delegate,approval, got '${MANDATE_USES}'" >&2
     exit 9
 fi
 RESP=$(amisad_curl "${LEDGER}/v1/verify")

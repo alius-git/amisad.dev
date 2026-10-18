@@ -106,7 +106,11 @@ struct State {
 // participation/contribution are the buyer's own consents (s003.silence);
 // mandate is a delegated-authority grant (s006.mandate); disclosure is a
 // scoped, time-boxed support-case grant (s008.mediation). All fold the same
-// grant/revoke way and share the immutable consent chain.
+// grant/revoke way and share the immutable consent chain. A "use" entry is the
+// coordinator's execution-time record that a consent was relied on (a match
+// or a disclosure delivery); it never changes the folded state, and its chain
+// position is what the auditor checks against the grants and revokes before
+// it (s010.certification).
 const GRANT_TYPES: [&str; 4] = ["participation", "contribution", "mandate", "disclosure"];
 
 /// Newest-wins fold of one subject's consent entries for one grant type:
@@ -509,13 +513,21 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let action = body.str_of("action").unwrap_or("");
             if body.str_of("subject").is_none()
                 || !GRANT_TYPES.contains(&grant_type)
-                || !matches!(action, "grant" | "revoke")
+                || !matches!(action, "grant" | "revoke" | "use")
                 || body.i64_of("ts").is_none()
             {
                 return Response::error(
                     400,
-                    "subject, grant_type (participation|contribution|mandate|disclosure), action (grant|revoke), ts required",
+                    "subject, grant_type (participation|contribution|mandate|disclosure), action (grant|revoke|use), ts required",
                 );
+            }
+            // A use is evidence only when it names what the consent was used
+            // for: the match it allowed, or the case a disclosure reached.
+            if action == "use"
+                && body.str_of("match_id").filter(|m| !m.is_empty()).is_none()
+                && body.str_of("scope").filter(|s| !s.is_empty()).is_none()
+            {
+                return Response::error(400, "a use entry requires match_id or scope");
             }
             if let Some(db) = state.db.as_mut() {
                 let (prev, hash) = state.consent.next_for(&body);
@@ -707,6 +719,13 @@ mod tests {
         assert_eq!(consent_state(&chain, "s2", "participation"), "granted");
         chain.append(entry("s1", "participation", "grant"));
         assert_eq!(consent_state(&chain, "s1", "participation"), "granted");
+        // A use records that a consent was relied on; it is evidence for the
+        // auditor and never moves the folded state either way.
+        chain.append(entry("s1", "participation", "use"));
+        assert_eq!(consent_state(&chain, "s1", "participation"), "granted");
+        chain.append(entry("s2", "participation", "revoke"));
+        chain.append(entry("s2", "participation", "use"));
+        assert_eq!(consent_state(&chain, "s2", "participation"), "revoked");
         assert!(chain.verify());
     }
 

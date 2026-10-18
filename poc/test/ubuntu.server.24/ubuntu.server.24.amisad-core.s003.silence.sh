@@ -236,7 +236,7 @@ echo "$CONSENTS" | python3 -c "
 import sys, json
 c = json.load(sys.stdin)
 assert c['participation'] == 'granted' and c['contribution'] == 'granted', c
-history = [(e['grant_type'], e['action']) for e in c['history']]
+history = [(e['grant_type'], e['action']) for e in c['history'] if e['action'] != 'use']
 assert history == [
     ('contribution', 'grant'), ('participation', 'grant'),
     ('participation', 'revoke'), ('contribution', 'revoke'),
@@ -244,19 +244,36 @@ assert history == [
 ], history
 assert 'maya' not in json.dumps(c).lower(), 'consent history leaked identity'
 print('ASSERT consent history grant-revoke-regrant OK')
+# Every match records a participation use; none may fall inside the
+# revocation window (the s010 auditor re-checks the same rule).
+revoked, uses = False, 0
+for e in c['history']:
+    if e['grant_type'] != 'participation':
+        continue
+    if e['action'] in ('grant', 'revoke'):
+        revoked = e['action'] == 'revoke'
+    elif e['action'] == 'use':
+        assert not revoked and e.get('match_id'), ('match inside the revocation window', e)
+        uses += 1
+assert uses >= 1, c
+print(f'ASSERT {uses} match(es) recorded as consent uses, none while revoked OK')
 "
+USES=$(amisad_curl "${LEDGER}/v1/consents" | python3 -c "
+import sys, json
+print(sum(1 for e in json.load(sys.stdin)['entries'] if e['payload']['action'] == 'use'))
+")
 RESP=$(amisad_curl "${LEDGER}/v1/verify")
 echo "$RESP" | python3 -c "
 import sys, json
 v = json.load(sys.stdin)
 assert v['attestation_ok'] and v['settlement_ok'] and v['consent_ok'], v
-assert v['consent_len'] == 6, v
+assert v['consent_len'] == 6 + ${USES}, v
 print('ASSERT all three chains verify OK')
 "
 
 echo "== durable store: the consent chain is rows in PostgreSQL =="
 CONSENT_ROWS=$(PSQL "SELECT count(*) FROM ledger.consent_ledger")
-if [ "$CONSENT_ROWS" != "6" ]; then
+if [ "$CONSENT_ROWS" != "$((6 + USES))" ]; then
     echo "consent chain not persisted (rows: ${CONSENT_ROWS})" >&2
     exit 9
 fi

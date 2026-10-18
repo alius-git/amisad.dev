@@ -207,10 +207,11 @@ IP:5432) to ledger-svc and seller-svc via the `databaseUrl` helm value; writes
 go to PostgreSQL first, and pods reload state on start. s001 asserts the rows
 landed and that a `kubectl rollout restart` reloads verifying chains and the
 settled order; s002 asserts the booked appointment row; s003 asserts the
-consent chain's six grant/revoke/re-grant rows; s004 asserts all twelve
+consent chain's six grant/revoke/re-grant rows plus one use per match, none
+inside the revocation window; s004 asserts all twelve
 attestation rows; s005 the boosted 5-way settlement; s006 the mandate
-grant+revoke consent rows; s007 the delta-zeroed offer leaving the catalog;
-s008 the compensating adjustment entries + disclosure grant; s010 the
+grant+revoke consent rows and the two mandate uses (under cap, then approval); s007 the delta-zeroed offer leaving the catalog;
+s008 the compensating adjustment entries + disclosure grant and its one use; s010 the
 independent four-dimension certification and tamper localization. An empty
 `databaseUrl` (the chart default) keeps a service in-memory -- how `cargo test`
 and skeleton services run.

@@ -112,9 +112,11 @@ print('ASSERT artifact accessible while granted OK')
 "
 
 echo "== TVP: the consent ledger records the disclosure grant, scoped, with expiry =="
-DISC_ROWS=$(PSQL "SELECT count(*) FROM ledger.consent_ledger WHERE grant_type='disclosure'")
+DISC_ROWS=$(PSQL "SELECT count(*) FROM ledger.consent_ledger WHERE grant_type='disclosure' AND payload::jsonb->>'action' = 'grant'")
 if [ "$DISC_ROWS" != "1" ]; then echo "expected 1 disclosure grant row, got ${DISC_ROWS}" >&2; exit 9; fi
-PSQL "SELECT payload FROM ledger.consent_ledger WHERE grant_type='disclosure'" | python3 -c "
+DISC_USE=$(PSQL "SELECT payload::jsonb->>'scope' FROM ledger.consent_ledger WHERE grant_type='disclosure' AND payload::jsonb->>'action' = 'use'")
+if [ "$DISC_USE" != "$CASE_ID" ]; then echo "expected one disclosure use scoped to ${CASE_ID}, got '${DISC_USE}'" >&2; exit 9; fi
+PSQL "SELECT payload FROM ledger.consent_ledger WHERE grant_type='disclosure' AND payload::jsonb->>'action' = 'grant'" | python3 -c "
 import sys, json
 p = json.loads(sys.stdin.read())
 assert p['scope'] == '${CASE_ID}' and p['expiry_ts'] > p['ts'], p

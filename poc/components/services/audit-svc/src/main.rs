@@ -94,6 +94,77 @@ fn lifecycle_violations(entries: &[json::Json]) -> i64 {
         .count() as i64
 }
 
+/// Consent: replay the consent chain in order and check every "use" (the
+/// coordinator's execution-time record that a consent was relied on) against
+/// the grants and revokes before it. A buyer's own match needs participation
+/// that was not revoked (absent history reads as granted, as at execution); a
+/// delegated match needs an active, unexpired mandate whose category matches
+/// and whose per-item cap holds unless the principal approved the match; a
+/// disclosure needs an unexpired grant for that one case. Every settlement
+/// instruction (one per match) must be backed by at least one participation or
+/// mandate use: a retried commit records a use per attempt, each checked at
+/// its own point in the chain, and an attempt that never committed leaves a
+/// valid use with no instruction, which proves nothing wrong. Returns the
+/// number of invalid uses plus the number of matches with no consent use.
+fn consent_violations(entries: &[json::Json], instructions: &[json::Json]) -> i64 {
+    let mut participation: HashMap<&str, &str> = HashMap::new();
+    let mut mandates: HashMap<(&str, &str), Option<&json::Json>> = HashMap::new();
+    let mut disclosures: HashMap<(&str, &str), Option<&json::Json>> = HashMap::new();
+    let mut used: HashSet<&str> = HashSet::new();
+    let mut violations = 0;
+    for entry in entries {
+        let Some(payload) = entry.get("payload") else { violations += 1; continue; };
+        let subject = payload.str_of("subject").unwrap_or("");
+        let ts = payload.i64_of("ts").unwrap_or(i64::MAX);
+        let match_id = payload.str_of("match_id").unwrap_or("");
+        let action = payload.str_of("action").unwrap_or("");
+        match (payload.str_of("grant_type").unwrap_or(""), action) {
+            ("participation", "grant" | "revoke") => { participation.insert(subject, action); }
+            ("contribution", "grant" | "revoke") => {}
+            ("mandate", "grant" | "revoke") => {
+                let key = (subject, payload.str_of("delegate").unwrap_or(""));
+                mandates.insert(key, (action == "grant").then_some(payload));
+            }
+            ("disclosure", "grant" | "revoke") => {
+                let key = (subject, payload.str_of("scope").unwrap_or(""));
+                disclosures.insert(key, (action == "grant").then_some(payload));
+            }
+            ("participation", "use") => {
+                if match_id.is_empty() || participation.get(subject) == Some(&"revoke") { violations += 1; }
+                else { used.insert(match_id); }
+            }
+            ("mandate", "use") => {
+                let key = (subject, payload.str_of("delegate").unwrap_or(""));
+                let via = payload.str_of("via").unwrap_or("");
+                let price = payload.i64_of("price_cents");
+                let valid = match mandates.get(&key) {
+                    Some(Some(grant)) => grant.i64_of("expiry_ts").is_some_and(|expiry| ts < expiry)
+                        && grant.str_of("category").is_some()
+                        && grant.str_of("category") == payload.str_of("category")
+                        && match via {
+                            "approval" => price.is_some(),
+                            "delegate" => price.zip(grant.i64_of("per_item_cents")).is_some_and(|(p, cap)| p <= cap),
+                            _ => false,
+                        },
+                    _ => false,
+                };
+                if match_id.is_empty() || !valid { violations += 1; }
+                else { used.insert(match_id); }
+            }
+            ("disclosure", "use") => {
+                let key = (subject, payload.str_of("scope").unwrap_or(""));
+                let valid = !key.1.is_empty() && matches!(disclosures.get(&key),
+                    Some(Some(grant)) if grant.i64_of("expiry_ts").is_some_and(|expiry| ts <= expiry));
+                if !valid { violations += 1; }
+            }
+            _ => violations += 1,
+        }
+    }
+    violations + instructions.iter()
+        .filter(|instruction| !used.contains(instruction.str_of("match_id").unwrap_or("")))
+        .count() as i64
+}
+
 fn settlement_violations(entries: &[json::Json], instructions: &[json::Json]) -> i64 {
     let mut by_match: HashMap<&str, Vec<&json::Json>> = HashMap::new();
     for entry in entries {
@@ -205,13 +276,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     region.is_empty() || region != jur
                 })
                 .count() as i64;
-            // Consent: chain integrity (grant->use->termination is the
-            // ledger's newest-wins fold; here we certify the chain is intact).
-            let consent_v = chain_violations(&consent);
             let instructions = match read_instructions(state) {
                 Ok(instructions) => instructions,
                 Err(response) => return response,
             };
+            // Consent: the chain is intact AND every match executed under a
+            // consent that held at that point in the chain.
+            let consent_v = chain_violations(&consent) + consent_violations(&consent, &instructions);
             let settlement_v = chain_violations(&settle) + settlement_violations(&settle, &instructions);
 
             let total = attestation_v + residency_v + consent_v + settlement_v;
@@ -338,6 +409,130 @@ mod tests {
         let parsed = json::parse(&resp.body).unwrap();
         assert_eq!(parsed.bool_of("detected"), Some(true));
         assert_eq!(parsed.i64_of("tampered_index"), Some(2));
+    }
+
+    fn consent(subject: &str, grant_type: &str, action: &str, ts: i64, extra: Vec<(&str, json::Json)>) -> json::Json {
+        let mut fields = vec![
+            ("subject", json::s(subject)),
+            ("grant_type", json::s(grant_type)),
+            ("action", json::s(action)),
+        ];
+        fields.extend(extra);
+        fields.push(("ts", json::n(ts)));
+        json::obj(fields)
+    }
+
+    fn matched(id: &str) -> Vec<(&str, json::Json)> {
+        vec![("match_id", json::s(id))]
+    }
+
+    fn instructions(ids: &[&str]) -> Vec<json::Json> {
+        ids.iter().map(|id| json::obj(vec![("match_id", json::s(id))])).collect()
+    }
+
+    fn mandate_grant(ts: i64) -> json::Json {
+        consent("maya", "mandate", "grant", ts, vec![
+            ("delegate", json::s("pat")),
+            ("category", json::s("housewares")),
+            ("per_item_cents", json::n(14000)),
+            ("expiry_ts", json::n(1000)),
+        ])
+    }
+
+    fn mandate_use(ts: i64, id: &str, category: &str, price: i64, via: &str) -> json::Json {
+        consent("maya", "mandate", "use", ts, vec![
+            ("delegate", json::s("pat")),
+            ("match_id", json::s(id)),
+            ("category", json::s(category)),
+            ("price_cents", json::n(price)),
+            ("via", json::s(via)),
+        ])
+    }
+
+    #[test]
+    fn participation_use_holds_without_history_and_after_a_regrant() {
+        let c = chain(&[
+            consent("maya", "participation", "use", 1, matched("m1")),
+            consent("maya", "participation", "grant", 2, vec![]),
+            consent("maya", "participation", "revoke", 3, vec![]),
+            consent("maya", "participation", "grant", 4, vec![]),
+            consent("maya", "participation", "use", 5, matched("m2")),
+        ]);
+        assert_eq!(consent_violations(&c, &instructions(&["m1", "m2"])), 0);
+    }
+
+    #[test]
+    fn a_match_inside_the_revocation_window_is_a_violation() {
+        let c = chain(&[
+            consent("maya", "participation", "revoke", 1, vec![]),
+            consent("maya", "participation", "use", 2, matched("m1")),
+            // Another subject's revoke does not affect Maya, and vice versa.
+            consent("elena", "participation", "use", 3, matched("m2")),
+        ]);
+        // The use inside the window is invalid, and m1 is left without valid consent.
+        assert_eq!(consent_violations(&c, &instructions(&["m1", "m2"])), 2);
+    }
+
+    #[test]
+    fn every_instructed_match_needs_a_valid_use() {
+        let one = chain(&[consent("maya", "participation", "use", 1, matched("m1"))]);
+        // m2 has an instruction but no consent evidence.
+        assert_eq!(consent_violations(&one, &instructions(&["m1", "m2"])), 1);
+        // An attempt that never committed leaves a valid use and no instruction.
+        assert_eq!(consent_violations(&one, &instructions(&[])), 0);
+        // A retried commit records one use per attempt.
+        let retried = chain(&[
+            consent("maya", "participation", "use", 1, matched("m1")),
+            consent("maya", "participation", "use", 2, matched("m1")),
+        ]);
+        assert_eq!(consent_violations(&retried, &instructions(&["m1"])), 0);
+        // An invalid use does not back its match: one violation for the use
+        // and one for the match left without valid consent.
+        let after_revoke = chain(&[
+            consent("maya", "participation", "revoke", 1, vec![]),
+            consent("maya", "participation", "use", 2, matched("m1")),
+        ]);
+        assert_eq!(consent_violations(&after_revoke, &instructions(&["m1"])), 2);
+        // A use that names no match proves nothing.
+        let unnamed = chain(&[consent("maya", "participation", "use", 1, vec![])]);
+        assert_eq!(consent_violations(&unnamed, &instructions(&[])), 1);
+    }
+
+    #[test]
+    fn mandate_use_is_checked_against_scope_cap_expiry_and_revocation() {
+        let ok = chain(&[
+            mandate_grant(1),
+            mandate_use(2, "m1", "housewares", 12000, "delegate"),
+            // Over the per-item cap is in scope only when Maya approved it.
+            mandate_use(3, "m2", "housewares", 15000, "approval"),
+        ]);
+        assert_eq!(consent_violations(&ok, &instructions(&["m1", "m2"])), 0);
+        for (bad, why) in [
+            (vec![mandate_grant(1), mandate_use(2, "m1", "housewares", 15000, "delegate")], "over cap"),
+            (vec![mandate_grant(1), mandate_use(2, "m1", "dresses", 12000, "delegate")], "out of scope"),
+            (vec![mandate_grant(1), mandate_use(1000, "m1", "housewares", 12000, "delegate")], "expired"),
+            (vec![mandate_use(1, "m1", "housewares", 12000, "delegate")], "never granted"),
+            (vec![
+                mandate_grant(1),
+                consent("maya", "mandate", "revoke", 2, vec![("delegate", json::s("pat"))]),
+                mandate_use(3, "m1", "housewares", 12000, "delegate"),
+            ], "revoked"),
+        ] {
+            // The invalid use, and m1 left without valid consent.
+            assert_eq!(consent_violations(&chain(&bad), &instructions(&["m1"])), 2, "{why}");
+        }
+    }
+
+    #[test]
+    fn disclosure_use_must_stay_inside_its_case_and_window() {
+        let grant = consent("maya", "disclosure", "grant", 1, vec![
+            ("scope", json::s("case-1")),
+            ("expiry_ts", json::n(10)),
+        ]);
+        let deliver = |ts: i64, scope: &str| consent("maya", "disclosure", "use", ts, vec![("scope", json::s(scope))]);
+        assert_eq!(consent_violations(&chain(&[grant.clone(), deliver(2, "case-1")]), &[]), 0);
+        assert_eq!(consent_violations(&chain(&[grant.clone(), deliver(2, "case-2")]), &[]), 1);
+        assert_eq!(consent_violations(&chain(&[grant, deliver(11, "case-1")]), &[]), 1);
     }
 
     #[test]

@@ -220,10 +220,11 @@ para ledger-svc e seller-svc pelo valor Helm `databaseUrl`; as gravações
 vão primeiro para o PostgreSQL, e os pods recarregam o estado na inicialização. s001 verifica se as linhas
 foram gravadas e se um `kubectl rollout restart` recarrega as cadeias verificáveis e o
 pedido liquidado; s002 verifica a linha do agendamento reservado; s003 verifica as
-seis linhas de concessão/revogação/nova concessão da cadeia de consentimento; s004 verifica todas as doze
+seis linhas de concessão/revogação/nova concessão da cadeia de consentimento mais um uso por
+correspondência, nenhum dentro da janela de revogação; s004 verifica todas as doze
 linhas de atestação; s005, a liquidação ampliada em 5 vias; s006, as linhas de consentimento de
-concessão+revogação do mandato; s007, a oferta com quantidade zerada por um delta saindo do catálogo;
-s008, os lançamentos de ajuste compensatórios + a concessão de divulgação; s010, a
+concessão+revogação do mandato e os dois usos do mandato (abaixo do limite, depois por aprovação); s007, a oferta com quantidade zerada por um delta saindo do catálogo;
+s008, os lançamentos de ajuste compensatórios + a concessão de divulgação e seu único uso; s010, a
 certificação independente em quatro dimensões e a localização de adulterações. Um
 `databaseUrl` vazio (o padrão do chart) mantém um serviço em memória -- é assim que `cargo test`
 e os serviços básicos são executados.
@@ -418,7 +419,7 @@ desvio de proxies, recuperação por novas tentativas e falhas antes que o Helm
 implante uma imagem que não foi importada. A prontidão continua exigindo o rollout
 de cada implantação e todos os dez NodePorts; cada verificação de inicialização
 ou HTTP mantém seu limite de 300 segundos. O arquivo
-`test/AmisAd.Regression.Tests.ps1` do repositório também executa as três suítes.
+`test/AmisAd.Regression.Tests.ps1` do repositório também executa as quatro suítes.
 Elas exigem Python 3 e um Bash funcional; uma verificação com prazo limitado em
 um sistema de arquivos privado ignora iniciadores ausentes ou incompatíveis.
 A verificação cobre caminhos com espaços, comandos de teste sem extensão e as

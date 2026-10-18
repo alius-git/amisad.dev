@@ -27,7 +27,7 @@ CREATE SCHEMA IF NOT EXISTS ledger;
 CREATE TABLE IF NOT EXISTS ledger.consent_ledger (
     id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     grant_type  text        NOT NULL, -- participation | contribution | mandate | disclosure
-    payload     text        NOT NULL, -- {subject, grant_type, action, ts}; subject is a pseudonymous hash
+    payload     text        NOT NULL, -- {subject, grant_type, action (grant|revoke|use), ts}; subject is a pseudonymous hash; a use also names its match_id or scope
     prev_hash   text        NOT NULL UNIQUE,
     row_hash    text        NOT NULL,
     created_at  timestamptz NOT NULL DEFAULT now()

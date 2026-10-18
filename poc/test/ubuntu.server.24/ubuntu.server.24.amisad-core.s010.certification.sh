@@ -106,6 +106,16 @@ assert c['certified'] is True and c['total_violations'] == 0, c
 print('ASSERT four-dimension certification clean OK')
 "
 
+echo "== TVP: the consent dimension certified real evidence, not an empty chain =="
+RESP=$(amisad_curl "${LEDGER}/v1/consents")
+echo "$RESP" | python3 -c "
+import sys, json
+uses = [e['payload'] for e in json.load(sys.stdin)['entries'] if e['payload']['action'] == 'use']
+assert any(u['grant_type'] == 'participation' and u.get('match_id') == '${MATCH_ID}' for u in uses), uses
+assert any(u['grant_type'] == 'disclosure' and u.get('scope') == '${CASE_ID}' for u in uses), uses
+print('ASSERT every seeded match and the disclosure carry a consent use OK')
+"
+
 echo "== TVP: a deliberate tamper is detected and localized to the exact record =="
 RESP=$(amisad_curl "${LEDGER}/v1/attestations")
 echo "$RESP" | python3 -c "

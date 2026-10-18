@@ -12,12 +12,18 @@
 // at execution time, absent history = granted - the explicit revoke is the
 // kill switch); a matching cycle re-serves open needs when a seller
 // publishes an offer or the subject re-grants participation.
+// s010.certification: every match records a consent-ledger "use" entry
+// naming the consent it relied on (participation for a buyer's own match, the
+// mandate for a delegated one) before the coordinator commits anything for
+// it, and a disclosure records its use once delivered, so the auditor can
+// replay the chain and prove each one was allowed at the moment it executed.
 
 use amisad_common::{ad_split, json, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct Shortlist {
     handle: String,
+    subject: String, // whose need produced it; a booking executes under this subject's consent
     environment_id: String,
     need_context: String,
     entries: Vec<json::Json>,
@@ -54,6 +60,7 @@ struct Held {
     tenant: String,
     price_cents: i64,
     need_context: String,
+    category: String, // the mandate scope the match was checked against
 }
 
 struct State {
@@ -173,6 +180,7 @@ fn buyer_status(seller_state: &str) -> &'static str {
 /// errors. handle_override keeps an open need's handle stable across cycles.
 fn attempt_match(
     state: &mut State,
+    subject: &str,
     jurisdiction: &str,
     envelope: &str,
     handle_override: Option<&str>,
@@ -288,6 +296,7 @@ fn attempt_match(
         ]);
         state.shortlists.push(Shortlist {
             handle: handle.clone(),
+            subject: subject.to_string(),
             environment_id,
             need_context,
             entries,
@@ -298,7 +307,10 @@ fn attempt_match(
     }
 
     // 4b. Committed order to the seller: need context only, no identity.
+    // The environment already closed the match, so the consent evidence is
+    // recorded before the seller sees the order.
     let match_id = match_record.str_of("match_id").unwrap_or("").to_string();
+    record_participation_use(subject, &match_id)?;
     let offer = match_record.get("offer").cloned().unwrap_or(json::Json::Null);
     let order_body = json::obj(vec![
         ("match_id", json::s(&match_id)),
@@ -366,7 +378,7 @@ fn run_cycle(state: &mut State) -> i64 {
                 continue;
             }
         }
-        match attempt_match(state, &jurisdiction, &envelope, Some(&handle)) {
+        match attempt_match(state, &subject, &jurisdiction, &envelope, Some(&handle)) {
             Ok(Some(_)) => {
                 state.open_needs.remove(index);
                 matched += 1;
@@ -398,6 +410,29 @@ fn record_consent(entry: &json::Json) -> Result<String, Response> {
     }
 }
 
+/// A consent-ledger "use" entry: the execution-time evidence that a consent
+/// was relied on. `fields` names what it was used for (match_id, or the scope
+/// of a disclosure) plus any detail the auditor checks against the grant.
+fn use_entry(subject: &str, grant_type: &str, fields: Vec<(&str, json::Json)>, ts: i64) -> json::Json {
+    let mut entry = vec![
+        ("subject", json::s(subject)),
+        ("grant_type", json::s(grant_type)),
+        ("action", json::s("use")),
+    ];
+    entry.extend(fields);
+    entry.push(("ts", json::n(ts)));
+    json::obj(entry)
+}
+
+/// Record that a buyer's own match executed under their participation
+/// consent, before the coordinator commits anything for it; a failed write
+/// stops the commit. An auto-closed match already has the environment's
+/// settlement instruction, so a failure there leaves an unbacked match that
+/// the auditor reports rather than one that passes silently.
+fn record_participation_use(subject: &str, match_id: &str) -> Result<String, Response> {
+    record_consent(&use_entry(subject, "participation", vec![("match_id", json::s(match_id))], now_secs()))
+}
+
 /// Commit a delegated match: settlement instruction, seller order, dual
 /// attribution on the principal's activity trail. `via` is "delegate" (Pat's
 /// own authority) or "approval" (over-cap, closed by Maya). Returns match_id.
@@ -410,9 +445,24 @@ fn commit_delegated(
     tenant: &str,
     price_cents: i64,
     need_context: &str,
+    category: &str,
     via: &str,
 ) -> Result<String, Response> {
     let match_id = booking_match_id(environment_id, offer_id);
+    // The mandate is the consent this match executes under: record the use
+    // with the scope and price the auditor re-checks against the grant.
+    record_consent(&use_entry(
+        principal,
+        "mandate",
+        vec![
+            ("delegate", json::s(delegate)),
+            ("match_id", json::s(&match_id)),
+            ("category", json::s(category)),
+            ("price_cents", json::n(price_cents)),
+            ("via", json::s(via)),
+        ],
+        now_secs(),
+    ))?;
     let (seller, network, platform, ads) = splits_for(price_cents);
     let instruction = json::obj(vec![
         ("match_id", json::s(&match_id)),
@@ -507,7 +557,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(resp) => return resp,
             }
 
-            match attempt_match(state, &jurisdiction, &envelope, None) {
+            match attempt_match(state, &subject, &jurisdiction, &envelope, None) {
                 Ok(Some(response)) => {
                     // A direct match satisfies any earlier open registration
                     // of the same need - drop it, or a later cycle would
@@ -793,7 +843,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             }
             // Manual dispatch so nothing auto-commits; the coordinator decides
             // commit-vs-hold from the matched price.
-            let shortlist = match attempt_match(state, &jurisdiction, &envelope, None) {
+            let shortlist = match attempt_match(state, &principal, &jurisdiction, &envelope, None) {
                 Ok(Some(r)) => r,
                 Ok(None) => {
                     return Response::json(
@@ -844,7 +894,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             if price_cents <= per_item {
                 let match_id = match commit_delegated(
                     state, &principal, &delegate, &environment_id, &offer_id, &tenant,
-                    price_cents, &need_context, "delegate",
+                    price_cents, &need_context, &mandate_category, "delegate",
                 ) {
                     Ok(m) => m,
                     Err(resp) => return resp,
@@ -869,6 +919,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     tenant,
                     price_cents,
                     need_context,
+                    category: mandate_category,
                 });
                 state.activity.push((
                     principal.clone(),
@@ -908,7 +959,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             };
             let match_id = match commit_delegated(
                 state, &held.principal, &held.delegate, &held.environment_id,
-                &held.offer_id, &held.tenant, held.price_cents, &held.need_context, "approval",
+                &held.offer_id, &held.tenant, held.price_cents, &held.need_context, &held.category, "approval",
             ) {
                 Ok(m) => m,
                 Err(resp) => return resp,
@@ -974,6 +1025,15 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     return Response::error(502, &format!("disclosure delivery ({status}): {body}"))
                 }
                 Err(e) => return Response::error(503, &format!("platform unavailable: {e}")),
+            }
+            // The delivery is the use of this grant, inside its one-case scope.
+            if let Err(resp) = record_consent(&use_entry(
+                &subject,
+                "disclosure",
+                vec![("scope", json::s(&case_id))],
+                now_secs(),
+            )) {
+                return resp;
             }
             Response::json(
                 201,
@@ -1050,6 +1110,22 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 }
                 return Response::error(409, "already booked");
             }
+            // A booking is an execution: the same participation gate as a
+            // direct match, then the consent evidence before anything commits.
+            let subject = state.shortlists[index].subject.clone();
+            match consent_granted(&subject, "participation") {
+                Ok(true) => {}
+                Ok(false) => {
+                    return Response::json(
+                        403,
+                        &json::obj(vec![
+                            ("status", json::s("refused")),
+                            ("reason", json::s("participation revoked")),
+                        ]),
+                    )
+                }
+                Err(resp) => return resp,
+            }
             let (environment_id, need_context, entry) = {
                 let sl = &state.shortlists[index];
                 let entry = match sl
@@ -1083,6 +1159,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let tenant = entry.str_of("tenant").unwrap_or("").to_string();
             let price_cents = entry.i64_of("price_cents").unwrap_or(0);
             let match_id = booking_match_id(&environment_id, &offer_id);
+            if let Err(resp) = record_participation_use(&subject, &match_id) {
+                return resp;
+            }
 
             // The booking IS the commitment: settlement instruction first
             // (fail closed - no instruction, no order), then the seller order
