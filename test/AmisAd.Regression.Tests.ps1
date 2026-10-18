@@ -240,6 +240,9 @@ Describe 'AmisAd edge admission' {
         $result.Ok | Should -BeTrue
         $result.Address['amisad-edge-a'] | Should -Be '192.0.2.11'
         $result.Address['amisad-edge-b'] | Should -Be '192.0.2.12'
+        # When each report was written is kept for the failure evidence.
+        $result.ReportedAt['amisad-edge-a'] | Should -Match 'Z$' -Because 'the report time is recorded in UTC'
+        ($result.Lines -join "`n") | Should -Match 'amisad-edge-a reported 192\.0\.2\.11 at '
         $script:EdgeTrace[0] | Should -Be 'start:amisad-edge-a'
         $script:EdgeTrace[1] | Should -Be 'start:amisad-edge-b'
     }
@@ -422,7 +425,12 @@ Export-ModuleMember -Function Write-CycleInfraFailure
 
 Describe 'AmisAd control snapshot' {
     AfterEach {
-        if (Test-Path -LiteralPath 'function:global:Save-UtmControlSnapshot') { Remove-Item -LiteralPath 'function:global:Save-UtmControlSnapshot' -Force }
+        # Unqualified on purpose: Remove-Item does not resolve a global:
+        # qualifier on the function drive from a nested scope, so the fake
+        # would otherwise outlive the test that defined it.
+        if (Get-Command Save-UtmControlSnapshot -CommandType Function -ErrorAction SilentlyContinue) {
+            Remove-Item -Path 'function:Save-UtmControlSnapshot' -Force
+        }
     }
     BeforeAll {
         $script:SnapshotStartup = @{
@@ -458,6 +466,13 @@ Describe 'AmisAd control snapshot' {
         Set-Item -Path 'function:global:Save-UtmControlSnapshot' -Value { [CmdletBinding(SupportsShouldProcess)] param([string]$OutputDirectory, [string]$Trigger, [string]$VMName) $null = @($OutputDirectory, $Trigger, $VMName); throw 'no evidence today' }
         $result = Save-AmisAdControlSnapshot -EdgeStartup $script:SnapshotStartup -LogDir $script:Logs
         $result | Should -BeNullOrEmpty
+    }
+
+    # Runs last in this block: the driver fakes above must not outlive their
+    # tests, or the no-driver case passes only because it happens to run first.
+    It 'leaves no driver fake behind for the tests that follow' {
+        Get-Command Save-UtmControlSnapshot -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        Save-AmisAdControlSnapshot -EdgeStartup $script:SnapshotStartup -LogDir $script:Logs | Should -BeNullOrEmpty
     }
 }
 
@@ -834,9 +849,9 @@ Export-ModuleMember -Function Get-VMState, Start-VM, Set-KeyFixtureState
             $script:Calls = [System.Collections.Generic.List[hashtable]]::new()
             $script:Answers = @{}
             $script:Guest = {
-                param([string]$VMName, [string]$User, [string]$Command, [int]$TimeoutSeconds)
+                param([string]$VMName, [string]$User, [string]$Command, [int]$TimeoutSeconds, [string]$Address)
                 $null = $TimeoutSeconds
-                $script:Calls.Add(@{ VM = $VMName; User = $User; Command = $Command })
+                $script:Calls.Add(@{ VM = $VMName; User = $User; Command = $Command; Address = $Address })
                 $kind = if ($Command -eq 'true') { 'probe' }
                     elseif ($Command -like 'cat *amisad-demo-key.pub*') { 'read' }
                     elseif ($Command -like 'umask 077*') { 'authorize' }
@@ -860,13 +875,16 @@ Export-ModuleMember -Function Get-VMState, Start-VM, Set-KeyFixtureState
                 -EdgeAddress @{ 'amisad-edge-a' = '192.0.2.11'; 'amisad-edge-b' = '192.0.2.12' } -Confirm:$false
             $result.Ok | Should -BeTrue -Because ($result.Lines -join "`n")
             $result.Fingerprint | Should -Be $script:Fingerprint
-            ($script:Calls | ForEach-Object { "$($_.VM)/$($_.User)" }) | Should -Be @(
-                'amisad-core/amisad-core-admin', 'amisad-core/amisad-core-admin',
-                'amisad-edge-a/amisad-edge-a-admin', 'amisad-edge-b/amisad-edge-b-admin',
-                'amisad-core/amisad-core-admin', 'amisad-core/amisad-core-admin')
-            $script:Calls[2].Command | Should -Match ([regex]::Escape($script:PublicLine))
-            $script:Calls[4].Command | Should -Match 'amisad-edge-a-admin@192\.0\.2\.11 true$'
-            $script:Calls[5].Command | Should -Match 'amisad-edge-b-admin@192\.0\.2\.12 true$'
+            ($script:Calls | ForEach-Object { "$($_.VM)/$($_.User)@$($_.Address)" }) | Should -Be @(
+                'amisad-core/amisad-core-admin@', 'amisad-core/amisad-core-admin@',
+                'amisad-edge-a/amisad-edge-a-admin@192.0.2.11', 'amisad-edge-a/amisad-edge-a-admin@192.0.2.11',
+                'amisad-edge-b/amisad-edge-b-admin@192.0.2.12', 'amisad-edge-b/amisad-edge-b-admin@192.0.2.12',
+                'amisad-core/amisad-core-admin@', 'amisad-core/amisad-core-admin@')
+            $script:Calls[2].Command | Should -Be 'true' -Because 'an address report does not prove sshd is accepting logins'
+            $script:Calls[3].Command | Should -Match ([regex]::Escape($script:PublicLine))
+            $script:Calls[6].Command | Should -Match 'amisad-edge-a-admin@192\.0\.2\.11 true$'
+            $script:Calls[7].Command | Should -Match 'amisad-edge-b-admin@192\.0\.2\.12 true$'
+            ($result.Lines -join "`n") | Should -Match 'Reaching amisad-edge-a at 192\.0\.2\.11, the address it reported'
         }
 
         It 'reads only the public file and never copies the private key anywhere' {
@@ -917,6 +935,15 @@ Export-ModuleMember -Function Get-VMState, Start-VM, Set-KeyFixtureState
             ($result.Lines -join "`n") | Should -Not -Match 'b3BlbnNzaC1rZXk'
         }
 
+        It 'waits for an edge to answer SSH at its reported address, and names that address when it never does' {
+            $script:Answers['probe|amisad-edge-a'] = @{ success = $false; exitCode = 255; output = 'Connection refused' }
+            $result = Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -InvokeGuest $script:Guest -PollSeconds 0 -ReadySeconds 0 `
+                -EdgeAddress @{ 'amisad-edge-a' = '192.0.2.11'; 'amisad-edge-b' = '192.0.2.12' } -Confirm:$false
+            $result.Ok | Should -BeFalse
+            $result.Reason | Should -Match 'amisad-edge-a did not answer SSH at 192\.0\.2\.11'
+            ($script:Calls | Where-Object { $_.Command -like 'umask 077*' }).Count | Should -Be 0
+        }
+
         It 'stops at the first edge that cannot be authorized and names it' {
             $script:Answers['authorize|amisad-edge-a'] = @{ success = $false; exitCode = 255; output = 'Permission denied (publickey)' }
             $result = Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -InvokeGuest $script:Guest -PollSeconds 0 -ReadySeconds 5 -Confirm:$false
@@ -946,6 +973,104 @@ Export-ModuleMember -Function Get-VMState, Start-VM, Set-KeyFixtureState
             $result.Ok | Should -BeTrue
             $script:Calls.Count | Should -Be 0
         }
+    }
+
+    Context 'the default SSH channel when host discovery finds nothing' {
+        # The edges reported fresh addresses, but the host's own discovery
+        # returns nothing for them -- Invoke-GuestSsh then dials the bare VM
+        # name, which DNS cannot resolve. The hand-off must reach each edge at
+        # the address it reported, through the framework's -ResolvedAddress.
+        BeforeEach {
+            $script:AmisAdSshCalls = [System.Collections.Generic.List[hashtable]]::new()
+            $script:AmisAdPublicLine = $script:PublicLine
+            Set-Item -Path 'function:global:Invoke-GuestSsh' -Value {
+                param([string]$VMName, [string]$User, [string]$Command, [int]$TimeoutSeconds, [string]$ResolvedAddress)
+                $null = $TimeoutSeconds
+                $script:AmisAdSshCalls.Add(@{ VM = $VMName; User = $User; Command = $Command; ResolvedAddress = $ResolvedAddress })
+                if ($VMName -like 'amisad-edge-*' -and -not $ResolvedAddress) {
+                    return @{ success = $false; exitCode = 255; output = "ssh: Could not resolve hostname ${VMName}: Name or service not known" }
+                }
+                $output = if ($Command -like 'cat *amisad-demo-key.pub*') { $script:AmisAdPublicLine } else { '' }
+                return @{ success = $true; exitCode = 0; output = $output }
+            }
+            Set-Item -Path 'function:global:Get-VMIp' -Value { param([string]$VMName) $null = $VMName; return '' }
+        }
+        AfterEach {
+            # Unqualified on purpose: Remove-Item does not resolve a global:
+            # qualifier on the function drive from a nested scope.
+            foreach ($fake in 'Invoke-GuestSsh', 'Get-VMIp') {
+                if (Get-Command $fake -CommandType Function -ErrorAction SilentlyContinue) { Remove-Item -Path "function:$fake" -Force }
+            }
+        }
+
+        It 'installs the key at the reported address and keeps the VM name and user' {
+            $result = Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -PollSeconds 0 -ReadySeconds 5 `
+                -EdgeAddress @{ 'amisad-edge-a' = '192.168.7.161'; 'amisad-edge-b' = '192.168.7.162' } -Confirm:$false
+            $result.Ok | Should -BeTrue -Because ($result.Lines -join "`n")
+            $edgeCalls = @($script:AmisAdSshCalls | Where-Object { $_.VM -like 'amisad-edge-*' })
+            $edgeCalls.Count | Should -BeGreaterThan 0
+            foreach ($call in $edgeCalls) {
+                $call.User | Should -Be "$($call.VM)-admin"
+                $call.ResolvedAddress | Should -Be $(if ($call.VM -eq 'amisad-edge-a') { '192.168.7.161' } else { '192.168.7.162' })
+            }
+            # The core has no reported address, so it keeps ordinary discovery.
+            @($script:AmisAdSshCalls | Where-Object { $_.VM -eq 'amisad-core' -and $_.ResolvedAddress }).Count | Should -Be 0
+        }
+
+        It 'still uses discovery for an edge that reported nothing' {
+            $result = Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -PollSeconds 0 -ReadySeconds 0 `
+                -EdgeAddress @{ 'amisad-edge-b' = '192.168.7.162' } -Confirm:$false
+            $result.Ok | Should -BeFalse
+            $result.Reason | Should -Match 'amisad-edge-a did not answer SSH at its discovered address'
+            ($result.Lines -join "`n") | Should -Match 'No reported address for amisad-edge-a'
+        }
+    }
+}
+
+Describe 'AmisAd edge address evidence' {
+    BeforeEach {
+        $script:EvidenceDir = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $script:AmisAdNetworkCaptures = [System.Collections.Generic.List[string]]::new()
+    }
+    AfterEach {
+        # Unqualified on purpose: Remove-Item does not resolve a global:
+        # qualifier on the function drive from a nested scope.
+        foreach ($fake in 'Get-VMIp', 'Save-VMNetworkState') {
+            if (Get-Command $fake -CommandType Function -ErrorAction SilentlyContinue) { Remove-Item -Path "function:$fake" -Force }
+        }
+    }
+
+    It 'records the reported address, its time, what discovery returns now, and the network capture' {
+        Set-Item -Path 'function:global:Get-VMIp' -Value { param([string]$VMName) if ($VMName -eq 'amisad-edge-b') { return '192.168.7.162' } return '' }
+        Set-Item -Path 'function:global:Save-VMNetworkState' -Value {
+            param([string]$VMName, [string]$OutputDirectory)
+            $script:AmisAdNetworkCaptures.Add("$VMName|$OutputDirectory")
+            return $true
+        }
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-a', 'amisad-edge-b' -LogDir $script:EvidenceDir `
+            -EdgeAddress @{ 'amisad-edge-a' = '192.168.7.161'; 'amisad-edge-b' = '192.168.7.162' } `
+            -ReportedAt @{ 'amisad-edge-a' = '2026-10-18T13:24:10.0000000Z' }
+        $result.Written | Should -BeTrue
+        $text = Get-Content -LiteralPath $result.Path -Raw
+        $text | Should -Match '"reportedAtUtc": "2026-10-18T13:24:10\.0000000Z"'
+        $record = $text | ConvertFrom-Json
+        $a = $record.edges | Where-Object vm -eq 'amisad-edge-a'
+        $a.reportedAddress | Should -Be '192.168.7.161'
+        $a.discoveryChecked | Should -BeTrue
+        $a.discoveredAddress | Should -BeNullOrEmpty
+        $a.networkStateSaved | Should -BeTrue
+        ($record.edges | Where-Object vm -eq 'amisad-edge-b').discoveredAddress | Should -Be '192.168.7.162'
+        $script:AmisAdNetworkCaptures | Should -Be @("amisad-edge-a|$($script:EvidenceDir)", "amisad-edge-b|$($script:EvidenceDir)")
+        ($result.Lines -join "`n") | Should -Match 'amisad-edge-a: reported 192\.168\.7\.161; discovery now returns nothing'
+    }
+
+    It 'never fails the stage when discovery throws, and records the error' {
+        Set-Item -Path 'function:global:Get-VMIp' -Value { param([string]$VMName) $null = $VMName; throw 'WMI query timed out' }
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-a' -LogDir $script:EvidenceDir
+        $result.Written | Should -BeTrue
+        $a = (Get-Content -LiteralPath $result.Path -Raw | ConvertFrom-Json).edges[0]
+        $a.discoveryError | Should -Match 'WMI query timed out'
+        $a.networkStateSaved | Should -BeNullOrEmpty -Because 'a host whose driver has no capture verb records none'
     }
 }
 

@@ -185,6 +185,8 @@ $edgeAddress = $edgeStartup.Address
 $keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
 foreach ($line in $keyHandoff.Lines) { Write-Information $line }
 if (-not $keyHandoff.Ok) {
+    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -EdgeAddress $edgeAddress -ReportedAt $edgeStartup.ReportedAt -LogDir $LogDir
+    foreach ($line in $evidence.Lines) { Write-Information $line }
     Write-Error "The edges do not trust amisad-core's demo key: $($keyHandoff.Reason). Stopping before the scenarios; VMs are left as-is for debugging."
     exit 1
 }

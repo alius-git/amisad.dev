@@ -189,6 +189,8 @@ $edgeAddress = $edgeStartup.Address
 $keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
 foreach ($line in $keyHandoff.Lines) { Write-Information $line }
 if (-not $keyHandoff.Ok) {
+    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -EdgeAddress $edgeAddress -ReportedAt $edgeStartup.ReportedAt -LogDir $LogDir
+    foreach ($line in $evidence.Lines) { Write-Information $line }
     $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage 'Sync-AmisAdDemoKey' -FailureClass 'provisioning_failure' `
         -ErrorMessage "The edges do not trust vm-core's demo key: $($keyHandoff.Reason)"
     Write-Error "The edges do not trust vm-core's demo key: $($keyHandoff.Reason). Stopping the warm-up instead of handing the scenarios edges they cannot reach."

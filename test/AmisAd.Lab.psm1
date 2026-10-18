@@ -216,6 +216,7 @@ function Start-AmisAdEdge {
     )
     $state = @{}
     $address = @{}
+    $reportedAt = @{}
     $lines = [System.Collections.Generic.List[string]]::new()
     # Once a start reports that the hypervisor's control channel stopped
     # acting, every further start would wait out the same timeout against the
@@ -259,12 +260,17 @@ function Start-AmisAdEdge {
         if (-not $state[$edge].Started) { continue }
         do {
             $report = $state[$edge].IpFile
-            if ((Test-Path -LiteralPath $report -PathType Leaf) -and
-                (Get-Item -LiteralPath $report).LastWriteTime -gt $state[$edge].Start) {
+            $written = if (Test-Path -LiteralPath $report -PathType Leaf) { (Get-Item -LiteralPath $report).LastWriteTime } else { $null }
+            if ($written -and $written -gt $state[$edge].Start) {
                 $reported = Get-Content -LiteralPath $report -Raw -ErrorAction SilentlyContinue
                 $parsed = $null
                 if ($reported -and [Net.IPAddress]::TryParse($reported.Trim(), [ref]$parsed)) {
                     $address[$edge] = $reported.Trim()
+                    # When the report was written is what later evidence is
+                    # read against: an address can be fresh at the report and
+                    # still not be one the host's own discovery can find.
+                    $reportedAt[$edge] = $written.ToUniversalTime().ToString('o')
+                    $lines.Add("$edge reported $($address[$edge]) at $($reportedAt[$edge]).")
                     $state[$edge].Ready = $true
                     $state[$edge].Reason = $null
                     break
@@ -276,8 +282,8 @@ function Start-AmisAdEdge {
         if (-not $state[$edge].Ready) { $state[$edge].Reason = 'started but never reported a fresh valid IP address' }
     }
     $missing = @($Name | Where-Object { -not $state[$_].Ready })
-    return @{ Ok = $missing.Count -eq 0; State = $state; Address = $address; Missing = $missing; Lines = [string[]]$lines
-              ControlHung = $controlHung; HungEdge = $hungEdge }
+    return @{ Ok = $missing.Count -eq 0; State = $state; Address = $address; ReportedAt = $reportedAt; Missing = $missing
+              Lines = [string[]]$lines; ControlHung = $controlHung; HungEdge = $hungEdge }
 }
 
 # --- REGION: Get-AmisAdEdgeFailure
@@ -419,6 +425,86 @@ function Save-AmisAdControlSnapshot {
     } catch {
         Write-Verbose "Save-AmisAdControlSnapshot: $($_.Exception.Message)"
         return $null
+    }
+}
+
+# --- REGION: Save-AmisAdEdgeAddressEvidence
+function Save-AmisAdEdgeAddressEvidence {
+    <#
+    .SYNOPSIS
+        Record, beside the stage logs, which address each edge was reached at
+        and what the host's own discovery says about it now, when the demo key
+        hand-off failed.
+    .DESCRIPTION
+        A failed hand-off is read against three facts that are gone a minute
+        later: the address the edge reported and when, what the host driver's
+        discovery returns at failure time (an empty answer is the case where
+        dialing the bare VM name fails in DNS), and the hypervisor's view of
+        the guest's network. edge-address-evidence.json keeps the first two;
+        a driver with Save-VMNetworkState (Hyper-V) adds its network-state
+        capture. Nothing here can fail the stage.
+    .PARAMETER EdgeVm
+        The edge VM names.
+    .PARAMETER EdgeAddress
+        Name -> address the edge reported (Start-AmisAdEdge's Address).
+    .PARAMETER ReportedAt
+        Name -> UTC time of that report (Start-AmisAdEdge's ReportedAt).
+    .PARAMETER LogDir
+        Where the evidence is written.
+    .OUTPUTS
+        [pscustomobject] Written, Path, Lines (to print).
+    #>
+    [CmdletBinding()]
+    [OutputType([pscustomobject])]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+        Justification = 'Writes diagnostic evidence for a stage that has already failed; no lab resource is modified.')]
+    param(
+        [Parameter(Mandatory)][string[]]$EdgeVm,
+        [hashtable]$EdgeAddress = @{},
+        [hashtable]$ReportedAt = @{},
+        [Parameter(Mandatory)][string]$LogDir
+    )
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $records = [System.Collections.Generic.List[object]]::new()
+    $canDiscover = [bool](Get-Command -Name Get-VMIp -ErrorAction SilentlyContinue)
+    $canCapture = [bool](Get-Command -Name Save-VMNetworkState -ErrorAction SilentlyContinue)
+    foreach ($edge in $EdgeVm) {
+        $discovered = $null
+        $discoveryError = $null
+        if ($canDiscover) {
+            try { $discovered = [string](Get-VMIp -VMName $edge) } catch { $discoveryError = $_.Exception.Message }
+        }
+        $captured = $null
+        if ($canCapture) {
+            try { $captured = [bool](Save-VMNetworkState -VMName $edge -OutputDirectory $LogDir) }
+            catch { $captured = $false; Write-Verbose "Save-VMNetworkState ${edge}: $($_.Exception.Message)" }
+        }
+        $reported = if ($EdgeAddress.ContainsKey($edge)) { [string]$EdgeAddress[$edge] } else { $null }
+        $records.Add([ordered]@{
+            vm                = $edge
+            reportedAddress   = $reported
+            reportedAtUtc     = if ($ReportedAt.ContainsKey($edge)) { [string]$ReportedAt[$edge] } else { $null }
+            discoveryChecked  = $canDiscover
+            discoveredAddress = if ($discovered) { $discovered } else { $null }
+            discoveryError    = $discoveryError
+            networkStateSaved = $captured
+        })
+        $seen = if (-not $canDiscover) { 'no discovery verb on this host' }
+                elseif ($discoveryError) { "discovery failed: $discoveryError" }
+                elseif ($discovered) { "discovery now returns $discovered" }
+                else { 'discovery now returns nothing' }
+        $lines.Add("${edge}: reported $(if ($reported) { $reported } else { 'no address' }); $seen.")
+    }
+    $path = Join-Path $LogDir 'edge-address-evidence.json'
+    try {
+        New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+        [ordered]@{ capturedAtUtc = [DateTime]::UtcNow.ToString('o'); edges = $records.ToArray() } |
+            ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $path -Encoding utf8
+        $lines.Add("Edge address evidence: $path")
+        return [pscustomobject]@{ Written = $true; Path = $path; Lines = [string[]]$lines }
+    } catch {
+        Write-Verbose "Save-AmisAdEdgeAddressEvidence: $($_.Exception.Message)"
+        return [pscustomobject]@{ Written = $false; Path = $path; Lines = [string[]]$lines }
     }
 }
 
@@ -580,14 +666,21 @@ function Sync-AmisAdDemoKey {
     .PARAMETER EdgeVm
         The edge VM names. Each administrator is <name>-admin.
     .PARAMETER EdgeAddress
-        Optional name -> IP map for the login proof (the addresses the edges
-        reported); an edge without an entry is looked up through the host driver.
+        Optional name -> IP map of the addresses the edges just reported. Every
+        SSH call to an edge (readiness, key install) dials that address, and the
+        login proof targets it; an edge without an entry falls back to the host
+        driver's discovery. A fresh report is the stronger evidence: discovery
+        can come back empty while the guest is reachable at the address it
+        reported.
     .PARAMETER InvokeGuest
-        Test seam: a scriptblock taking (VMName, User, Command, TimeoutSeconds)
-        and returning @{ success; exitCode; output }. The default wraps the
-        framework's Invoke-GuestSsh.
+        Test seam: a scriptblock taking (VMName, User, Command, TimeoutSeconds,
+        Address) and returning @{ success; exitCode; output }. Address is empty
+        when no reported address is known. The default wraps the framework's
+        Invoke-GuestSsh, passing a known address as -ResolvedAddress.
     .PARAMETER ReadySeconds
-        How long to wait for vm-core's SSH after starting it.
+        How long to wait for vm-core's SSH after starting it, and for each
+        edge's SSH before the key is installed there (an address report proves
+        the network is up, not that sshd is accepting logins yet).
     .PARAMETER PollSeconds
         Pause between attempts.
     .OUTPUTS
@@ -620,8 +713,12 @@ function Sync-AmisAdDemoKey {
             Import-Module (Join-Path $YurunaRoot 'test/modules/Test.Ssh.psm1') -Global -DisableNameChecking -Verbose:$false
         }
         $InvokeGuest = {
-            param([string]$VMName, [string]$User, [string]$Command, [int]$TimeoutSeconds)
-            Invoke-GuestSsh -VMName $VMName -User $User -Command $Command -TimeoutSeconds $TimeoutSeconds
+            param([string]$VMName, [string]$User, [string]$Command, [int]$TimeoutSeconds, [string]$Address)
+            if ($Address) {
+                Invoke-GuestSsh -VMName $VMName -User $User -Command $Command -TimeoutSeconds $TimeoutSeconds -ResolvedAddress $Address
+            } else {
+                Invoke-GuestSsh -VMName $VMName -User $User -Command $Command -TimeoutSeconds $TimeoutSeconds
+            }
         }
     }
 
@@ -655,13 +752,27 @@ function Sync-AmisAdDemoKey {
     $authorize = Get-AmisAdAuthorizeKeyCommand -PublicKey $publicKey
     foreach ($edge in $EdgeVm) {
         $edgeUser = "$edge-admin"
+        $edgeTarget = if ($EdgeAddress.ContainsKey($edge)) { ([string]$EdgeAddress[$edge]).Trim() } else { '' }
+        $where = if ($edgeTarget) { "at $edgeTarget" } else { "at its discovered address" }
+        if ($edgeTarget) { $lines.Add("Reaching $edge at $edgeTarget, the address it reported.") }
+        else { $lines.Add("No reported address for $edge; the host driver's discovery chooses one.") }
+        $edgeDeadline = (Get-Date).AddSeconds($ReadySeconds)
+        $edgeProbe = $null
+        do {
+            $edgeProbe = & $InvokeGuest $edge $edgeUser 'true' 30 $edgeTarget
+            if ($edgeProbe.success) { break }
+            Start-Sleep -Seconds $PollSeconds
+        } while ((Get-Date) -lt $edgeDeadline)
+        if (-not $edgeProbe.success) {
+            return (& $fail "$edge did not answer SSH $where within ${ReadySeconds}s (exit $($edgeProbe.exitCode)): $($edgeProbe.output)")
+        }
         $done = $null
         foreach ($attempt in 1..3) {
-            $done = & $InvokeGuest $edge $edgeUser $authorize 120
+            $done = & $InvokeGuest $edge $edgeUser $authorize 120 $edgeTarget
             if ($done.success) { break }
             if ($attempt -lt 3) { Start-Sleep -Seconds $PollSeconds }
         }
-        if (-not $done.success) { return (& $fail "could not authorize the demo key on $edge (exit $($done.exitCode)): $($done.output)") }
+        if (-not $done.success) { return (& $fail "could not authorize the demo key on $edge $where (exit $($done.exitCode)): $($done.output)") }
         $lines.Add("$edge now trusts $fingerprint (any earlier amisad-demo entry replaced).")
     }
 
@@ -691,6 +802,7 @@ function Sync-AmisAdDemoKey {
 }
 
 Export-ModuleMember -Function Invoke-AmisAdScript, Invoke-AmisAdStage, Invoke-AmisAdCleanup,
-    Remove-InstallMedia, Set-EdgeMemory, Start-VMConfirmed, Start-AmisAdEdge, Get-AmisAdEdgeFailure, Write-AmisAdLabFailure, Save-AmisAdControlSnapshot, Remove-LegacyDemoKey,
+    Remove-InstallMedia, Set-EdgeMemory, Start-VMConfirmed, Start-AmisAdEdge, Get-AmisAdEdgeFailure, Write-AmisAdLabFailure, Save-AmisAdControlSnapshot,
+    Save-AmisAdEdgeAddressEvidence, Remove-LegacyDemoKey,
     ConvertTo-AmisAdDemoPublicKey, Get-AmisAdKeyFingerprint, Get-AmisAdAuthorizeKeyCommand,
     Get-AmisAdEdgeLoginCommand, Sync-AmisAdDemoKey
