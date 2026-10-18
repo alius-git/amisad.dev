@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-guests",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/0bcd6b880b82e8b61dc017688f6dbeba4982096b3041cdbd784f499dde70d4b3",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/597597d54090bb7ee5d4b98f320e53f78ad75c66fc80776ff447af3d2abae71a",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,8 +25,8 @@
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared guests inventory; source-inputs SHA256 0bcd6b880b82e8b61dc017688f6dbeba4982096b3041cdbd784f499dde70d4b3. Not an installed-system scan.",
-      "versionInfo": "2026.10.18"
+      "comment": "Declared guests inventory; source-inputs SHA256 597597d54090bb7ee5d4b98f320e53f78ad75c66fc80776ff447af3d2abae71a. Not an installed-system scan.",
+      "versionInfo": "2026.10.21"
     },
     {
       "name": "build-essential",
