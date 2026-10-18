@@ -124,6 +124,65 @@ function Invoke-AmisAdCleanup {
     return 0
 }
 
+# --- REGION: Test-AmisAdStorageAdmission
+function Test-AmisAdStorageAdmission {
+    <#
+    .SYNOPSIS
+        Check the topology's actual storage volumes and retain the admission evidence.
+    .DESCRIPTION
+        The optional driver helper allows this project to run with older frameworks.
+        An unavailable probe is recorded explicitly; a measured shortage stops the
+        stage. Disk growth is reserved before provisioning, not charged again after
+        the disks and checkpoints already exist.
+    #>
+    [CmdletBinding()]
+    [OutputType([hashtable])]
+    param(
+        [Parameter(Mandatory)][string]$YurunaRoot,
+        [Parameter(Mandatory)][string]$HostType,
+        [Parameter(Mandatory)][string]$LogDir,
+        [Parameter(Mandatory)][ValidateSet('BeforeProvisioning', 'BeforeStart')][string]$Stage,
+        [switch]$IncludeDiskGrowth
+    )
+    if ($HostType -ne 'host.windows.hyper-v') { return @{ allowed = $true; status = 'not-applicable'; reason = '' } }
+    $evidence = @{ allowed = $true; status = 'unknown'; reason = 'Storage admission is unavailable: the host driver has no Test-VMStorageCapacity helper.';
+                   timestamp = [DateTime]::UtcNow.ToString('o') }
+    $capacityCommand = Get-Command Test-VMStorageCapacity -ErrorAction SilentlyContinue
+    if ($capacityCommand) {
+        $requirements = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'host-storage.requirements.json') -Raw -ErrorAction Stop |
+            ConvertFrom-Json -AsHashtable -ErrorAction Stop
+        $memory = @{}
+        $growth = @{}
+        foreach ($vm in $requirements.virtualMachines) {
+            if (-not $IncludeDiskGrowth -and [long]$vm.startupMemoryBytes -eq 0) { continue }
+            $memory[$vm.name] = [long]$vm.startupMemoryBytes
+            if ($IncludeDiskGrowth) { $growth[$vm.name] = [long]$vm.additionalStorageBytes }
+        }
+        try {
+            $capacityArgs = @{ VMName = [string[]]$memory.Keys; StartupMemoryBytes = $memory;
+                AdditionalStorageBytes = $growth; ReserveBytes = [long]$requirements.reserveBytes }
+            if ($IncludeDiskGrowth -and $capacityCommand.Parameters.ContainsKey('ProvisioningMemoryBytes')) {
+                $capacityArgs.ProvisioningMemoryBytes = [long]$requirements.provisioningMemoryBytes
+            }
+            $evidence = Test-VMStorageCapacity @capacityArgs
+        } catch {
+            $evidence = @{ allowed = $true; status = 'unknown'; reason = "Storage admission is unavailable: $($_.Exception.Message)";
+                           timestamp = [DateTime]::UtcNow.ToString('o') }
+        }
+    }
+    try {
+        New-Item -ItemType Directory -Path $LogDir -Force -ErrorAction Stop | Out-Null
+        $evidence | ConvertTo-Json -Depth 15 | Set-Content -LiteralPath (Join-Path $LogDir "storage-admission.$Stage.json") -Encoding utf8 -ErrorAction Stop
+    } catch { Write-Warning "Could not save storage admission evidence: $($_.Exception.Message)" }
+    if ($evidence.status -eq 'unknown') { Write-Warning $evidence.reason }
+    if (-not $evidence.allowed) {
+        $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage "StorageAdmission-$Stage" `
+            -FailureClass 'provisioning_failure' -ErrorMessage "Topology storage admission refused: $($evidence.reason)" `
+            -StartupFailure @{ kind = 'storage-capacity'; hostStorage = $evidence }
+    }
+    return $evidence
+}
+
 # --- REGION: Remove-InstallMedia
 function Remove-InstallMedia {
     <#
@@ -181,21 +240,36 @@ function Start-VMConfirmed {
     try {
         $record = @(Start-VM -VMName $Name -ErrorAction Stop) | Select-Object -Last 1
     } catch {
-        return @{ started = $false; reason = $_.Exception.Message; kind = 'error'; controlHung = $false }
+        return @{ started = $false; reason = $_.Exception.Message; kind = 'error'; controlHung = $false; vmName = $Name }
     }
-    if ($record -isnot [hashtable]) { return @{ started = $false; reason = 'Start-VM returned no status record'; kind = 'error'; controlHung = $false } }
+    if ($record -isnot [hashtable]) { return @{ started = $false; reason = 'Start-VM returned no status record'; kind = 'error'; controlHung = $false; vmName = $Name } }
     # The host contract's record may name the failure kind and whether the
     # hypervisor's control channel stopped acting; a driver that does not
     # report them reads as 'none', so the caller's retry policy is unchanged.
     $kind = if ($record.Contains('kind') -and -not [string]::IsNullOrWhiteSpace("$($record['kind'])")) { [string]$record['kind'] } else { 'none' }
     $controlHung = $record.Contains('controlHung') -and [bool]$record['controlHung']
-    if (-not $record.success) { return @{ started = $false; reason = "$($record.errorMessage)"; kind = $kind; controlHung = $controlHung } }
+    $result = @{ started = $false; reason = "$($record.errorMessage)"; kind = $kind; controlHung = $controlHung; vmName = $Name }
+    foreach ($field in 'hostMemory', 'hostStorage', 'errorCode') {
+        if ($record.Contains($field)) { $result[$field] = $record[$field] }
+    }
+    # Older drivers expose the numeric disk-full code only in their message.
+    # Preserve compatibility without treating unrelated English text as a code.
+    if ($result.reason -match '(?i)\b0x800700(?:70|27)\b') {
+        $result.errorCode = $Matches[0].ToLowerInvariant()
+        if ($kind -eq 'none') { $result.kind = 'storage-capacity' }
+    }
+    if (-not $record.success) { return $result }
     $deadline = (Get-Date).AddSeconds($RunningTimeoutSeconds)
     while ((Get-Date) -lt $deadline) {
-        if ((Get-VMState -VMName $Name) -eq 'running') { return @{ started = $true; reason = $null; kind = 'none'; controlHung = $false } }
+        if ((Get-VMState -VMName $Name) -eq 'running') {
+            $result.started = $true; $result.reason = $null; $result.kind = 'none'; $result.controlHung = $false
+            return $result
+        }
         Start-Sleep -Seconds 2
     }
-    return @{ started = $false; reason = "start reported success but the VM is '$(Get-VMState -VMName $Name)' after ${RunningTimeoutSeconds}s"; kind = 'not-running'; controlHung = $false }
+    $result.reason = "start reported success but the VM is '$(Get-VMState -VMName $Name)' after ${RunningTimeoutSeconds}s"
+    $result.kind = 'not-running'; $result.controlHung = $false
+    return $result
 }
 
 # --- REGION: Start-AmisAdEdge
@@ -224,6 +298,7 @@ function Start-AmisAdEdge {
     # verdict names the edge that saw it.
     $controlHung = $false
     $hungEdge = ''
+    $storageBlocked = ''
     foreach ($edge in $Name) {
         $report = Join-Path $LogRoot "handoff/$edge.ip.txt"
         $state[$edge] = @{ IpFile = $report; Start = (Get-Date); Started = $false; Ready = $false; Reason = 'not attempted'; Kind = 'none'; Attempts = 0 }
@@ -234,6 +309,12 @@ function Start-AmisAdEdge {
             $lines.Add("Start-VM $edge skipped: $($state[$edge].Reason)")
             continue
         }
+        if ($storageBlocked) {
+            $state[$edge].Reason = "not attempted: storage capacity must improve before further starts (reported for $storageBlocked)"
+            $state[$edge].Kind = 'storage-capacity'
+            $lines.Add("Start-VM $edge skipped: $($state[$edge].Reason)")
+            continue
+        }
         Remove-Item -LiteralPath $report -Force -ErrorAction SilentlyContinue
         $state[$edge].Start = Get-Date
         foreach ($attempt in 1..3) {
@@ -241,11 +322,19 @@ function Start-AmisAdEdge {
             $state[$edge].Reason = $started.reason
             $state[$edge].Attempts = $attempt
             if ($started.Contains('kind') -and $started.kind) { $state[$edge].Kind = [string]$started.kind }
+            foreach ($field in 'hostMemory', 'hostStorage', 'errorCode') {
+                if ($started.Contains($field)) { $state[$edge][$field] = $started[$field] }
+            }
             if ($started.started) {
                 $state[$edge].Started = $true
                 break
             }
             $lines.Add("Start-VM $edge attempt ${attempt}/3 failed: $($started.reason)")
+            if ($state[$edge].Kind -eq 'storage-capacity' -or ($started.Contains('errorCode') -and $started.errorCode -in @('0x80070070', '0x80070027'))) {
+                $storageBlocked = $edge
+                $lines.Add("Start-VM $edge`: storage capacity must improve before retrying; no further start is attempted.")
+                break
+            }
             if ($started.Contains('controlHung') -and [bool]$started.controlHung) {
                 $controlHung = $true
                 $hungEdge = $edge
@@ -316,14 +405,18 @@ function Get-AmisAdEdgeFailure {
         $outcome = if ($edgeState -and $edgeState['Started']) { 'no-ip-report' }
                    elseif ($kind -eq 'apple-event') { 'start-not-acted' }
                    else { 'start-failed' }
-        $rows.Add(@{
+        $row = @{
             area     = 'amisad-edge'
             vmName   = [string]$edge
             outcome  = $outcome
             detail   = [string]$edgeState['Reason']
             kind     = $kind
             attempts = [int]$(if ($edgeState -and $edgeState.Contains('Attempts')) { $edgeState['Attempts'] } else { 0 })
-        })
+        }
+        foreach ($field in 'hostMemory', 'hostStorage', 'errorCode') {
+            if ($edgeState.Contains($field)) { $row[$field] = $edgeState[$field] }
+        }
+        $rows.Add($row)
     }
     $detail = (@($EdgeStartup['Missing'] | ForEach-Object { "$_ ($($EdgeStartup['State'][$_]['Reason']))" })) -join '; '
     $failureClass = if ($controlHung) { 'hypervisor_unresponsive' } else { 'provisioning_failure' }
@@ -360,6 +453,10 @@ function Write-AmisAdLabFailure {
         What the stage saw, as the record's description.
     .PARAMETER DependencyFailures
         Per-item evidence rows, kept under context.dependencyFailures.
+    .PARAMETER VMName
+        The VM whose startup failed, when the stage names one.
+    .PARAMETER StartupFailure
+        Structured driver evidence retained through the startup wrappers.
     .OUTPUTS
         [bool] $true when the record was handed to the framework writer.
     #>
@@ -373,7 +470,9 @@ function Write-AmisAdLabFailure {
         [Parameter(Mandatory)][string]$Stage,
         [Parameter(Mandatory)][string]$FailureClass,
         [Parameter(Mandatory)][string]$ErrorMessage,
-        [hashtable[]]$DependencyFailures = @()
+        [hashtable[]]$DependencyFailures = @(),
+        [string]$VMName = '',
+        [hashtable]$StartupFailure = @{}
     )
     if ([string]::IsNullOrWhiteSpace($env:YURUNA_LOG_DIR)) { return $false }
     try {
@@ -382,8 +481,22 @@ function Write-AmisAdLabFailure {
         foreach ($moduleName in 'Test.SequenceFailureState.psm1', 'Test.StateFile.psm1', 'Test.RunnerInnerLoop.psm1') {
             Import-Module (Join-Path $YurunaRoot "test/modules/$moduleName") -Global -DisableNameChecking -ErrorAction Stop
         }
-        Write-CycleInfraFailure -Stage $Stage -FailureClass $FailureClass -Severity 'hard' `
-            -GuestKey '(orchestration)' -ErrorMessage $ErrorMessage -HostType $HostType -DependencyFailures $DependencyFailures
+        $rows = @($DependencyFailures)
+        if ($StartupFailure.Count) {
+            $row = @{ area = 'vm-start'; vmName = $VMName; outcome = 'start-failed'; detail = $ErrorMessage }
+            if ($Stage -like 'StorageAdmission-*') { $row.area = 'host-storage'; $row.outcome = 'admission-refused' }
+            foreach ($field in 'hostMemory', 'hostStorage', 'errorCode', 'kind') {
+                if ($StartupFailure.Contains($field)) { $row[$field] = $StartupFailure[$field] }
+            }
+            $rows += $row
+        }
+        $writeArgs = @{ Stage = $Stage; FailureClass = $FailureClass; Severity = 'hard'; GuestKey = '(orchestration)';
+            VMName = $VMName; ErrorMessage = $ErrorMessage; HostType = $HostType; DependencyFailures = [hashtable[]]$rows }
+        $writer = Get-Command Write-CycleInfraFailure -ErrorAction Stop
+        foreach ($field in 'HostMemory', 'HostStorage') {
+            if ($StartupFailure.Contains($field) -and $writer.Parameters.ContainsKey($field)) { $writeArgs[$field] = $StartupFailure[$field] }
+        }
+        Write-CycleInfraFailure @writeArgs
         return $true
     } catch {
         Write-Verbose "Write-AmisAdLabFailure: $($_.Exception.Message)"
@@ -451,6 +564,8 @@ function Save-AmisAdEdgeAddressEvidence {
         Name -> UTC time of that report (Start-AmisAdEdge's ReportedAt).
     .PARAMETER LogDir
         Where the evidence is written.
+    .PARAMETER AdditionalVm
+        Other VMs involved in the failure, including a core that could not start.
     .OUTPUTS
         [pscustomobject] Written, Path, Lines (to print).
     #>
@@ -462,22 +577,35 @@ function Save-AmisAdEdgeAddressEvidence {
         [Parameter(Mandatory)][string[]]$EdgeVm,
         [hashtable]$EdgeAddress = @{},
         [hashtable]$ReportedAt = @{},
-        [Parameter(Mandatory)][string]$LogDir
+        [Parameter(Mandatory)][string]$LogDir,
+        [string[]]$AdditionalVm = @()
     )
     $lines = [System.Collections.Generic.List[string]]::new()
     $records = [System.Collections.Generic.List[object]]::new()
     $canDiscover = [bool](Get-Command -Name Get-VMIp -ErrorAction SilentlyContinue)
     $canCapture = [bool](Get-Command -Name Save-VMNetworkState -ErrorAction SilentlyContinue)
+    $diagnostics = @{}
+    foreach ($vm in (@($EdgeVm) + @($AdditionalVm) | Select-Object -Unique)) {
+        # Driver filenames are fixed. Each VM needs its own directory so a
+        # later snapshot cannot overwrite the machine that failed first.
+        $directory = Join-Path $LogDir ([Uri]::EscapeDataString($vm))
+        $captured = $null
+        if ($canCapture) {
+            try { $captured = [bool](Save-VMNetworkState -VMName $vm -OutputDirectory $directory) }
+            catch { $captured = $false; Write-Verbose "Save-VMNetworkState ${vm}: $($_.Exception.Message)" }
+        }
+        $storage = @{ status = 'unknown'; reason = 'The host driver does not expose storage capacity evidence.' }
+        if (Get-Command Test-VMStorageCapacity -ErrorAction SilentlyContinue) {
+            try { $storage = Test-VMStorageCapacity -VMName $vm }
+            catch { $storage = @{ status = 'unknown'; reason = $_.Exception.Message } }
+        }
+        $diagnostics[$vm] = @{ directory = $directory; networkStateSaved = $captured; hostStorage = $storage }
+    }
     foreach ($edge in $EdgeVm) {
         $discovered = $null
         $discoveryError = $null
         if ($canDiscover) {
             try { $discovered = [string](Get-VMIp -VMName $edge) } catch { $discoveryError = $_.Exception.Message }
-        }
-        $captured = $null
-        if ($canCapture) {
-            try { $captured = [bool](Save-VMNetworkState -VMName $edge -OutputDirectory $LogDir) }
-            catch { $captured = $false; Write-Verbose "Save-VMNetworkState ${edge}: $($_.Exception.Message)" }
         }
         $reported = if ($EdgeAddress.ContainsKey($edge)) { [string]$EdgeAddress[$edge] } else { $null }
         $records.Add([ordered]@{
@@ -487,7 +615,7 @@ function Save-AmisAdEdgeAddressEvidence {
             discoveryChecked  = $canDiscover
             discoveredAddress = if ($discovered) { $discovered } else { $null }
             discoveryError    = $discoveryError
-            networkStateSaved = $captured
+            networkStateSaved = $diagnostics[$edge].networkStateSaved
         })
         $seen = if (-not $canDiscover) { 'no discovery verb on this host' }
                 elseif ($discoveryError) { "discovery failed: $discoveryError" }
@@ -498,8 +626,8 @@ function Save-AmisAdEdgeAddressEvidence {
     $path = Join-Path $LogDir 'edge-address-evidence.json'
     try {
         New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
-        [ordered]@{ capturedAtUtc = [DateTime]::UtcNow.ToString('o'); edges = $records.ToArray() } |
-            ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $path -Encoding utf8
+        [ordered]@{ capturedAtUtc = [DateTime]::UtcNow.ToString('o'); edges = $records.ToArray(); vmDiagnostics = $diagnostics } |
+            ConvertTo-Json -Depth 15 | Set-Content -LiteralPath $path -Encoding utf8
         $lines.Add("Edge address evidence: $path")
         return [pscustomobject]@{ Written = $true; Path = $path; Lines = [string[]]$lines }
     } catch {
@@ -700,9 +828,12 @@ function Sync-AmisAdDemoKey {
 
     $lines = [System.Collections.Generic.List[string]]::new()
     $fail = {
-        param([string]$Reason)
-        $lines.Add("Demo key hand-off failed: $Reason")
-        return [pscustomobject]@{ Ok = $false; Lines = [string[]]$lines; Fingerprint = ''; Reason = $Reason }
+        param([string]$Reason, [string]$Stage = 'Sync-AmisAdDemoKey', [string]$VMName = '', [hashtable]$StartupFailure = @{})
+        $label = if ($Stage -eq 'Start-AmisAdCore') { "$VMName startup failed" } else { 'Demo key hand-off failed' }
+        $lines.Add("${label}: $Reason")
+        $failureClass = if ($StartupFailure.Contains('controlHung') -and $StartupFailure.controlHung) { 'hypervisor_unresponsive' } else { 'provisioning_failure' }
+        return [pscustomobject]@{ Ok = $false; Lines = [string[]]$lines; Fingerprint = ''; Reason = $Reason;
+            Stage = $Stage; VMName = $VMName; StartupFailure = $StartupFailure; FailureClass = $failureClass }
     }
     if (-not $PSCmdlet.ShouldProcess("$CoreVm -> $($EdgeVm -join ', ')", 'Authorize the demo public key on the edges')) {
         return [pscustomobject]@{ Ok = $true; Lines = [string[]]@(); Fingerprint = ''; Reason = '' }
@@ -726,7 +857,7 @@ function Sync-AmisAdDemoKey {
     if ((Get-Command Get-VMState -ErrorAction SilentlyContinue) -and ((Get-VMState -VMName $CoreVm) -ne 'running')) {
         $lines.Add("Starting $CoreVm to read its demo public key.")
         $started = Start-VMConfirmed -Name $CoreVm -Confirm:$false
-        if (-not $started.started) { return (& $fail "$CoreVm did not start: $($started.reason)") }
+        if (-not $started.started) { return (& $fail "$CoreVm did not start: $($started.reason)" 'Start-AmisAdCore' $CoreVm $started) }
     }
     $coreUser = "$CoreVm-admin"
     $deadline = (Get-Date).AddSeconds($ReadySeconds)
@@ -802,6 +933,7 @@ function Sync-AmisAdDemoKey {
 }
 
 Export-ModuleMember -Function Invoke-AmisAdScript, Invoke-AmisAdStage, Invoke-AmisAdCleanup,
+    Test-AmisAdStorageAdmission,
     Remove-InstallMedia, Set-EdgeMemory, Start-VMConfirmed, Start-AmisAdEdge, Get-AmisAdEdgeFailure, Write-AmisAdLabFailure, Save-AmisAdControlSnapshot,
     Save-AmisAdEdgeAddressEvidence, Remove-LegacyDemoKey,
     ConvertTo-AmisAdDemoPublicKey, Get-AmisAdKeyFingerprint, Get-AmisAdAuthorizeKeyCommand,

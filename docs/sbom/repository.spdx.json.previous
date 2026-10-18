@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-repository",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/repository/597597d54090bb7ee5d4b98f320e53f78ad75c66fc80776ff447af3d2abae71a",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/repository/23640462fe5094e1cd6276348ab3e2454302b6dbe374f8c8d1ab15c43b6f6286",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,8 +25,8 @@
       "licenseDeclared": "MIT",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared repository inventory; source-inputs SHA256 597597d54090bb7ee5d4b98f320e53f78ad75c66fc80776ff447af3d2abae71a. Not an installed-system scan.",
-      "versionInfo": "2026.10.21"
+      "comment": "Declared repository inventory; source-inputs SHA256 23640462fe5094e1cd6276348ab3e2454302b6dbe374f8c8d1ab15c43b6f6286. Not an installed-system scan.",
+      "versionInfo": "2026.10.18.1"
     },
     {
       "name": "rules_rust",

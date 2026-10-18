@@ -119,6 +119,9 @@ Stop-LabConsole -HostType $HostType
 # the status service serves to the whole LAN; it is deleted and said so.
 foreach ($line in (Remove-LegacyDemoKey -YurunaRoot $YurunaRoot -Confirm:$false)) { Write-Warning $line }
 
+$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeProvisioning' -IncludeDiskGrowth
+if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
+
 # --- REGION: Resolve stash service
 # A stash is a requirement of this pass, not an optimization: the build uploads
 # its binaries to it and amisad-core downloads them. This project states no
@@ -159,6 +162,9 @@ if ((Invoke-AmisAdStage @stageContext -Name 'amisad-core' -Sequence 'workload.gu
 }
 Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core' -Confirm:$false -HostType $HostType
 
+$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeStart'
+if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
+
 # --- REGION: Start edges and wait for addresses
 # s004.failover needs the region-B edge live (jurisdiction-restricted
 # allocation must have a roomier non-compliant region to exclude); earlier
@@ -174,8 +180,12 @@ $edges = 'amisad-edge-a', 'amisad-edge-b'
 $edgeStartup = Start-AmisAdEdge -Name $edges -LogRoot $logRoot -Confirm:$false
 foreach ($line in $edgeStartup.Lines) { Write-Information $line }
 if (-not $edgeStartup.Ok) {
-    $detail = ($edgeStartup.Missing | ForEach-Object { "$_ ($($edgeStartup.State[$_].Reason))" }) -join '; '
-    Write-Error "Region edges are not live: $detail. Stopping before the scenarios; VMs are left as-is for debugging."
+    $failure = Get-AmisAdEdgeFailure -EdgeStartup $edgeStartup
+    $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage 'Start-AmisAdEdge' `
+        -FailureClass $failure.FailureClass -ErrorMessage $failure.ErrorMessage -DependencyFailures $failure.DependencyFailures
+    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -AdditionalVm 'amisad-core' -LogDir $LogDir
+    foreach ($line in $evidence.Lines) { Write-Information $line }
+    Write-Error "$($failure.ErrorMessage). Stopping before the scenarios; VMs are left as-is for debugging."
     exit 1
 }
 
@@ -185,9 +195,11 @@ $edgeAddress = $edgeStartup.Address
 $keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
 foreach ($line in $keyHandoff.Lines) { Write-Information $line }
 if (-not $keyHandoff.Ok) {
-    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -EdgeAddress $edgeAddress -ReportedAt $edgeStartup.ReportedAt -LogDir $LogDir
+    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -AdditionalVm 'amisad-core' -EdgeAddress $edgeAddress -ReportedAt $edgeStartup.ReportedAt -LogDir $LogDir
     foreach ($line in $evidence.Lines) { Write-Information $line }
-    Write-Error "The edges do not trust amisad-core's demo key: $($keyHandoff.Reason). Stopping before the scenarios; VMs are left as-is for debugging."
+    $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage $keyHandoff.Stage -FailureClass $keyHandoff.FailureClass `
+        -ErrorMessage $keyHandoff.Reason -VMName $keyHandoff.VMName -StartupFailure $keyHandoff.StartupFailure
+    Write-Error "$($keyHandoff.Stage): $($keyHandoff.Reason). Stopping before the scenarios; VMs are left as-is for debugging."
     exit 1
 }
 

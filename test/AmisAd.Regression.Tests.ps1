@@ -210,9 +210,73 @@ Export-ModuleMember -Function Start-VM, Get-VMState
         $result.kind | Should -Be 'none'
         $result.controlHung | Should -BeFalse
     }
+
+    It 'preserves the VM identity, numeric error and capacity evidence from a refused start' {
+        Mock Start-VM -ModuleName AmisAd.Lab -MockWith {
+            @{ success = $false; errorMessage = 'C: cannot allocate 12 GiB'; kind = 'storage-capacity';
+               errorCode = '0x80070070'; hostStorage = @{ status = 'insufficient'; requiredBytes = 12GB; freeBytes = 9GB };
+               hostMemory = @{ availableBytes = 24GB } }
+        }
+        $result = Start-VMConfirmed -Name 'amisad-core' -Confirm:$false
+        $result.started | Should -BeFalse
+        $result.vmName | Should -Be 'amisad-core'
+        $result.errorCode | Should -Be '0x80070070'
+        $result.hostStorage.requiredBytes | Should -Be 12GB
+        $result.hostStorage.freeBytes | Should -Be 9GB
+        $result.hostMemory.availableBytes | Should -Be 24GB
+    }
+
+    It 'recognizes older driver <ErrorCode> without requiring new result fields' -ForEach @(
+        @{ ErrorCode = '0x80070070' }
+        @{ ErrorCode = '0x80070027' }
+    ) {
+        $script:DriverDiskFullCode = $ErrorCode
+        Mock Start-VM -ModuleName AmisAd.Lab -MockWith {
+            @{ success = $false; errorMessage = "The system could not allocate VMRS ($script:DriverDiskFullCode)." }
+        }
+        $result = Start-VMConfirmed -Name 'amisad-core' -Confirm:$false
+        $result.started | Should -BeFalse
+        $result.errorCode | Should -Be $ErrorCode
+        $result.kind | Should -Be 'storage-capacity'
+    }
 }
 
 Describe 'AmisAd edge admission' {
+    It 'stops after numeric disk-full <ErrorCode> without a classified failure kind' -ForEach @(
+        @{ ErrorCode = '0x80070070' }
+        @{ ErrorCode = '0x80070027' }
+    ) {
+        $script:DriverDiskFullCode = $ErrorCode
+        Mock Start-VMConfirmed -ModuleName AmisAd.Lab -MockWith {
+            @{ started = $false; reason = 'VMRS volume full'; kind = 'none'; errorCode = $script:DriverDiskFullCode }
+        }
+        $result = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -Confirm:$false
+        $result.Ok | Should -BeFalse
+        $result.State['amisad-edge-a'].Attempts | Should -Be 1
+        $result.State['amisad-edge-a'].errorCode | Should -Be $ErrorCode
+        $result.State['amisad-edge-b'].Attempts | Should -Be 0
+        Should -Invoke Start-VMConfirmed -ModuleName AmisAd.Lab -Times 1 -Exactly
+        Should -Invoke Start-Sleep -ModuleName AmisAd.Lab -Times 0 -Exactly
+    }
+
+    It 'stops after a storage refusal and preserves its evidence without blind retries' {
+        Mock Start-VMConfirmed -ModuleName AmisAd.Lab -MockWith {
+            @{ started = $false; reason = 'VMRS volume full'; kind = 'storage-capacity'; errorCode = '0x80070070';
+               vmName = 'amisad-edge-a'; hostStorage = @{ status = 'insufficient'; freeBytes = 1GB } }
+        }
+        $result = Start-AmisAdEdge -LogRoot $script:Logs -ReadyTimeoutSeconds 0 -Confirm:$false
+        $result.Ok | Should -BeFalse
+        $result.State['amisad-edge-a'].Attempts | Should -Be 1
+        $result.State['amisad-edge-a'].hostStorage.freeBytes | Should -Be 1GB
+        $result.State['amisad-edge-b'].Attempts | Should -Be 0
+        Should -Invoke Start-VMConfirmed -ModuleName AmisAd.Lab -Times 1 -Exactly
+        Should -Invoke Start-Sleep -ModuleName AmisAd.Lab -Times 0 -Exactly
+        $failure = Get-AmisAdEdgeFailure -EdgeStartup $result
+        $failure.FailureClass | Should -Be 'provisioning_failure'
+        $failure.DependencyFailures[0].errorCode | Should -Be '0x80070070'
+        $failure.DependencyFailures[0].hostStorage.freeBytes | Should -Be 1GB
+    }
+
     BeforeEach {
         $script:EdgeTrace = [System.Collections.Generic.List[string]]::new()
         Mock Start-VMConfirmed -ModuleName AmisAd.Lab -MockWith {
@@ -377,8 +441,8 @@ Describe 'AmisAd lab failure record' {
         @'
 function Write-CycleInfraFailure {
     param([string]$Stage, [string]$FailureClass, [string]$Severity, [string]$GuestKey, [string]$VMName, [string]$ErrorMessage, [string]$HostType, [hashtable]$HostMemory, [hashtable[]]$DependencyFailures = @())
-    $captured = @{ Stage = $Stage; FailureClass = $FailureClass; Severity = $Severity; GuestKey = $GuestKey; ErrorMessage = $ErrorMessage; HostType = $HostType; DependencyFailures = @($DependencyFailures) }
-    $captured | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $env:YURUNA_LOG_DIR 'captured.json')
+    $captured = @{ Stage = $Stage; FailureClass = $FailureClass; Severity = $Severity; GuestKey = $GuestKey; VMName = $VMName; HostMemory = $HostMemory; ErrorMessage = $ErrorMessage; HostType = $HostType; DependencyFailures = @($DependencyFailures) }
+    $captured | ConvertTo-Json -Depth 15 | Set-Content -LiteralPath (Join-Path $env:YURUNA_LOG_DIR 'captured.json')
 }
 Export-ModuleMember -Function Write-CycleInfraFailure
 '@ | Set-Content -LiteralPath (Join-Path $modulesDir 'Test.RunnerInnerLoop.psm1')
@@ -414,12 +478,184 @@ Export-ModuleMember -Function Write-CycleInfraFailure
         $written | Should -BeFalse
     }
 
+    It 'preserves storage evidence with a public writer that has no HostStorage parameter' {
+        $env:YURUNA_LOG_DIR = Join-Path $TestDrive 'storage-record-log'
+        New-Item -ItemType Directory -Path $env:YURUNA_LOG_DIR -Force | Out-Null
+        $startup = @{ kind = 'storage-capacity'; errorCode = '0x80070070'; hostStorage = @{ freeBytes = 9GB; requiredBytes = 12GB };
+                      hostMemory = @{ availableBytes = 24GB } }
+        Write-AmisAdLabFailure -YurunaRoot $script:RecordFramework -HostType 'host.windows.hyper-v' -Stage 'Start-AmisAdCore' `
+            -FailureClass 'provisioning_failure' -ErrorMessage 'VMRS volume full' -VMName 'amisad-core' -StartupFailure $startup | Should -BeTrue
+        $captured = Get-Content -Raw -LiteralPath (Join-Path $env:YURUNA_LOG_DIR 'captured.json') | ConvertFrom-Json
+        $captured.VMName | Should -Be 'amisad-core'
+        $captured.Severity | Should -Be 'hard'
+        $captured.FailureClass | Should -Be 'provisioning_failure'
+        $captured.HostMemory.availableBytes | Should -Be 24GB
+        $captured.DependencyFailures[0].hostStorage.freeBytes | Should -Be 9GB
+        $captured.DependencyFailures[0].errorCode | Should -Be '0x80070070'
+    }
+
     It 'never fails the stage when the framework writer is missing' {
         $env:YURUNA_LOG_DIR = Join-Path $TestDrive 'record-log-missing'
         New-Item -ItemType Directory -Path $env:YURUNA_LOG_DIR -Force | Out-Null
         $written = Write-AmisAdLabFailure -YurunaRoot (Join-Path $TestDrive 'no-such-framework') -HostType 'host.macos.utm' -Stage 'Start-AmisAdEdge' `
             -FailureClass 'provisioning_failure' -ErrorMessage 'no framework'
         $written | Should -BeFalse
+    }
+}
+
+Describe 'AmisAd topology storage admission' {
+    BeforeEach {
+        $script:StorageDir = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        Mock Write-AmisAdLabFailure -ModuleName AmisAd.Lab -MockWith { $true }
+    }
+    AfterEach {
+        if (Get-Command Test-VMStorageCapacity -CommandType Function -ErrorAction SilentlyContinue) {
+            Remove-Item -Path 'function:Test-VMStorageCapacity' -Force
+        }
+    }
+
+    It 'records unavailable evidence and remains compatible with a public driver lacking the optional helper' {
+        $result = Test-AmisAdStorageAdmission -YurunaRoot $script:FixtureRoot -HostType 'host.windows.hyper-v' -LogDir $script:StorageDir -Stage 'BeforeProvisioning' -IncludeDiskGrowth
+        $result.allowed | Should -BeTrue
+        $result.status | Should -Be 'unknown'
+        $result.reason | Should -Match 'unavailable'
+        $record = Get-Content -LiteralPath (Join-Path $script:StorageDir 'storage-admission.BeforeProvisioning.json') -Raw | ConvertFrom-Json
+        $record.status | Should -Be 'unknown'
+        Should -Invoke Write-AmisAdLabFailure -ModuleName AmisAd.Lab -Times 0 -Exactly
+    }
+
+    It 'checks the declared concurrent runtime plus explicit growth before provisioning and refuses a known shortage' {
+        Set-Item -Path 'function:global:Test-VMStorageCapacity' -Value {
+            param([string[]]$VMName, [hashtable]$StartupMemoryBytes, [hashtable]$AdditionalStorageBytes, [long]$ReserveBytes, [long]$ProvisioningMemoryBytes)
+            $script:CapacityArgs = @{ VMName = $VMName; Memory = $StartupMemoryBytes; Growth = $AdditionalStorageBytes; Reserve = $ReserveBytes; Provisioning = $ProvisioningMemoryBytes }
+            return @{ allowed = $false; status = 'insufficient'; reason = 'C: needs 86 GiB, 56 GiB available'; volumes = @(@{ volume = 'C:'; freeBytes = 56GB }) }
+        }
+        $result = Test-AmisAdStorageAdmission -YurunaRoot $script:FixtureRoot -HostType 'host.windows.hyper-v' -LogDir $script:StorageDir -Stage 'BeforeProvisioning' -IncludeDiskGrowth
+        $result.allowed | Should -BeFalse
+        @($script:CapacityArgs.VMName).Count | Should -Be 4
+        ($script:CapacityArgs.Memory.Values | Measure-Object -Sum).Sum | Should -Be 20GB
+        ($script:CapacityArgs.Growth.Values | Measure-Object -Sum).Sum | Should -Be 64GB
+        $script:CapacityArgs.Memory['amisad-build'] | Should -Be 0
+        $script:CapacityArgs.Reserve | Should -Be 2GB
+        $script:CapacityArgs.Provisioning | Should -Be 12GB
+        Should -Invoke Write-AmisAdLabFailure -ModuleName AmisAd.Lab -Times 1 -Exactly -ParameterFilter {
+            $Stage -eq 'StorageAdmission-BeforeProvisioning' -and $FailureClass -eq 'provisioning_failure' -and $StartupFailure.hostStorage.status -eq 'insufficient'
+        }
+    }
+
+    It 'rechecks final starts without charging the already provisioned disk growth again' {
+        Set-Item -Path 'function:global:Test-VMStorageCapacity' -Value {
+            param([string[]]$VMName, [hashtable]$StartupMemoryBytes, [hashtable]$AdditionalStorageBytes, [long]$ReserveBytes)
+            $script:CapacityArgs = @{ VMName = $VMName; Memory = $StartupMemoryBytes; Growth = $AdditionalStorageBytes; Reserve = $ReserveBytes }
+            return @{ allowed = $true; status = 'ready'; reason = '' }
+        }
+        $result = Test-AmisAdStorageAdmission -YurunaRoot $script:FixtureRoot -HostType 'host.windows.hyper-v' -LogDir $script:StorageDir -Stage 'BeforeStart'
+        $result.allowed | Should -BeTrue
+        @($script:CapacityArgs.VMName).Count | Should -Be 3
+        $script:CapacityArgs.VMName | Should -Not -Contain 'amisad-build'
+        ($script:CapacityArgs.Memory.Values | Measure-Object -Sum).Sum | Should -Be 20GB
+        $script:CapacityArgs.Growth.Count | Should -Be 0
+        Should -Invoke Write-AmisAdLabFailure -ModuleName AmisAd.Lab -Times 0 -Exactly
+    }
+}
+
+Describe 'AmisAd topology entry points' {
+    BeforeAll {
+        $script:EntryProject = Join-Path $TestDrive 'entry-project'
+        $script:EntryFramework = Join-Path $TestDrive 'entry-framework'
+        foreach ($directory in 'test', 'poc/build') { New-Item -ItemType Directory -Path (Join-Path $script:EntryProject $directory) -Force | Out-Null }
+        New-Item -ItemType Directory -Path (Join-Path $script:EntryFramework 'test') -Force | Out-Null
+        foreach ($file in 'Debug-TestSequence.ps1', 'Remove-TestVMFiles.ps1') { Set-Content -LiteralPath (Join-Path $script:EntryFramework "test/$file") -Value '# fixture' }
+        foreach ($file in 'test/Initialize-Lab.ps1', 'poc/build/run-tests.ps1') { Copy-Item -LiteralPath (Join-Path $script:RepoRoot $file) -Destination (Join-Path $script:EntryProject $file) }
+        @'
+function Resolve-YurunaRoot { param($Explicit) return $Explicit }
+function Initialize-AmisAdHost { param($YurunaRoot) return 'host.windows.hyper-v' }
+function Test-HostRequirement { param($HostType) return $true }
+'@ | Set-Content -LiteralPath (Join-Path $script:EntryProject 'test/AmisAd.HostCommon.ps1')
+        @'
+function Resolve-StashService { param($YurunaRoot, $Pin) return @{ Address = '192.0.2.1'; Lines = @() } }
+Export-ModuleMember -Function Resolve-StashService
+'@ | Set-Content -LiteralPath (Join-Path $script:EntryProject 'test/AmisAd.StashService.psm1')
+        @'
+function Add-Trace { param($Text) Add-Content -LiteralPath $env:AMISAD_FIXTURE_TRACE -Value $Text }
+function Test-AmisAdStorageAdmission {
+    param($YurunaRoot, $HostType, $LogDir, $Stage, [switch]$IncludeDiskGrowth)
+    Add-Trace "admission:$Stage"
+    return @{ allowed = $env:AMISAD_FIXTURE_BLOCK -ne $Stage; reason = 'fixture capacity shortage' }
+}
+function Invoke-AmisAdStage { param($Name) Add-Trace "stage:$Name"; return 0 }
+function Invoke-AmisAdCleanup { return 0 }
+function Stop-LabConsole { }
+function Remove-LegacyDemoKey { }
+function Stop-VMForce { return $true }
+function Remove-InstallMedia { }
+function Set-EdgeMemory { }
+function Get-VMState { return 'stopped' }
+function Start-AmisAdEdge {
+    Add-Trace 'start:edges'
+    return @{ Ok = $true; Lines = @(); Address = @{}; ReportedAt = @{} }
+}
+function Sync-AmisAdDemoKey {
+    Add-Trace 'start:core'
+    return @{ Ok = $false; Lines = @(); Stage = 'Start-AmisAdCore'; FailureClass = 'provisioning_failure'; VMName = 'amisad-core';
+              Reason = 'amisad-core did not start: VMRS volume full'; StartupFailure = @{ errorCode = '0x80070070'; hostStorage = @{ freeBytes = 9GB } } }
+}
+function Save-AmisAdEdgeAddressEvidence {
+    param($EdgeVm, $EdgeAddress, $ReportedAt, $LogDir, $AdditionalVm)
+    Add-Trace "diagnostics:$AdditionalVm"
+    return @{ Lines = @(); Written = $true }
+}
+function Write-AmisAdLabFailure {
+    param($YurunaRoot, $HostType, $Stage, $FailureClass, $ErrorMessage, $VMName, $StartupFailure)
+    @{ Stage = $Stage; VMName = $VMName; StartupFailure = $StartupFailure } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath "$env:AMISAD_FIXTURE_TRACE.json"
+    return $true
+}
+Export-ModuleMember -Function *
+'@ | Set-Content -LiteralPath (Join-Path $script:EntryProject 'test/AmisAd.Lab.psm1')
+        $script:SavedFixtureTrace = $env:AMISAD_FIXTURE_TRACE
+        $script:SavedFixtureBlock = $env:AMISAD_FIXTURE_BLOCK
+    }
+    AfterAll {
+        $env:AMISAD_FIXTURE_TRACE = $script:SavedFixtureTrace
+        $env:AMISAD_FIXTURE_BLOCK = $script:SavedFixtureBlock
+    }
+
+    It '<Entry> stops at <Gate> before the next VM operation' -TestCases @(
+        @{ Entry = 'test/Initialize-Lab.ps1'; Gate = 'BeforeProvisioning'; Stages = 0 }
+        @{ Entry = 'test/Initialize-Lab.ps1'; Gate = 'BeforeStart'; Stages = 4 }
+        @{ Entry = 'poc/build/run-tests.ps1'; Gate = 'BeforeProvisioning'; Stages = 0 }
+        @{ Entry = 'poc/build/run-tests.ps1'; Gate = 'BeforeStart'; Stages = 4 }
+    ) {
+        param($Entry, $Gate, $Stages)
+        $env:AMISAD_FIXTURE_TRACE = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $env:AMISAD_FIXTURE_BLOCK = $Gate
+        $arguments = @('-YurunaRoot', $script:EntryFramework, '-LogDir', $script:Logs)
+        Invoke-AmisAdScript -ScriptPath (Join-Path $script:EntryProject $Entry) -ScriptArguments $arguments `
+            -OutputPath "$env:AMISAD_FIXTURE_TRACE.out" -ErrorPath "$env:AMISAD_FIXTURE_TRACE.err" | Should -Be 1
+        $trace = @(Get-Content -LiteralPath $env:AMISAD_FIXTURE_TRACE)
+        $trace | Should -Contain "admission:$Gate"
+        @($trace | Where-Object { $_ -like 'stage:*' }).Count | Should -Be $Stages
+        @($trace | Where-Object { $_ -like 'start:*' }).Count | Should -Be 0
+    }
+
+    It '<Entry> records the core startup cause and captures the failed core' -TestCases @(
+        @{ Entry = 'test/Initialize-Lab.ps1' }
+        @{ Entry = 'poc/build/run-tests.ps1' }
+    ) {
+        param($Entry)
+        $env:AMISAD_FIXTURE_TRACE = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $env:AMISAD_FIXTURE_BLOCK = ''
+        $arguments = @('-YurunaRoot', $script:EntryFramework, '-LogDir', $script:Logs)
+        Invoke-AmisAdScript -ScriptPath (Join-Path $script:EntryProject $Entry) -ScriptArguments $arguments `
+            -OutputPath "$env:AMISAD_FIXTURE_TRACE.out" -ErrorPath "$env:AMISAD_FIXTURE_TRACE.err" | Should -Be 1
+        $record = Get-Content -LiteralPath "$env:AMISAD_FIXTURE_TRACE.json" -Raw | ConvertFrom-Json
+        $record.Stage | Should -Be 'Start-AmisAdCore'
+        $record.VMName | Should -Be 'amisad-core'
+        $record.StartupFailure.errorCode | Should -Be '0x80070070'
+        @(Get-Content -LiteralPath $env:AMISAD_FIXTURE_TRACE) | Should -Contain 'diagnostics:amisad-core'
+        $errorText = Get-Content -LiteralPath "$env:AMISAD_FIXTURE_TRACE.err" -Raw
+        $errorText | Should -Match 'VMRS volume full'
+        $errorText | Should -Not -Match 'do not trust'
     }
 }
 
@@ -911,6 +1147,22 @@ Export-ModuleMember -Function Get-VMState, Start-VM, Set-KeyFixtureState
             (Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -InvokeGuest $script:Guest -PollSeconds 0 -ReadySeconds 5 -Confirm:$false).Ok | Should -BeTrue
         }
 
+        It 'reports the core startup stage and evidence before any guest or key operation' {
+            Set-KeyFixtureState -State 'off'
+            Mock Start-VMConfirmed -ModuleName AmisAd.Lab -MockWith {
+                @{ started = $false; reason = 'VMRS volume full'; vmName = 'amisad-core'; kind = 'storage-capacity';
+                   errorCode = '0x80070070'; hostStorage = @{ status = 'insufficient'; freeBytes = 9GB } }
+            }
+            $result = Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -InvokeGuest $script:Guest -Confirm:$false
+            $result.Ok | Should -BeFalse
+            $result.Stage | Should -Be 'Start-AmisAdCore'
+            $result.VMName | Should -Be 'amisad-core'
+            $result.StartupFailure.errorCode | Should -Be '0x80070070'
+            $result.StartupFailure.hostStorage.freeBytes | Should -Be 9GB
+            ($result.Lines -join "`n") | Should -Not -Match 'key hand-off failed|do not trust'
+            $script:Calls.Count | Should -Be 0
+        }
+
         It 'fails when the core never answers SSH' {
             $script:Answers['probe'] = @{ success = $false; exitCode = 255; output = 'connection timed out' }
             $result = Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -InvokeGuest $script:Guest -PollSeconds 0 -ReadySeconds 0 -Confirm:$false
@@ -1060,7 +1312,7 @@ Describe 'AmisAd edge address evidence' {
         $a.discoveredAddress | Should -BeNullOrEmpty
         $a.networkStateSaved | Should -BeTrue
         ($record.edges | Where-Object vm -eq 'amisad-edge-b').discoveredAddress | Should -Be '192.168.7.162'
-        $script:AmisAdNetworkCaptures | Should -Be @("amisad-edge-a|$($script:EvidenceDir)", "amisad-edge-b|$($script:EvidenceDir)")
+        $script:AmisAdNetworkCaptures | Should -Be @("amisad-edge-a|$(Join-Path $script:EvidenceDir 'amisad-edge-a')", "amisad-edge-b|$(Join-Path $script:EvidenceDir 'amisad-edge-b')")
         ($result.Lines -join "`n") | Should -Match 'amisad-edge-a: reported 192\.168\.7\.161; discovery now returns nothing'
     }
 
@@ -1071,6 +1323,21 @@ Describe 'AmisAd edge address evidence' {
         $a = (Get-Content -LiteralPath $result.Path -Raw | ConvertFrom-Json).edges[0]
         $a.discoveryError | Should -Match 'WMI query timed out'
         $a.networkStateSaved | Should -BeNullOrEmpty -Because 'a host whose driver has no capture verb records none'
+    }
+
+    It 'keeps both edge snapshots and the failed core snapshot on disk' {
+        Set-Item -Path 'function:global:Save-VMNetworkState' -Value {
+            param([string]$VMName, [string]$OutputDirectory)
+            New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
+            @{ vmName = $VMName } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $OutputDirectory 'vm-network.state.json')
+            return $true
+        }
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-a', 'amisad-edge-b' -AdditionalVm 'amisad-core' -LogDir $script:EvidenceDir
+        $result.Written | Should -BeTrue
+        foreach ($vm in 'amisad-edge-a', 'amisad-edge-b', 'amisad-core') {
+            $record = Get-Content -LiteralPath (Join-Path $script:EvidenceDir "$vm/vm-network.state.json") -Raw | ConvertFrom-Json
+            $record.vmName | Should -Be $vm
+        }
     }
 }
 

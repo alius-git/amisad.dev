@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "hostType": "host.windows.hyper-v",
+  "reserveBytes": 2147483648,
+  "provisioningMemoryBytes": 12884901888,
+  "virtualMachines": [
+    { "name": "amisad-core", "startupMemoryBytes": 12884901888, "additionalStorageBytes": 17179869184 },
+    { "name": "amisad-edge-a", "startupMemoryBytes": 4294967296, "additionalStorageBytes": 17179869184 },
+    { "name": "amisad-edge-b", "startupMemoryBytes": 4294967296, "additionalStorageBytes": 17179869184 },
+    { "name": "amisad-build", "startupMemoryBytes": 0, "additionalStorageBytes": 17179869184 }
+  ]
+}
