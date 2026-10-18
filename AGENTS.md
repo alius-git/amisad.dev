@@ -107,6 +107,29 @@ Watch for scope expansion, premature abstraction, missing failure paths and
 refactors that spread into unrelated files. When these appear, reassess the
 approach instead of continuing to broaden the change.
 
+## Preserve operator configuration
+
+A tool that rewrites a configuration file the operator owns, such as a test
+configuration refreshed from its template or a setting an installer fills in,
+keeps every value the operator set. A built-in default fills only an absent or
+blank key and never replaces a value already present. Only a value the
+operator supplied for that run replaces an existing one.
+
+- Report every replaced value as `key: previous -> new`, never as the new
+  value alone, and before the file is written. A line that names only the new
+  value reads as confirmation to the operator whose value was just lost, and
+  later runs then exercise the wrong target while every check stays green,
+  because telemetry agrees with the configuration it was handed.
+- Keep the previous value recoverable, through a backup or the reported line,
+  and say where it is.
+- Printing the resolved configuration at run start does not satisfy this rule;
+  the comparison the operator needs is against the previous file.
+- Every code path that writes such a file has a regression test that seeds a
+  non-default operator value (for example a `file:///` project URL), re-runs
+  the path with the built-in default and proves the value survived unchanged
+  on disk. A path that may replace a value also proves the `previous -> new`
+  report.
+
 ## Preserve standalone execution contracts
 
 When a script is designed to run as a single downloaded or copied file, keep
