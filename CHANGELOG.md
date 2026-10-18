@@ -9,6 +9,12 @@ Versions track the framework release the material was last exercised against,
 not an independent release line -- the POC is only meaningful paired with a
 framework that can deploy it.
 
+## 2026.10.18.2
+
+- Lab provisioning checks storage capacity before creating or starting VMs and
+  preserves per-VM startup evidence. Disk-full failures stop without resource
+  retries and retain their original error codes and failure stage.
+
 ## 2026.10.18.1
 
 - Core deployment imports the ten service images in one archive, sharing their
