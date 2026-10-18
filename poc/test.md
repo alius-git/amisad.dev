@@ -393,7 +393,7 @@ current-boot Flannel evidence, proxy bypass, retry recovery, and failures before
 Helm can deploy an image that was not imported. Readiness still requires every
 deployment rollout and all ten NodePorts; each startup or HTTP gate keeps its
 300-second allowance. The repository's `test/AmisAd.Regression.Tests.ps1` gate also
-runs all three suites. They require Python 3 and usable Bash; a bounded private
+runs all four suites. They require Python 3 and usable Bash; a bounded private
 filesystem probe skips absent or incompatible shell launchers. The probe checks
 paths with spaces, extensionless command fixtures, and the required POSIX tools.
 Real HTTP cases also require
