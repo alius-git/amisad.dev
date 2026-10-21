@@ -22,6 +22,12 @@ the task changes only one repository. Discover the repositories from the active
 workspace instead of assuming a fixed list or directory layout. Do not start
 changes anywhere until synchronization has succeeded everywhere.
 
+A nested checkout at `project/` inside a workspace-root repository is excluded
+from this preflight unless the task explicitly targets it. Leave an excluded
+checkout untouched; its branch, upstream, or working-tree state does not block
+changes elsewhere, and no operator confirmation is required for this exclusion.
+This exception does not apply to a repository that is itself a workspace root.
+
 1. Inspect each checkout's branch, upstream and `git status --short --branch`.
    Stay on its current branch. If any checkout has uncommitted work, an
    unfinished merge/rebase, no upstream or a detached HEAD, stop and ask the
