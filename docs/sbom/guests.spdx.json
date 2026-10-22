@@ -26,7 +26,7 @@
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
       "comment": "Declared guests inventory; source-inputs SHA256 d0664a454611d7f6b4672df1f8d1f2d3c88c423572d352c7ee7d511e0310a757. Not an installed-system scan.",
-      "versionInfo": "2026.10.24"
+      "versionInfo": "2026.10.21"
     },
     {
       "name": "build-essential",
