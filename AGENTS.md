@@ -200,7 +200,11 @@ For code changes, run relevant checks during development and the complete
 existing Pester suites required by the affected repositories before declaring
 the work ready, committing or pushing. Include workspace suites that exercise
 changed shared behavior. Use the documented runners and required Pester
-versions; a focused test run alone is not evidence that all tests pass.
+versions; a focused test run alone is not evidence that all tests pass. A
+complete run may count a suite's recorded pass instead of running it again only
+when the documented runner proves that the suite's inputs, toolchain and
+environment are unchanged since that pass; report how many suites it reused. A
+release runs every suite again and reuses no recorded pass.
 
 Never delete or weaken assertions, lower coverage baselines, disable gates or
 add skips just to obtain a passing result. Preserve documented platform skips;

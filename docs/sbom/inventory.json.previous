@@ -2,11 +2,11 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "86a13b4531eb1a62dcd9f737d07d17701311d194c05050365034b13a2b09007a",
+  "sourceInputsSha256": "d0664a454611d7f6b4672df1f8d1f2d3c88c423572d352c7ee7d511e0310a757",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
-    "AGENTS.md": "43c3e50bb4b78d78446ddf45ac3cf220c1869ac489d6ac800f99cc95092f093d",
+    "AGENTS.md": "4188a0578f6397b106f03cd43aa82200fdaec832c9ea67abafa7f26da2abf9d4",
     "CHANGELOG.md": "e64b7d925881fbeec109953927b3287e6cf63e51fc06bf47095aa4bcc3cff8dc",
     "CLAUDE.md": "cf5bfc36262f054c8c51d4170a9052be7e931fbb199eb38c21689c9f93268c00",
     "LICENSE": "fd07c3e2ae68a723e589adab773e60aa945e55c6fbd5b8ebb64fc11c158db463",
