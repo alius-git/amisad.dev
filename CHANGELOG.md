@@ -9,9 +9,9 @@ Versions track the framework release the material was last exercised against,
 not an independent release line -- the POC is only meaningful paired with a
 framework that can deploy it.
 
-## 2026.10.21
+## 2026.10.22
 
-- Align script versions and generated inventories with Yuruna `2026.10.21`.
+- Align script versions and generated inventories with Yuruna `2026.10.22`.
 
 ## 2026.10.18.2
 
