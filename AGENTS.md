@@ -98,6 +98,17 @@ and tradeoffs, and give a brief plan for multi-step work. Ask for a human
 decision when requirements, scope or architectural intent are unclear rather
 than inventing an answer.
 
+## Do not invent requirements
+
+Implement what the operator asked for. Do not add a new mandatory step,
+precondition, prepared artifact, qualification, approval or gate to an existing
+workflow (building, testing, releasing, publishing, installing or provisioning)
+unless the operator explicitly requested it. A design document, plan or review
+finding that describes such a requirement does not approve enforcing it, and
+work the operator deferred must not become a blocker. When a change seems to
+need a new requirement, propose it with its reason and wait for clear approval
+before implementing it.
+
 ## Keep changes simple and focused
 
 Write the smallest clear change that solves the requested problem. Preserve
