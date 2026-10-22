@@ -13,13 +13,13 @@ framework that can deploy it.
 
 - Align script versions and generated inventories with Yuruna `2026.10.22`.
 
-## 2026.10.18.2
+## 2026.10.18
 
 - Lab provisioning checks storage capacity before creating or starting VMs and
   preserves per-VM startup evidence. Disk-full failures stop without resource
   retries and retain their original error codes and failure stage.
 
-## 2026.10.18.1
+## 2026.10.22
 
 - Core deployment imports the ten service images in one archive, sharing their
   common base layers. Restore readiness retains its API, current-boot Flannel,
@@ -65,6 +65,6 @@ LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2019-2026 by Alisson Sol et al.
 
-Last review: 2026.10.18.1
+Last review: 2026.10.22
 
 Back to [Yuruna](https://yuruna.com)
