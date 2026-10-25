@@ -44,9 +44,16 @@ either demo, so the two behave identically:
   `GetContext`, which would leave a server killable only by closing the
   terminal.
 - **They gate the vault passwords per client, not per binding.** `/api/personas`
-  serves real persona passwords to loopback requests -- the host's own browser --
-  and `<withheld: remote viewer>` to everyone else. `-SharePersonaPasswords`
-  opts in for remote viewers, on a trusted network.
+  serves real persona passwords to loopback requests that name the host by a
+  loopback name -- the host's own browser -- and `<withheld: remote viewer>` to
+  everyone else. `-SharePersonaPasswords` opts in for remote viewers, on a
+  trusted network.
+- **They answer only to this machine's names.** A request whose `Host` is not
+  `localhost`, a loopback or local address, the machine name or the bind address
+  is refused (421), so a page on another site that makes its own name resolve
+  here (DNS rebinding) never reaches a route. A request that changes demo state
+  (anything but a GET) from a page of another origin is refused (403), and
+  resetting the journal takes a POST.
 
 Shared parameters: `-Port`, `-YurunaRoot`, `-CoreIp`, `-EdgeAIp`, `-EdgeBIp`,
 `-BindAddress`, `-SharePersonaPasswords`, `-SkipFirewall`.

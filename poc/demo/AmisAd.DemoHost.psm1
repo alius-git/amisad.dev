@@ -415,13 +415,66 @@ function Get-PersonaSecret {
 function Test-LoopbackClient($Request) {
     <#
     .SYNOPSIS
-    Whether a request arrived from this machine, so loopback-only routes can refuse the rest.
+    Whether a request arrived from this machine, addressed to it by a loopback
+    name, so loopback-only routes can refuse the rest.
+    .DESCRIPTION
+    A page on another site can have its own host name resolve to 127.0.0.1
+    (DNS rebinding): its requests then arrive from a loopback peer but name
+    that site in Host, so the peer alone does not prove a local caller.
     #>
     $addr = $Request.RemoteEndPoint.Address
     # A dual-stack listener reports IPv4 peers as ::ffff:127.0.0.1, which
     # IsLoopback does not recognize in its mapped form.
     if ($addr.IsIPv4MappedToIPv6) { $addr = $addr.MapToIPv4() }
-    return [System.Net.IPAddress]::IsLoopback($addr)
+    if (-not [System.Net.IPAddress]::IsLoopback($addr)) { return $false }
+    $name = [string]$Request.Url.DnsSafeHost
+    $literal = $null
+    return ($name -eq 'localhost' -or ([System.Net.IPAddress]::TryParse($name, [ref]$literal) -and [System.Net.IPAddress]::IsLoopback($literal)))
+}
+
+# --- REGION: Test-DemoRequestHost
+function Test-DemoRequestHost {
+    <#
+    .SYNOPSIS
+    Whether a request names this machine in its Host header.
+    .DESCRIPTION
+    The demo answers to loopback names, to this machine's own addresses and
+    name, and to the address it was bound to. Any other name is a page on
+    another site whose name was made to resolve here (DNS rebinding), and is
+    refused before a route runs.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param([Parameter(Mandatory)]$Request, [string]$BindAddress = 'any')
+    $name = [string]$Request.Url.DnsSafeHost
+    if (-not $name) { return $false }
+    if ($name -eq 'localhost' -or $name -eq [Environment]::MachineName -or $name -eq $BindAddress) { return $true }
+    $literal = $null
+    if ([System.Net.IPAddress]::TryParse($name, [ref]$literal)) {
+        if ([System.Net.IPAddress]::IsLoopback($literal)) { return $true }
+        return ($name -in @(Get-DemoHostIpList))
+    }
+    return $false
+}
+
+# --- REGION: Test-DemoSameOrigin
+function Test-DemoSameOrigin {
+    <#
+    .SYNOPSIS
+    Whether a request that changes demo state may come from where it came.
+    .DESCRIPTION
+    Browsers send Origin on every cross-origin request that is not a GET, a
+    plain form post or a no-cors fetch included, so a request from another
+    page names that page here and is refused. The demo's own pages send their
+    own origin, and a client that is not a browser sends none.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param([Parameter(Mandatory)]$Request)
+    $origin = [string]$Request.Headers['Origin']
+    if (-not $origin) { return $true }
+    $own = '{0}://{1}' -f $Request.Url.Scheme, $Request.Url.Authority
+    return [string]::Equals($origin.TrimEnd('/'), $own, [StringComparison]::OrdinalIgnoreCase)
 }
 
 # --- REGION: Write-Body
@@ -450,4 +503,4 @@ function Write-Json($Response, [int]$Status, $Object, [int]$Depth = 8) {
 
 Export-ModuleMember -Function Get-DemoHostIp, Get-DemoHostIpList, Test-DemoAdministrator,
     Add-DemoFirewallRule, New-DemoListener, Enable-DemoStopKey, Disable-DemoStopKey, Test-DemoStopKey, `
-    Resolve-VmIp, Get-PersonaSecret, Test-LoopbackClient, Write-Body, Write-Json
+    Resolve-VmIp, Get-PersonaSecret, Test-LoopbackClient, Test-DemoRequestHost, Test-DemoSameOrigin, Write-Body, Write-Json

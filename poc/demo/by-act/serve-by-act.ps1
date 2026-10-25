@@ -186,7 +186,11 @@ try {
         $res = $ctx.Response
         try {
             $path = $req.Url.AbsolutePath
-            if ($path -eq '/api/personas') {
+            if (-not (Test-DemoRequestHost -Request $req -BindAddress $BindAddress)) {
+                Write-Json -Response $res -Status 421 -Object @{ error = 'this demo answers only to its own host names' }
+            } elseif ($req.HttpMethod -notin @('GET', 'HEAD') -and -not (Test-DemoSameOrigin -Request $req)) {
+                Write-Json -Response $res -Status 403 -Object @{ error = 'a page from another origin cannot change demo state' }
+            } elseif ($path -eq '/api/personas') {
                 if ($SharePersonaPasswords -or (Test-LoopbackClient $req)) {
                     Write-Json -Response $res -Status 200 -Object (Get-PersonaSecret -YurunaRoot $YurunaRoot -Usernames $personaUsers)
                 } else {

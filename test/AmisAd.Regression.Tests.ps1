@@ -768,6 +768,61 @@ Export-ModuleMember -Function Get-Password
     }
 }
 
+# A page on another site can make its own name resolve to 127.0.0.1 (DNS
+# rebinding); its requests then reach the demo from a loopback peer.
+Describe 'AmisAd demo requests name this machine' {
+    BeforeAll {
+        function New-DemoRequest {
+            [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',
+                Justification = 'Test helper: builds an in-memory request object; changes no system state.')]
+            [CmdletBinding()]
+            param([string]$Url, [string]$Peer = '127.0.0.1', [string]$Origin = '', [string]$Method = 'GET')
+            $headers = @{}
+            if ($Origin) { $headers['Origin'] = $Origin }
+            [pscustomobject]@{
+                Url = [Uri]$Url; HttpMethod = $Method; Headers = $headers
+                RemoteEndPoint = [System.Net.IPEndPoint]::new([System.Net.IPAddress]::Parse($Peer), 50000)
+            }
+        }
+    }
+    It 'answers <Url> with <Expected>' -TestCases @(
+        @{ Url = 'http://localhost:8080/'; Expected = $true }
+        @{ Url = 'http://127.0.0.1:8080/'; Expected = $true }
+        @{ Url = 'http://[::1]:8080/'; Expected = $true }
+        @{ Url = 'http://192.0.2.77:8080/'; Expected = $true; Bind = '192.0.2.77' }
+        @{ Url = 'http://attacker.example:8080/'; Expected = $false }
+    ) {
+        param($Url, $Expected, $Bind)
+        $bindAddress = if ($Bind) { $Bind } else { 'any' }
+        Test-DemoRequestHost -Request (New-DemoRequest -Url $Url) -BindAddress $bindAddress | Should -Be $Expected
+    }
+    It 'answers to this machine''s own name' {
+        Test-DemoRequestHost -Request (New-DemoRequest -Url ('http://' + [Environment]::MachineName + ':8080/')) | Should -BeTrue
+    }
+    It 'withholds loopback-only data from a rebound name, though the peer is loopback' {
+        Test-LoopbackClient (New-DemoRequest -Url 'http://localhost:8080/api/personas') | Should -BeTrue
+        Test-LoopbackClient (New-DemoRequest -Url 'http://attacker.example:8080/api/personas') | Should -BeFalse
+        Test-LoopbackClient (New-DemoRequest -Url 'http://localhost:8080/api/personas' -Peer '192.0.2.9') | Should -BeFalse
+    }
+    It 'lets only the demo''s own pages, or a client that names no origin, change state' {
+        Test-DemoSameOrigin -Request (New-DemoRequest -Url 'http://localhost:8080/api/journal' -Method POST) | Should -BeTrue
+        Test-DemoSameOrigin -Request (New-DemoRequest -Url 'http://localhost:8080/api/journal' -Method POST -Origin 'http://localhost:8080') | Should -BeTrue
+        Test-DemoSameOrigin -Request (New-DemoRequest -Url 'http://localhost:8080/api/journal' -Method POST -Origin 'https://attacker.example') | Should -BeFalse
+    }
+    It 'checks the host, then the origin, before any route in <Server>' -TestCases @(
+        @{ Server = 'poc/demo/data-view/serve-data-view.ps1' }, @{ Server = 'poc/demo/by-act/serve-by-act.ps1' }
+    ) {
+        param($Server)
+        $text = Get-Content -Raw -LiteralPath (Join-Path $script:RepoRoot $Server)
+        $hostCheck = $text.IndexOf('Test-DemoRequestHost -Request $req')
+        $originCheck = $text.IndexOf('Test-DemoSameOrigin -Request $req')
+        $firstRoute = $text.IndexOf("elseif (`$path -eq '/api/personas')")
+        $hostCheck | Should -BeGreaterThan 0
+        $originCheck | Should -BeGreaterThan $hostCheck
+        $firstRoute | Should -BeGreaterThan $originCheck
+    }
+}
+
 Describe 'AmisAd image failure propagation' {
     BeforeAll {
         $script:ImagesWrapper = Join-Path $script:FixtureRoot 'images-wrapper.ps1'
