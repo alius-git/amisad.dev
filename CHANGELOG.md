@@ -9,9 +9,9 @@ Versions track the framework release the material was last exercised against,
 not an independent release line -- the POC is only meaningful paired with a
 framework that can deploy it.
 
-## 2026.10.25
+## 2026.10.28
 
-- Align script versions and generated inventories with Yuruna `2026.10.25`.
+- Align script versions and generated inventories with Yuruna `2026.10.28`.
 
 ## 2026.10.18
 
@@ -19,7 +19,7 @@ framework that can deploy it.
   preserves per-VM startup evidence. Disk-full failures stop without resource
   retries and retain their original error codes and failure stage.
 
-## 2026.10.25
+## 2026.10.28
 
 - Core deployment imports the ten service images in one archive, sharing their
   common base layers. Restore readiness retains its API, current-boot Flannel,
@@ -65,6 +65,6 @@ LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2019-2026 by Alisson Sol et al.
 
-Last review: 2026.10.25
+Last review: 2026.10.28
 
 Back to [Yuruna](https://yuruna.com)
