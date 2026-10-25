@@ -369,12 +369,6 @@ foreign build.
    its status-server IP report (see the s004 script).
 4. Update [usernames.md](usernames.md) and this file if the pattern changes.
 
----
-
-LICENSEURI https://yuruna.link/license
-
-Copyright (c) 2026 by Alisson Sol et al.
-
 ## Focused recovery and packaging checks
 
 After `cargo build --workspace --locked`, run `python3 test/service_contracts.py`
@@ -427,3 +421,9 @@ Hebrew. Translations are machine drafts with source hashes in
 `messages.provenance.json`; `python3 test/check_messages.py` checks completeness,
 unused keys, and staleness. `node test/low_browser_contracts.cjs` tests the built SPA
 with Chrome; `PLAYWRIGHT_MODULE` and `CHROME_PATH` can override local tool paths.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 by Alisson Sol et al.

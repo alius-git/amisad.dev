@@ -14,9 +14,6 @@
 .PRIVATEDATA
 #>
 
-# LICENSEURI https://yuruna.link/license
-# Copyright (c) 2026 by Alisson Sol et al.
-
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSAvoidOverwritingBuiltInCmdlets', '', Justification = 'The contracts shadow Start-Process and Test-Path with recording doubles.')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = 'The doubles stand in for cmdlets and external tools and only record the call.')]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSReviewUnusedParameter', '', Justification = 'A double accepts the parameters of the command it replaces and ignores them.')]

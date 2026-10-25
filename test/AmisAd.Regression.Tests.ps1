@@ -69,6 +69,16 @@ Describe 'AmisAd guest deployment contracts' {
     }
 }
 
+Describe 'AmisAd build wrappers' {
+    It 'installs the web SPA from its lock file with dependency scripts disabled' {
+        $build = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'poc/components/apps/web-spa/build.sh')
+        $installs = @($build | Where-Object { $_ -match '^\s*npm\s+(install|i|ci)\b' })
+        $installs.Count | Should -Be 1
+        $installs[0] | Should -Match '^\s*npm ci\b' -Because 'npm install rewrites the lock when package.json disagrees'
+        $installs[0] | Should -Match '--ignore-scripts\b' -Because 'transitive lifecycle scripts would run on the build host'
+    }
+}
+
 Describe 'AmisAd child process boundaries' {
     BeforeAll {
         $script:Sweep = Join-Path $script:FixtureRoot 'sweep.ps1'

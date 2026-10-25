@@ -40,16 +40,18 @@ body {
   margin: 0 0.75rem 0.5rem 0;
 }
 
-/* The module header's link back home is the same kind of bare text link, so
-   it gets the same 44px minimum touch target. */
-.amisad-module header a {
+/* The module header's link back home, and the not-found page's, are the same
+   kind of bare text link, so they get the same 44px minimum touch target. */
+.amisad-module header a,
+.amisad-module > a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
 }
 
 .amisad-home nav a,
-.amisad-module header a {
+.amisad-module header a,
+.amisad-module > a {
   color: var(--amisad-terracotta);
   text-decoration: none;
   font-weight: 600;

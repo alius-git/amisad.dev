@@ -22,7 +22,7 @@ const MODULES = [
 function Home() {
   return (
     <div className="amisad-home">
-      <img src="/icon.svg" alt="AmisAd" width={64} height={64} />
+      <img src="/icon.svg" alt="" width={64} height={64} />
       <h1>AmisAd</h1>
       <p>POC skeleton - pick a workspace.</p>
       <nav>
@@ -39,7 +39,7 @@ function Home() {
 function NotFound() {
   const locale = (navigator.language || "en").split("-")[0];
   const text = notFoundMessages[locale] || notFoundMessages.en;
-  return <main lang={locale in notFoundMessages ? locale : "en"} dir={locale === "he" ? "rtl" : "ltr"}>
+  return <main className="amisad-module" lang={locale in notFoundMessages ? locale : "en"} dir={locale === "he" ? "rtl" : "ltr"}>
     <h1>{text.title}</h1><p>{text.description}</p><Link to="/">{text.home}</Link>
   </main>;
 }

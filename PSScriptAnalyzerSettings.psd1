@@ -35,5 +35,3 @@
         PSUseBOMForUnicodeEncodedFile = @{ Enable = $true }
     }
 }
-
-# Copyright (c) 2019-2026 by Alisson Sol et al.

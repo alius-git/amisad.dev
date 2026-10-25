@@ -24,6 +24,7 @@ body {
   font-family: "Segoe UI", system-ui, sans-serif;
   color: var(--ink);
   background: var(--paper);
+  -webkit-text-size-adjust: 100%;
 }
 header {
   display: flex;
@@ -32,11 +33,20 @@ header {
      scrollbar on the whole page rather than overflowing itself. */
   flex-wrap: wrap;
   padding: 0.55rem 1rem;
+  /* index.html declares viewport-fit=cover, so in landscape the page extends
+     under the notch; the inset has to be added on top of the base padding. */
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
   background: var(--amisad-navy);
   color: var(--amisad-white);
   position: sticky;
   top: 0;
   z-index: 5;
+}
+/* Wrapped onto several rows, a pinned header would hold a third of a phone
+   screen in either orientation, so there it scrolls away with the page. */
+@media (max-width: 700px), (max-height: 500px) {
+  header { position: static; }
 }
 header > * + * { margin-left: 0.75rem; }
 header h1 { font-size: 1.1rem; margin: 0 1rem 0 0; font-weight: 600; }
@@ -70,9 +80,13 @@ main {
   grid-gap: 1rem;
   gap: 1rem;
   padding: 1rem;
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
   align-items: start;
 }
-@media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+/* minmax(0, 1fr), not 1fr: a 1fr track never shrinks below its widest
+   unbreakable content, so one long token would widen the page past a phone. */
+@media (max-width: 1100px) { main { grid-template-columns: minmax(0, 1fr); } }
 
 .panel, .card {
   background: var(--card);

@@ -91,3 +91,9 @@ version before reporting success. Repeating an unchanged install does not restar
 an active matching service. Demo firewall helpers check native exit codes and
 elevation results; an existing Windows firewall rule does not skip the separate
 HTTP URL reservation. A failed operation returns false and logs a warning.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 by Alisson Sol et al.

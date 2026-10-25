@@ -391,12 +391,6 @@ de outra arquitetura.
    pelo relatório de IP enviado ao status-server (veja o script s004).
 4. Atualize [usernames.md](usernames.md) e este arquivo se o padrão mudar.
 
----
-
-LICENSEURI https://yuruna.link/license
-
-Copyright (c) 2026 by Alisson Sol et al.
-
 <a id="focused-recovery-and-packaging-checks"></a>
 
 ## Verificações específicas de recuperação e empacotamento
@@ -454,3 +448,9 @@ hebraico. As traduções são rascunhos de máquina com hashes da fonte em
 `messages.provenance.json`; `python3 test/check_messages.py` verifica a completude,
 as chaves não usadas e a desatualização. `node test/low_browser_contracts.cjs` testa a SPA compilada
 com o Chrome; `PLAYWRIGHT_MODULE` e `CHROME_PATH` podem substituir os caminhos das ferramentas locais.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 by Alisson Sol et al.

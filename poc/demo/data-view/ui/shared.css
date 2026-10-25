@@ -91,6 +91,18 @@ body {
 }
 .chip.bad { color: #ffb4a8; opacity: 1; }
 .chip.good { color: #9df5c8; opacity: 1; }
+/* A topology or consent chip can be wider than a phone (the core and edge
+   addresses alone run about 390px), and nowrap would then scroll the whole page
+   sideways. Safari before 15.4 ignores overflow-wrap: anywhere; the spaces in
+   the chip text still give it places to break. */
+@media (max-width: 600px) {
+  .chip { white-space: normal; overflow-wrap: anywhere; }
+}
+/* Wrapped onto several rows, a pinned bar would hold a third of a phone screen
+   in either orientation, so there it scrolls away with the page. */
+@media (max-width: 700px), (max-height: 500px) {
+  .bar { position: static; }
+}
 .bar a { color: var(--amisad-white); font-size: 0.8rem; display: inline-flex; align-items: center; min-height: 44px; }
 
 /* REGION: controls */

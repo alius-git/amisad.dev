@@ -9,6 +9,10 @@ else
     cd "$(dirname "$0")"
 fi
 
-npm install
+# Install exactly what package-lock.json records, and fail instead of rewriting
+# it when package.json disagrees. Dependency lifecycle scripts stay off: they are
+# the usual npm supply-chain vector, and the only package that declares one,
+# fsevents, is optional, macOS-only and unused by `vite build`.
+npm ci --ignore-scripts --no-audit --no-fund
 npm run build
 echo "web-spa build complete: dist/"
