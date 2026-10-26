@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42b2c21a-083d-4386-b042-8e818bbf8b18
 name: amisad_buyer
 description: AmisAd buyer app POC skeleton - offline-first vault, private matching.
 publish_to: "none"

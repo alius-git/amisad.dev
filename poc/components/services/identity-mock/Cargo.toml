@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42c52e65-be5f-47a8-8877-0567a038013f
 [package]
 name = "identity-mock"
 version = "0.1.0"

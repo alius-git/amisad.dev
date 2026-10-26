@@ -1,6 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42dec72c-56a0-4850-b10c-ab6a73851d50
 # AmisAd POC - install the build toolchains on the build VM:
 # rustup (pinned stable Rust), bazelisk (as /usr/local/bin/bazel), git, python3.
 # --- REGION: Initialize environment

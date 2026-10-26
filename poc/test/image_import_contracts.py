@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 426e4f25-bfa3-49ca-b407-28aaf02ecf58
 """Run the thin-image deployment region with private native command fixtures."""
 import os
 from pathlib import Path

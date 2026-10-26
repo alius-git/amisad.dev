@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 423fbf8e-4653-406c-af33-41dd135f8ae2
 -- AmisAd POC - s010.certification seed placeholder.
 -- NOTE: the live sequence seeds via the APIs; this scenario's real state is
 -- operational (support cases + disclosure artifacts in platform-svc;

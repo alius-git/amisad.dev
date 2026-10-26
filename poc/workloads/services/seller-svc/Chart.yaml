@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42e6c6d0-e7da-4df5-b555-f5c0648b6214
 apiVersion: v2
 name: seller-svc
 description: AmisAd POC skeleton chart for seller-svc

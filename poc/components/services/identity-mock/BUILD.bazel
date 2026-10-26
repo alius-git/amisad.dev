@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 4293d140-13c0-413f-88f3-727a2ba6fcf9
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 rust_binary(

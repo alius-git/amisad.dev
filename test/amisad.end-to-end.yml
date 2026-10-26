@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42e12e08-2154-4d94-bc8c-0b468677317c
 # yaml-language-server: $schema=../../yuruna/test/schemas/orchestration-sequence.schema.yml
 #
 # Orchestration sequence: InvokeTestSequence steps run under one status.json

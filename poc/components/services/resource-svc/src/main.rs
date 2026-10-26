@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42990467-4bd0-4417-8bd6-067247b5bd7b
 // AmisAd POC resource-svc: minimal carrier control plane. Registers edge
 // slice endpoints per region with capacity, answers placement requests -
 // DEFAULT allocation is capacity-greedy across ALL regions; a jurisdiction

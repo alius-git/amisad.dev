@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42240682-c787-42a0-bb7e-5f07d83a9b0d
 //! AmisAd POC shared plumbing, deliberately std-only (no third-party crates):
 //! a small HTTP server (`serve_app`) and client (`request`), a minimal JSON
 //! value type with parser and serializer (`json`), and SHA-256 (`sha256`) for

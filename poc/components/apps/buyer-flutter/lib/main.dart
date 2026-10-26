@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42b99bce-3cb7-4303-b6d5-2d5e0ad5c7b8
 // AmisAd buyer app - s001.fulfillment manual demo.
 // The needs-list screen drives the same APIs as the automated buyer-client:
 // obtain a token, submit the need as an opaque envelope, show the match, and

@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 422468b2-8abf-4c38-897d-0cda97e75b98
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/ads-svc/Dockerfile -t amisad/ads-svc .
 FROM rust:1.98-slim-bookworm AS build

@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 4266f734-f706-4d81-9768-9e7417c0e70d
 -- AmisAd POC - s008.mediation seed: Zero-Knowledge Dispute Mediation and
 -- Settlement Adjustment.
 -- NOTE: the live sequence seeds via the APIs. The dispute is operational -

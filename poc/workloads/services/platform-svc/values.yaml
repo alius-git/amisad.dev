@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 424e1cd8-44b9-4c10-b900-d75f983189f0
 namespace: amisad
 image: localhost:5000/amisad/platform-svc:latest
 port: 8080

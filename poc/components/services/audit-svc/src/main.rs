@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42aefdce-0ba0-40f1-b843-0d09e86de0c3
 // AmisAd POC audit-svc: independent certification of the full evidence trail
 // (s010.certification). Ingrid runs a certification that walks the ledger's
 // raw chain dumps and re-verifies FOUR dimensions itself - attestation

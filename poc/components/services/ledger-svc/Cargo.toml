@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 4212306c-2502-4721-bdb1-7f2bc5f94d2d
 [package]
 name = "ledger-svc"
 version = "0.1.0"

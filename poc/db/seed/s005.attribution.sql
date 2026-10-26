@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 4296bdf6-1196-47c8-b83d-e971a234390e
 -- AmisAd POC - s005.attribution seed: Campaign-Boosted Match, Edge Creative
 -- Serving, and Attribution Credit.
 -- NOTE: the live sequence seeds via the APIs. The ad economy is operational

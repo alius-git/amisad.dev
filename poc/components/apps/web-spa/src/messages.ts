@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2019-2026 by Alisson Sol et al.
+// GUID: 423d242b-3c48-4bc0-ad9a-7a849cb5afda
 // Translations are machine drafts; English is the source and fallback.
 export const notFoundMessages: Record<string, { title: string; description: string; home: string }> = {
   en: { title: "Page not found", description: "This page does not exist. Choose a workspace from the home page.", home: "Return home" },

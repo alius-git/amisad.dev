@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 42b1b810-dec7-4693-8e85-3d3fbdda0298
 -- AmisAd POC - s002.fitting seed: Elena's dress catalog (one dusty blue), a
 -- second seller's out-of-range/past-deadline dresses, and fitting slots.
 -- NOTE: the live sequence seeds via the seller-svc API, which WRITES THROUGH

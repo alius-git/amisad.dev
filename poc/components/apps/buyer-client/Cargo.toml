@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42273f07-7037-4c8f-87e5-724d1205e191
 [package]
 name = "buyer-client"
 version = "0.1.0"

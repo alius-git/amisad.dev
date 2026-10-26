@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 4288c23b-ac80-47d8-b84e-150d5c3e5056
 """Run the actual installer in a disposable filesystem with native command fixtures."""
 import hashlib
 import os

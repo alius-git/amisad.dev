@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 428c42cd-ead6-4072-9bdd-b2a263509a11
 openapi: 3.0.3
 info:
   title: slice-runtime

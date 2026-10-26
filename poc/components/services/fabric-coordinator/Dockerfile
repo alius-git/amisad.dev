@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 424fc348-2c93-45e3-9164-cd72253f6d0b
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/fabric-coordinator/Dockerfile -t amisad/fabric-coordinator .
 FROM rust:1.98-slim-bookworm AS build

@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42e45f79-f145-472a-9d7d-557a2528a24e
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 

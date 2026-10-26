@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 429622cf-a4da-4b51-be1e-69d66c3b871e
 
 // Optional PostgreSQL policy, compiled only by services that own a database.
 use amisad_common::Response;

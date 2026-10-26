@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42ff15e4-e93a-49ba-929e-2e8008f379fa
 {{- if ne (toString .Values.replicas) "1" -}}
 {{- fail "replicas must be exactly 1 for this cached single-writer service" -}}
 {{- end }}

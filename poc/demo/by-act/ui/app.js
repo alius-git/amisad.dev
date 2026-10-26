@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 425c9590-1065-4d9b-9242-30b1a9023151
 // AmisAd demo console: persona dropdown drives per-scenario step buttons,
 // each a real API call through serve-by-act.ps1's same-origin proxy. Full
 // behavior: ../README.md#how-it-works

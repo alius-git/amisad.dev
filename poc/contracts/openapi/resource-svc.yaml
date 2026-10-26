@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 427ada95-5d23-4c83-9c4a-c9fbe08f934e
 openapi: 3.0.3
 info:
   title: resource-svc

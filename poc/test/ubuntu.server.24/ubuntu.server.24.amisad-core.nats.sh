@@ -1,6 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42297199-700a-4b3e-999e-018dc4b7df51
 # AmisAd POC - install NATS JetStream as a host systemd service. Deliberately
 # NOT in-cluster: docker.io pulls fail in this lab (invalid_token via the
 # caching path); the GitHub release binary avoids Docker Hub.

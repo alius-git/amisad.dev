@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42636291-b9b9-4565-b0a4-39ee384ffc56
 """Shared HTTP lifecycle contracts; only rustc and Python's standard library are required.
 
 Normal HTTP contracts run on Windows as well. SIGTERM contracts require Unix;

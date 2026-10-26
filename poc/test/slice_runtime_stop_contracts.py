@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 421a78ee-587e-449a-bae7-27c0919bc99a
 """Stopping slice-runtime before a scenario delivers its binary waits for the exit."""
 import errno
 import os

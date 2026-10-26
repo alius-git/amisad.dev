@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 420eb19e-9fd2-46ed-9a6a-760e3ac8ddaa
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/seller-svc/Dockerfile -t amisad/seller-svc .
 FROM rust:1.98-slim-bookworm AS build

@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42eeb1e6-d528-405e-9de2-7f4a82029ff5
 """AmisAd POC Bazel module.
 
 Rust builds through rules_rust with a pinned toolchain. Third-party crates

@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42fe1f6a-faf3-4fbd-9bac-b4639be06472
 // Placeholder for a role-scoped module. Real workspaces (catalog, control
 // plane, campaigns, ...) replace this per module as scenarios land.
 

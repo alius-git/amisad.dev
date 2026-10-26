@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 422c0d0b-170e-492d-a090-116e7de6c423
 [package]
 name = "amisad-common"
 version = "0.1.0"

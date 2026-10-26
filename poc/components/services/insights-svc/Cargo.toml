@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42e2fb60-61d9-4110-a0a5-de5ec48e8d34
 [package]
 name = "insights-svc"
 version = "0.1.0"

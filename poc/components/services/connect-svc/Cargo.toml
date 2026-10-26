@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42467216-444b-408a-808a-aabdc8a2f9ff
 [package]
 name = "connect-svc"
 version = "0.1.0"

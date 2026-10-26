@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42ccf3a2-8375-4d26-a201-7575c34a5d88
 // AmisAd POC buyer-client: the headless buyer playing Maya. s001.fulfillment:
 // submit (auto-close match as one JSON line) | wait <handle> | run.
 // s002.fitting: shortlist (manual dress need -> handle + shortlist) |

@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 42361ec0-1f9a-40c2-94ab-86940b7925da
 -- AmisAd POC - s007.inventory seed: Enterprise Integration Onboarding and
 -- Inventory-Truth Matching.
 -- NOTE: the live sequence seeds via the connector APIs. Partners, scoped

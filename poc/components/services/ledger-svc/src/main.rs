@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 4238dc2e-792d-4d01-969d-282498b9bd5e
 // AmisAd POC ledger-svc: append-only hash-chained attestation, settlement,
 // and consent ledgers with read APIs and chain verification. Consent entries
 // (grant_type participation | contribution, action grant | revoke, keyed by

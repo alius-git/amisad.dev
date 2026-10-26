@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42caa23b-3f0a-4068-85e7-f494511c81a9
 """Real slice-runtime HTTP delivery contracts; build workspace binaries first."""
 import unittest
 

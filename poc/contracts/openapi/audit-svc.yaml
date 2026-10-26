@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42ffdfdb-15a1-4340-8d1e-74e71ad1b0e1
 openapi: 3.0.3
 info:
   title: audit-svc

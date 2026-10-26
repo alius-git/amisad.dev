@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 421d0494-a56a-4975-9082-7f4d73a1bf30
 # AmisAd POC - Components information - localhost (skeleton).
 # NOTE: the service Dockerfiles expect the poc/ workspace root as build
 # context (the Rust workspace lives there); buildPath entries below name the

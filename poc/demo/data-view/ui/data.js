@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42f04189-c782-4fcf-b8d3-16af726e59ba
 // The data window: read-only live state of the three lab VMs while the
 // scenarios run. Full behavior: ../README.md#what-the-boxes-can-and-cannot-show
 

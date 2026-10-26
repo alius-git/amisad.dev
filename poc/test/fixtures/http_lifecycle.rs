@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 4295a5ca-3948-4fe2-8c37-8e0a2a2bc94c
 use amisad_common::{json, serve_app, Request, Response, ServiceInfo};
 use std::fs::{self, OpenOptions};
 use std::io::Write;

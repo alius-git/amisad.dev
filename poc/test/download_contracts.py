@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42f057b1-ba14-4948-bdb4-6373022bd3ef
 """Verified nested downloads: the helper every guest script carries, the order
 in which each script uses it, and the launch commands that supply the digests.
 

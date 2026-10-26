@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42e569eb-d2e5-487f-9df4-275e978249fa
 // AmisAd POC connect-svc: supply-side integration gateway (s007.inventory).
 // Alex registers as a partner (Priya's registry verifies -> sandbox only) and
 // certifies a connector; Elena grants scoped access (catalog, inventory,

@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42e8018d-4bc5-49ef-9b5e-c82b5b96c58e
 namespace: amisad
 image: localhost:5000/amisad/fabric-coordinator:latest
 port: 8080

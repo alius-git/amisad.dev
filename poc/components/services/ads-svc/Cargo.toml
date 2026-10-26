@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 420fb0e9-3fb3-4c8a-a6ac-16d0989c399a
 [package]
 name = "ads-svc"
 version = "0.1.0"

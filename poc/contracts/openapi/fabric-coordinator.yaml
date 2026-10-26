@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42a03d24-96e3-4436-91c6-91cc4a993c84
 openapi: 3.0.3
 info:
   title: fabric-coordinator

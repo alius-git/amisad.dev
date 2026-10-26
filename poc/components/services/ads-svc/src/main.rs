@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 4288ea6d-de63-4e0f-860a-162ae3ff28de
 // AmisAd POC ads-svc: campaign administration and creative studio marketplace
 // (s005.attribution). Marcel (agency) creates a campaign and issues a creative
 // brief; Kai (creator) accepts it and produces an approved asset; Marcel

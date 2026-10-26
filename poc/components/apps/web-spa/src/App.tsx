@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42dec13a-adba-4dc1-98f4-9681eac22a10
 // AmisAd web SPA shell - POC skeleton.
 // One shell, seven role-scoped modules (per plan/design.md): seller, resource,
 // ads, insights, platform, audit, connect. Each module is an empty placeholder

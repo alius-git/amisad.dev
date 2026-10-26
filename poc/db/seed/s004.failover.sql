@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 42be5ebc-8038-4878-a9ef-c06cebc41f38
 -- AmisAd POC - s004.failover seed: Sovereign Slice Allocation, Isolation
 -- Fault, and Attested Failover.
 -- NOTE: the live sequence seeds via the APIs. The scenario's real state is

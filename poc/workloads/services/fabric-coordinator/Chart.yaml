@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 4216e481-118c-4d99-bc51-11521494a163
 apiVersion: v2
 name: fabric-coordinator
 description: AmisAd POC skeleton chart for fabric-coordinator

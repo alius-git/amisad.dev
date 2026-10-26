@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 4247c005-5d25-4bf6-b5de-8ab6b13da208
 // AmisAd POC platform-svc: marketplace stewardship. s004.failover: cross-party
 // incident cases linking environment lifecycles by id. s008.mediation: the
 // support desk - a case opens carrying operational METADATA only (order state,

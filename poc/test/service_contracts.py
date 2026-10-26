@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 428f76de-f1df-49e3-8c60-f8ba79aaf13a
 """Native service contracts. Build Rust binaries first; set AMISAD_BIN_DIR if needed."""
 import contextlib
 import http.client

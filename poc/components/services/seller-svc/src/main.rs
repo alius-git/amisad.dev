@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42fdd0e9-e7b7-4707-98ea-3190d3c1165d
 // AmisAd POC seller-svc: offer catalog with standing auto-close deals and the
 // order state machine (committed -> provisioning -> fulfilled; a closed match
 // creates the order already committed). Advancing to fulfilled confirms

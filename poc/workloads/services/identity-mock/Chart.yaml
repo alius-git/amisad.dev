@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 4246c37c-e4e6-4234-8a63-76d371f561c6
 apiVersion: v2
 name: identity-mock
 description: AmisAd POC skeleton chart for identity-mock

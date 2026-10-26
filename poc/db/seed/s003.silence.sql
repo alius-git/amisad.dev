@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 42e64b98-a616-46d3-9c91-7b0e4d1132a3
 -- AmisAd POC - s003.silence seed: Consent Revocation and the Right to Silence.
 -- NOTE: the live sequence seeds via the APIs, which write through to
 -- PostgreSQL. Consent entries are hash-chained rows (prev_hash/row_hash) and

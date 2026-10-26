@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 426da73f-e212-49ea-85a3-0612421b9a47
 # AmisAd POC - Workloads information - localhost (skeleton).
 # Deploys the ten service charts into the amisad namespace. TLS/ingress and
 # the SPA static serving land when the applications grow real routes.

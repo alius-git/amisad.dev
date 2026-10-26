@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 427d8025-d8a5-463c-b3f6-22e89a782f56
 [workspace]
 resolver = "2"
 members = [

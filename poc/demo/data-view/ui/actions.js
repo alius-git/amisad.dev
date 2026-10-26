@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 421aab6b-aee1-4a52-b634-6bdff2f1fe45
 // The action window: draws the persona swimlane chart, runs the selected step
 // against the live lab, and appends every outcome to the server journal so the
 // data view - and any other open window, on any machine - stays in step.

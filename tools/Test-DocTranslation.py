@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 4203239d-3cca-4489-9ceb-9ba43bd12749
 """Check source currentness and integrity of the two local pt-BR documents.
 
 The explicit --record-machine mode records machine origin. Currentness and

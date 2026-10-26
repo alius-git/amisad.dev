@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42ed02fc-e4aa-48d7-b403-c5b025b362c7
 //! Catalog-backed problem messages. Protocol codes are never translated.
 use crate::json;
 use std::sync::OnceLock;

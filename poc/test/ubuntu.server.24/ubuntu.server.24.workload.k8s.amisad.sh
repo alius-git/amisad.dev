@@ -1,6 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42d0b04a-d061-440b-b09b-4a3303f612b8
 # AmisAd POC - build all service images and deploy the skeleton charts (idempotent).
 # --- REGION: Initialize environment
 set -euo pipefail

@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42101cae-63c7-4ccb-bf61-845778e1fb04
 [package]
 name = "slice-runtime"
 version = "0.1.0"

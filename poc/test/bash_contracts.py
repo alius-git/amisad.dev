@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 4222c157-36fc-4161-b26c-a4755177c63b
 """Bash prerequisites must be usable against the native fixture filesystem."""
 import importlib.util
 import io

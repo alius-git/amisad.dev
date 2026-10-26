@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42038377-6bec-428e-9acb-98dc0bb163d7
 """Reject missing, unused, or stale problem translations before building."""
 import hashlib
 import json

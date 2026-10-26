@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42e39b1f-e9e7-4811-8678-ff27064f76a4
 """Native build wrapper and deployment packaging contracts."""
 import os, subprocess, tempfile, unittest
 from pathlib import Path

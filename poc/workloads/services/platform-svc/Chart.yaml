@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42a0a1ac-0c82-4ab6-8751-eae807a5ccf6
 apiVersion: v2
 name: platform-svc
 description: AmisAd POC skeleton chart for platform-svc

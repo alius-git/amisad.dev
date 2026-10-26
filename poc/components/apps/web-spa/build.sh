@@ -1,6 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 4238a175-cde5-4a8d-8a8a-c25bec7f74ee
 # AmisAd web SPA - build wrapper invoked via `bazel run //components/apps/web-spa:build`.
 set -euo pipefail
 if [ -n "${BUILD_WORKSPACE_DIRECTORY:-}" ]; then

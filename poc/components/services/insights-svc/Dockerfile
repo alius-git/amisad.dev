@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 4205ac82-f268-4339-b5db-8218809a5256
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/insights-svc/Dockerfile -t amisad/insights-svc .
 FROM rust:1.98-slim-bookworm AS build

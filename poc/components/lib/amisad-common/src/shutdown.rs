@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42dd7929-42fe-436e-b90a-d1bf8485e7c0
 use std::io::{self, ErrorKind};
 use std::net::TcpListener;
 use std::os::fd::AsRawFd;

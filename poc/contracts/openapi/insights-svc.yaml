@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 4201f154-8cf3-46ca-a091-61065daa5a92
 openapi: 3.0.3
 info:
   title: insights-svc

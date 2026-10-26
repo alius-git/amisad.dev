@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 425e73a1-5f6b-4a68-ba9d-cd1ad551bff6
 openapi: 3.0.3
 info:
   title: ads-svc

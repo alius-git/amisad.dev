@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42924f76-f708-46ea-a534-fc82bf076963
 # Flutter has no mature Bazel rules; the wrapper delegates to the Flutter CLI.
 # Invoke with: bazel run //components/apps/buyer-flutter:build
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")

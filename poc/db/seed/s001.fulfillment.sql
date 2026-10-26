@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 422c058c-4d92-44c4-b660-5b7b116ffce9
 -- AmisAd POC - s001.fulfillment seed: Elena's catalog with standing auto-close
 -- deals in region-a. NOTE: the live sequence seeds via the seller-svc API,
 -- which WRITES THROUGH to PostgreSQL (offers persist with their full document

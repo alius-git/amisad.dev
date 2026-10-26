@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42c3d935-4955-40e6-aea8-545d4e37ff35
 [package]
 name = "audit-svc"
 version = "0.1.0"

@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42dafd5d-9672-4b43-b1f3-4a0393d7b44f
 apiVersion: v2
 name: audit-svc
 description: AmisAd POC skeleton chart for audit-svc

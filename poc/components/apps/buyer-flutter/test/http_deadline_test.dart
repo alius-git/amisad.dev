@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2019-2026 by Alisson Sol et al.
+// GUID: 42c504f7-50ac-4654-88b4-6f8327e2d0b1
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';

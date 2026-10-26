@@ -1,6 +1,7 @@
 #!/bin/bash
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 4266ae95-bb37-4c94-9abc-528abc09316f
 # AmisAd POC - put the restored amisad-core in position for a scenario run: the
 # apiserver answering, the CNI able to place a sandbox, CoreDNS and every amisad
 # deployment restarted onto pods that exist now, and every NodePort answering.

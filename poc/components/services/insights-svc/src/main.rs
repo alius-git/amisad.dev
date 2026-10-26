@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 42f6addd-d659-46ab-bd2d-a95cf57b01d5
 // AmisAd POC insights-svc: threshold-protected aggregate demand insights.
 // s003.silence: an aggregation cycle pulls the COUNT of consent-contributing
 // open needs from the fabric. s009.suppression: per (category, region) demand

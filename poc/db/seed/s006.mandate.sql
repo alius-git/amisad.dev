@@ -1,5 +1,6 @@
 -- LICENSEURI https://yuruna.link/license
 -- Copyright (c) 2026 by Alisson Sol et al.
+-- GUID: 425329c5-e04e-422b-9003-a76a3f9c448b
 -- AmisAd POC - s006.mandate seed: Delegated Procurement Under a Scoped
 -- Mandate.
 -- NOTE: the live sequence seeds via the APIs. The mandate grant/revoke is a

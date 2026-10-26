@@ -1,5 +1,6 @@
 // LICENSEURI https://yuruna.link/license
 // Copyright (c) 2026 by Alisson Sol et al.
+// GUID: 4217b9d2-247a-4819-af1b-c688a2af0c57
 // Shared model for the AmisAd data-view demo: the persona cast, the whole
 // scenario script, the box registry the data window polls, the journal client
 // that keeps every open window in step, and the swimlane renderer both windows

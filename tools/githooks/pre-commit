@@ -1,7 +1,28 @@
 #!/bin/sh
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 4274110c-9b3c-43d7-9e4e-457c7c2c9c2e
 repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 1
+framework=${YURUNA_FRAMEWORK_ROOT:-$repo_root/../yuruna}
+# --- REGION: run_metadata_gate
+# The framework's source-metadata gate holds the staged files to the header
+# contract: the license pointer, the copyright line and a unique 42-prefixed
+# GUID (the framework's CONTRIBUTING.md, "Source metadata"). It runs from the
+# framework checkout beside this repository, or where YURUNA_FRAMEWORK_ROOT
+# points; without that checkout or pwsh the check is skipped with a warning.
+run_metadata_gate() {
+    metadata_gate="$framework/tools/Test-SourceMetadata.ps1"
+    if [ ! -f "$metadata_gate" ] || ! command -v pwsh >/dev/null 2>&1; then
+        echo 'pre-commit: WARNING: the source-metadata check did not run; it needs pwsh and the framework checkout beside this repository (or YURUNA_FRAMEWORK_ROOT).' >&2
+        return 0
+    fi
+    if ! NO_COLOR=1 pwsh -NoProfile -ExecutionPolicy Bypass -File "$metadata_gate" -Staged -Quiet -Root "$repo_root" >&2; then
+        echo 'pre-commit: the source-metadata gate failed (see above); the commit is blocked.' >&2
+        echo "  Add the lines it shows, or declare a generated or vendored path in the framework's" >&2
+        echo '  tools/source-metadata.exemptions.json. git commit --no-verify skips the check (discouraged).' >&2
+        return 1
+    fi
+}
 # --- REGION: SBOM
 # See https://yuruna.link/sbom
 run_sbom() {
@@ -27,5 +48,6 @@ run_sbom() {
         return 1
     fi
 }
+run_metadata_gate || exit 1
 run_sbom || exit 1
 exit 0

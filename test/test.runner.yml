@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 423bf965-54a5-4f85-886b-1d49f2d7d092
 # `amisad.end-to-end` is an orchestration sequence (InvokeTestSequence steps).
 # The unattended runner detects the orchestration entry and delegates the whole
 # cycle to it - one dashboard row per inner sequence.

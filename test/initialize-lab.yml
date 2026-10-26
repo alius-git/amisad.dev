@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 421ce544-3d70-41d9-98df-fde6f5c363c8
 # initialize-lab.yml - host-side teardown + warm-up wrapper.
 #   1. Clear-Lab.ps1 - remove every lab VM + storage, sweep orphaned files.
 #   2. Initialize-Lab.ps1 - build the stash, both edges, and amisad-core.

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42807cd6-9296-48ed-a92d-60b37836f927
 """Restored-cluster gates in private paths, with real loopback HTTP probes."""
 import contextlib
 import http.server

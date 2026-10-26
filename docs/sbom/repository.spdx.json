@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-repository",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/repository/6ae8b05d7fdd4cdaf26ceedb292217aae81d13d751565a597a0619d6b5b8b2d4",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/repository/03e9f6f18ef9622e4d948c8c3b0e9434f2d841d05f2ccab38b47449371850997",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,7 +25,7 @@
       "licenseDeclared": "LicenseRef-Yuruna",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared repository inventory; source-inputs SHA256 6ae8b05d7fdd4cdaf26ceedb292217aae81d13d751565a597a0619d6b5b8b2d4. Not an installed-system scan.",
+      "comment": "Declared repository inventory; source-inputs SHA256 03e9f6f18ef9622e4d948c8c3b0e9434f2d841d05f2ccab38b47449371850997. Not an installed-system scan.",
       "versionInfo": "2026.10.26"
     },
     {
@@ -36,7 +36,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}",
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 6, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}",
       "versionInfo": "0.74.0"
     },
     {
@@ -47,7 +47,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 15, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}",
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"bazel\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [\"Bazel registry transitive dependencies are unresolved without a tracked module lock.\"], \"scope\": \"build\"}",
       "versionInfo": "0.8.0"
     },
     {
@@ -58,7 +58,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 5, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -76,7 +76,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 10, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 12, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 12, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -118,7 +118,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 27, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 27, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -232,7 +232,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 61, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 61, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -370,7 +370,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 103, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 103, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -508,7 +508,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 155, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 155, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -742,7 +742,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 239, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 239, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -760,7 +760,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 246, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 246, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -802,7 +802,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 264, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 264, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -1204,7 +1204,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 407, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 407, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -1270,7 +1270,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 414, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 414, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.19.14",
       "checksums": [
         {
@@ -1438,7 +1438,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 507, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 507, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -1504,7 +1504,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 526, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 526, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -1666,7 +1666,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 4, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 586, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 586, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -2308,7 +2308,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 11, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"runtime\", \"versionConstraint\": \"bookworm-slim\"}"
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 12, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"runtime\", \"versionConstraint\": \"bookworm-slim\"}"
     },
     {
       "name": "rust",
@@ -2318,7 +2318,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"build\", \"versionConstraint\": \"1.98-slim-bookworm\"}"
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"docker\", \"evidence\": [{\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/edge/slice-runtime/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/ads-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/audit-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/connect-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/fabric-coordinator/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/identity-mock/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/insights-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/ledger-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/platform-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/resource-svc/Dockerfile\"}, {\"detail\": \"Dockerfile FROM declaration\", \"line\": 6, \"path\": \"poc/components/services/seller-svc/Dockerfile\"}], \"notes\": [\"Container OS/package contents were not scanned; tag-only images are mutable.\"], \"scope\": \"build\", \"versionConstraint\": \"1.98-slim-bookworm\"}"
     },
     {
       "name": "flutter",
@@ -2328,7 +2328,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"runtime\"}"
+      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 13, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"runtime\"}"
     },
     {
       "name": "flutter_test",
@@ -2338,7 +2338,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\"}"
+      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"flutter-sdk\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 17, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: SDK flutter.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\"}"
     },
     {
       "name": "Git",
@@ -2348,7 +2348,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"git\", \"evidence\": [{\"detail\": \"Index snapshot and generated-file staging use the installed Git CLI\", \"line\": 38, \"path\": \"tools/Sync-Sbom.py\"}], \"notes\": [\"The repository does not pin the installed Git version.\"], \"scope\": \"build\"}"
+      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"git\", \"evidence\": [{\"detail\": \"Index snapshot and generated-file staging use the installed Git CLI\", \"line\": 39, \"path\": \"tools/Sync-Sbom.py\"}], \"notes\": [\"The repository does not pin the installed Git version.\"], \"scope\": \"build\"}"
     },
     {
       "name": "@oxc-project/types",
@@ -4104,7 +4104,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Flutter/Dart package manifest\", \"line\": 3, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Pub/Gradle transitive packages are unresolved; platform scaffolding is generated.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Flutter/Dart package manifest\", \"line\": 4, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Pub/Gradle transitive packages are unresolved; platform scaffolding is generated.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -4122,7 +4122,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 18, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^6.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^6.0.0\"}"
+      "comment": "{\"completeness\": \"unresolved\", \"ecosystem\": \"pub\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 19, \"path\": \"poc/components/apps/buyer-flutter/pubspec.yaml\"}], \"notes\": [\"Declared Dart constraint: ^6.0.0.\", \"No tracked pub lockfile was resolved.\"], \"scope\": \"test\", \"versionConstraint\": \"^6.0.0\"}"
     },
     {
       "name": "Python",
@@ -4132,7 +4132,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"python\", \"evidence\": [{\"detail\": \"SBOM collector uses Python 3.11 tomllib and the standard library\", \"line\": 12, \"path\": \"tools/sbom_dependencies.py\"}], \"notes\": [\"No Python package installation is required.\"], \"scope\": \"build\", \"versionConstraint\": \">=3.11\"}"
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"python\", \"evidence\": [{\"detail\": \"SBOM collector uses Python 3.11 tomllib and the standard library\", \"line\": 13, \"path\": \"tools/sbom_dependencies.py\"}], \"notes\": [\"No Python package installation is required.\"], \"scope\": \"build\", \"versionConstraint\": \">=3.11\"}"
     },
     {
       "name": "Bazel",
@@ -4153,7 +4153,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 22, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}",
+      "comment": "{\"completeness\": \"declared\", \"ecosystem\": \"toolchain\", \"evidence\": [{\"detail\": \"Bazel Rust toolchain pin\", \"line\": 23, \"path\": \"poc/MODULE.bazel\"}], \"notes\": [], \"scope\": \"build\"}",
       "versionInfo": "1.98.0"
     }
   ],

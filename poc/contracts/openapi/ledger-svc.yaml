@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42321548-6bb6-49a3-ab2e-b01ee28a6cb8
 openapi: 3.0.3
 info:
   title: ledger-svc

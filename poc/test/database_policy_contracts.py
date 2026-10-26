@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42748c8a-563e-4fed-a0a2-71851f5f287c
 """Run against a disposable schema; DATABASE_POLICY_URL and PSQL are required."""
 import contextlib
 import http.client

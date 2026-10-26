@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 420b3a09-9da1-4535-959c-5bbce1bfd19e
 apiVersion: v2
 name: insights-svc
 description: AmisAd POC skeleton chart for insights-svc

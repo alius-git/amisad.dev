@@ -1,5 +1,6 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
+# GUID: 42c79152-39a9-42c7-ac84-3edb6553be1f
 [package]
 name = "platform-svc"
 version = "0.1.0"

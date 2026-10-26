@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 423a7477-2f5e-4b25-b30a-5adfef52b264
 """Find a bounded Bash that can execute fixtures on the native filesystem."""
 import os
 from pathlib import Path
