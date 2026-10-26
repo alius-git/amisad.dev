@@ -55,8 +55,12 @@ Describe 'AmisAd guest deployment contracts' {
 
     It 'passes the native <Suite> contracts' -TestCases @(
         @{ Suite = 'bash_contracts.py' }
+        @{ Suite = 'build_contracts.py' }
         @{ Suite = 'cluster_ready_contracts.py' }
+        @{ Suite = 'download_contracts.py' }
+        @{ Suite = 'http_shutdown_contracts.py' }
         @{ Suite = 'image_import_contracts.py' }
+        @{ Suite = 'nats_installer_contracts.py' }
         @{ Suite = 'slice_runtime_stop_contracts.py' }
     ) {
         param($Suite)
@@ -65,6 +69,64 @@ Describe 'AmisAd guest deployment contracts' {
             return
         }
         $output = & $script:ContractPython -B (Join-Path $script:RepoRoot "poc/test/$Suite") -v 2>&1
+        $LASTEXITCODE | Should -Be 0 -Because ($output -join "`n")
+    }
+
+    # These start the services cargo builds; without the build there is nothing
+    # to run them against, which the skip says rather than failing the suite.
+    It 'passes the <Suite> contracts against the built services' -TestCases @(
+        @{ Suite = 'service_contracts.py'; Binary = 'seller-svc' }
+        @{ Suite = 'slice_runtime_http_contracts.py'; Binary = 'slice-runtime' }
+    ) {
+        param($Suite, $Binary)
+        $bin = if ($env:AMISAD_BIN_DIR) { $env:AMISAD_BIN_DIR } else { Join-Path $script:RepoRoot 'poc/target/debug' }
+        if (-not $script:ContractPython) {
+            Set-ItResult -Skipped -Because 'A runnable Python 3 interpreter is required.'
+            return
+        }
+        if (-not (Test-Path -LiteralPath (Join-Path $bin $Binary))) {
+            Set-ItResult -Skipped -Because "the services are not built: run cargo build --workspace --locked in poc/ (or set AMISAD_BIN_DIR)"
+            return
+        }
+        $output = & $script:ContractPython -B (Join-Path $script:RepoRoot "poc/test/$Suite") -v 2>&1
+        $LASTEXITCODE | Should -Be 0 -Because ($output -join "`n")
+    }
+
+    It 'passes the database policy contracts against a live policy endpoint' {
+        if (-not $env:DATABASE_POLICY_URL -or -not $script:ContractPython) {
+            Set-ItResult -Skipped -Because 'set DATABASE_POLICY_URL to a running database policy service to run these contracts'
+            return
+        }
+        $output = & $script:ContractPython -B (Join-Path $script:RepoRoot 'poc/test/database_policy_contracts.py') -v 2>&1
+        $LASTEXITCODE | Should -Be 0 -Because ($output -join "`n")
+    }
+
+    It 'passes the <Program> Node contracts' -TestCases @(
+        @{ Program = 'poc/test/deep_find_contracts.cjs' }
+        @{ Program = 'test/demo-polling.test.js' }
+    ) {
+        param($Program)
+        if (-not (Get-Command node -CommandType Application -ErrorAction SilentlyContinue)) {
+            Set-ItResult -Skipped -Because 'Node.js is required.'
+            return
+        }
+        $output = & node (Join-Path $script:RepoRoot $Program) 2>&1
+        $LASTEXITCODE | Should -Be 0 -Because ($output -join "`n")
+    }
+
+    It 'passes the browser contracts against the built web SPA' {
+        $chrome = if ($env:CHROME_PATH) { $env:CHROME_PATH } else { (Get-Command chromium, google-chrome, chrome -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1).Source }
+        $dist = Join-Path $script:RepoRoot 'poc/components/apps/web-spa/dist'
+        if (-not (Get-Command node -CommandType Application -ErrorAction SilentlyContinue) -or -not $chrome -or -not (Test-Path -LiteralPath $dist)) {
+            Set-ItResult -Skipped -Because 'needs Node.js, Chrome or Chromium, and the web SPA built into poc/components/apps/web-spa/dist'
+            return
+        }
+        $output = & node (Join-Path $script:RepoRoot 'poc/test/low_browser_contracts.cjs') 2>&1
+        $LASTEXITCODE | Should -Be 0 -Because ($output -join "`n")
+    }
+
+    It 'passes the host helper contracts' {
+        $output = & (Get-Process -Id $PID).Path -NoProfile -NonInteractive -File (Join-Path $script:RepoRoot 'poc/test/host_contracts.ps1') 2>&1
         $LASTEXITCODE | Should -Be 0 -Because ($output -join "`n")
     }
 }

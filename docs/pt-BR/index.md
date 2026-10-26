@@ -9,4 +9,10 @@ manifesto local de traduções.
 | Automação de testes da prova de conceito | [Automação de testes](poc/test.md) | [poc/test.md](../../poc/test.md) |
 | Nomes dos hospedeiros e usuários das VMs convidadas | [Nomes e usuários das VMs](poc/usernames.md) | [poc/usernames.md](../../poc/usernames.md) |
 
-Consulte a [licença](../../LICENSE) do repositório.
+Consulte a [licença](../../LICENSE.md) do repositório.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 by Alisson Sol et al.

@@ -12,6 +12,8 @@ framework that can deploy it.
 ## 2026.10.26
 
 - Align script versions and generated inventories with Yuruna `2026.10.26`.
+- Licensed under the Yuruna License (LICENSE.md), which every file's license
+  pointer already named, in place of the MIT License text.
 
 ## 2026.10.18
 

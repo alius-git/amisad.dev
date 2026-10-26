@@ -719,3 +719,9 @@ slice-runtime `/v1/egress` and `/v1/ingress` -> `entries` (egress entries are
 - No historical persistence of the journal across server restarts.
 - No editing of `poc/demo/by-act` (including its README).
 - No screenshot/recording tooling.
+
+---
+
+LICENSEURI https://yuruna.link/license
+
+Copyright (c) 2026 by Alisson Sol et al.

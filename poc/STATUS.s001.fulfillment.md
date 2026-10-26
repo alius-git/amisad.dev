@@ -129,7 +129,7 @@ failure that is NOT in the AmisAd code:
   guests -- both are denied). So it keeps attempting one futile cold cycle per
   ~60 min, each leaving a failed 12 GB VM up (host was down to ~8 GB free).
   **Operator action needed:** stop the runner (Ctrl-C in its elevated window,
-  or `Stop-Process` on the elevated `Invoke-TestRunner` pwsh), and remove the
+  or `Stop-Process` on the elevated `Start-TestRunner` pwsh), and remove the
   leftover `test-ubuntu-server-24-01` VM. The `amisad-demo-PASS` VM and its
   `k8s.amisad`/`build.amisad` snapshots should be kept.
 
