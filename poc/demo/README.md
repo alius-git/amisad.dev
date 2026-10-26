@@ -52,7 +52,7 @@ either demo, so the two behave identically:
   `localhost`, a loopback or local address, the machine name or the bind address
   is refused (421), so a page on another site that makes its own name resolve
   here (DNS rebinding) never reaches a route. A request that changes demo state
-  (anything but a GET) from a page of another origin is refused (403), and
+  (anything but a GET or HEAD) from a page of another origin is refused (403), and
   resetting the journal takes a POST.
 
 Shared parameters: `-Port`, `-YurunaRoot`, `-CoreIp`, `-EdgeAIp`, `-EdgeBIp`,

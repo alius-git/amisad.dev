@@ -61,7 +61,7 @@ The server handles the host-side plumbing itself:
 
 `/api/personas` returns the vault passwords in the clear for the identity
 cards, so they are gated on the **client**, not the binding: loopback requests
-(the host's own browser) always get them, and everyone else sees
+that name the host by a loopback name (the host's own browser) always get them, and everyone else sees
 `<withheld: remote viewer>`. Add `-SharePersonaPasswords` to serve them to
 remote viewers too -- on a trusted network, since anything that can reach the
 port then gets them.

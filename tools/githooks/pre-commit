@@ -24,7 +24,7 @@ run_metadata_gate() {
     fi
 }
 # --- REGION: SBOM
-# See https://yuruna.link/sbom
+# See https://yuruna.link/427fb0be
 run_sbom() {
     sbom_generator="$repo_root/tools/Sync-Sbom.py"
     if [ ! -f "$sbom_generator" ]; then
