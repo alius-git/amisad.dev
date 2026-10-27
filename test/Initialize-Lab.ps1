@@ -22,7 +22,7 @@
     the end-to-end pass; Clear-Lab.ps1 is the teardown half that runs first).
     Runs on any Yuruna host type (Hyper-V, KVM, UTM).
 .DESCRIPTION
-    See https://yuruna.link/42010605-0006.
+    See https://yuruna.link/42010605-00b3.
 .PARAMETER YurunaRoot
     Yuruna framework checkout that holds test/Debug-TestSequence.ps1. Optional --
     see Resolve-YurunaRoot for the discovery order.
@@ -74,7 +74,7 @@ if (-not (Test-Path -LiteralPath $ts)) { Write-Error "Debug-TestSequence.ps1 not
 
 # --- REGION: Resolve-StageLogDir
 function Resolve-StageLogDir {
-    <# See https://yuruna.link/42010605-0006. #>
+    <# See https://yuruna.link/42010605-00b2. #>
     [CmdletBinding()]
     [OutputType([string])]
     param([string]$Explicit)
@@ -192,7 +192,7 @@ foreach ($vm in @('amisad-core', 'amisad-edge-a', 'amisad-edge-b', 'amisad-build
 
 
 # --- REGION: Authorize demo public key
-# See https://yuruna.link/42010605-0006
+# See https://yuruna.link/42010605-00b1
 $edgeAddress = $edgeStartup.Address
 $keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
 foreach ($line in $keyHandoff.Lines) { Write-Information $line }

@@ -21,7 +21,7 @@
     Stash-service pre-flight shared by the AmisAd entry points that build the
     topology (test/Initialize-Lab.ps1, poc/build/run-tests.ps1).
 .DESCRIPTION
-    See https://yuruna.link/42010605-0006.
+    See https://yuruna.link/42010605-00ae.
 #>
 
 Set-StrictMode -Version Latest
@@ -33,7 +33,7 @@ function Resolve-StashService {
         Find the stash service, verify it answers, and publish the address for
         the rest of the cycle to resolve without re-probing.
     .DESCRIPTION
-        See https://yuruna.link/42010605-0006.
+        See https://yuruna.link/42010605-00ad.
     .PARAMETER YurunaRoot
         Yuruna framework checkout supplying the stash extension and the
         extension-host lookup.
@@ -76,7 +76,7 @@ function Resolve-StashService {
 
     $lines.Add('== Resolving the stash service ==')
 
-    # See https://yuruna.link/42010605-0006
+    # See https://yuruna.link/42010605-00ac
     $retryDelaySeconds = @(2, 5, 10)
     $attemptCount = $retryDelaySeconds.Count + 1
     $canDiscover = [bool](Get-Command Get-ExtensionHostAddress -ErrorAction SilentlyContinue)

@@ -21,7 +21,7 @@
     Shared host-portability helpers for the AmisAd host-action scripts
     (Clear-Lab.ps1, Initialize-Lab.ps1). Dot-sourced, not invoked.
 .DESCRIPTION
-    See https://yuruna.link/42010605-0006.
+    See https://yuruna.link/42010605-00a9.
 #>
 
 Set-StrictMode -Version Latest
@@ -32,7 +32,7 @@ function Resolve-YurunaRoot {
     .SYNOPSIS
         Locate the Yuruna framework checkout, without hard-coding a path.
     .DESCRIPTION
-        See https://yuruna.link/42010605-0006.
+        See https://yuruna.link/42010605-00a8.
     .OUTPUTS
         [string] absolute path; throws when nothing validates.
     #>

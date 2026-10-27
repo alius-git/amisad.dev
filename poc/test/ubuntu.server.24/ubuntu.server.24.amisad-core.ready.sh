@@ -61,7 +61,7 @@ amisad_wait_flannel 300 || {
     exit 9
 }
 SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
-# See https://yuruna.link/42010605-0007
+# See https://yuruna.link/42010605-00ba
 kubectl -n kube-system rollout restart deployment/coredns
 kubectl -n amisad rollout restart deployment
 kubectl -n kube-system rollout status deployment/coredns --timeout=600s

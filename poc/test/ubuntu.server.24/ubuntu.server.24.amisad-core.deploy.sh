@@ -2,7 +2,7 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42c1acfe-069d-43e1-bf01-bd373334f486
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00d3
 # --- REGION: Initialize environment
 set -euo pipefail
 
@@ -48,7 +48,7 @@ amisad_host_fetch() {
 }
 
 # --- REGION: amisad_sha256
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00cb
 amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
     local file="$1" out
     out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1
@@ -114,7 +114,7 @@ amisad_verify_download() {
 # End download verification
 
 # --- REGION: amisad_fetch_stash_binaries
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00d2
 amisad_fetch_stash_binaries() {
     local stash="$1" label="$2" dest="$3" links link url want have tried=0
     # `|| true`: grep exits 1 when the list is empty (no artifact yet), which
@@ -182,7 +182,7 @@ POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
 
 echo "== download prebuilt binaries from the stash service =="
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00d1
 if [ -z "${STASH_HOST:-}" ]; then
     echo "STASH_HOST is empty - the sequence supplies it from \${ext:stash-service.ResolveHost(...)} and the cycle's warm-up publishes the address it verified. Nowhere to fetch the binaries from; aborting." >&2
     exit 3
@@ -265,7 +265,7 @@ for svc in $SERVICES; do
     if kubectl -n amisad wait --for=condition=available "deployment/${svc}" --timeout=600s; then
         continue
     fi
-    # See https://yuruna.link/42010605-0008
+    # See https://yuruna.link/42010605-00d0
     echo "== ${svc} never became available; cluster state ==" >&2
     kubectl -n amisad get pods -o wide >&2 || true
     kubectl -n amisad describe "deployment/${svc}" 2>&1 | tail -25 >&2 || true

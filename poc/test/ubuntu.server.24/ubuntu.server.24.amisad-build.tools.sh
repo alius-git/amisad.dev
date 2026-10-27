@@ -32,7 +32,7 @@ amisad_retry() {
 }
 
 # --- REGION: amisad_verify_pinned
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00ce
 amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
     local file="$1" want="$2" label="$3" have
     have=$(sha256sum "$file" 2>/dev/null) || have=''
@@ -110,7 +110,7 @@ amisad_select_rust_toolchain
 cargo --version
 rustc --version
 
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00cd
 BAZELISK_VERSION=v1.29.0
 BAZELISK_SHA256_AMD64=5a408715e932c0250d28bd84555f12edbf70117de42f9181691c736eacc4a992
 BAZELISK_SHA256_ARM64=e20e8b0f4f240091b7a55bf17b9398bd4f40ee70ae0208dff95dd4c445fb4010

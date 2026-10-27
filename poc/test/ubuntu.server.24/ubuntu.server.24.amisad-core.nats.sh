@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # --- REGION: amisad_verify_pinned
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00ce
 amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
     local file="$1" want="$2" label="$3" have
     have=$(sha256sum "$file" 2>/dev/null) || have=''

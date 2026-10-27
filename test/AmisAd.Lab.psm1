@@ -643,7 +643,7 @@ function Remove-LegacyDemoKey {
         Delete a core->edge demo key that an earlier lab run left in the status
         service's served tree.
     .DESCRIPTION
-        See https://yuruna.link/42010605-0006.
+        See https://yuruna.link/42010605-00ab.
     .PARAMETER YurunaRoot
         Yuruna framework checkout whose status service served the file.
     .OUTPUTS
@@ -785,7 +785,7 @@ function Sync-AmisAdDemoKey {
         Authorize the PUBLIC half of vm-core's demo key on the edge VMs, over
         the harness SSH channel, and prove the login works.
     .DESCRIPTION
-        See https://yuruna.link/42010605-0006.
+        See https://yuruna.link/42010605-00aa.
     .PARAMETER YurunaRoot
         Yuruna framework checkout; supplies the SSH helper when -InvokeGuest is
         not given.

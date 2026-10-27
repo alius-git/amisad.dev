@@ -2,7 +2,7 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42db66aa-6b1c-435d-8b6d-fc5c268ef75d
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00cf
 # --- REGION: Initialize environment
 set -euo pipefail
 
@@ -40,7 +40,7 @@ amisad_host_fetch() {
 }
 
 # --- REGION: amisad_sha256
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00cb
 amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
     local file="$1" out
     out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1

@@ -16,7 +16,7 @@
     scenario against a shared amisad-core (stages [0]-[5]; see poc/test.md).
     Runs on any Yuruna host type (Hyper-V, KVM, UTM).
 .DESCRIPTION
-    See https://yuruna.link/42010605-0006.
+    See https://yuruna.link/42010605-00b7.
 .PARAMETER YurunaRoot
     Yuruna framework checkout that holds test/Debug-TestSequence.ps1. Optional
     -- see Resolve-YurunaRoot for the discovery order.
@@ -97,7 +97,7 @@ if (Test-Path -LiteralPath $runnerPidFile) {
 }
 
 # --- REGION: Clean start
-# See https://yuruna.link/42010605-0006
+# See https://yuruna.link/42010605-00b6
 Stop-LabConsole -HostType $HostType
 $sweepScript = Join-Path $YurunaRoot 'test/Remove-TestVMFiles.ps1'
 if (-not (Test-Path -LiteralPath $sweepScript)) {
@@ -190,7 +190,7 @@ if (-not $edgeStartup.Ok) {
 }
 
 # --- REGION: Authorize demo public key
-# See https://yuruna.link/42010605-0006
+# See https://yuruna.link/42010605-00b5
 $edgeAddress = $edgeStartup.Address
 $keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
 foreach ($line in $keyHandoff.Lines) { Write-Information $line }

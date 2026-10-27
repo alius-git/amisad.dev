@@ -2,7 +2,7 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42f32af5-d323-43ac-a15e-0cb36badcab5
-# See https://yuruna.link/42010605-0007
+# See https://yuruna.link/42010605-00c7
 # --- REGION: Initialize environment
 set -euo pipefail
 
@@ -63,7 +63,7 @@ sudo tee /etc/systemd/system/amisad-ip-report.timer >/dev/null <<'EOS'
 Description=Keep this edge VM's reported IP current
 
 [Timer]
-# See https://yuruna.link/42010605-0007
+# See https://yuruna.link/42010605-00c6
 OnBootSec=45s
 OnUnitActiveSec=30s
 AccuracySec=5s

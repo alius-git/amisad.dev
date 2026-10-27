@@ -2,7 +2,7 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 422f9d39-9a89-4cab-bf15-8f0033037d9f
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00cc
 # --- REGION: Initialize environment
 set -euo pipefail
 
@@ -45,7 +45,7 @@ amisad_host_fetch() {
 }
 
 # --- REGION: amisad_sha256
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00cb
 amisad_sha256() { # <file> -> its SHA-256 on stdout, lowercase hex
     local file="$1" out
     out=$(sha256sum "$file" 2>/dev/null) || out=$(shasum -a 256 "$file" 2>/dev/null) || return 1
@@ -129,7 +129,7 @@ POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
 
 echo "== stash reachability (fail fast, before the ~20-min build) =="
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00ca
 if [ -z "${STASH_HOST:-}" ]; then
     echo "STASH_HOST is empty - the sequence supplies it from \${ext:stash-service.ResolveHost(...)} and the cycle's warm-up publishes the address it verified. Nowhere to upload binaries; aborting before build." >&2
     exit 3
@@ -179,7 +179,7 @@ if [ "$SZ" -ge 104857600 ]; then
 fi
 
 echo "== upload binaries to the stash service =="
-# See https://yuruna.link/42010605-0008
+# See https://yuruna.link/42010605-00c9
 SCP_LOG=/tmp/scp-upload.log
 SCP_ATTEMPTS=3
 SCP_BACKOFF=5

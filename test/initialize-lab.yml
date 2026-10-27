@@ -10,7 +10,7 @@ name: initialize-lab
 description: Tear down the lab, then build + start the AmisAd topology (host-side, pre-run).
 
 host:
-  # See https://yuruna.link/42010605-0006
+  # See https://yuruna.link/42010605-00b4
   elevated: true
   scripts:
     - Clear-Lab.ps1

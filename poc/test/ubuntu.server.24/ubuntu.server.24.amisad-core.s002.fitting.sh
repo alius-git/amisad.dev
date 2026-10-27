@@ -2,7 +2,7 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42bb396f-7c51-4e1c-8bac-dd70f07caf08
-# See https://yuruna.link/42010605-0007
+# See https://yuruna.link/42010605-00bc
 # --- REGION: Initialize environment
 set -euo pipefail
 

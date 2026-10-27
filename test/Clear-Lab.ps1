@@ -22,7 +22,7 @@
     VM (and its storage), then sweep orphaned VM files. Runs on any Yuruna
     host type (Hyper-V, KVM, UTM).
 .DESCRIPTION
-    See https://yuruna.link/42010605-0006.
+    See https://yuruna.link/42010605-00b0.
 .PARAMETER YurunaRoot
     Path to the Yuruna framework checkout that holds test/. Optional -- see
     Resolve-YurunaRoot for the discovery order (the runner's
@@ -61,7 +61,7 @@ if (-not (Test-HostRequirement -HostType $HostType)) { exit 1 }
 $LabVmPrefix = 'amisad-'
 
 # --- REGION: Refuse concurrent runner
-# See https://yuruna.link/42010605-0006
+# See https://yuruna.link/42010605-00af
 if (-not $env:YURUNA_CYCLE_CONTEXT) {
     $runnerPidFile = Join-Path $YurunaRoot 'test/status/runtime/runner.pid'
     if (Test-Path -LiteralPath $runnerPidFile) {
