@@ -50,8 +50,9 @@ $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
 Write-Information "Test driver on '$HostType' (framework: $YurunaRoot)."
 
+# --- REGION: Validate host requirements
 # Fail fast on a host that cannot call its own VM cmdlets (Administrator on
-# Hyper-V, virsh//dev/kvm on KVM, utmctl + UTM.app on macOS). Without this gate
+# Hyper-V, virsh + /dev/kvm on KVM, utmctl + UTM.app on macOS). Without this gate
 # the first sweep dies inside the hypervisor with its own raw message, which
 # names the computer but not the fix.
 if (-not (Test-HostRequirement -HostType $HostType)) { exit 1 }
@@ -85,6 +86,7 @@ if (Get-Command Initialize-HostDisplay -ErrorAction SilentlyContinue) {
     Initialize-HostDisplay -HostType $HostType
 }
 
+# --- REGION: Refuse concurrent runner
 # Refuse to sweep VMs out from under an active Yuruna runner.
 $runnerPidFile = Join-Path $YurunaRoot 'test/status/runtime/runner.pid'
 if (Test-Path -LiteralPath $runnerPidFile) {
@@ -112,15 +114,16 @@ if ($sweepExit -ne 0) {
 }
 Stop-LabConsole -HostType $HostType
 
+$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeProvisioning' -IncludeDiskGrowth
+if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
+
+# --- REGION: Remove legacy demo key
 # The core->edge demo keypair is generated INSIDE amisad-core (its deploy chain);
 # the private half never leaves it and only the public half is handed to the
 # edges, after both exist (see [4b] below and poc/usernames.md). A host that ran
 # an older version of this driver holds a pair under test/status/handoff, which
 # the status service serves to the whole LAN; it is deleted and said so.
 foreach ($line in (Remove-LegacyDemoKey -YurunaRoot $YurunaRoot -Confirm:$false)) { Write-Warning $line }
-
-$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeProvisioning' -IncludeDiskGrowth
-if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
 
 # --- REGION: Resolve stash service
 # A stash is a requirement of this pass, not an optimization: the build uploads

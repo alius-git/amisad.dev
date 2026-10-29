@@ -63,6 +63,7 @@ $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
 Write-Information "Warm-up on '$HostType' (framework: $YurunaRoot)."
 
+# --- REGION: Validate host requirements
 # Fail fast on a host that cannot drive its own hypervisor (Administrator on
 # Hyper-V, virsh + /dev/kvm on KVM, utmctl + UTM.app on macOS). Without this
 # gate the first provisioning stage burns its startup time before dying inside

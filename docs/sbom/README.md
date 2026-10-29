@@ -78,8 +78,6 @@ python tools/Sync-Sbom.py --update --staged --stage
 Hook activation belongs to local Git configuration; a fresh clone needs that
 configuration to run the tracked hook automatically.
 
-Back to [amisad.dev](../../README.md).
-
 ---
 
 LICENSEURI https://yuruna.link/license
@@ -87,3 +85,5 @@ LICENSEURI https://yuruna.link/license
 Copyright (c) 2026 by Alisson Sol et al.
 
 Last review: 2026.10.30
+
+Back to [amisad.dev](../../README.md).
