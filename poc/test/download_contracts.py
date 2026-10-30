@@ -23,6 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 GUEST = ROOT / 'test/ubuntu.server.24'
 SEQUENCES = ROOT / 'test'
+HELPERS = ROOT / 'test/amisad-scenario.sh'
 COMPILE = GUEST / 'ubuntu.server.24.amisad-build.compile.sh'
 DEPLOY = GUEST / 'ubuntu.server.24.amisad-core.deploy.sh'
 DB = GUEST / 'ubuntu.server.24.amisad-core.db.sh'
@@ -109,6 +110,45 @@ class VerificationHelper(Contract):
             self.assertIn('rc=1', result.stdout)
             self.assertIn('fixture resolver refused', result.stderr)
             self.assertEqual(Path(directory, 'attempts').read_text().splitlines(), ['attempt'])
+
+    def edge_lookup(self, directory, locate_body, getent_body='return 2'):
+        """Run amisad_edge_addr against a fixture host.env, locator and wget."""
+        Path(directory, 'host.env').write_text('YURUNA_STATUS_SERVICE_IP=192.0.2.1\nYURUNA_STATUS_SERVICE_PORT=8080\n')
+        Path(directory, 'locate.sh').write_text('#!/bin/bash\n' + locate_body + '\n')
+        helper = function_text(HELPERS, 'amisad_edge_addr').replace('/etc/yuruna/host.env', './host.env').replace(
+            '/usr/local/lib/yuruna/yuruna-host-locate.sh', './locate.sh')
+        return run_bash('chmod +x ./locate.sh\n. ./host.env\nexport YURUNA_STATUS_SERVICE_IP YURUNA_STATUS_SERVICE_PORT\n'
+                        + helper + '\n'
+                        'getent() { ' + getent_body + '; }\n'
+                        'wget() { local a; for a in "$@"; do case "$a" in http://*) echo "$a" >> attempts;; esac; done; '
+                        'case "$*" in *192.0.2.9*) printf "192.168.122.50"; return 0;; esac; return 8; }\n'
+                        'ip=$(amisad_edge_addr amisad-edge-a); echo "rc=$? ip=[$ip]"\n', directory)
+
+    def test_edge_lookup_refreshes_the_host_coordinates_and_retries_once(self):
+        # The host took a new address while the scenario ran: the first fetch
+        # goes to the address the script started with and fails, the locator
+        # rewrites host.env, and the second fetch reaches the host.
+        with tempfile.TemporaryDirectory() as directory:
+            result = self.edge_lookup(directory, "printf 'YURUNA_STATUS_SERVICE_IP=192.0.2.9\\nYURUNA_STATUS_SERVICE_PORT=8080\\n' > ./host.env")
+            self.assertIn('rc=0 ip=[192.168.122.50]', result.stdout)
+            self.assertIn('refreshing the host coordinates and retrying', result.stderr)
+            self.assertEqual(Path(directory, 'attempts').read_text().splitlines(),
+                             ['http://192.0.2.1:8080/log/handoff/amisad-edge-a.ip.txt',
+                              'http://192.0.2.9:8080/log/handoff/amisad-edge-a.ip.txt'])
+
+    def test_edge_lookup_stays_quiet_and_unresolved_when_the_locator_refuses(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = self.edge_lookup(directory, 'echo "fixture resolver refused" >&2\nexit 9')
+            self.assertIn('rc=0 ip=[]', result.stdout)
+            self.assertIn('fixture resolver refused', result.stderr)
+            self.assertEqual(Path(directory, 'attempts').read_text().splitlines(),
+                             ['http://192.0.2.1:8080/log/handoff/amisad-edge-a.ip.txt'])
+
+    def test_edge_lookup_never_asks_the_host_for_an_edge_the_guest_resolves_itself(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = self.edge_lookup(directory, 'exit 9', getent_body='echo "192.168.122.7 amisad-edge-a"')
+            self.assertIn('rc=0 ip=[192.168.122.7]', result.stdout)
+            self.assertFalse(Path(directory, 'attempts').exists(), 'a resolvable edge needs no handoff fetch')
 
     def verify(self, expected, content=b'payload', override=False):
         with tempfile.TemporaryDirectory() as directory:

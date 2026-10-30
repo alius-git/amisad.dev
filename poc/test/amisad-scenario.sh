@@ -36,12 +36,35 @@ amisad_curl() { # <same args as curl -sf>
 }
 
 # --- REGION: amisad_edge_addr
+# The handoff file is served by the host's status service, and the host can
+# take a new address while a scenario runs: its DHCP lease expires and the
+# server hands it another. The coordinates in the environment are the ones the
+# host had when this script started, so a fetch that fails is retried once
+# after the guest's own locator has refreshed them. Output stays the address or
+# nothing, and the return code stays 0 either way: the caller decides what an
+# unresolved edge means. getent answers first because vm-core resolves the edge
+# without the host when it can.
 amisad_edge_addr() { # <edge-vm-name>
-    local edge="$1" ip
+    local edge="$1" ip attempt
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
     if [ -n "$ip" ]; then printf '%s' "$ip"; return 0; fi
-    wget --no-proxy --timeout=10 --tries=2 -qO- \
-        "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log/handoff/${edge}.ip.txt" 2>/dev/null || true
+    for attempt in 1 2; do
+        if [ "$attempt" -eq 2 ]; then
+            [ -x /usr/local/lib/yuruna/yuruna-host-locate.sh ] || return 0
+            /usr/local/lib/yuruna/yuruna-host-locate.sh >/dev/null || return 0
+            if [ -r /etc/yuruna/host.env ]; then
+                # shellcheck disable=SC1091
+                . /etc/yuruna/host.env
+            fi
+        fi
+        ip=$(wget --no-proxy --timeout=10 --tries=2 -qO- \
+            "http://${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT}/log/handoff/${edge}.ip.txt" 2>/dev/null || true)
+        if [ -n "$ip" ]; then printf '%s' "$ip"; return 0; fi
+        if [ "$attempt" -eq 1 ]; then
+            echo "edge '${edge}' handoff fetch from ${YURUNA_STATUS_SERVICE_IP}:${YURUNA_STATUS_SERVICE_PORT} failed; refreshing the host coordinates and retrying." >&2
+        fi
+    done
+    return 0
 }
 
 # --- REGION: amisad_stop_slice_runtime
