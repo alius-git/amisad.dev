@@ -84,6 +84,6 @@ LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
 
-Last review: 2026.10.31
+Last review: 2026.11.03
 
 Back to [amisad.dev](../../README.md).
