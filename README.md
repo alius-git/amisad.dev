@@ -36,6 +36,7 @@ its storage evidence and separate diagnostic directories for each involved VM.
 ## Software inventory
 
 - [Software bill of materials](docs/sbom/README.md) -- Repository, host, and guest inventories in SPDX, CycloneDX, and SWID formats, with automatic maintenance before commits.
+- Commit hook -- The tracked `tools/githooks/pre-commit` holds staged files to the framework's source-metadata contract and refreshes the inventories. It runs only in a clone that enabled it once with `git config core.hooksPath tools/githooks`; the framework's install scripts enable only the framework checkout's hook.
 
 ---
 

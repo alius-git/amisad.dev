@@ -290,6 +290,10 @@ this: the helper copies stay identical, each script verifies before it extracts,
 launch commands carry every variable their script reads, and a download that does
 not match is refused and removed.
 
+`test/workload_contracts.py` holds every namespace deletion in the localhost
+workload files to a `--timeout`, so a namespace stuck in `Terminating` cannot
+hold the lane.
+
 **Deliberately not covered:**
 
 - `apt-get install`, `cargo` (with the committed `Cargo.lock`) and `npm` (with

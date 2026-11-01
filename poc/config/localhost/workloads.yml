@@ -14,7 +14,7 @@ workloads:
 - context: "${env:runTag}-${env:project}-${env:runId}"
   deployments:
     # Uninstall previous workloads: idempotent
-    - kubectl: "delete namespace ${env:namespace} --ignore-not-found=true --v=1"
+    - kubectl: "delete namespace ${env:namespace} --ignore-not-found=true --timeout=300s --v=1"
     - kubectl: "create namespace ${env:namespace} --v=1"
     - kubectl: "config set-context --current --namespace=${env:namespace} --v=1"
     - chart: "services/seller-svc"
