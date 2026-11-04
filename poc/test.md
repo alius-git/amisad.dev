@@ -16,23 +16,33 @@ the deadline case takes about 20 seconds. They require no VM or temporary commit
 by that test. Run `python3 test/slice_runtime_http_contracts.py -v` to check the
 production binary's eight HTTP lifecycle posts to isolated ledger and telemetry
 peers, with successful and failed responses. Both checks require the abort to
-keep the envelope sealed and omit match and shortlist records.
+keep the envelope sealed and omit match and shortlist records. The same suite
+checks that a runtime started with `ADVERTISE_URL` registers itself with
+resource-svc under a 30-second lease and registers again to renew it, that the
+lifecycle cases, which set no `ADVERTISE_URL`, see telemetry posts only, and
+that ledger appends carry the write token while telemetry does not.
 
 Run `python3 test/http_shutdown_contracts.py -v` for the
 [shared HTTP lifecycle checks](test/http_shutdown_contracts.py). They compile a
 std-only fixture in a temporary directory with `rustc` (`RUSTC` can select the
 compiler; `AMISAD_LIFECYCLE_BINARY` can select a prebuilt fixture). Normal HTTP
-checks run on Windows too. Unix checks require SIGTERM to stop new intake,
-finish the active write and response, drop service state, and preserve the journal
-across restart. Linux also checks the real PID 1 behavior in private `unshare`
-namespaces; those cases skip when unprivileged namespaces are unavailable.
-The services retain their request deadlines, Kubernetes termination grace, and
-single-writer `Recreate` deployment policy.
+checks run on Windows too: `/health` and `/version` answer while a handler runs,
+a client that stalls mid-request delays no other request, a handler panic ends
+the process with status 101, every response returns an `X-Request-Id` that error
+bodies repeat as `correlation_id`, and an outbound call made inside a handler
+forwards it. Unix checks require SIGTERM to stop new intake, finish the active
+write and response, answer 503 `service_stopping` to a request that had not
+started, drop service state, and preserve the journal across restart. Linux also
+checks the real PID 1 behavior in private `unshare` namespaces; those cases skip
+when unprivileged namespaces are unavailable. The services retain their request
+deadlines, Kubernetes termination grace, and single-writer `Recreate` deployment
+policy.
 
 To check durable recovery, initialize an **empty disposable PostgreSQL database**
 with `db/schema.sql`, set `AMISAD_TEST_DATABASE_URL` to its connection URL, and run
 `python3 test/service_contracts.py DurableContracts -v`. This explicit suite writes
-fixture offers, instructions, orders, and refunds, then restarts the services.
+fixture offers, instructions, orders, refunds, and a jurisdiction policy, then
+restarts the services.
 Use a fresh database for each invocation; never point it at the demo database.
 The regular suite uses memory stores regardless of the caller's `DATABASE_URL`.
 
@@ -194,17 +204,25 @@ use this endpoint, and verify what it returns before extracting it (see
 vault PAT in a `sensitive: true` step.
 
 **Durable stores.** The db step provisions the `amisad` database with the app
-role `amisad` (fixed lab password `amisadpoc2026` -- it rides inside a URL, so
-alphanumeric on purpose), opens `listen_addresses`/pg_hba to the pod and node
-networks, and grants SELECT and INSERT on the three append-only ledger tables,
-with no UPDATE or DELETE grant. It also grants SELECT, INSERT, and UPDATE on
+role `amisad`, which it creates without a password, opens
+`listen_addresses`/pg_hba to the pod and node networks, and grants SELECT and
+INSERT on the three append-only ledger tables, with no UPDATE or DELETE grant.
+It also grants SELECT, INSERT, and UPDATE on
 `ledger.settlement_instructions`. The same
 app role receives SELECT, INSERT, and UPDATE on `seller.offers`, `seller.orders`,
 and `seller.inventory`; inventory access is required during seller startup as
-well as during stock updates.
-`deploy.sh` passes `DATABASE_URL` (node
-IP:5432) to ledger-svc and seller-svc via the `databaseUrl` helm value; writes
-go to PostgreSQL first, and pods reload state on start. s001 asserts the rows
+well as during stock updates. It also receives SELECT, INSERT, and UPDATE on
+`resource.allocation_policies`, which resource-svc reads at startup and upserts
+when a policy is set.
+`deploy.sh` gives the role a new password on every build (48 hex characters,
+so it fits in a URL): psql reads it on standard input with statement logging
+turned off, and only the Secret `amisad-database` keeps it. `deploy.sh` passes
+`DATABASE_URL` (node IP:5432) to ledger-svc, seller-svc, and resource-svc via
+the `databaseUrl` helm value, written with `$(AMISAD_DB_PASSWORD)` and
+`$(NODE_IP)`, and names the Secret in the `databasePasswordSecret` value, so
+each pod builds the URL when it starts and neither the Helm release nor the
+Deployment holds the password; writes go to PostgreSQL first, and pods reload
+state on start. s001 asserts the rows
 landed and that a `kubectl rollout restart` reloads verifying chains and the
 settled order; s002 asserts the booked appointment row; s003 asserts the
 consent chain's six grant/revoke/re-grant rows plus one use per match, none
@@ -216,16 +234,33 @@ independent four-dimension certification and tamper localization. An empty
 `databaseUrl` (the chart default) keeps a service in-memory -- how `cargo test`
 and skeleton services run.
 
+**Ledger write token.** `deploy.sh`'s `amisad_publish_ledger_write_token`, run
+right after the database password, makes a 64-hex token for each build and
+publishes it only as Secret `amisad/amisad-ledger-write` (key `token`; the old
+one is deleted, the new one created from standard input). The ledger-svc,
+fabric-coordinator, seller-svc and platform-svc charts read it into
+`LEDGER_WRITE_TOKEN` (`ledgerWriteSecret`). ledger-svc answers any POST without
+`Authorization: Bearer <token>` with 401 `write_token_required`; GETs stay open.
+`test/amisad-scenario.sh` reads the Secret on `amisad-core` and pipes the token
+into the edge's ssh standard input, where the start command reads it into
+slice-runtime's environment; the single-VM fallback does the same locally. s008
+and s010 refund through platform-svc's `POST /v1/support/cases/refund`. Services
+started without the variable, as `cargo test` and most contract cases do, keep
+appends open; the contract cases for the token start ledger-svc with one.
+
 Existing `amisad-core-k8s` and `amisad-core` snapshots created before the inventory
-grant must be rebuilt or repaired before reuse. The normal end-to-end cycle
+and policy grants must be rebuilt or repaired before reuse. The normal end-to-end cycle
 removes and rebuilds these VMs automatically. For a retained lab, apply the current
 `db/schema.sql` as the database administrator, then run this in the `amisad`
 database. Recapture the repaired infrastructure snapshot and rebuild the deployed
 `amisad-core` snapshot from it; for a running deployed VM, restart seller after
-applying the grant:
+applying the grants. resource-svc reads the policy table once a deploy passes it
+`databaseUrl`.
 
 ```sql
 GRANT SELECT, INSERT, UPDATE ON seller.inventory TO amisad;
+GRANT USAGE ON SCHEMA resource TO amisad;
+GRANT SELECT, INSERT, UPDATE ON resource.allocation_policies TO amisad;
 ```
 
 ## Verified nested downloads
@@ -376,7 +411,7 @@ foreign build.
 ## Focused recovery and packaging checks
 
 After `cargo build --workspace --locked`, run `python3 test/service_contracts.py`
-and `python3 test/check_messages.py`. For durable inventory and settlement recovery,
+and `python3 test/check_messages.py`. For durable inventory, settlement, and policy recovery,
 apply `db/schema.sql` to a disposable PostgreSQL database, set
 `AMISAD_TEST_DATABASE_URL`, and run `python3 test/service_contracts.py DurableContracts`.
 These tests create records and restart their own local service processes.
@@ -385,14 +420,18 @@ These tests create records and restart their own local service processes.
 `pwsh test/host_contracts.ps1` use disposable paths and native command fixtures;
 they do not modify the host firewall, install system services, or deploy VMs.
 Run `python3 test/bash_contracts.py -v`, `python3 test/cluster_ready_contracts.py -v`,
-`python3 test/image_import_contracts.py -v`, and `python3 test/slice_runtime_stop_contracts.py -v`
-for restored-cluster readiness, thin-image delivery, and edge slice-runtime stop
-checks. They cover bounded API and NodePort requests,
-current-boot Flannel evidence, proxy bypass, retry recovery, and failures before
+`python3 test/database_secret_contracts.py -v`, `python3 test/image_import_contracts.py -v`,
+and `python3 test/slice_runtime_stop_contracts.py -v`
+for restored-cluster readiness, the per-build credentials, thin-image
+delivery, and edge slice-runtime stop and start checks. They cover bounded API and NodePort requests,
+current-boot Flannel evidence, proxy bypass, retry recovery, a role password
+that reaches psql and its Secret only on standard input, a ledger write token
+that reaches its Secret and the edge only on standard input, no fixed database
+password in any tracked file, and failures before
 Helm can deploy an image that was not imported. Readiness still requires every
 deployment rollout and all ten NodePorts; each startup or HTTP gate keeps its
 300-second allowance. The repository's `test/AmisAd.Regression.Tests.ps1` gate also
-runs all four suites. They require Python 3 and usable Bash; a bounded private
+runs all five suites. They require Python 3 and usable Bash; a bounded private
 filesystem probe skips absent or incompatible shell launchers. The probe checks
 paths with spaces, extensionless command fixtures, and the required POSIX tools.
 Real HTTP cases also require
@@ -401,19 +440,21 @@ private authentication fixture uses OpenSSL. Missing tools skip the relevant cas
 Run `flutter test` and `flutter analyze` in `components/apps/buyer-flutter` for
 request-deadline, navigation/disposal, and stale-response checks.
 
-Scenario HTTP diagnostics and edge lookup are shared in `test/amisad-scenario.sh`,
-loaded from the extracted project archive. `build/Publish-ProjectArchive.ps1`
+Scenario HTTP diagnostics, edge lookup, and the slice-runtime start (delivery to
+the edge, the gated single-VM fallback, and the health wait) are shared in
+`test/amisad-scenario.sh`, loaded from the extracted project archive. `build/Publish-ProjectArchive.ps1`
 is the canonical archive command; `build/serve-local.ps1` forwards for compatibility.
-Seller and ledger compile the database-specific `amisad-common/src/database.rs`
+Seller, ledger, and resource compile the database-specific `amisad-common/src/database.rs`
 module directly; the common library itself remains std-only. SQL errors return
-503 without terminating a live connection; a closed connection exits for restart.
+503 `store_unavailable` without terminating a live connection; a closed
+connection exits for restart.
 `test/database_policy_contracts.py` verifies both against a disposable PostgreSQL
 database selected by `DATABASE_POLICY_URL` (never use an existing lab database).
 Run it with an administrative connection to a disposable PostgreSQL cluster and
 `PSQL` pointing to `psql` if it is outside PATH. Its provisioning regression applies
 `db/schema.sql` and the actual grant block from the guest db script in a rolled-back
-transaction, then exercises inventory reads and writes as the non-superuser
-`amisad` role and verifies that ledger UPDATE/DELETE remain forbidden. Run that
+transaction, then exercises inventory reads and writes and a jurisdiction policy
+upsert as the non-superuser `amisad` role and verifies that ledger UPDATE/DELETE remain forbidden. Run that
 check alone with:
 
 ```bash

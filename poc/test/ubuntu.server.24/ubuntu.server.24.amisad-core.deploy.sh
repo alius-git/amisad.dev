@@ -163,6 +163,126 @@ amisad_fetch_stash_binaries() {
     return 7
 }
 
+# Gives the app role 'amisad' a password made for this build and publishes it
+# only as the Kubernetes Secret amisad-database (key 'password'), which the
+# ledger, seller and resource charts read. The password never lands in a file,
+# an argument list, the profile trace or the database's statement log: psql
+# reads the ALTER on standard input after the session turns statement logging
+# off, kubectl reads the Secret on standard input, and create (unlike apply)
+# keeps it out of a last-applied-configuration annotation. 48 hex characters
+# fit in DATABASE_URL without escaping. Every run, a transport retry included,
+# sets a new password; pods read the Secret when they start, and the readiness
+# step restarts them before each scenario. The body is a subshell, so its
+# 'set +x' ends with it and the caller's trace resumes on every path.
+#
+# This is the deploy step's first contact with the cluster and the database,
+# and kubectl does not retry a refused TCP dial, so it first waits (up to
+# $1 seconds, default 300) for the apiserver's /readyz and for pg_isready, and
+# ensures the namespace, all before the ALTER: a cluster or database that is
+# still starting changes nothing. Only the Secret's delete and create follow the
+# ALTER. If either fails, the role is left on a password no Secret carries and
+# the step exits before helm; its next run sets a new password and creates the
+# Secret again unconditionally, so a re-run converges.
+# --- REGION: amisad_publish_database_password
+amisad_publish_database_password() (
+    set +x
+    local budget="${1:-300}" deadline remaining max_time api_ready=0 api_rc=0 api_error='' db_ready=0 db_rc=0
+    local pw encoded err
+    local stale='!!   the role password changed, but Secret amisad/amisad-database does not carry it; the next run of this step sets a new password and creates the Secret again'
+    deadline=$((SECONDS + budget))
+    while [ "$SECONDS" -lt "$deadline" ]; do
+        if [ "$api_ready" -eq 0 ]; then
+            # Bound the dial itself as well as the retries; 0s would mean no timeout.
+            remaining=$((deadline - SECONDS))
+            max_time=2
+            if [ "$remaining" -ge 1 ] && [ "$remaining" -lt "$max_time" ]; then max_time="$remaining"; fi
+            if api_error=$(kubectl --request-timeout="${max_time}s" get --raw='/readyz' 2>&1); then
+                api_ready=1
+            else
+                api_rc=$?
+            fi
+        fi
+        if [ "$db_ready" -eq 0 ]; then
+            if sudo -u postgres pg_isready -q; then db_ready=1; else db_rc=$?; fi
+        fi
+        if [ "$api_ready" -eq 1 ] && [ "$db_ready" -eq 1 ]; then break; fi
+        if [ "$SECONDS" -lt "$deadline" ]; then sleep 1; fi
+    done
+    if [ "$api_ready" -eq 0 ]; then
+        echo "!! the apiserver did not answer /readyz within ${budget}s (last kubectl exit: ${api_rc}); the role password was not changed" >&2
+        if [ -n "$api_error" ]; then printf '%s\n' "${api_error:0:4096}" >&2; fi
+    fi
+    if [ "$db_ready" -eq 0 ]; then
+        echo "!! PostgreSQL did not accept connections (pg_isready) within ${budget}s (last exit: ${db_rc}); the role password was not changed" >&2
+    fi
+    if [ "$api_ready" -eq 0 ] || [ "$db_ready" -eq 0 ]; then exit 1; fi
+    pw=$(openssl rand -hex 24) || pw=''
+    if [[ ! "$pw" =~ ^[0-9a-f]{48}$ ]]; then
+        echo "!! no database password: openssl did not return 24 random bytes as 48 hex characters" >&2
+        exit 1
+    fi
+    kubectl get namespace amisad >/dev/null 2>&1 || kubectl create namespace amisad >/dev/null || exit 1
+    if ! err=$(printf "SET log_statement = 'none';\nSET log_min_duration_statement = -1;\nSET log_min_error_statement = 'panic';\nALTER ROLE amisad LOGIN PASSWORD '%s';\n" "$pw" \
+            | sudo -u postgres psql -v ON_ERROR_STOP=1 -d amisad -f - 2>&1 >/dev/null); then
+        echo "!! could not set the amisad role password:" >&2
+        printf '%s\n' "${err//"$pw"/<redacted>}" >&2
+        exit 1
+    fi
+    encoded=$(printf '%s' "$pw" | base64 | tr -d '\n')
+    if ! kubectl -n amisad delete secret amisad-database --ignore-not-found >/dev/null; then
+        echo "!! could not delete the previous Secret amisad/amisad-database" >&2
+        printf '%s\n' "$stale" >&2
+        exit 1
+    fi
+    if ! err=$(printf 'apiVersion: v1\nkind: Secret\nmetadata:\n  name: amisad-database\n  namespace: amisad\ntype: Opaque\ndata:\n  password: %s\n' "$encoded" \
+            | kubectl create -f - 2>&1 >/dev/null); then
+        err=${err//"$pw"/<redacted>}
+        echo "!! could not create Secret amisad/amisad-database:" >&2
+        printf '%s\n' "${err//"$encoded"/<redacted>}" >&2
+        printf '%s\n' "$stale" >&2
+        exit 1
+    fi
+    echo "  amisad role password set for this build; published only as Secret amisad/amisad-database"
+)
+
+# Makes the ledger write token for this build and publishes it only as the
+# Kubernetes Secret amisad-ledger-write (key 'token'). The ledger-svc,
+# fabric-coordinator, seller-svc and platform-svc charts read it into
+# LEDGER_WRITE_TOKEN, and the scenario scripts read it from the Secret for the
+# edges' slice-runtime; ledger-svc refuses an append without it. Like the role
+# password, it never lands in a file, an argument list or the profile trace:
+# kubectl reads the Secret on standard input, and create (unlike apply) keeps
+# it out of a last-applied-configuration annotation. It runs right after
+# amisad_publish_database_password, whose wait for the apiserver and the
+# namespace it relies on. Every run makes a new token. Pods read it when they
+# start, and a re-run leaves running pods on the previous one until the
+# readiness step restarts them before each scenario. A run that fails exits
+# before helm, and the next one makes a new token and creates the Secret again.
+# The body is a subshell, so its 'set +x' ends with it.
+# --- REGION: amisad_publish_ledger_write_token
+amisad_publish_ledger_write_token() (
+    set +x
+    local token encoded err
+    token=$(openssl rand -hex 32) || token=''
+    if [[ ! "$token" =~ ^[0-9a-f]{64}$ ]]; then
+        echo "!! no ledger write token: openssl did not return 32 random bytes as 64 hex characters" >&2
+        exit 1
+    fi
+    encoded=$(printf '%s' "$token" | base64 | tr -d '\n')
+    if ! kubectl -n amisad delete secret amisad-ledger-write --ignore-not-found >/dev/null; then
+        echo "!! could not delete the previous Secret amisad/amisad-ledger-write" >&2
+        exit 1
+    fi
+    if ! err=$(printf 'apiVersion: v1\nkind: Secret\nmetadata:\n  name: amisad-ledger-write\n  namespace: amisad\ntype: Opaque\ndata:\n  token: %s\n' "$encoded" \
+            | kubectl create -f - 2>&1 >/dev/null); then
+        err=${err//"$token"/<redacted>}
+        echo "!! could not create Secret amisad/amisad-ledger-write:" >&2
+        printf '%s\n' "${err//"$encoded"/<redacted>}" >&2
+        exit 1
+    fi
+    echo "  ledger write token made for this build; published only as Secret amisad/amisad-ledger-write"
+)
+
 # Downloads land in a private directory (mode 0700), not loose in /tmp: another
 # local user could otherwise swap a file between its digest check and its use.
 AMISAD_WORK=$(mktemp -d "${TMPDIR:-/tmp}/amisad-fetch.XXXXXX")
@@ -227,12 +347,17 @@ PY
 
 echo "== build thin images + deploy 10 services =="
 sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
+amisad_publish_database_password
+amisad_publish_ledger_write_token
 SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
-# Durable stores: ledger-svc and seller-svc reach the host PostgreSQL via the
-# node IP, resolved by the POD at start ($(NODE_IP) is kubernetes env
-# expansion from the downward API, NOT shell) - a snapshot restore with a new
-# DHCP lease would make a deploy-time IP stale. Role/password: db step.
-DATABASE_URL='postgres://amisad:amisadpoc2026@$(NODE_IP):5432/amisad'
+# Durable stores: ledger-svc, seller-svc and resource-svc reach the host
+# PostgreSQL via the node IP, resolved by the POD at start ($(NODE_IP) is
+# kubernetes env expansion from the downward API, NOT shell) - a snapshot
+# restore with a new DHCP lease would make a deploy-time IP stale.
+# $(AMISAD_DB_PASSWORD) expands the same way, from the Secret
+# amisad_publish_database_password created, so neither the Helm release nor the
+# Deployment carries the password.
+DATABASE_URL='postgres://amisad:$(AMISAD_DB_PASSWORD)@$(NODE_IP):5432/amisad'
 # --- REGION: Resolve service endpoints
 NODE_IP=$(hostname -I | awk '{print $1}')
 # docker.io is unreachable in this lab: distroless base from gcr.io, thin images
@@ -255,7 +380,11 @@ docker save "${IMAGES[@]}" | sudo ctr -n k8s.io images import -
 for svc in $SERVICES; do
     EXTRA=()
     case "$svc" in
-        ledger-svc|seller-svc) EXTRA=(--set-string "databaseUrl=${DATABASE_URL}") ;;
+        ledger-svc|seller-svc|resource-svc) EXTRA+=(--set-string "databaseUrl=${DATABASE_URL}" --set-string databasePasswordSecret=amisad-database) ;;
+    esac
+    # The ledger and the services that append to it read the write token.
+    case "$svc" in
+        ledger-svc|seller-svc|fabric-coordinator|platform-svc) EXTRA+=(--set-string ledgerWriteSecret=amisad-ledger-write) ;;
     esac
     helm upgrade --install "$svc" "workloads/services/${svc}" \
         --namespace amisad --create-namespace \

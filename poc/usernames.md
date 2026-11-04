@@ -55,7 +55,7 @@ in sudoers.
 
 | Account | Where | Purpose |
 |---------|-------|---------|
-| `amisad` | PostgreSQL role on `amisad-core` | App role for ledger-svc and seller-svc (`DATABASE_URL`). INSERT+SELECT only on ledger tables -- append-only is database-enforced. Fixed lab password `amisadpoc2026` (inside a URL, so alphanumeric); not vault-managed, provisioned by the db step. |
+| `amisad` | PostgreSQL role on `amisad-core` | App role for ledger-svc, seller-svc, and resource-svc (`DATABASE_URL`). INSERT+SELECT only on ledger tables -- append-only is database-enforced. Created by the db step without a password; the deploy step sets a new one on every build (48 hex characters, so it fits in a URL) through psql standard input and publishes it only as the Kubernetes Secret `amisad-database`, from which the pods build `DATABASE_URL`. Not vault-managed: nothing outside `amisad-core` signs in with it. |
 | `amisad_audit_ro` | PostgreSQL role (NOLOGIN) | Read-only ledger access reserved for audit-svc; independence is architectural. |
 
 ## Core->edge access

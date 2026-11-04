@@ -38,7 +38,8 @@ or LAN at `http://<vm-ip>:<nodeport>`.
 
 **Re-arm (only after a VM restart).** A reboot of `amisad-core` loses the
 in-memory state (coordinator routing, identity tokens, the registered edge) --
-but the ledgers, offers, and orders come back from PostgreSQL, chains intact.
+but the ledgers, offers, orders, and jurisdiction policies come back from
+PostgreSQL, chains intact.
 Run the command steps below as **`amisad-core-admin`**: the repo and
 `target/release/` binaries live under its home, which the non-admin personas
 cannot traverse. maya/elena/tom/priya are the demo *narrative* logins, and the
@@ -237,7 +238,7 @@ curl -s -X POST http://$NODE_IP:30086/v1/support/cases -d '{"match_id":"<id>","m
 curl -s -X POST http://$NODE_IP:30086/v1/support/cases/disclosure/request -d '{"case_id":"<case_id>"}'
 target/release/buyer-client disclose <case_id> delivery-photo-ref-77 4   # Maya grants, 4s TTL
 curl -s http://$NODE_IP:30086/v1/support/cases/<case_id>/disclosure     # artifact readable now
-curl -s -X POST http://$NODE_IP:30081/v1/settlements/adjust -d '{"match_id":"<id>","case_id":"<case_id>"}'   # refund: compensating entries
+curl -s -X POST http://$NODE_IP:30086/v1/support/cases/refund -d '{"case_id":"<case_id>"}'   # refund: compensating entries on the ledger
 curl -s http://$NODE_IP:30081/v1/settlements/match/<id>                 # original untouched, net 0
 sleep 5; curl -s -o /dev/null -w '%{http_code}\n' http://$NODE_IP:30086/v1/support/cases/<case_id>/disclosure   # 410: expired
 ```

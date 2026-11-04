@@ -6,9 +6,11 @@
 // support desk - a case opens carrying operational METADATA only (order state,
 // settlement) with no buyer identity; a scoped, time-boxed disclosure artifact
 // can be attached and read only until it expires, after which the access path
-// is gone. Nothing buyer-derived ever reaches this service.
+// is gone. Nothing buyer-derived ever reaches this service. Sam's refund goes
+// through this desk to ledger-svc, which takes appends only with the write
+// token this service holds.
 
-use amisad_common::{json, serve_app, Request, Response, ServiceInfo};
+use amisad_common::{json, post_to_ledger, serve_app, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct SupportCase {
@@ -24,6 +26,10 @@ struct SupportCase {
 struct State {
     cases: Vec<json::Json>,
     support: Vec<SupportCase>,
+}
+
+fn ledger_url() -> String {
+    std::env::var("LEDGER_URL").unwrap_or_else(|_| String::from("http://ledger-svc:8080"))
 }
 
 fn now_secs() -> i64 {
@@ -153,6 +159,33 @@ fn handle(state: &mut State, req: &Request) -> Response {
             case.lifecycle.push(json::obj(vec![("stage", json::s("delivery")), ("ts", json::n(now_secs())), ("expiry_ts", json::n(expiry_ts))]));
             Response::json(200, &json::obj(vec![("case_id", json::s(&case_id)), ("stage", json::s("disclosed"))]))
         }
+        // Sam refunds the case's match: the ledger posts compensating entries
+        // referencing the case. The match is always the one recorded on the
+        // case, never one from the body. Neither this route nor case creation
+        // takes a credential, so anyone who reaches the service can open a
+        // case for any match and refund it once (the ledger allows one refund
+        // per match); the write token this service holds closes direct ledger
+        // appends, not this route. The ledger's answer is relayed as it came,
+        // so an identical replay answers 200 with the prior outcome.
+        ("POST", "/v1/support/cases/refund") => {
+            let body = match json::parse(&req.body) {
+                Ok(b) => b,
+                Err(_) => return Response::problem(400, "invalid_request"),
+            };
+            let case_id = body.str_of("case_id").unwrap_or("").to_string();
+            let case = match state.support.iter().find(|c| c.id == case_id) {
+                Some(c) => c,
+                None => return Response::error(404, "unknown case"),
+            };
+            let adjustment = json::obj(vec![
+                ("match_id", json::s(&case.match_id)),
+                ("case_id", json::s(&case.id)),
+            ]);
+            match post_to_ledger(&format!("{}/v1/settlements/adjust", ledger_url()), &adjustment.dump()) {
+                Ok((status, body)) => Response { status, body },
+                Err(e) => Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}")),
+            }
+        }
         ("POST", "/v1/support/cases/resolve") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
@@ -225,6 +258,7 @@ mod tests {
         Request {
             method: method.to_string(),
             path: path.to_string(),
+            headers: Vec::new(),
             body: body.to_string(),
         }
     }
@@ -265,5 +299,15 @@ mod tests {
         for marker in ["maya", "need", "envelope", "buyer"] {
             assert!(!fetched.body.contains(marker), "case leaked: {marker}");
         }
+    }
+
+    #[test]
+    fn refund_needs_a_known_case() {
+        let mut state = State { cases: Vec::new(), support: Vec::new() };
+        // Answered before any ledger call: nothing listens on the default ledger host here.
+        for body in ["{\"case_id\":\"support-0001\"}", "{}"] {
+            assert_eq!(handle(&mut state, &req("POST", "/v1/support/cases/refund", body)).status, 404, "{body}");
+        }
+        assert_eq!(handle(&mut state, &req("POST", "/v1/support/cases/refund", "not json")).status, 400);
     }
 }

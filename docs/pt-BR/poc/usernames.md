@@ -65,7 +65,7 @@ obtidos do cofre em uma etapa `sensitive: true`) e **não** estão no sudoers.
 
 | Conta | Local | Finalidade |
 |---------|-------|---------|
-| `amisad` | Papel do PostgreSQL em `amisad-core` | Papel da aplicação para ledger-svc e seller-svc (`DATABASE_URL`). Apenas INSERT+SELECT nas tabelas do ledger -- o banco impõe a restrição de somente acréscimo. Senha fixa do laboratório `amisadpoc2026` (dentro de uma URL, portanto alfanumérica); não é gerenciada pelo cofre e é provisionada pela etapa db. |
+| `amisad` | Papel do PostgreSQL em `amisad-core` | Papel da aplicação para ledger-svc, seller-svc e resource-svc (`DATABASE_URL`). Apenas INSERT+SELECT nas tabelas do ledger -- o banco impõe a restrição de somente acréscimo. Criado pela etapa db sem senha; a etapa de implantação define uma nova a cada build (48 caracteres hexadecimais, para caber em uma URL) pela entrada padrão do psql e a publica somente como o Secret do Kubernetes `amisad-database`, do qual os pods montam `DATABASE_URL`. Não é gerenciada pelo cofre: nada fora de `amisad-core` entra com ela. |
 | `amisad_audit_ro` | Papel do PostgreSQL (NOLOGIN) | Acesso somente de leitura ao ledger, reservado para audit-svc; a independência é arquitetural. |
 
 <a id="core-edge-access"></a>

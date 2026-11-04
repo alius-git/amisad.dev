@@ -34,6 +34,15 @@ spec:
           env:
             - name: PORT
               value: {{ .Values.port | quote }}
+            {{- if .Values.ledgerWriteSecret }}
+            # The bearer token ledger-svc requires on appends. Only this Secret
+            # carries it; the deploy step makes a new one for each build.
+            - name: LEDGER_WRITE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ledgerWriteSecret | quote }}
+                  key: token
+            {{- end }}
             {{- if .Values.databaseUrl }}
             # NODE_IP resolves at pod start (snapshot restores can change the
             # node address); databaseUrl may reference it as $(NODE_IP).
@@ -41,6 +50,16 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
+            {{- if .Values.databasePasswordSecret }}
+            # The role password exists only in this Secret, which the deploy
+            # step sets for each build. Kubernetes expands $(NAME) only from
+            # variables defined earlier in this list, so DATABASE_URL comes last.
+            - name: AMISAD_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.databasePasswordSecret | quote }}
+                  key: password
+            {{- end }}
             - name: DATABASE_URL
               value: {{ .Values.databaseUrl | quote }}
             {{- end }}

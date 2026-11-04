@@ -57,6 +57,7 @@ Describe 'AmisAd guest deployment contracts' {
         @{ Suite = 'bash_contracts.py' }
         @{ Suite = 'build_contracts.py' }
         @{ Suite = 'cluster_ready_contracts.py' }
+        @{ Suite = 'database_secret_contracts.py' }
         @{ Suite = 'download_contracts.py' }
         @{ Suite = 'http_shutdown_contracts.py' }
         @{ Suite = 'image_import_contracts.py' }
@@ -104,6 +105,7 @@ Describe 'AmisAd guest deployment contracts' {
 
     It 'passes the <Program> Node contracts' -TestCases @(
         @{ Program = 'poc/test/deep_find_contracts.cjs' }
+        @{ Program = 'poc/test/demo_script_contracts.cjs' }
         @{ Program = 'test/demo-polling.test.js' }
     ) {
         param($Program)
@@ -970,6 +972,8 @@ public sealed class AmisAdFixtureHandler : HttpMessageHandler {
         foreach ($function in $functions) { . ([scriptblock]::Create($function.Extent.Text)) }
         $handler = [AmisAdFixtureHandler]::new()
         $http = [Net.Http.HttpClient]::new($handler)
+        # data-view's Invoke-Proxy also reads its quiet-period table from the server's scope.
+        $proxyDownUntil = @{}
         $requestBodyStream = [IO.MemoryStream]::new([Text.Encoding]::UTF8.GetBytes('{"fixture":true}'))
         $request = [pscustomobject]@{ HasEntityBody = $true; InputStream = $requestBodyStream; ContentEncoding = [Text.Encoding]::UTF8; HttpMethod = 'POST'; Url = [uri]'http://localhost/?fixture=1' }
         $output = [IO.MemoryStream]::new()
@@ -983,6 +987,7 @@ public sealed class AmisAdFixtureHandler : HttpMessageHandler {
             $handler.Content.WasDisposed | Should -BeTrue
             { $handler.Request.Content.ReadAsStringAsync().GetAwaiter().GetResult() } | Should -Throw
             $requestBodyStream.CanRead | Should -BeFalse
+            $proxyDownUntil.Count | Should -Be 0
         } finally {
             $http.Dispose(); $requestBodyStream.Dispose(); $output.Dispose()
         }
@@ -1000,6 +1005,8 @@ public sealed class AmisAdFixtureHandler : HttpMessageHandler {
         $handler = [AmisAdFixtureHandler]::new()
         $handler.Fail = $true
         $http = [Net.Http.HttpClient]::new($handler)
+        # data-view's Invoke-Proxy also reads its quiet-period table from the server's scope.
+        $proxyDownUntil = @{}
         $requestBodyStream = [IO.MemoryStream]::new([Text.Encoding]::UTF8.GetBytes('{"fixture":true}'))
         $request = [pscustomobject]@{ HasEntityBody = $true; InputStream = $requestBodyStream; ContentEncoding = [Text.Encoding]::UTF8; HttpMethod = 'POST'; Url = [uri]'http://localhost/' }
         $output = [IO.MemoryStream]::new()
@@ -1008,8 +1015,249 @@ public sealed class AmisAdFixtureHandler : HttpMessageHandler {
             Invoke-Proxy -Request $request -Response $response -TargetBase 'http://fixture.invalid' -Rest '/example'
             $response.StatusCode | Should -Be 502
             { $handler.Request.Content.ReadAsStringAsync().GetAwaiter().GetResult() } | Should -Throw
+            $proxyDownUntil.Count | Should -Be 0
         } finally {
             $http.Dispose(); $handler.Content.Dispose(); $requestBodyStream.Dispose(); $output.Dispose()
+        }
+    }
+}
+
+# The demo hosts bind every interface, so their proxy is a path from the LAN to
+# amisad-core; it reaches only the service NodePorts the deploy step exposes.
+Describe 'AmisAd demo proxy reaches only the service NodePorts' {
+    It 'routes only 30080-30089 to amisad-core in <Server>' -TestCases @(
+        @{ Server = 'by-act' }, @{ Server = 'data-view' }
+    ) {
+        param($Server)
+        $demoRoot = Join-Path $script:RepoRoot "poc/demo/$Server"
+        $tokens = $null; $parseErrors = $null
+        $ast = [Management.Automation.Language.Parser]::ParseFile((Join-Path $demoRoot "serve-$Server.ps1"), [ref]$tokens, [ref]$parseErrors)
+        $routes = @($ast.FindAll({ param($node)
+                    $node -is [Management.Automation.Language.BinaryExpressionAst] -and
+                    $node.Operator -eq [Management.Automation.Language.TokenKind]::Imatch -and
+                    $node.Right -is [Management.Automation.Language.StringConstantExpressionAst] -and
+                    $node.Right.Value.StartsWith('^/api/core/') }, $true))
+        $routes.Count | Should -Be 1
+        $pattern = $routes[0].Right.Value
+        foreach ($path in '/api/core/30080/health', '/api/core/30089/v1/certify') {
+            $path -match $pattern | Should -BeTrue -Because $path
+            $Matches[2] | Should -Be ($path -replace '^/api/core/\d+', '')
+        }
+        foreach ($path in '/api/core/8222/varz', '/api/core/22/', '/api/core/5432/x', '/api/core/300810/x',
+            '/api/core/3008/x', '/api/core/30079/health', '/api/core/30090/health') {
+            $path -match $pattern | Should -BeFalse -Because $path
+        }
+        # What the route does not take falls through to the static files, which answer 404.
+        $definitions = @($ast.FindAll({ param($node)
+                    ($node -is [Management.Automation.Language.AssignmentStatementAst] -and $node.Left.Extent.Text -in '$artRoot', '$mime') -or
+                    ($node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Send-StaticFile') }, $false))
+        foreach ($definition in $definitions) { . ([scriptblock]::Create($definition.Extent.Text)) }
+        $body = [IO.MemoryStream]::new()
+        $response = [pscustomobject]@{ StatusCode = 0; ContentType = ''; ContentLength64 = 0; Headers = @{}; OutputStream = $body }
+        Send-StaticFile -Response $response -UrlPath '/api/core/8222/varz'
+        $response.StatusCode | Should -Be 404
+    }
+}
+
+# A stopped VM answers no connection, and the data window keeps requests to each
+# of its services in flight; the proxy stops dialing it for a while so every
+# other request does not wait behind those.
+Describe 'AmisAd data-view proxy and a VM that does not answer' {
+    BeforeAll {
+        if (-not ('AmisAdUnansweredHandler' -as [type])) {
+            Add-Type -TypeDefinition @'
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+public sealed class AmisAdUnansweredHandler : HttpMessageHandler {
+    public int Calls;
+    public Exception Failure;
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token) {
+        Interlocked.Increment(ref Calls);
+        if (Failure != null) return Task.FromException<HttpResponseMessage>(Failure);
+        return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}") });
+    }
+}
+'@
+        }
+        $sourcePath = Join-Path $script:RepoRoot 'poc/demo/data-view/serve-data-view.ps1'
+        $tokens = $null; $parseErrors = $null
+        $script:DataViewAst = [Management.Automation.Language.Parser]::ParseFile($sourcePath, [ref]$tokens, [ref]$parseErrors)
+        $functions = $script:DataViewAst.FindAll({ param($node) $node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -in @('Invoke-Proxy', 'Read-RequestBody') }, $false)
+        foreach ($function in $functions) { . ([scriptblock]::Create($function.Extent.Text)) }
+        # One proxied GET, answered through whatever $http and $proxyDownUntil the caller holds.
+        function Invoke-FixtureGet([string]$TargetBase) {
+            $output = [IO.MemoryStream]::new()
+            $request = [pscustomobject]@{ HasEntityBody = $false; HttpMethod = 'GET'; Url = [uri]'http://localhost/' }
+            $response = [pscustomobject]@{ StatusCode = 0; ContentType = ''; ContentLength64 = 0; Headers = @{}; OutputStream = $output }
+            try {
+                Invoke-Proxy -Request $request -Response $response -TargetBase $TargetBase -Rest '/health'
+                [pscustomobject]@{ Status = $response.StatusCode; Body = [Text.Encoding]::UTF8.GetString($output.ToArray()) }
+            } finally { $output.Dispose() }
+        }
+    }
+
+    It 'gives a connection 3 s of its own and the client no timeout' {
+        $setup = @($script:DataViewAst.FindAll({ param($node)
+                    $node -is [Management.Automation.Language.AssignmentStatementAst] -and
+                    $node.Left.Extent.Text -in '$proxyHandler', '$proxyHandler.ConnectTimeout', '$http', '$http.Timeout' }, $false))
+        $setup.Count | Should -Be 4
+        foreach ($statement in $setup) { . ([scriptblock]::Create($statement.Extent.Text)) }
+        try {
+            $proxyHandler.ConnectTimeout | Should -Be ([TimeSpan]::FromSeconds(3))
+            $http.Timeout | Should -Be ([Threading.Timeout]::InfiniteTimeSpan)
+        } finally { $http.Dispose() }
+    }
+
+    It 'stops dialing a VM whose address could not be reached and answers 502 at once' {
+        $handler = [AmisAdUnansweredHandler]::new()
+        $handler.Failure = [Net.Http.HttpRequestException]::new('No route to host (192.0.2.10:30080)',
+            [Net.Sockets.SocketException]::new([int][Net.Sockets.SocketError]::HostUnreachable))
+        $http = [Net.Http.HttpClient]::new($handler)
+        $proxyDownUntil = @{}
+        try {
+            $answers = @(foreach ($port in 30080..30089) { Invoke-FixtureGet -TargetBase "http://192.0.2.10:$port" })
+            $handler.Calls | Should -Be 1
+            @($answers | Where-Object Status -EQ 502).Count | Should -Be 10
+            $answers[-1].Body | Should -Match '192\.0\.2\.10 did not answer a connection attempt; asking again after'
+            $quiet = ($proxyDownUntil['192.0.2.10'] - [DateTime]::UtcNow).TotalSeconds
+            $quiet | Should -BeGreaterThan 25
+            $quiet | Should -BeLessOrEqual 30
+        } finally { $http.Dispose() }
+    }
+
+    It 'treats a connect timeout the same way' {
+        $handler = [AmisAdUnansweredHandler]::new()
+        $handler.Failure = [Threading.Tasks.TaskCanceledException]::new('The operation was canceled.',
+            [TimeoutException]::new('A connection could not be established within the configured ConnectTimeout.'))
+        $http = [Net.Http.HttpClient]::new($handler)
+        $proxyDownUntil = @{}
+        try {
+            $answers = @(1..3 | ForEach-Object { Invoke-FixtureGet -TargetBase 'http://192.0.2.10:30082' })
+            $handler.Calls | Should -Be 1
+            @($answers | Where-Object Status -EQ 502).Count | Should -Be 3
+            $proxyDownUntil.Keys | Should -Be @('192.0.2.10')
+        } finally { $http.Dispose() }
+    }
+
+    It 'keeps asking a VM that <Case>' -TestCases @(
+        @{ Case = 'refused the connection'; Failure = [Net.Http.HttpRequestException]::new('Connection refused (192.0.2.10:30080)',
+                [Net.Sockets.SocketException]::new([int][Net.Sockets.SocketError]::ConnectionRefused)) }
+        @{ Case = 'answered after the deadline'; Failure = [Threading.Tasks.TaskCanceledException]::new('The operation was canceled.',
+                [IO.IOException]::new('Unable to read data from the transport connection: Operation canceled.',
+                    [Net.Sockets.SocketException]::new([int][Net.Sockets.SocketError]::OperationAborted))) }
+    ) {
+        param($Case, $Failure)
+        $handler = [AmisAdUnansweredHandler]::new()
+        $handler.Failure = $Failure
+        $http = [Net.Http.HttpClient]::new($handler)
+        $proxyDownUntil = @{}
+        try {
+            $answers = @(1..3 | ForEach-Object { Invoke-FixtureGet -TargetBase 'http://192.0.2.10:30080' })
+            $handler.Calls | Should -Be 3 -Because $Case
+            @($answers | Where-Object Status -EQ 502).Count | Should -Be 3
+            $proxyDownUntil.Count | Should -Be 0
+        } finally { $http.Dispose() }
+    }
+
+    It 'asks again once the quiet period has passed' {
+        $handler = [AmisAdUnansweredHandler]::new()
+        $http = [Net.Http.HttpClient]::new($handler)
+        $proxyDownUntil = @{ '192.0.2.10' = [DateTime]::UtcNow.AddSeconds(-1) }
+        try {
+            (Invoke-FixtureGet -TargetBase 'http://192.0.2.10:30080').Status | Should -Be 200
+            $handler.Calls | Should -Be 1
+            $proxyDownUntil['192.0.2.10'] | Should -BeLessThan ([DateTime]::UtcNow)
+        } finally { $http.Dispose() }
+    }
+
+    It 'still asks other VMs' {
+        $handler = [AmisAdUnansweredHandler]::new()
+        $http = [Net.Http.HttpClient]::new($handler)
+        $proxyDownUntil = @{ '192.0.2.10' = [DateTime]::UtcNow.AddSeconds(30) }
+        try {
+            (Invoke-FixtureGet -TargetBase 'http://192.0.2.10:30080').Status | Should -Be 502
+            $handler.Calls | Should -Be 0
+            (Invoke-FixtureGet -TargetBase 'http://192.0.2.11:30080').Status | Should -Be 200
+            $handler.Calls | Should -Be 1
+            $proxyDownUntil.Keys | Should -Be @('192.0.2.10')
+        } finally { $http.Dispose() }
+    }
+}
+
+# Both consoles run poc/demo/common/scenario-script.js, which sits beside their
+# own folders, so each server maps /common/ there and to nothing above it.
+Describe 'AmisAd demo scenario script' {
+    It 'serves the one scenario script to <Server>' -TestCases @(
+        @{ Server = 'by-act' }, @{ Server = 'data-view' }
+    ) {
+        param($Server)
+        $demoRoot = Join-Path $script:RepoRoot "poc/demo/$Server"
+        $tokens = $null; $parseErrors = $null
+        $ast = [Management.Automation.Language.Parser]::ParseFile((Join-Path $demoRoot "serve-$Server.ps1"), [ref]$tokens, [ref]$parseErrors)
+        # The server's own art root, MIME map and static handler, as it defines them.
+        $definitions = @($ast.FindAll({ param($node)
+                    ($node -is [Management.Automation.Language.AssignmentStatementAst] -and $node.Left.Extent.Text -in '$artRoot', '$mime') -or
+                    ($node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Send-StaticFile') }, $false))
+        $definitions.Count | Should -Be 3
+        foreach ($definition in $definitions) { . ([scriptblock]::Create($definition.Extent.Text)) }
+        $serve = {
+            param([string]$UrlPath)
+            $body = [IO.MemoryStream]::new()
+            $response = [pscustomobject]@{ StatusCode = 0; ContentType = ''; ContentLength64 = 0; Headers = @{}; OutputStream = $body }
+            Send-StaticFile -Response $response -UrlPath $UrlPath
+            [pscustomobject]@{ Status = $response.StatusCode; Type = $response.ContentType; Bytes = $body.ToArray() }
+        }
+
+        $shared = & $serve '/common/scenario-script.js'
+        $shared.Status | Should -Be 200
+        $shared.Type | Should -Be 'text/javascript; charset=utf-8'
+        $expected = [IO.File]::ReadAllBytes((Join-Path $script:RepoRoot 'poc/demo/common/scenario-script.js'))
+        [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($shared.Bytes)) |
+            Should -Be ([Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($expected)))
+        (& $serve '/art/icon.svg').Status | Should -Be 200
+        (& $serve '/').Type | Should -Be 'text/html; charset=utf-8'
+        # A real file outside common/, so only the containment check can refuse it.
+        Test-Path -LiteralPath (Join-Path $script:RepoRoot 'test/AmisAd.Lab.psm1') -PathType Leaf | Should -BeTrue
+        (& $serve '/common/../../../test/AmisAd.Lab.psm1').Status | Should -Be 404
+    }
+
+    # A folder whose name only starts with a served root's name is outside it.
+    It 'refuses a sibling folder of each served root in <Server>' -TestCases @(
+        @{ Server = 'by-act' }, @{ Server = 'data-view' }
+    ) {
+        param($Server)
+        $tokens = $null; $parseErrors = $null
+        $ast = [Management.Automation.Language.Parser]::ParseFile((Join-Path $script:RepoRoot "poc/demo/$Server/serve-$Server.ps1"), [ref]$tokens, [ref]$parseErrors)
+        $definitions = @($ast.FindAll({ param($node)
+                    ($node -is [Management.Automation.Language.AssignmentStatementAst] -and $node.Left.Extent.Text -in '$artRoot', '$mime') -or
+                    ($node -is [Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq 'Send-StaticFile') }, $false))
+        $definitions.Count | Should -Be 3
+        # The repository's layout under a private root, with a real file in a
+        # sibling of each served folder; the server derives $artRoot from it.
+        $demoRoot = Join-Path $TestDrive "sibling-$Server/poc/demo/$Server"
+        foreach ($file in 'ui/page.html', '../common/scenario-script.js', '../../components/art/icon.svg',
+            "../$Server-x/leak.html", '../common-x/leak.js', '../../components/art-x/leak.svg') {
+            $target = [IO.Path]::GetFullPath((Join-Path $demoRoot $file))
+            $null = New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force
+            [IO.File]::WriteAllText($target, $file)
+        }
+        foreach ($definition in $definitions) { . ([scriptblock]::Create($definition.Extent.Text)) }
+        $serve = {
+            param([string]$UrlPath)
+            $body = [IO.MemoryStream]::new()
+            $response = [pscustomobject]@{ StatusCode = 0; ContentType = ''; ContentLength64 = 0; Headers = @{}; OutputStream = $body }
+            Send-StaticFile -Response $response -UrlPath $UrlPath
+            $response.StatusCode
+        }
+
+        foreach ($path in "/ui/page.html", '/common/scenario-script.js', '/art/icon.svg') {
+            & $serve $path | Should -Be 200 -Because $path
+        }
+        foreach ($path in "/../$Server-x/leak.html", '/common/../common-x/leak.js', '/art/../art-x/leak.svg') {
+            & $serve $path | Should -Be 404 -Because $path
         }
     }
 }
@@ -1523,16 +1771,19 @@ Describe 'AmisAd key handling policy' {
     }
 
     It 'leaves the scenarios that reach an edge reading the key from the admin home of vm-core' {
+        # The scenarios reach an edge only through the shared helper, which
+        # holds the one login that names the key.
+        $helper = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'poc/test/amisad-scenario.sh') -Raw
+        $helper | Should -Match 'ssh_opts=\(-i "\$REAL_HOME/\.ssh/amisad-demo-key"'
         $scenarios = @($script:Sources | Where-Object { $_.Name -match '^ubuntu\.server\.24\.amisad-core\.s\d{3}\..+\.sh$' })
         $scenarios.Count | Should -BeGreaterOrEqual 10
-        $usingTheKey = 0
+        $reachingAnEdge = 0
         foreach ($scenario in $scenarios) {
             $text = Get-Content -LiteralPath $scenario.FullName -Raw
-            if ($text -notmatch 'amisad-demo-key') { continue }
-            $usingTheKey++
-            $text | Should -Match 'SSH_OPTS=\(-i "\$REAL_HOME/\.ssh/amisad-demo-key"' -Because $scenario.Name
+            $text | Should -Not -Match 'amisad-demo-key' -Because "$($scenario.Name) logs in to an edge through the helper"
+            if ($text -match '(?m)^\s*amisad_(start|deliver)_slice_runtime ') { $reachingAnEdge++ }
         }
-        $usingTheKey | Should -BeGreaterOrEqual 9 -Because 'the scenarios that start slice-runtime on an edge all log in with the key'
+        $reachingAnEdge | Should -BeGreaterOrEqual 9 -Because 'the scenarios that start slice-runtime on an edge all log in with the key'
     }
 }
 

@@ -48,6 +48,102 @@
       "sourceHash": "5a5995df081fb2c4b33941350d3134990a331b173ae00637d0a6bf435dab23fc",
       "origin": "machine",
       "description": "An inventory timestamp is older, or a replay changes stock at the same timestamp."
+    },
+    "service_stopping": {
+      "text": "服务正在停止，未执行此请求。请重试请求。",
+      "sourceHash": "38e934181b12035681176dfbfeabf49b944a430a3eee93c56651b18ccc8510b3",
+      "origin": "machine",
+      "description": "Shutdown was requested before the handler started, so the request was not run."
+    },
+    "service_stalled": {
+      "text": "服务处理当前请求时没有进展。",
+      "sourceHash": "721793ae0bed67dac689b7ea65c22c68e3b7393968f11f9d126d9bcadf9f25fa",
+      "origin": "machine",
+      "description": "The running handler made no outbound progress within the stall limit; liveness probes restart the service."
+    },
+    "unverified_actor": {
+      "text": "无法验证参与者令牌。",
+      "sourceHash": "3c77ea036341177309d17a540fdbec939f3ed5f96add727b328fb98dceb8b1f4",
+      "origin": "machine",
+      "description": "Identity did not accept the actor token the request carried."
+    },
+    "held_match_not_found": {
+      "text": "没有使用此标识的暂挂匹配在等待此委托人批准。",
+      "sourceHash": "21a5c8b1256ce2aefa3374dd975722536f2b7b8939196a0b4e7f3e38bde60b59",
+      "origin": "machine",
+      "description": "The handle names no over-cap match held for the verified principal: it was never held, its approval already committed, or its mandate was revoked."
+    },
+    "unknown_handle": {
+      "text": "此标识未知。",
+      "sourceHash": "355d5054cbe8f06fc321f3492672fe7e73008f02ad9cebd15ef453d176265cfd",
+      "origin": "machine",
+      "description": "No shortlist or order is kept under the handle; handles do not survive a coordinator restart."
+    },
+    "offer_not_on_shortlist": {
+      "text": "该商品不在此候选列表中。",
+      "sourceHash": "7ad436d938b22d8d5a4dda022ff8620f09ae33c3c831b3bd0ab52a5fe0a8266e",
+      "origin": "machine",
+      "description": "A booking named an offer that the environment did not shortlist for the handle."
+    },
+    "slot_not_offered": {
+      "text": "该商品不包含所请求的时段。",
+      "sourceHash": "9498515103ae191fd2ddfd4129a57d6f59618a0608997eba2c99ee22b232f8e8",
+      "origin": "machine",
+      "description": "A booking named a fitting slot that the shortlisted offer does not carry."
+    },
+    "already_booked": {
+      "text": "此候选列表已使用其他选择完成预订。",
+      "sourceHash": "7f18e530239f602af1e9175851234458f16e52996785dcd548b3016a8baa64bc",
+      "origin": "machine",
+      "description": "The handle has a completed booking for another offer or slot; an identical replay answers 200 instead."
+    },
+    "not_found": {
+      "text": "请求的资源不存在。",
+      "sourceHash": "a8deda015c682a3469c94e5ee6b1734fd27e07d5b4caf2b9b6f56e769943d812",
+      "origin": "machine",
+      "description": "No route matches the request's method and path."
+    },
+    "upstream_unavailable": {
+      "text": "无法访问此请求所依赖的服务。请重试请求。",
+      "sourceHash": "0bf7631c40c95bfdf07835f906f578407d78a525652c142f201a0e0e2dbb599d",
+      "origin": "machine",
+      "description": "A call to another service failed before it returned an answer; detail names the service and the error."
+    },
+    "upstream_failed": {
+      "text": "此请求所依赖的服务返回了意外的应答。",
+      "sourceHash": "7d67a9ba668890961e16cd7d9870add6be53ab1edfefebb2c5aac3f37f07ed78",
+      "origin": "machine",
+      "description": "Another service answered with an unexpected status or a body that could not be read; detail carries its answer."
+    },
+    "no_compliant_edge": {
+      "text": "合规区域中没有可为此司法管辖区提供容量的边缘节点。",
+      "sourceHash": "f745532fea7757512a4c3b4d0509bce4145beb51c190ec73e60ac4cbdfdc154e",
+      "origin": "machine",
+      "description": "Placement found no registered edge with capacity and an unexpired lease in a region the jurisdiction's policy allows."
+    },
+    "environment_aborted": {
+      "text": "匹配环境在每次尝试中均已中止。",
+      "sourceHash": "a095fe9226cae865b9f419e407d338efb027d71e49a49ae41f35611abac4b57a",
+      "origin": "machine",
+      "description": "All three attempts in the compliant placement ended with the environment aborting; nothing was matched."
+    },
+    "manual_dispatch_ignored": {
+      "text": "匹配环境忽略了手动成交策略。",
+      "sourceHash": "33c1bb484e9cfc3e9a6986159b26333730bfe3c458c86615549f3481caa3a518",
+      "origin": "machine",
+      "description": "A delegated need was dispatched for a shortlist and a match record came back; no consent use or order was recorded for it."
+    },
+    "store_unavailable": {
+      "text": "服务的持久存储不可用。请重试请求。",
+      "sourceHash": "7df6832805f837f8c65b2c24c50d2a0e9b60cc3e471ab89fb836ae1e6f62f175",
+      "origin": "machine",
+      "description": "A PostgreSQL statement failed while the connection stayed open, so the request was not applied; detail names the store and the error."
+    },
+    "write_token_required": {
+      "text": "向账本追加记录需要其写入令牌。",
+      "sourceHash": "4ce9ea791fd8e0f6e55c1f54523c0942aab041f013a7e982b96629911234f5f9",
+      "origin": "machine",
+      "description": "A POST to ledger-svc carried no Authorization bearer, or one other than the write token the deploy step made for this build."
     }
   }
 }

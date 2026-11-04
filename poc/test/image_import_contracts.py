@@ -100,7 +100,18 @@ if [ "$3" = wait ] && [[ "$*" == *"deployment/${FAIL_WAIT:-none}"* ]]; then exit
                 self.assertIn(f'upgrade --install {service} workloads/services/{service}', helm)
                 self.assertIn(f'--set image=amisad/{service}:poc --set pullPolicy=Never', helm)
                 self.assertIn('--namespace amisad --create-namespace', helm)
-                self.assertEqual('databaseUrl=' in helm, service in ('ledger-svc', 'seller-svc'))
+                durable = service in ('ledger-svc', 'seller-svc', 'resource-svc')
+                self.assertEqual('databaseUrl=' in helm, durable)
+                # The pod builds the URL from the per-build Secret; the release carries no password.
+                self.assertEqual('--set-string databaseUrl=postgres://amisad:$(AMISAD_DB_PASSWORD)@$(NODE_IP):5432/amisad'
+                                 ' --set-string databasePasswordSecret=amisad-database' in helm, durable, helm)
+                self.assertEqual('databasePasswordSecret=' in helm, durable, helm)
+                # That URL is the release's only one, so no other carries a password.
+                self.assertEqual(helm.count('postgres://'), 1 if durable else 0, helm)
+                # The ledger and the services that append to it read the per-build write token.
+                writer = service in ('ledger-svc', 'seller-svc', 'fabric-coordinator', 'platform-svc')
+                self.assertEqual(helm.endswith(' --set-string ledgerWriteSecret=amisad-ledger-write'), writer, helm)
+                self.assertEqual('ledgerWriteSecret=' in helm, writer, helm)
             waits = [a for a in actions if ' wait ' in a]
             self.assertEqual(waits, [f'kubectl -n amisad wait --for=condition=available deployment/{service} --timeout=600s'
                                      for service in SERVICES])

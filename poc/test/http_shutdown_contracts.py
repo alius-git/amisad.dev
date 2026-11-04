@@ -10,6 +10,7 @@ Set RUSTC or AMISAD_LIFECYCLE_BINARY to use a particular compiler or built fixtu
 """
 import contextlib
 import http.client
+import http.server
 import json
 import os
 from pathlib import Path
@@ -33,6 +34,22 @@ def wait_for(predicate, timeout=5):
             return
         time.sleep(.01)
     raise TimeoutError('condition did not become true')
+
+
+def read_reply(connection):
+    """Everything the server writes before it closes the connection.
+
+    A server that refuses a request before reading all of it closes with input
+    unread, which resets the connection after the answer was already sent.
+    """
+    reply = b''
+    try:
+        while chunk := connection.recv(4096):
+            reply += chunk
+    except ConnectionResetError:
+        if not reply:
+            raise
+    return reply
 
 
 class RunningService:
@@ -74,14 +91,22 @@ class RunningService:
             self.signal_pid = child
         return self
 
-    def call(self, path, body=None):
-        connection = http.client.HTTPConnection('127.0.0.1', self.port, timeout=5)
+    def call(self, path, body=None, timeout=5):
+        status, _, payload = self.exchange(path, body, timeout=timeout)
+        return status, payload
+
+    def exchange(self, path, body=None, headers=None, timeout=5):
+        connection = http.client.HTTPConnection('127.0.0.1', self.port, timeout=timeout)
         try:
-            connection.request('GET' if body is None else 'POST', path, body=body)
+            connection.request('GET' if body is None else 'POST', path, body=body, headers=headers or {})
             response = connection.getresponse()
-            return response.status, json.loads(response.read())
+            return response.status, response.headers, json.loads(response.read())
         finally:
             connection.close()
+
+    def output(self):
+        self.log.seek(0)
+        return self.log.read().decode(errors='replace')
 
     def terminate(self):
         os.kill(self.signal_pid, signal.SIGTERM)
@@ -170,6 +195,88 @@ class HttpLifecycle(LifecycleFixture):
             finally:
                 second.close()
 
+    def test_health_and_version_answer_while_a_handler_runs(self):
+        with self.service() as service:
+            result = []
+            thread = threading.Thread(target=lambda: result.append(service.call('/commit-after-release', 'slow-write')))
+            thread.start()
+            try:
+                wait_for(service.directory.joinpath('started').exists)
+                self.assertEqual(service.call('/health', timeout=2), (200, {'status': 'ok', 'service': 'lifecycle-fixture'}))
+                self.assertEqual(service.call('/version', timeout=2), (200, {'service': 'lifecycle-fixture', 'version': 'test'}))
+            finally:
+                service.directory.joinpath('release').touch()
+                thread.join(timeout=5)
+            self.assertEqual(result, [(201, {'committed': True})])
+
+    def test_a_stalled_client_does_not_delay_other_requests(self):
+        with self.service() as service:
+            with socket.create_connection(('127.0.0.1', service.port), timeout=5) as stalled:
+                stalled.sendall(b'POST /append HTTP/1.1\r\nContent-Length: 10\r\n\r\nabc')
+                self.assertEqual(service.call('/append', 'not-delayed', timeout=2)[0], 201)
+            self.assertEqual(service.call('/journal'), (200, 'not-delayed\n'))
+
+    def test_a_handler_panic_ends_the_process_for_its_supervisor(self):
+        with self.service() as service:
+            with self.assertRaises((OSError, http.client.HTTPException)):
+                service.call('/panic', 'boom')
+            self.assertEqual(service.process.wait(timeout=5), 101)
+
+    def test_request_ids_are_returned_and_name_error_bodies(self):
+        with self.service() as service:
+            status, headers, body = service.exchange('/missing', headers={'X-Request-Id': 'contract-1'})
+            self.assertEqual((status, headers['X-Request-Id'], body.get('correlation_id')), (404, 'contract-1', 'contract-1'))
+            status, headers, body = service.exchange('/health', headers={'X-Request-Id': 'probe-1'})
+            self.assertEqual((status, headers['X-Request-Id'], body), (200, 'probe-1', {'status': 'ok', 'service': 'lifecycle-fixture'}))
+            minted = set()
+            for supplied in [None, 'x' * 65, 'two words', 'caf\u00e9'.encode()]:
+                with self.subTest(supplied=supplied):
+                    status, headers, body = service.exchange('/missing', headers={} if supplied is None else {'X-Request-Id': supplied})
+                    self.assertEqual(status, 404)
+                    self.assertRegex(headers['X-Request-Id'] or '', '^[0-9a-f]{16}$')
+                    self.assertEqual(body.get('correlation_id'), headers['X-Request-Id'])
+                    minted.add(headers['X-Request-Id'])
+            self.assertEqual(len(minted), 4, 'every minted id is new')
+            # A request refused before it is parsed still gets an id.
+            with socket.create_connection(('127.0.0.1', service.port), timeout=5) as connection:
+                connection.sendall(b'POST /append HTTP/1.1\r\nContent-Length: 1\r\nContent-Length: 1\r\n\r\nx')
+                head, _, payload = read_reply(connection).partition(b'\r\n\r\n')
+            self.assertTrue(head.startswith(b'HTTP/1.1 400'), head)
+            ids = [line.split(b':', 1)[1].strip().decode() for line in head.split(b'\r\n')[1:]
+                   if line.lower().startswith(b'x-request-id:')]
+            self.assertEqual(len(ids), 1, head)
+            self.assertRegex(ids[0], '^[0-9a-f]{16}$')
+            self.assertEqual(json.loads(payload)['correlation_id'], ids[0])
+
+    def test_outbound_calls_forward_the_request_id_and_server_errors_are_logged(self):
+        seen = []
+        class Peer(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                seen.append(self.headers.get('X-Request-Id'))
+                data = b'{"error":"peer unavailable"}'
+                self.send_response(503)
+                self.send_header('Content-Length', str(len(data)))
+                self.end_headers()
+                self.wfile.write(data)
+
+            def log_message(self, *args):
+                pass
+
+        with http.server.ThreadingHTTPServer(('127.0.0.1', 0), Peer) as peer:
+            serving = threading.Thread(target=peer.serve_forever, daemon=True)
+            serving.start()
+            try:
+                with self.service() as service:
+                    status, headers, body = service.exchange(
+                        '/forward', f'http://127.0.0.1:{peer.server_port}/peer', headers={'X-Request-Id': 'contract-2'})
+                    self.assertEqual(seen, ['contract-2'])
+                    self.assertEqual((status, headers['X-Request-Id']), (503, 'contract-2'))
+                    self.assertEqual(body, {'error': 'peer unavailable', 'correlation_id': 'contract-2'})
+                    self.assertRegex(service.output(), r'lifecycle-fixture answered 503 - to POST /forward \(request contract-2\)')
+            finally:
+                peer.shutdown()
+                serving.join(timeout=5)
+
     @unittest.skipUnless(os.name == 'posix', 'SIGTERM is a Unix lifecycle contract')
     def test_idle_sigterm_returns_success_and_releases_port(self):
         with self.service() as service:
@@ -206,6 +313,10 @@ class HttpLifecycle(LifecycleFixture):
                 wait_for(service.directory.joinpath('started').exists)
                 with socket.create_connection(('127.0.0.1', service.port), timeout=5) as queued:
                     queued.sendall(b'POST /append HTTP/1.1\r\nContent-Length: 6\r\n\r\nqueued')
+                    # Connections are accepted in arrival order, so an answered
+                    # /health shows the server took the queued request in
+                    # before the signal arrived.
+                    self.assertEqual(service.call('/health')[0], 200)
                     for _ in range(3):
                         service.terminate()
                         time.sleep(.02)
@@ -215,6 +326,9 @@ class HttpLifecycle(LifecycleFixture):
                     self.assertFalse(thread.is_alive())
                     self.assertEqual(result, [(201, {'committed': True})])
                     self.assert_graceful_exit(service)
+                    head, _, payload = read_reply(queued).partition(b'\r\n\r\n')
+                    self.assertTrue(head.startswith(b'HTTP/1.1 503'), head)
+                    self.assertEqual(json.loads(payload)['code'], 'service_stopping')
                 self.assertEqual(service.directory.joinpath('journal').read_text(), 'active-write\n',
                                  'a queued request was handled after shutdown was requested')
             finally:

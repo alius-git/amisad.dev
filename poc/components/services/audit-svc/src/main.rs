@@ -405,6 +405,7 @@ mod tests {
         let resp = handle(&mut state, &Request {
             method: "POST".to_string(),
             path: "/v1/certify/tamper".to_string(),
+            headers: Vec::new(),
             body,
         });
         let parsed = json::parse(&resp.body).unwrap();

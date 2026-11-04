@@ -88,6 +88,22 @@ paths:
             schema: { type: object }
       responses:
         "200": { description: "stage" }
+  /v1/support/cases/refund:
+    post:
+      summary: "Sam refunds the case's match: posts compensating entries referencing the case to ledger-svc's /v1/settlements/adjust with the ledger write token and relays its status and body (body: case_id)"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        "201": { description: "Ledger answer: match_id, case_id, adjustment_entries" }
+        "200": { description: "Ledger answer to an identical replay: the prior outcome, no new entries" }
+        "400": { description: "Body is not JSON" }
+        "404": { description: "Unknown case, or the ledger's answer for a match with no settlement" }
+        "401": { description: "Ledger answer: this service holds no valid write token" }
+        "409": { description: "Ledger answer: unconfirmed settlement, conflicting case, or inconsistent prior adjustment" }
+        "503": { description: "upstream_unavailable: the ledger could not be reached" }
   /v1/support/cases/resolve:
     post:
       summary: "Resolve the case (body: case_id)"

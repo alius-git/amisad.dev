@@ -51,9 +51,10 @@ Node 20.19+ on 20.x or Node 22.12+ on newer supported lines.
 
 - **One third-party crate: `postgres`.** The services serve their routes with
   the std-only responder in `amisad-common`; the first external dependency is
-  the PostgreSQL client for the durable ledger/catalog stores, wired through
-  **crate_universe** in `MODULE.bazel` with the committed `Cargo.lock`. (Actix
-  replaces the responder when the surface outgrows it -- plan/design.md section 1.)
+  the PostgreSQL client for the durable ledger, catalog and policy stores,
+  wired through **crate_universe** in `MODULE.bazel` with the committed
+  `Cargo.lock`. (Actix replaces the responder when the surface outgrows it --
+  plan/design.md section 1.)
 - **App builds are `bazel run` wrappers.** Flutter and Vite have no mature
   Bazel rules, and their toolchains fight sandboxing (Gradle/pub/npm caches).
   `sh_binary` wrappers keep Bazel as the single entry point without lying
@@ -102,22 +103,42 @@ Deviations from the target design, deliberate and to be retired in later
 scenarios -- the wire contracts (`contracts/openapi/`) are unchanged by all of
 them:
 
-- **PostgreSQL for the ledgers and the seller; in-memory for the rest.**
-  ledger-svc and seller-svc write through to the vm-core PostgreSQL
-  (`DATABASE_URL` from the helm values; `db/schema.sql`) and reload on start --
-  chains, orders, and offers survive pod restarts, and the app role has no
+- **PostgreSQL for the ledgers, the seller and the jurisdiction policies;
+  in-memory for the rest.** ledger-svc, seller-svc and resource-svc write
+  through to the vm-core PostgreSQL (`DATABASE_URL` from the helm values;
+  `db/schema.sql`) and reload on start -- chains, orders, offers, and
+  jurisdiction policies survive pod restarts, and the app role has no
   UPDATE/DELETE on ledger tables, so append-only is database-enforced.
   Without `DATABASE_URL` the same binaries run in-memory (that is how
-  `cargo test` stays hermetic). resource-svc and identity-mock keep in-process
-  state behind the real APIs.
+  `cargo test` stays hermetic). resource-svc's edge registry, telemetry and
+  incidents, and identity-mock's tokens, stay in process behind the real APIs.
+- **One per-build write token on the ledger, not per-caller identity.**
+  ledger-svc refuses any POST without `Authorization: Bearer <LEDGER_WRITE_TOKEN>`
+  (401 `write_token_required`); reads stay open. The deploy step makes the
+  token for each build and keeps it only in Secret `amisad/amisad-ledger-write`,
+  which the ledger-svc, fabric-coordinator, seller-svc and platform-svc charts
+  read (`ledgerWriteSecret`); the scenario start hands it to the edges'
+  slice-runtime on ssh standard input. The chains stay plain SHA-256, so
+  audit-svc verifies them with no secret. The token admits the writer set, not
+  an individual caller. Without it (`cargo test`, hand runs) appends are open
+  and ledger-svc says so on stderr. Refunds stay reachable without a
+  credential: platform-svc's support routes are open like the other
+  NodePorts, so anyone who can reach platform `30086` can open a case for any
+  match and refund it once, the same reach a direct ledger refund would have
+  without the token. The token closes direct ledger appends, not that route.
 - **Envelope opacity instead of encryption.** Upstream services carry the
   envelope as an opaque string and never parse it (checkable in code and by
   the egress assert); actual envelope crypto is TODO.
 - **Direct HTTP events, not NATS yet.** Order status flows by polling;
-  s003.silence's offer-published event is a direct fire-and-forget HTTP
-  notify from seller-svc to the coordinator (a detached thread, so the two
-  single-threaded services cannot deadlock). The JetStream wiring stays a
-  later step.
+  s003.silence's offer-published event is a direct HTTP notify from
+  seller-svc to the coordinator, sent from a detached thread so the two
+  services, each running one handler at a time, cannot deadlock. A transport
+  error or a 5xx is resent after 1, 2, 4 and 8 seconds (five attempts in all).
+  A repeated event cannot match or order a need twice, because the
+  coordinator's matching cycle removes each need it matches, but it does
+  dispatch the needs still open again, each in a new attested environment, so
+  a resend can append attestation rows. The JetStream wiring stays a later
+  step.
 - **Logical ephemeral environments.** `slice-runtime` is a persistent edge
   process; each request runs one attested created->attested->executed->destroyed
   environment whose state drops at response time.
@@ -203,7 +224,10 @@ on the campaign side.
 s006.mandate adds delegated authority. Maya grants Pat a scoped mandate
 (category, per-item cap, expiry) recorded on the consent ledger as a third
 grant type ('mandate') and held in the coordinator for scope. Pat's delegate
-workspace shows Maya as principal. An in-scope, under-cap need closes on Pat's
+workspace shows Maya as principal. Every delegated need is dispatched with a
+manual policy, so the environment returns a shortlist whatever the sealed
+envelope says and the coordinator decides commit or hold against the cap; an
+approval whose commit fails stays held for Maya's retry. An in-scope, under-cap need closes on Pat's
 authority with dual attribution (actor Pat, principal Maya, mandate ref) on
 Maya's activity trail; an over-cap match is HELD - the closing exists only
 after Maya's recorded approval; an out-of-scope category is refused at
@@ -226,8 +250,10 @@ Order-lifecycle events mirror to the ERP idempotently (a replayed delivery is
 a no-op); an out-of-scope call is refused on credential scope and logged with
 nothing returned; and revocation kills the credentials while Elena's catalog
 stays intact. No buyer identity or need content crosses the integration
-surface. The seller->connect order webhook is a detached best-effort thread,
-like the offer-published event.
+surface. The seller->connect order webhook is sent from a detached thread and
+resent like the offer-published event; connect-svc drops a repeated
+(match id, state) delivery and never moves its mirror backwards, so a resend
+leaves the mirror as it was.
 
 ## s008.mediation implementation notes
 
@@ -236,10 +262,12 @@ in platform-svc carrying operational METADATA only (order state, settlement) -
 no buyer identity ever reaches it. When metadata is not enough, Sam requests a
 scoped, time-boxed disclosure; Maya grants it through the coordinator, which
 records a `disclosure` grant on the consent ledger under her PSEUDONYMOUS
-subject and delivers the artifact to the case with an expiry. The refund posts
-as compensating settlement entries (negatives) referencing the case - history
-is never edited, so the chains still verify and the derived net reflects the
-refund. After the grant expires the artifact access path is gone (410). The
+subject and delivers the artifact to the case with an expiry. Sam refunds
+through platform-svc (`POST /v1/support/cases/refund` with the case id), which
+takes the match from the case and posts compensating settlement entries
+(negatives) referencing the case to ledger-svc with the ledger write token -
+history is never edited, so the chains still verify and the derived net
+reflects the refund. After the grant expires the artifact access path is gone (410). The
 consent ledger gains its fourth grant type (`disclosure`), and the settlement
 ledger its `adjust` endpoint.
 

@@ -7,10 +7,14 @@
 //! the hash-chained ledgers, self-tested against the FIPS 180-4 vectors. A
 //! real web framework replaces these when the POC outgrows scenario work.
 
+use std::cell::RefCell;
 use std::io::{BufRead, BufReader, ErrorKind, Read, Write};
 use std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use std::panic::{catch_unwind, AssertUnwindSafe};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{Condvar, Mutex, OnceLock};
 use std::thread::sleep;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 mod i18n;
 #[cfg(unix)]
@@ -24,7 +28,20 @@ pub struct ServiceInfo {
 pub struct Request {
     pub method: String,
     pub path: String,
+    /// Every header line in arrival order: names as sent, values without the
+    /// spaces and tabs around them. The 32 KiB header budget bounds the list.
+    pub headers: Vec<(String, String)>,
     pub body: String,
+}
+
+impl Request {
+    /// The first value of the named header. Names match ignoring ASCII case,
+    /// as HTTP defines them.
+    pub fn header(&self, name: &str) -> Option<&str> {
+        self.headers.iter()
+            .find(|(candidate, _)| candidate.eq_ignore_ascii_case(name))
+            .map(|(_, value)| value.as_str())
+    }
 }
 
 pub struct Response {
@@ -40,16 +57,35 @@ impl Response {
             ("error", json::s(&i18n::message("en-US", code))),
         ]))
     }
-    fn localized(self, locale: &str) -> Response {
-        if let Ok(value) = json::parse(&self.body) {
-            if let Some(code) = value.str_of("code").filter(|code| i18n::contains(code)) {
-                return Response::json(self.status, &json::obj(vec![
-                    ("code", json::s(code)),
-                    ("error", json::s(&i18n::message(locale, code))),
-                ]));
-            }
+    /// A catalog problem plus `detail`, a developer diagnostic such as the
+    /// upstream answer behind the failure. The detail is never translated.
+    pub fn problem_detail(status: u16, code: &str, detail: &str) -> Response {
+        Response::json(status, &json::obj(vec![
+            ("code", json::s(code)),
+            ("error", json::s(&i18n::message("en-US", code))),
+            ("detail", json::s(detail)),
+        ]))
+    }
+    /// Translates a catalog problem's `error` into `locale` and keeps every
+    /// other member. An error body that is a JSON object also gains
+    /// `correlation_id`, the id the X-Request-Id response header carries.
+    fn localized(self, locale: &str, request_id: &str) -> Response {
+        let Ok(json::Json::Obj(mut members)) = json::parse(&self.body) else { return self };
+        let code = members.iter()
+            .find(|(name, _)| name == "code")
+            .and_then(|(_, value)| value.as_str())
+            .filter(|code| i18n::contains(code))
+            .map(str::to_string);
+        if code.is_none() && self.status < 400 {
+            return self;
         }
-        self
+        if let Some(code) = code {
+            set_member(&mut members, "error", json::s(&i18n::message(locale, &code)));
+        }
+        if self.status >= 400 {
+            set_member(&mut members, "correlation_id", json::s(request_id));
+        }
+        Response { status: self.status, body: json::Json::Obj(members).dump() }
     }
 
     pub fn json(status: u16, value: &json::Json) -> Response {
@@ -60,6 +96,14 @@ impl Response {
             status,
             body: json::obj(vec![("error", json::s(message))]).dump(),
         }
+    }
+}
+
+/// Replaces the named member in place, or appends it.
+fn set_member(members: &mut Vec<(String, json::Json)>, name: &str, value: json::Json) {
+    match members.iter_mut().find(|(candidate, _)| candidate == name) {
+        Some((_, current)) => *current = value,
+        None => members.push((name.to_string(), value)),
     }
 }
 
@@ -131,11 +175,12 @@ fn read_request(stream: &TcpStream, locale: &mut String) -> Result<Option<Reques
     let method = parts[0].to_string();
     let path = parts[1].to_string();
     let mut content_length = None;
+    let mut headers = Vec::new();
     loop {
         let header = read_line(&mut reader)?;
         if header == "\r\n" { break; }
         let (name, value) = header.strip_suffix("\r\n").and_then(|h| h.split_once(':')).ok_or_else(invalid)?;
-        if name.is_empty() || !name.bytes().all(|c| c.is_ascii_alphanumeric() || b"!#$%&'*+-.^_`|~".contains(&c)) {
+        if !is_token(name) {
             return Err(invalid());
         }
         if name.eq_ignore_ascii_case("transfer-encoding") {
@@ -153,15 +198,21 @@ fn read_request(stream: &TcpStream, locale: &mut String) -> Result<Option<Reques
             if size > MAX_BODY_BYTES { return Err(Response::problem(413, "request_too_large")); }
             content_length = Some(size);
         }
+        headers.push((name.to_string(), value.trim_matches([' ', '\t']).to_string()));
     }
     let mut body = vec![0; content_length.unwrap_or(0)];
     reader.read_exact(&mut body).map_err(io_error)?;
-    Ok(Some(Request { method, path, body: String::from_utf8(body).map_err(|_| invalid())? }))
+    Ok(Some(Request { method, path, headers, body: String::from_utf8(body).map_err(|_| invalid())? }))
 }
 
-fn write_response(stream: &TcpStream, response: &Response) {
+/// An HTTP token (RFC 9110), the grammar of a header name.
+fn is_token(name: &str) -> bool {
+    !name.is_empty() && name.bytes().all(|c| c.is_ascii_alphanumeric() || b"!#$%&'*+-.^_`|~".contains(&c))
+}
+
+fn write_response(stream: &TcpStream, response: &Response, request_id: &str) {
     let payload = format!(
-        "HTTP/1.1 {} {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+        "HTTP/1.1 {} {}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nX-Request-Id: {request_id}\r\nConnection: close\r\n\r\n{}",
         response.status,
         status_text(response.status),
         response.body.len(),
@@ -171,14 +222,135 @@ fn write_response(stream: &TcpStream, response: &Response) {
     let _ = writer.write_all(payload.as_bytes());
 }
 
+/// X-Request-Id values a service adopts: 1 to 64 characters that need no
+/// quoting in a header or a log line. Any other value is replaced.
+fn request_id_is_valid(id: &str) -> bool {
+    (1..=64).contains(&id.len())
+        && id.bytes().all(|c| c.is_ascii_alphanumeric() || matches!(c, b'.' | b'_' | b'-'))
+}
+
+/// 16 hex characters: the counter keeps them distinct within a process, and
+/// the process id and the clock keep them distinct across restarts.
+fn mint_request_id() -> String {
+    static MINTED: AtomicU64 = AtomicU64::new(0);
+    let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|time| time.as_nanos()).unwrap_or(0);
+    let seed = format!("{}|{nanos}|{}", std::process::id(), MINTED.fetch_add(1, Ordering::Relaxed));
+    sha256::hex_digest(seed.as_bytes())[..16].to_string()
+}
+
+thread_local! {
+    static CORRELATION_ID: RefCell<Option<String>> = const { RefCell::new(None) };
+}
+
+/// The id of the request this thread's handler is serving, or None outside a
+/// handler, including on threads a handler starts. Calls through `request`
+/// forward it as X-Request-Id, so one id names every hop of a request.
+pub fn correlation_id() -> Option<String> {
+    CORRELATION_ID.with(|id| id.borrow().clone())
+}
+
+fn with_correlation_id<T>(id: &str, work: impl FnOnce() -> T) -> T {
+    CORRELATION_ID.with(|current| *current.borrow_mut() = Some(id.to_string()));
+    let result = work();
+    CORRELATION_ID.with(|current| *current.borrow_mut() = None);
+    result
+}
+
+/// Connections a service reads and answers at once, one thread each, so a
+/// slow client or a long handler does not hold up the others. Further
+/// connections wait in the listen backlog until a thread finishes.
+const MAX_CONNECTIONS: usize = 32;
+
+/// How long the running handler may go without starting, or without one of
+/// its outbound calls through `request` starting or finishing, before /health
+/// reports the service stalled. One call against a peer that answers at all
+/// takes at most about 52 s: a 10 s connect, the 2 s pause and a 10 s retried
+/// connect, then a 30 s wait for the answer. A handler silent for longer is
+/// wedged outside those bounds, for example in a database call on a half-open
+/// connection, and only a restart frees it.
+const STALL_LIMIT: Duration = Duration::from_secs(120);
+
+/// When the running handler started, in `monotonic_ms` time; 0 while none
+/// runs. Handlers run one at a time, so one value describes the only one.
+static HANDLER_STARTED: AtomicU64 = AtomicU64::new(0);
+/// When an outbound call a handler made through `request` last started or
+/// finished. Calls from other threads, such as slice-runtime's lease renewal,
+/// leave it alone: they would otherwise keep a wedged handler looking busy.
+static LAST_PROGRESS: AtomicU64 = AtomicU64::new(0);
+
+/// Milliseconds on a monotonic clock, counted from 1 so that 0 can mean none.
+fn monotonic_ms() -> u64 {
+    static START: OnceLock<Instant> = OnceLock::new();
+    START.get_or_init(Instant::now).elapsed().as_millis() as u64 + 1
+}
+
+/// True when a handler is running and STALL_LIMIT has passed since both its
+/// start and the last outbound progress.
+fn stalled(handler_started: u64, last_progress: u64, now: u64) -> bool {
+    handler_started != 0
+        && now.saturating_sub(handler_started.max(last_progress)) > STALL_LIMIT.as_millis() as u64
+}
+
+#[cfg(unix)]
+fn stopping() -> bool {
+    shutdown::requested()
+}
+
+#[cfg(not(unix))]
+fn stopping() -> bool {
+    false
+}
+
+/// Counts the connection threads and lets the accept loop wait for room.
+#[derive(Default)]
+struct ConnectionGate {
+    open: Mutex<usize>,
+    closed: Condvar,
+}
+
+impl ConnectionGate {
+    /// Whether another connection thread may start. A full gate waits at most
+    /// half a second for one to finish, so the accept loop still sees SIGTERM.
+    fn has_room(&self) -> bool {
+        let open = self.open.lock().unwrap();
+        let (open, _) = self.closed
+            .wait_timeout_while(open, Duration::from_millis(500), |open| *open >= MAX_CONNECTIONS)
+            .unwrap();
+        *open < MAX_CONNECTIONS
+    }
+    fn enter(&self) {
+        *self.open.lock().unwrap() += 1;
+    }
+    fn leave(&self) {
+        *self.open.lock().unwrap() -= 1;
+        self.closed.notify_one();
+    }
+}
+
 /// Bind 0.0.0.0:$PORT (default 8080); /health and /version are built in,
 /// everything else dispatches to `handler` with mutable service state.
-/// Single-threaded by design: the POC call graph is acyclic, so sequential
-/// request handling cannot deadlock. On Unix, SIGTERM stops intake after the
-/// current request finishes, allowing service state to drop before exit.
-pub fn serve_app<S>(
+///
+/// Each connection is read and answered on its own thread, at most
+/// MAX_CONNECTIONS at a time. /health and /version answer without the service
+/// state, so probes reach a live process while a handler waits on a peer;
+/// /health answers 503 `service_stalled` only when the running handler has
+/// shown no progress for STALL_LIMIT. Every other request takes the state lock
+/// once it has fully arrived, so handlers run one at a time: service state
+/// keeps a single writer, and because the POC call graph is acyclic, a handler
+/// waiting on another service cannot deadlock.
+///
+/// Every response carries X-Request-Id: the caller's value when it is a short
+/// token, otherwise a minted one. Error bodies repeat it as `correlation_id`,
+/// and each 5xx answer writes one line naming it to stderr.
+///
+/// On Unix, SIGTERM stops intake: running handlers finish and answer, requests
+/// not yet started answer 503 `service_stopping`, and service state drops
+/// before this returns. A handler panic exits the process with 101, the status
+/// of a panic out of main, so the supervisor restarts the service rather than
+/// another handler running on the state the panic left.
+pub fn serve_app<S: Send>(
     info: ServiceInfo,
-    mut state: S,
+    state: S,
     handler: fn(&mut S, &Request) -> Response,
 ) -> std::io::Result<()> {
     let port = std::env::var("PORT").unwrap_or_else(|_| String::from("8080"));
@@ -190,60 +362,128 @@ pub fn serve_app<S>(
         listener.set_nonblocking(true)?;
     }
     println!("{} {} listening on {addr}", info.name, info.version);
-    loop {
-        #[cfg(unix)]
-        if shutdown::requested() { return Ok(()); }
-        let stream = match listener.accept() {
-            Ok((stream, _)) => stream,
+    let state = Mutex::new(state);
+    let gate = ConnectionGate::default();
+    std::thread::scope(|scope| -> std::io::Result<()> {
+        loop {
             #[cfg(unix)]
-            Err(error) if error.kind() == ErrorKind::WouldBlock => {
-                shutdown::wait_for_connection(&listener)?;
-                continue;
-            }
-            Err(error) if error.kind() == ErrorKind::Interrupted => continue,
-            #[cfg(unix)]
-            Err(error) if shutdown::transient_accept_error(&error) => {
-                sleep(Duration::from_millis(10));
-                continue;
-            }
-            #[cfg(not(unix))]
-            Err(_) => continue,
-            #[cfg(unix)]
-            Err(error) => return Err(error),
-        };
-        #[cfg(unix)]
-        {
             if shutdown::requested() { return Ok(()); }
-            // Accepted sockets inherit listener flags on some Unix targets;
-            // the request deadline reader requires blocking socket reads.
-            stream.set_nonblocking(false)?;
-        }
-        let _ = stream.set_write_timeout(Some(Duration::from_secs(5)));
-        let mut locale = i18n::negotiate(&std::env::var("AMISAD_LOCALE").unwrap_or_default());
-        let request = match read_request(&stream, &mut locale) {
-            Ok(Some(r)) => r,
-            Ok(None) => continue,
-            Err(response) => {
-                write_response(&stream, &response.localized(&locale));
-                continue;
+            if !gate.has_room() { continue; }
+            let stream = match listener.accept() {
+                Ok((stream, _)) => stream,
+                #[cfg(unix)]
+                Err(error) if error.kind() == ErrorKind::WouldBlock => {
+                    shutdown::wait_for_connection(&listener)?;
+                    continue;
+                }
+                Err(error) if error.kind() == ErrorKind::Interrupted => continue,
+                #[cfg(unix)]
+                Err(error) if shutdown::transient_accept_error(&error) => {
+                    sleep(Duration::from_millis(10));
+                    continue;
+                }
+                #[cfg(not(unix))]
+                Err(_) => continue,
+                #[cfg(unix)]
+                Err(error) => return Err(error),
+            };
+            #[cfg(unix)]
+            {
+                if shutdown::requested() { return Ok(()); }
+                // Accepted sockets inherit listener flags on some Unix targets;
+                // the request deadline reader requires blocking socket reads.
+                stream.set_nonblocking(false)?;
             }
-        };
-        let response = match (request.method.as_str(), request.path.as_str()) {
-            ("GET", "/health") => Response::json(
-                200,
-                &json::obj(vec![("status", json::s("ok")), ("service", json::s(info.name))]),
-            ),
-            ("GET", "/version") => Response::json(
-                200,
-                &json::obj(vec![
-                    ("service", json::s(info.name)),
-                    ("version", json::s(info.version)),
-                ]),
-            ),
-            _ => handler(&mut state, &request),
-        };
-        write_response(&stream, &response.localized(&locale));
+            let _ = stream.set_write_timeout(Some(Duration::from_secs(5)));
+            gate.enter();
+            let (info, state, gate) = (&info, &state, &gate);
+            let started = std::thread::Builder::new().spawn_scoped(scope, move || {
+                if catch_unwind(AssertUnwindSafe(|| serve_connection(stream, info, state, handler))).is_err() {
+                    eprintln!("{}: a request handler panicked; exiting so the supervisor restarts it", info.name);
+                    std::process::exit(101);
+                }
+                gate.leave();
+            });
+            if let Err(error) = started {
+                gate.leave();
+                eprintln!("{}: dropped a connection: no thread to serve it: {error}", info.name);
+            }
+        }
+    })
+}
+
+/// Reads one request and answers it; see serve_app.
+fn serve_connection<S>(
+    stream: TcpStream,
+    info: &ServiceInfo,
+    state: &Mutex<S>,
+    handler: fn(&mut S, &Request) -> Response,
+) {
+    let mut locale = i18n::negotiate(&std::env::var("AMISAD_LOCALE").unwrap_or_default());
+    let request = match read_request(&stream, &mut locale) {
+        Ok(Some(request)) => request,
+        Ok(None) => return,
+        Err(response) => {
+            let id = mint_request_id();
+            write_response(&stream, &response.localized(&locale, &id), &id);
+            return;
+        }
+    };
+    let id = request.header("x-request-id")
+        .filter(|id| request_id_is_valid(id))
+        .map_or_else(mint_request_id, str::to_string);
+    let response = match (request.method.as_str(), request.path.as_str()) {
+        ("GET", "/health") => {
+            if stalled(HANDLER_STARTED.load(Ordering::Relaxed), LAST_PROGRESS.load(Ordering::Relaxed), monotonic_ms()) {
+                Response::problem(503, "service_stalled")
+            } else {
+                Response::json(
+                    200,
+                    &json::obj(vec![("status", json::s("ok")), ("service", json::s(info.name))]),
+                )
+            }
+        }
+        ("GET", "/version") => Response::json(
+            200,
+            &json::obj(vec![
+                ("service", json::s(info.name)),
+                ("version", json::s(info.version)),
+            ]),
+        ),
+        _ => {
+            let mut state = state.lock().unwrap_or_else(|_| {
+                eprintln!("{}: a handler panicked while holding the service state; exiting", info.name);
+                std::process::exit(101)
+            });
+            if stopping() {
+                Response::problem(503, "service_stopping")
+            } else {
+                HANDLER_STARTED.store(monotonic_ms(), Ordering::Relaxed);
+                let response = with_correlation_id(&id, || handler(&mut state, &request));
+                HANDLER_STARTED.store(0, Ordering::Relaxed);
+                response
+            }
+        }
     }
+    .localized(&locale, &id);
+    if response.status >= 500 {
+        eprintln!("{}", server_error_line(info.name, &response, &request, &id));
+    }
+    write_response(&stream, &response, &id);
+}
+
+/// The stderr line for one 5xx answer. Method, path and the body's `code` come
+/// from the client or the handler, so each is escaped to keep one answer on
+/// one line.
+fn server_error_line(service: &str, response: &Response, request: &Request, id: &str) -> String {
+    let code = json::parse(&response.body).ok().and_then(|body| body.str_of("code").map(str::to_string));
+    format!(
+        "{service} answered {} {} to {} {} (request {id})",
+        response.status,
+        code.as_deref().unwrap_or("-").escape_debug(),
+        request.method.escape_debug(),
+        request.path.escape_debug()
+    )
 }
 
 /// Legacy skeleton entry point: /health and /version only.
@@ -279,6 +519,57 @@ fn connect_is_worth_retrying(error: &std::io::Error) -> bool {
 /// Minimal HTTP/1.1 client for plain-http service-to-service calls.
 /// Returns (status, body). Only `http://host[:port]/path` URLs.
 pub fn request(method: &str, url: &str, body: Option<&str>) -> Result<(u16, String), String> {
+    request_with_headers(method, url, body, &[])
+}
+
+/// `request` with extra header lines, such as Authorization. The client sets
+/// Host, Content-Type, Content-Length and Connection itself, and X-Request-Id
+/// inside a handler. A name that is not an HTTP token, or a value holding a
+/// control character other than tab, is refused before connecting, and the
+/// error never repeats the value.
+pub fn request_with_headers(
+    method: &str,
+    url: &str,
+    body: Option<&str>,
+    headers: &[(&str, &str)],
+) -> Result<(u16, String), String> {
+    // Both stamps are the outbound progress the /health stall rule looks for.
+    // Only a handler's thread carries a correlation id, so only its calls count.
+    let in_handler = correlation_id().is_some();
+    if in_handler { LAST_PROGRESS.store(monotonic_ms(), Ordering::Relaxed); }
+    let result = exchange(method, url, body, headers);
+    if in_handler { LAST_PROGRESS.store(monotonic_ms(), Ordering::Relaxed); }
+    result
+}
+
+/// The Authorization value ledger-svc requires on appends, `Bearer` and the
+/// LEDGER_WRITE_TOKEN this process was started with; None when it is unset or
+/// empty, as in unit tests and hand runs, where the ledger has none either.
+pub fn ledger_write_authorization() -> Option<String> {
+    std::env::var("LEDGER_WRITE_TOKEN").ok()
+        .filter(|token| !token.is_empty())
+        .map(|token| format!("Bearer {token}"))
+}
+
+/// POSTs `body` to a ledger-svc append endpoint, carrying the write token's
+/// Authorization header when this process has one.
+pub fn post_to_ledger(url: &str, body: &str) -> Result<(u16, String), String> {
+    let authorization = ledger_write_authorization();
+    let headers: Vec<(&str, &str)> = authorization.iter().map(|value| ("Authorization", value.as_str())).collect();
+    request_with_headers("POST", url, Some(body), &headers)
+}
+
+fn exchange(method: &str, url: &str, body: Option<&str>, headers: &[(&str, &str)]) -> Result<(u16, String), String> {
+    let mut extra = String::new();
+    if let Some(id) = correlation_id() {
+        extra.push_str(&format!("X-Request-Id: {id}\r\n"));
+    }
+    for (name, value) in headers {
+        if !is_token(name) || value.bytes().any(|c| c.is_ascii_control() && c != b'\t') {
+            return Err(format!("invalid header {name:?} for {url}"));
+        }
+        extra.push_str(&format!("{name}: {value}\r\n"));
+    }
     let rest = url
         .strip_prefix("http://")
         .ok_or_else(|| format!("unsupported url: {url}"))?;
@@ -316,7 +607,7 @@ pub fn request(method: &str, url: &str, body: Option<&str>) -> Result<(u16, Stri
     let _ = stream.set_read_timeout(Some(Duration::from_secs(30)));
     let body_text = body.unwrap_or("");
     let payload = format!(
-        "{method} {path} HTTP/1.1\r\nHost: {host}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body_text}",
+        "{method} {path} HTTP/1.1\r\nHost: {host}\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n{extra}\r\n{body_text}",
         body_text.len()
     );
     let mut writer = &stream;
@@ -819,8 +1110,17 @@ mod tests {
         )));
     }
 
+    /// Held by every test that calls `request` or runs a handler, so the
+    /// shared stall stamps one test reads are not moved by another.
+    static STALL_STAMPS: Mutex<()> = Mutex::new(());
+
+    fn hold_stall_stamps() -> std::sync::MutexGuard<'static, ()> {
+        STALL_STAMPS.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+    }
+
     #[test]
     fn spent_retry_keeps_the_original_connect_error() {
+        let _stamps = hold_stall_stamps();
         // Nothing listens on port 1, so both dials are refused; the call costs
         // CONNECT_RETRY_DELAY and must still report the failure verbatim.
         let error = request("GET", "http://127.0.0.1:1/health", None).unwrap_err();
@@ -864,6 +1164,219 @@ mod tests {
         assert!(json::parse("\"\\ud800\\u0041\"").is_err());
         let paired = json::parse("\"\\ud83d\\ude00\"").expect("surrogate pair");
         assert_eq!(paired.as_str(), Some("😀"));
+    }
+
+    #[test]
+    fn request_keeps_its_headers_for_the_handler() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let mut client = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        client.write_all(b"POST /x HTTP/1.1\r\nAuthorization: Bearer t\r\nX-Request-Id:  abc \t\r\n\
+            X-Trace: first\r\nX-Trace: second\r\nContent-Length: 2\r\n\r\n{}").unwrap();
+        let (server, _) = listener.accept().unwrap();
+        let mut locale = String::from("en-US");
+        let Ok(Some(request)) = read_request(&server, &mut locale) else { panic!("the request was refused") };
+        assert_eq!(request.header("authorization"), Some("Bearer t"));
+        assert_eq!(request.header("X-REQUEST-ID"), Some("abc"));
+        assert_eq!(request.header("x-trace"), Some("first"));
+        assert_eq!(request.header("missing"), None);
+        assert_eq!(request.headers.len(), 5);
+        assert_eq!(request.headers[3], (String::from("X-Trace"), String::from("second")));
+        assert_eq!(request.body, "{}");
+    }
+
+    #[test]
+    fn health_and_version_answer_while_the_state_is_locked() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let address = listener.local_addr().unwrap();
+        let info = ServiceInfo { name: "unit", version: "test" };
+        let state = Mutex::new(());
+        let held = state.lock().unwrap();
+        let replies = std::thread::scope(|scope| {
+            let replies: Vec<String> = ["/health", "/version"].iter().map(|path| {
+                let mut client = TcpStream::connect(address).unwrap();
+                client.set_read_timeout(Some(Duration::from_secs(2))).unwrap();
+                client.write_all(format!("GET {path} HTTP/1.1\r\n\r\n").as_bytes()).unwrap();
+                let (server, _) = listener.accept().unwrap();
+                let (info, state) = (&info, &state);
+                scope.spawn(move || {
+                    serve_connection(server, info, state, |_, _| Response::error(500, "the handler ran"))
+                });
+                let mut reply = Vec::new();
+                // A timeout leaves the reply short; the assertions below report it.
+                let _ = client.read_to_end(&mut reply);
+                String::from_utf8_lossy(&reply).into_owned()
+            }).collect();
+            // Released before the scope joins, so a server that wrongly waits
+            // for the state fails the assertions instead of hanging the test.
+            drop(held);
+            replies
+        });
+        assert!(replies[0].starts_with("HTTP/1.1 200 OK\r\n"), "{}", replies[0]);
+        assert!(replies[0].ends_with("\r\n\r\n{\"status\":\"ok\",\"service\":\"unit\"}"), "{}", replies[0]);
+        assert!(replies[1].starts_with("HTTP/1.1 200 OK\r\n"), "{}", replies[1]);
+        assert!(replies[1].ends_with("\r\n\r\n{\"service\":\"unit\",\"version\":\"test\"}"), "{}", replies[1]);
+    }
+
+    #[test]
+    fn stall_rule_needs_an_in_flight_request_without_recent_progress() {
+        let second = 1000;
+        let now = 1000 * second;
+        assert!(!stalled(0, 0, now), "idle");
+        assert!(!stalled(0, now - 500 * second, now), "idle after an old call");
+        assert!(!stalled(now - 300 * second, now - 10 * second, now), "a handler still making calls");
+        assert!(!stalled(now - 119 * second, now - 500 * second, now), "a handler inside the limit");
+        assert!(stalled(now - 121 * second, 0, now), "silent since it started");
+        assert!(stalled(now - 300 * second, now - 121 * second, now), "silent since its last call");
+    }
+
+    #[test]
+    fn handlers_and_their_outbound_calls_feed_the_stall_rule() {
+        static SEEN: Mutex<Vec<(u64, u64)>> = Mutex::new(Vec::new());
+        let _stamps = hold_stall_stamps();
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let mut client = TcpStream::connect(listener.local_addr().unwrap()).unwrap();
+        client.write_all(b"POST /x HTTP/1.1\r\nContent-Length: 0\r\n\r\n").unwrap();
+        let (server, _) = listener.accept().unwrap();
+        let (info, state) = (ServiceInfo { name: "unit", version: "test" }, Mutex::new(()));
+        serve_connection(server, &info, &state, |_, _| {
+            let started = HANDLER_STARTED.load(Ordering::Relaxed);
+            // The stamps count milliseconds; the pause makes a progress stamp
+            // from this call strictly later than the handler start.
+            sleep(Duration::from_millis(5));
+            // Refused before connecting, so no network is used: only the
+            // progress stamps around the exchange run.
+            let refused = request_with_headers("GET", "http://127.0.0.1:1/", None, &[("bad name", "")]);
+            assert!(refused.is_err());
+            SEEN.lock().unwrap().push((started, LAST_PROGRESS.load(Ordering::Relaxed)));
+            Response::json(200, &json::obj(vec![]))
+        });
+        let (started, progress) = SEEN.lock().unwrap()[0];
+        assert_ne!(started, 0, "the handler start is stamped");
+        assert!(progress > started, "an outbound call inside the handler stamps progress: {progress} <= {started}");
+        assert_eq!(HANDLER_STARTED.load(Ordering::Relaxed), 0, "the start stamp clears when the handler returns");
+    }
+
+    #[test]
+    fn outbound_calls_outside_a_handler_leave_the_progress_stamp_alone() {
+        let _stamps = hold_stall_stamps();
+        const MARK: u64 = 7;
+        LAST_PROGRESS.store(MARK, Ordering::Relaxed);
+        // Refused before connecting, so no network is used: only the progress
+        // stamps around the exchange would run. One call comes from this
+        // thread, one from a thread like slice-runtime's lease renewal.
+        assert!(request_with_headers("GET", "http://127.0.0.1:1/", None, &[("bad name", "")]).is_err());
+        std::thread::spawn(|| request_with_headers("GET", "http://127.0.0.1:1/", None, &[("bad name", "")]))
+            .join().unwrap().unwrap_err();
+        assert_eq!(LAST_PROGRESS.load(Ordering::Relaxed), MARK, "a call made outside a handler stamped progress");
+        LAST_PROGRESS.store(0, Ordering::Relaxed);
+    }
+
+    #[test]
+    fn server_error_line_stays_on_one_line() {
+        let request = Request {
+            method: String::from("PO\nST"),
+            path: String::from("/x\r\ny"),
+            headers: Vec::new(),
+            body: String::new(),
+        };
+        let response = Response::json(500, &json::obj(vec![("code", json::s("bad\ncode"))]));
+        assert_eq!(
+            server_error_line("unit", &response, &request, "contract-7"),
+            "unit answered 500 bad\\ncode to PO\\nST /x\\r\\ny (request contract-7)"
+        );
+        let uncoded = Response::error(502, "identity unavailable");
+        assert_eq!(
+            server_error_line("unit", &uncoded, &request, "contract-8"),
+            "unit answered 502 - to PO\\nST /x\\r\\ny (request contract-8)"
+        );
+    }
+
+    #[test]
+    fn request_ids_are_bounded_tokens_or_minted() {
+        assert!(request_id_is_valid("abc-123.X_9"));
+        assert!(request_id_is_valid(&"a".repeat(64)));
+        let too_long = "a".repeat(65);
+        for rejected in ["", too_long.as_str(), "two words", "line\r\nbreak", "caf\u{e9}"] {
+            assert!(!request_id_is_valid(rejected), "{rejected:?}");
+        }
+        let (first, second) = (mint_request_id(), mint_request_id());
+        assert_ne!(first, second);
+        for minted in [&first, &second] {
+            assert_eq!(minted.len(), 16, "{minted}");
+            assert!(minted.bytes().all(|c| c.is_ascii_hexdigit()), "{minted}");
+            assert!(request_id_is_valid(minted));
+        }
+    }
+
+    #[test]
+    fn problem_detail_keeps_detail_and_adds_the_correlation_id() {
+        let response = Response::problem_detail(400, "invalid_request", "budget_cents is missing")
+            .localized("pt-BR", "contract-1");
+        assert_eq!(response.status, 400);
+        let expected = i18n::message("pt-BR", "invalid_request");
+        assert_ne!(expected, i18n::message("en-US", "invalid_request"));
+        assert_eq!(json::parse(&response.body).unwrap(), json::obj(vec![
+            ("code", json::s("invalid_request")),
+            ("error", json::s(&expected)),
+            ("detail", json::s("budget_cents is missing")),
+            ("correlation_id", json::s("contract-1")),
+        ]));
+    }
+
+    #[test]
+    fn error_bodies_gain_the_correlation_id() {
+        let refusal = Response::json(403, &json::obj(vec![
+            ("status", json::s("refused")),
+            ("reason", json::s("participation revoked")),
+        ]));
+        assert_eq!(json::parse(&refusal.localized("en-US", "contract-2").body).unwrap(), json::obj(vec![
+            ("status", json::s("refused")),
+            ("reason", json::s("participation revoked")),
+            ("correlation_id", json::s("contract-2")),
+        ]));
+        let legacy = Response::error(502, "identity unavailable").localized("he-IL", "contract-3");
+        assert_eq!(json::parse(&legacy.body).unwrap(), json::obj(vec![
+            ("error", json::s("identity unavailable")),
+            ("correlation_id", json::s("contract-3")),
+        ]));
+        let created = Response::json(201, &json::obj(vec![("committed", json::b(true))]));
+        let unchanged = created.body.clone();
+        assert_eq!(created.localized("pt-BR", "contract-4").body, unchanged);
+        let not_an_object = Response { status: 500, body: String::from("[\"x\"]") };
+        assert_eq!(not_an_object.localized("en-US", "contract-5").body, "[\"x\"]");
+    }
+
+    #[test]
+    fn client_sends_extra_headers_and_forwards_the_request_id() {
+        let _stamps = hold_stall_stamps();
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let url = format!("http://{}/v1/append", listener.local_addr().unwrap());
+        let peer = std::thread::spawn(move || {
+            let mut seen = Vec::new();
+            for _ in 0..2 {
+                let (stream, _) = listener.accept().unwrap();
+                let mut locale = String::new();
+                let Ok(Some(request)) = read_request(&stream, &mut locale) else { panic!("the request was refused") };
+                write_response(&stream, &Response::json(201, &json::obj(vec![])), "peer");
+                seen.push(request.headers);
+            }
+            seen
+        });
+        let sent = with_correlation_id("contract-6", || {
+            request_with_headers("POST", &url, Some("{}"), &[("Authorization", "Bearer t")])
+        });
+        assert_eq!(sent, Ok((201, String::from("{}"))));
+        assert_eq!(correlation_id(), None, "the id belongs to the handler call only");
+        assert_eq!(request("GET", &url, None), Ok((201, String::from("{}"))));
+        let seen = peer.join().unwrap();
+        assert!(seen[0].contains(&(String::from("Authorization"), String::from("Bearer t"))), "{:?}", seen[0]);
+        assert!(seen[0].contains(&(String::from("X-Request-Id"), String::from("contract-6"))), "{:?}", seen[0]);
+        assert!(!seen[1].iter().any(|(name, _)| name.eq_ignore_ascii_case("x-request-id")), "{:?}", seen[1]);
+        for (name, value) in [("Bad Name", "v"), ("X-Token", "secret\r\nInjected: 1"), ("X-Token", "secret\0")] {
+            let refused = request_with_headers("GET", &url, None, &[(name, value)]).unwrap_err();
+            assert!(refused.starts_with("invalid header"), "{refused}");
+            assert!(!refused.contains("secret"), "{refused}");
+        }
     }
 }
 

@@ -27,7 +27,8 @@ sequenceDiagram
         Coordinator->>PlatformSvc: Exactly the granted artifact, carrying its expiry
         PlatformSvc-->>Sam: Artifact read-only - identity still withheld
     end
-    Sam->>LedgerSvc: Evidence supports the buyer - refund posts as compensating entries referencing the case
+    Sam->>PlatformSvc: Evidence supports the buyer - refund the case
+    PlatformSvc->>LedgerSvc: Compensating entries for the case's match, referencing the case, with the ledger write token
     Note over LedgerSvc: One full reversal per match; identical case replay returns its prior outcome, including after restart
     Note over LedgerSvc: History is never edited; a conflicting case or inconsistent prior refund is rejected
     Sam->>PlatformSvc: Resolution recorded, case closed

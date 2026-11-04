@@ -22,6 +22,17 @@ fn handle(state: &mut Journal, request: &Request) -> Response {
         let text = fs::read_to_string(state.directory.join("journal")).unwrap_or_default();
         return Response::json(200, &json::s(&text));
     }
+    if request.method == "POST" && request.path == "/panic" {
+        panic!("lifecycle fixture handler panicked on request");
+    }
+    if request.method == "POST" && request.path == "/forward" {
+        // Calls the URL in the body and relays the answer, so the contracts
+        // can see what an outbound call made inside a handler carries.
+        return match amisad_common::request("GET", &request.body, None) {
+            Ok((status, body)) => Response { status, body },
+            Err(error) => Response::error(502, &error),
+        };
+    }
     if request.method != "POST" || !matches!(request.path.as_str(), "/append" | "/commit-after-release") {
         return Response::error(404, "not found");
     }

@@ -36,7 +36,7 @@ DO $$ BEGIN
         CREATE ROLE amisad LOGIN;
     END IF;
 END $$;
-REVOKE ALL ON ALL TABLES IN SCHEMA seller, ledger FROM amisad;
+REVOKE ALL ON ALL TABLES IN SCHEMA seller, ledger, resource FROM amisad;
 """ + grants.group(1) + """
 SET LOCAL ROLE amisad;
 SELECT current_user, rolsuper FROM pg_roles WHERE rolname = current_user;
@@ -47,6 +47,11 @@ VALUES ('provisioning-inventory', 5, 20);
 UPDATE seller.inventory SET stock = 7, delta_ts = 21
 WHERE offer_id = 'provisioning-inventory';
 SELECT stock, delta_ts FROM seller.inventory WHERE offer_id = 'provisioning-inventory';
+INSERT INTO resource.allocation_policies (jurisdiction, regions) VALUES ('provisioning-policy', '["region-a"]')
+ON CONFLICT (jurisdiction) DO UPDATE SET regions = EXCLUDED.regions;
+INSERT INTO resource.allocation_policies (jurisdiction, regions) VALUES ('provisioning-policy', '["region-b"]')
+ON CONFLICT (jurisdiction) DO UPDATE SET regions = EXCLUDED.regions;
+SELECT 'policy ' || regions FROM resource.allocation_policies WHERE jurisdiction = 'provisioning-policy';
 SELECT has_table_privilege(current_user, 'seller.inventory', 'DELETE');
 SELECT has_table_privilege(current_user, table_name, 'UPDATE')
     OR has_table_privilege(current_user, table_name, 'DELETE')
@@ -57,16 +62,19 @@ ROLLBACK;
         lines = result.splitlines()
         self.assertIn('amisad|f', lines)
         self.assertIn('7|21', lines)
+        self.assertIn('policy ["region-b"]', lines)
         self.assertEqual(lines[-5:], ['f', 'f', 'f', 'f', 'ROLLBACK'])
 
     def test_invalid_configuration_exits(self):
-        for name in ('seller-svc', 'ledger-svc'):
+        for name in ('seller-svc', 'ledger-svc', 'resource-svc'):
             result = subprocess.run([str(BIN / name)], env={**os.environ, 'DATABASE_URL': 'invalid option'}, capture_output=True, timeout=5)
             self.assertEqual(result.returncode, 1)
             self.assertIn(b'connection failed', result.stderr)
 
     def test_sql_error_survives_and_closed_connection_exits(self):
-        for name, table, endpoint, body in [('seller-svc', 'seller.offers', '/v1/offers', OFFER), ('ledger-svc', 'ledger.settlement_instructions', '/v1/settlements/instructions', INSTRUCTION)]:
+        policy = dict(jurisdiction='policy-fixture', regions=['policy-fixture'])
+        for name, table, endpoint, body in [('seller-svc', 'seller.offers', '/v1/offers', OFFER), ('ledger-svc', 'ledger.settlement_instructions', '/v1/settlements/instructions', INSTRUCTION),
+                                            ('resource-svc', 'resource.allocation_policies', '/v1/policies', policy)]:
             with socket.socket() as sock:
                 sock.bind(('127.0.0.1', 0))
                 port = sock.getsockname()[1]
@@ -85,8 +93,13 @@ ROLLBACK;
                         raise AssertionError('service did not start')
                     sql(f'ALTER TABLE {table} RENAME TO policy_fixture_hidden')
                     renamed = True
-                    self.assertEqual(call(url, endpoint, body)[0], 503)
+                    status, refused = call(url, endpoint, body)
+                    self.assertEqual((status, refused.get('code')), (503, 'store_unavailable'), refused)
                     self.assertIsNone(proc.poll())
+                    if name == 'resource-svc':
+                        # A policy the store refused is not applied: placement stays unrestricted.
+                        self.assertEqual(call(url, '/v1/edges', dict(region='elsewhere', endpoint='http://elsewhere:8080'))[0], 201)
+                        self.assertEqual(call(url, '/v1/placements', dict(jurisdiction='policy-fixture'))[0], 200)
                     sql(f'ALTER TABLE {table.split(".")[0]}.policy_fixture_hidden RENAME TO {table.split(".")[1]}')
                     renamed = False
                     self.assertEqual(call(url, '/health')[0], 200)

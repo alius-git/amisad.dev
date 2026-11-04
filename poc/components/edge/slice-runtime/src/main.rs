@@ -9,15 +9,18 @@
 // can arm isolation faults (POST /v1/faults) - an armed environment
 // self-terminates right after attestation, BEFORE the envelope is opened
 // (created -> attested -> aborted -> destroyed, fault reason attested, no
-// match record, nothing need-derived leaves). Deviations: poc/README.md.
+// match record, nothing need-derived leaves). Started with ADVERTISE_URL, the
+// runtime registers itself with resource-svc under a lease it keeps renewing.
+// Its ledger appends carry LEDGER_WRITE_TOKEN, which the scenario start hands
+// over on standard input. Deviations: poc/README.md.
 
-use amisad_common::{json, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
+use amisad_common::{json, ledger_write_authorization, request, request_with_headers, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
 use std::io::Read;
 use std::sync::OnceLock;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 #[cfg(test)]
-type HttpSender = Box<dyn FnMut(&str, &str, Option<&str>) -> Result<(u16, String), String>>;
+type HttpSender = Box<dyn FnMut(&str, &str, Option<&str>, &[(&str, &str)]) -> Result<(u16, String), String> + Send>;
 
 struct State {
     egress: Vec<String>,
@@ -38,6 +41,44 @@ fn resource_url() -> String {
 /// assertable from the ledger alone.
 fn region() -> String {
     std::env::var("REGION").unwrap_or_default()
+}
+
+/// The lease a self-registration asks for, and how often it is renewed: the
+/// lease spans three renewals, so one lost POST keeps the edge placed.
+const LEASE_SECS: i64 = 30;
+const LEASE_RENEWAL: Duration = Duration::from_secs(10);
+
+/// The edge's own registration when ADVERTISE_URL, REGION and RESOURCE_URL are
+/// all set: the resource-svc URL and the POST /v1/edges body, with CAPACITY or
+/// 1. Without them the runtime registers nothing and is registered from
+/// outside, as the scenario scripts do.
+fn advertisement() -> Option<(String, String)> {
+    let setting = |name: &str| std::env::var(name).ok().filter(|value| !value.is_empty());
+    let (endpoint, region, resource) = (setting("ADVERTISE_URL")?, setting("REGION")?, setting("RESOURCE_URL")?);
+    let capacity = setting("CAPACITY").map_or(Ok(1), |text| text.parse::<i64>()).unwrap_or_else(|_| {
+        eprintln!("CAPACITY is not an integer; registering capacity 1");
+        1
+    });
+    let registration = json::obj(vec![
+        ("region", json::s(&region)),
+        ("endpoint", json::s(&endpoint)),
+        ("capacity", json::n(capacity)),
+        ("lease_secs", json::n(LEASE_SECS)),
+    ]);
+    Some((resource, registration.dump()))
+}
+
+/// Registers the edge and renews its lease for as long as the process runs.
+/// A failure only goes to stderr: the registration is not environment egress.
+fn renew_lease(resource: &str, registration: &str) {
+    loop {
+        match request("POST", &format!("{resource}/v1/edges"), Some(registration)) {
+            Ok((201, _)) => {}
+            Ok((status, body)) => eprintln!("lease renewal to {resource} returned {status}: {body}"),
+            Err(e) => eprintln!("lease renewal to {resource} failed: {e}"),
+        }
+        std::thread::sleep(LEASE_RENEWAL);
+    }
 }
 
 fn now_nanos() -> u128 {
@@ -147,16 +188,19 @@ fn auto_closable(need: &json::Json, offer: &json::Json) -> bool {
 }
 
 /// Every outbound payload goes through here so the egress log is complete.
-fn post_out(state: &mut State, kind: &str, url: &str, body: &json::Json) {
+/// `authorization` is the ledger write token's header value for a ledger
+/// append, and None for any other peer.
+fn post_out(state: &mut State, kind: &str, url: &str, body: &json::Json, authorization: Option<&str>) {
     let text = body.dump();
     state.egress.push(format!("{kind}:{text}"));
+    let headers: Vec<(&str, &str)> = authorization.map(|value| ("Authorization", value)).into_iter().collect();
     #[cfg(test)]
     let result = match state.http_sender.as_mut() {
-        Some(send) => send("POST", url, Some(&text)),
-        None => request("POST", url, Some(&text)),
+        Some(send) => send("POST", url, Some(&text), &headers),
+        None => request_with_headers("POST", url, Some(&text), &headers),
     };
     #[cfg(not(test))]
-    let result = request("POST", url, Some(&text));
+    let result = request_with_headers("POST", url, Some(&text), &headers);
     match result {
         Err(e) => eprintln!("egress {kind} to {url} failed: {e}"),
         // The ledger 503s when its durable store is down; silence here would
@@ -196,6 +240,7 @@ fn attest_with(
         "attestation",
         &format!("{}/v1/attestations", ledger_url()),
         &payload,
+        ledger_write_authorization().as_deref(),
     );
     let mut telemetry_pairs = vec![
         ("environment_id", json::s(environment_id)),
@@ -211,6 +256,7 @@ fn attest_with(
         "telemetry",
         &format!("{}/v1/telemetry", resource_url()),
         &telemetry,
+        None,
     );
 }
 
@@ -225,6 +271,15 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let envelope = match body.str_of("envelope") {
                 Some(e) => e.to_string(),
                 None => return Response::error(400, "envelope required"),
+            };
+            // The dispatcher's closing policy can only narrow the sealed one:
+            // "manual" returns a shortlist even for an auto-close need. Any
+            // other value is refused before an environment exists, so nothing
+            // is attested for it.
+            let manual = match body.get("policy") {
+                None => false,
+                Some(policy) if policy.as_str() == Some("manual") => true,
+                Some(_) => return Response::problem_detail(400, "invalid_request", "policy must be \"manual\" when present"),
             };
             let empty = Vec::new();
             let offers = body.get("offers").and_then(|o| o.as_arr()).unwrap_or(&empty).clone();
@@ -268,11 +323,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 }
             };
 
-            if need.bool_of("auto_close") != Some(true) {
-                // Manual policy (s002.fitting): the environment returns a
-                // shortlist of every fully-fitting offer and commits NOTHING -
-                // no match id, no settlement instruction, no order. The buyer's
-                // explicit booking is the only path to a commitment.
+            if manual || need.bool_of("auto_close") != Some(true) {
+                // Manual policy (s002.fitting), or a manual dispatch such as a
+                // delegated need: the environment returns a shortlist of every
+                // fully-fitting offer and commits NOTHING - no match id, no
+                // settlement instruction, no order. The buyer's explicit booking
+                // (for a delegated need, the coordinator's decision against the
+                // mandate cap) is the only path to a commitment.
                 // Only slots the need's fitting constraint allows may leave
                 // the environment - the shortlist must honor EVERY constraint,
                 // and the coordinator cannot re-check (it never parses the
@@ -387,6 +444,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 "settlement-instruction",
                 &format!("{}/v1/settlements/instructions", ledger_url()),
                 &instruction,
+                ledger_write_authorization().as_deref(),
             );
             attest(state, &environment_id, &jurisdiction, "executed");
 
@@ -451,6 +509,15 @@ fn handle(state: &mut State, req: &Request) -> Response {
 }
 
 fn main() -> std::io::Result<()> {
+    // Not fatal: hand runs and cargo tests use a ledger with appends open. A
+    // ledger that has a token refuses these appends with 401, which shows
+    // only in each append's egress line, so the start names the cause once.
+    if ledger_write_authorization().is_none() {
+        eprintln!("slice-runtime: LEDGER_WRITE_TOKEN is not set; ledger appends go without a write token");
+    }
+    if let Some((resource, registration)) = advertisement() {
+        std::thread::spawn(move || renew_lease(&resource, &registration));
+    }
     serve_app(
         ServiceInfo {
             name: "slice-runtime",
@@ -566,14 +633,14 @@ mod tests {
     fn armed_environment_aborts_without_opening_the_envelope() {
         // The sender belongs to this state, so parallel tests cannot change
         // its peers or depend on an external resolver to reject a hostname.
-        let attempts = std::rc::Rc::new(std::cell::RefCell::new(Vec::new()));
+        let attempts = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
         let recorded = attempts.clone();
         let mut state = State {
             egress: Vec::new(),
             ingress: Vec::new(),
             armed_faults: 1,
-            http_sender: Some(Box::new(move |method, url, body| {
-                recorded.borrow_mut().push((method.to_string(), url.to_string(), body.unwrap().to_string()));
+            http_sender: Some(Box::new(move |method, url, body, _| {
+                recorded.lock().unwrap().push((method.to_string(), url.to_string(), body.unwrap().to_string()));
                 Err(String::from("fixture peer unavailable"))
             })),
         };
@@ -582,6 +649,7 @@ mod tests {
             &Request {
                 method: "POST".to_string(),
                 path: "/v1/environments".to_string(),
+                headers: Vec::new(),
                 body: "{\"jurisdiction\":\"region-a\",\"envelope\":\"{\\\"category\\\":\\\"housewares\\\"}\",\"offers\":[]}".to_string(),
             },
         );
@@ -598,7 +666,7 @@ mod tests {
         assert!(!egress.contains("match-record"));
         assert!(!egress.contains("housewares"));
         assert!(!egress.contains("shortlist-record"));
-        let attempts = attempts.borrow();
+        let attempts = attempts.lock().unwrap();
         assert_eq!(attempts.len(), 8, "every lifecycle attempts attestation and telemetry");
         for (index, lifecycle) in ["created", "attested", "aborted", "destroyed"].iter().enumerate() {
             for (offset, endpoint, field) in [(0, "/v1/attestations", "lifecycle"), (1, "/v1/telemetry", "event")] {
@@ -625,6 +693,7 @@ mod tests {
         let req = |body: &str| Request {
             method: "POST".to_string(),
             path: "/v1/faults".to_string(),
+            headers: Vec::new(),
             body: body.to_string(),
         };
         assert_eq!(handle(&mut state, &req("{\"mode\":\"chaos\"}")).status, 400);
@@ -632,5 +701,73 @@ mod tests {
         let ok = handle(&mut state, &req("{\"mode\":\"isolation\",\"count\":2}"));
         assert_eq!(ok.status, 200);
         assert_eq!(state.armed_faults, 2);
+    }
+
+    /// A state whose sender records every outbound URL and answers 201.
+    fn recording_state() -> (State, std::sync::Arc<std::sync::Mutex<Vec<String>>>) {
+        let sent = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let recorded = sent.clone();
+        let state = State {
+            egress: Vec::new(),
+            ingress: Vec::new(),
+            armed_faults: 0,
+            http_sender: Some(Box::new(move |_, url, _, _| {
+                recorded.lock().unwrap().push(url.to_string());
+                Ok((201, String::from("{}")))
+            })),
+        };
+        (state, sent)
+    }
+
+    /// An auto-close need with one offer it may close on, dispatched with
+    /// `policy` as the body's policy member, if any.
+    fn dispatch(state: &mut State, policy: Option<&str>) -> Response {
+        let mut body = vec![
+            ("jurisdiction", json::s("region-a")),
+            ("envelope", json::s(&need().dump())),
+            ("offers", json::arr(vec![offer(11000, "housewares", "region-a", 10, true)])),
+        ];
+        if let Some(policy) = policy {
+            body.push(("policy", json::parse(policy).unwrap()));
+        }
+        handle(state, &Request {
+            method: "POST".to_string(),
+            path: "/v1/environments".to_string(),
+            headers: Vec::new(),
+            body: json::obj(body).dump(),
+        })
+    }
+
+    #[test]
+    fn manual_dispatch_policy_overrides_an_auto_close_envelope() {
+        let (mut state, sent) = recording_state();
+        let response = dispatch(&mut state, Some("\"manual\""));
+        assert_eq!(response.status, 201, "{}", response.body);
+        let body = json::parse(&response.body).unwrap();
+        assert_eq!(body.get("shortlist").and_then(|s| s.as_arr()).map(Vec::len), Some(1), "{}", response.body);
+        assert_eq!(body.str_of("match_id"), None);
+        let sent = sent.lock().unwrap();
+        assert_eq!(sent.len(), 8, "four lifecycle events, each attested and mirrored: {sent:?}");
+        assert!(sent.iter().all(|url| url.ends_with("/v1/attestations") || url.ends_with("/v1/telemetry")), "{sent:?}");
+        let egress = state.egress.join("\n");
+        assert!(egress.contains("shortlist-record:"), "{egress}");
+        assert!(!egress.contains("match-record:") && !egress.contains("settlement-instruction:"), "{egress}");
+    }
+
+    #[test]
+    fn unknown_dispatch_policy_is_refused_before_an_environment_exists() {
+        for policy in ["\"auto\"", "\"MANUAL\"", "\"\"", "null", "true"] {
+            let (mut state, sent) = recording_state();
+            let response = dispatch(&mut state, Some(policy));
+            assert_eq!(response.status, 400, "{policy}: {}", response.body);
+            assert_eq!(json::parse(&response.body).unwrap().str_of("code"), Some("invalid_request"), "{policy}");
+            assert!(sent.lock().unwrap().is_empty(), "{policy}: nothing may be attested");
+            assert!(state.egress.is_empty(), "{policy}");
+        }
+        // Without a policy the sealed need decides, as before: it closes.
+        let (mut state, _) = recording_state();
+        let closed = dispatch(&mut state, None);
+        assert_eq!(closed.status, 201);
+        assert!(json::parse(&closed.body).unwrap().str_of("match_id").is_some(), "{}", closed.body);
     }
 }

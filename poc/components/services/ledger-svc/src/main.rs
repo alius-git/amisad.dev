@@ -13,6 +13,14 @@
 // normalization would silently break the hash chain on reload.
 // Chain rule: row_hash = sha256(prev_hash_hex + canonical_payload_json),
 // genesis prev = 64 zeros. History is never edited; balances are derived.
+// The chain stays plain, unkeyed SHA-256, so audit-svc recomputes it with
+// read access alone and holds no ledger secret. A chain that verifies shows
+// that no row changed after it was written, not who wrote it. Authorship comes
+// from two credentials the deploy step makes for each build: the write token
+// every POST must carry as `Authorization: Bearer <LEDGER_WRITE_TOKEN>`, and
+// the password of the database role that stores the rows. Reads stay open.
+// Without a token (unit tests, hand runs) appends are open to any caller, and
+// the service says so on stderr at start.
 
 use amisad_common::{json, serve_app, sha256, Request, Response, ServiceInfo};
 use postgres::Client;
@@ -102,6 +110,17 @@ struct State {
     consent: Chain,
     instructions: Vec<Instruction>,
     db: Option<Client>,
+    /// LEDGER_WRITE_TOKEN; None leaves appends open.
+    write_token: Option<String>,
+}
+
+/// Whether `authorization` is `Bearer <token>`. The token is compared in time
+/// that does not depend on where the first wrong character is.
+fn bearer_matches(token: &str, authorization: Option<&str>) -> bool {
+    let Some((scheme, presented)) = authorization.and_then(|value| value.split_once(' ')) else { return false };
+    scheme.eq_ignore_ascii_case("bearer")
+        && presented.len() == token.len()
+        && presented.bytes().zip(token.bytes()).fold(0u8, |difference, (a, b)| difference | (a ^ b)) == 0
 }
 
 // participation/contribution are the buyer's own consents (s003.silence);
@@ -257,6 +276,13 @@ fn parse_instruction(body: &json::Json) -> Result<Instruction, String> {
 }
 
 fn handle(state: &mut State, req: &Request) -> Response {
+    if req.method == "POST" {
+        if let Some(token) = state.write_token.as_deref() {
+            if !bearer_matches(token, req.header("authorization")) {
+                return Response::problem(401, "write_token_required");
+            }
+        }
+    }
     let path = req.path.as_str();
     match (req.method.as_str(), path) {
         ("POST", "/v1/attestations") => {
@@ -647,6 +673,10 @@ fn main() -> std::io::Result<()> {
         ),
         None => (Chain::default(), Chain::default(), Chain::default(), Vec::new()),
     };
+    let write_token = std::env::var("LEDGER_WRITE_TOKEN").ok().filter(|token| !token.is_empty());
+    if write_token.is_none() {
+        eprintln!("ledger-svc: LEDGER_WRITE_TOKEN is not set; appends are open to any caller");
+    }
     serve_app(
         ServiceInfo {
             name: "ledger-svc",
@@ -658,6 +688,7 @@ fn main() -> std::io::Result<()> {
             consent,
             instructions,
             db,
+            write_token,
         },
         handle,
     )
@@ -763,6 +794,7 @@ mod tests {
             consent: Chain::default(),
             instructions: Vec::new(),
             db: None,
+            write_token: None,
         };
         let inst = json::parse(
             "{\"match_id\":\"m1\",\"value_cents\":12000,\"splits\":{\"seller_cents\":10800,\"network_cents\":600,\"platform_cents\":600,\"ads_cents\":0}}",
@@ -772,6 +804,7 @@ mod tests {
         let confirm = Request {
             method: "POST".to_string(),
             path: "/v1/settlements/confirm".to_string(),
+            headers: Vec::new(),
             body: "{\"match_id\":\"m1\"}".to_string(),
         };
         let response = handle(&mut state, &confirm);
@@ -784,5 +817,73 @@ mod tests {
             .sum();
         assert_eq!(total, 12000);
         assert!(state.settlement.verify());
+    }
+
+    fn empty_state(write_token: Option<&str>) -> State {
+        State {
+            attestation: Chain::default(),
+            settlement: Chain::default(),
+            consent: Chain::default(),
+            instructions: Vec::new(),
+            db: None,
+            write_token: write_token.map(str::to_string),
+        }
+    }
+
+    fn attestation(authorization: Option<&str>) -> Request {
+        Request {
+            method: "POST".to_string(),
+            path: "/v1/attestations".to_string(),
+            headers: authorization.map(|value| ("Authorization".to_string(), value.to_string())).into_iter().collect(),
+            body: "{\"environment_id\":\"e1\",\"lifecycle\":\"created\"}".to_string(),
+        }
+    }
+
+    fn read_attestations() -> Request {
+        Request {
+            method: "GET".to_string(),
+            path: "/v1/attestations".to_string(),
+            headers: Vec::new(),
+            body: String::new(),
+        }
+    }
+
+    #[test]
+    fn appends_need_the_write_token_when_one_is_configured() {
+        let mut state = empty_state(Some("contract-token"));
+        // A prefix or an extension of the token must fail as surely as a wrong
+        // character: the byte comparison alone stops at the shorter side.
+        for authorization in [
+            None,
+            Some("Bearer a-different-token"),
+            Some("Bearer contract-tokem"),
+            Some("Bearer contract-toke"),
+            Some("Bearer c"),
+            Some("Bearer contract-token-x"),
+            Some("contract-token"),
+        ] {
+            let refused = handle(&mut state, &attestation(authorization));
+            assert_eq!(refused.status, 401, "{authorization:?}");
+            assert_eq!(json::parse(&refused.body).unwrap().str_of("code"), Some("write_token_required"));
+        }
+        // Every POST is an append, including one to a path the ledger does not serve.
+        let mut unknown = attestation(None);
+        unknown.path = "/v1/unknown".to_string();
+        assert_eq!(handle(&mut state, &unknown).status, 401);
+        assert!(state.attestation.entries.is_empty(), "a refused append must not reach the chain");
+        assert_eq!(handle(&mut state, &attestation(Some("Bearer contract-token"))).status, 201);
+        assert_eq!(handle(&mut state, &attestation(Some("bearer contract-token"))).status, 201);
+        let read = handle(&mut state, &read_attestations());
+        assert_eq!(read.status, 200);
+        assert_eq!(json::parse(&read.body).unwrap().get("entries").and_then(|e| e.as_arr()).map(Vec::len), Some(2));
+    }
+
+    #[test]
+    fn appends_stay_open_without_a_configured_token() {
+        let mut state = empty_state(None);
+        assert_eq!(handle(&mut state, &attestation(None)).status, 201);
+        assert_eq!(handle(&mut state, &attestation(Some("Bearer anything"))).status, 201);
+        assert_eq!(handle(&mut state, &read_attestations()).status, 200);
+        assert!(state.attestation.verify());
     }
 }

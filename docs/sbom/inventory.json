@@ -2,7 +2,7 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "e5c33e5409beea4a79d4584d60ba26f267fee7c6569a35bc6580794c26fed32f",
+  "sourceInputsSha256": "97ca0e0735f3150475077259bcbb48a122f2ef374c75a19419a61008e7b0b206",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
@@ -14,28 +14,28 @@
     "README.md": "b42c097e3a3466ecdddc3ce60cf549c07cd55ee89c8d95aefea2bd760a26878b",
     "VERSION": "46088a2929566cc8c0671f7be7b520081b82d6c46bf7779c952ab377a4b272b7",
     "docs/pt-BR/index.md": "e16a26a2802fa9dc1b3de9b09cb8bd91386781de6058a0b01179a92789bb14c1",
-    "docs/pt-BR/poc/test.md": "71ba6f7d6a80c80cb7be48221d9df1d1b84cc6e20c5a9f9d2ac276582592bb5f",
-    "docs/pt-BR/poc/usernames.md": "661f1f7f22305432f2d4e9848cebaebaf9054cca7c2d4c1c98c9c383fc8a9146",
-    "globalization/manifests/doc-translations.json": "16891a6a9da572c7b2ece1716d3337fdd600f8031d7073d3dfe8ff6533fc1d03",
+    "docs/pt-BR/poc/test.md": "8c89b9bafef7d7cb4f4f8efee5d6e4dbb30f17f8ae4d398a613ce16706045faa",
+    "docs/pt-BR/poc/usernames.md": "0d93214007311d0c921a426ac333884e0076546130306ca7864e80a41930ed2e",
+    "globalization/manifests/doc-translations.json": "a21d9a7ec9527c4aafa437f579b45fcfc98cddb94f8fe77982bd339a9f946308",
     "plan/applications.md": "e8721203f340718cf2dd6bd09c0eb99cafa1106a8af7b008238e6c643ecb236c",
-    "plan/design.md": "3cf2667840636cb45d5575b9ebdb486c5ca9de9babd2032fc559490d29e65054",
+    "plan/design.md": "d5557094f458a5a560f8b673a43572aff43810042a6161ae2be9d3dbe34cbb6e",
     "plan/design/01-overview.md": "fb28eee8ea715ff54a5a4934bb623ee795b384130767e1f3078b1e960adbd1ea",
-    "plan/design/02-buyer.md": "8f20427c9fa5cb2d75346323504db298c430487167b4cf418d04d1697c7896c9",
-    "plan/design/03-seller.md": "7b77b929d65c5ea85532e517fb663cfcb647b564a4f8751e95f2e467a739d492",
-    "plan/design/04-resource.md": "2b72af547b4f77fc624d1bc105b03e5e6d1e15fd64a740e3587fd904eb3913e9",
+    "plan/design/02-buyer.md": "58c20693a93ce381849a80b9e8768a25799540c0e458e691c91d066c960d0666",
+    "plan/design/03-seller.md": "fa0aa6d1806beb9245326cd4edaf624d356cc581d1efd35cb4276a1329528d41",
+    "plan/design/04-resource.md": "f05fe8852363385f6197a955ce37507df105fc8109c38e71c85caa2472bf50b6",
     "plan/design/05-ads.md": "ed93e2fdf08ddea396ed6c5f8487180907e779ec3fd3a5b1b0d7088dd920e013",
     "plan/design/06-insights.md": "803296ff4feba77aeefc5b7b0264ad5b4d6e75125ed314c845ebc1246ea2bc00",
-    "plan/design/07-platform.md": "211d03b00f8aff03ddbe523050c8903dd78296be0a5f41c089e9a4b0b49b9580",
-    "plan/design/08-audit.md": "238074fd8d1130410bfc54ee367223dca415ea94df67cfb9c776a8e53d3a8e0c",
+    "plan/design/07-platform.md": "de6d56bcfd757183b8c449f8c6cf229568edd75f7751ca7c52d85dc041e8c4a1",
+    "plan/design/08-audit.md": "c999267678b6cd1393efd6b2d37c3ae14146482eba464782d7d8eff3d4d99d42",
     "plan/design/09-connect.md": "432d596953c44bc2f83024d384d09a8f8f03f54b7ad65363e5c2a09f6b5395ab",
     "plan/design/seq.s001.fulfillment.md": "c2a82906b939c466553997a2f48d002d5a5e1c452f738eccb22988a911814781",
     "plan/design/seq.s002.fitting.md": "60e362e4e22d7f618995e8e3f865bf9ad2a38eed5b8a8dae4c3a1d83beb50e42",
     "plan/design/seq.s003.silence.md": "b4c41151913a23f9e0565aee61e93934c03c1a780603540ca99830f974e552e6",
     "plan/design/seq.s004.failover.md": "d45d89ec4eae8e93ce27aab3fb272644e5604f7e16c1be13bc3d26fa06184384",
     "plan/design/seq.s005.attribution.md": "35658839ae0d6de6cdf4bd1d1f9fa2afadc767a74b5210529a6ee4a83ba8c4c4",
-    "plan/design/seq.s006.mandate.md": "0bb6e53b82d6f19d83097f7895e5f3c92504ab8b7b2e997cbe24ccfbdfb798e5",
+    "plan/design/seq.s006.mandate.md": "22e1d03dd0c39f9a802371b68c6fe51e0feca2aea21144f33829cb200e096726",
     "plan/design/seq.s007.inventory.md": "8f153c43d81cf44c7cc6e8ea79692249b0eb4158a22738f3e6631049294d89f7",
-    "plan/design/seq.s008.mediation.md": "37276f2d98a5db7d3d1bcacf2f704d0fc53d98828b8e39d7d74bec798d22377d",
+    "plan/design/seq.s008.mediation.md": "a43dfd5187e2c549996c203cfa823009aba8c854cb40ca1065974bab51ec1f46",
     "plan/design/seq.s009.suppression.md": "23647d9654b684bba8cfa97890b1863652cd4d59d06c8647cdf7029aeb2bfd6f",
     "plan/design/seq.s010.certification.md": "c074ee16891a3f7f6952b917452180e1e789e31f59ab91979a309f08a287ccc0",
     "plan/personas.md": "d692a47e9dd5712a208aca5b5757abfc6e1f9054114210485498b1fd0263034d",
@@ -46,10 +46,10 @@
     "poc/.dockerignore": "6c3aa38c25893c8008c339a577cd8dff854769fffb1e183ccc044e8d05bdfe05",
     "poc/.gitignore": "96be5462d0193b7f7550fd82821252288b03c40e37fc7efb9f4ee4024a973b9f",
     "poc/BUILD.bazel": "e07d948b2b811798f05c5081ba1169b14fc7bfbb04ca1308997cdebe7a297b2e",
-    "poc/Cargo.lock": "c4cac02e79f8273a708197cdf73181c71162bf7d194eaf749cc81ef540408813",
+    "poc/Cargo.lock": "5639d1a2b95c32e6c91c76a9db416297f7f7db5862d9ef36a03da3b4b262c17f",
     "poc/Cargo.toml": "aaa5f34c499592e78b37669d4ddbec2ffa34efc2f136ed9c43bc00c0e954f67f",
     "poc/MODULE.bazel": "1102044178454f002fa96cf0d93b2707bbb11cfc0e8b1cc082897d585fba7099",
-    "poc/README.md": "0512326f7381c621c7c92076dfa03241ac6641f378891c22b0528bcd1b3ba039",
+    "poc/README.md": "2e74f3a4a1828f806a973ae31159cff0a4446555c207740a739b355e037df05b",
     "poc/STATUS.s001.fulfillment.md": "ccb534288ad77c76896b343614db0846d8ed08a34184c05bf924a1c65cc3ab8c",
     "poc/build/Publish-ProjectArchive.ps1": "fcfb12ecdc2b0fbf797c1a903b50813f49bc934707db156e7b4cf7d620a9e4e4",
     "poc/build/build-all.ps1": "5bcbd32aff29f2d330cf2029bd009a0d276d3936c8aab7f2e540e7ff084c2dab",
@@ -92,57 +92,57 @@
     "poc/components/edge/slice-runtime/BUILD.bazel": "153579eb6bacd43a8421f5b2180ca1c80ce1ad674e7ec85f0bc5d3dee150a99b",
     "poc/components/edge/slice-runtime/Cargo.toml": "a41e936ff8efcf49db84e1fb18751991d4753105cb388c38b96ff3685d32b905",
     "poc/components/edge/slice-runtime/Dockerfile": "373175c4dd886eda31bf89abebe0b4a874091fccf2c0896355d3abec648927b1",
-    "poc/components/edge/slice-runtime/src/main.rs": "77be02181a513f618f0dafae8e32e14e40b543c185434a1488c4490ff6abf081",
+    "poc/components/edge/slice-runtime/src/main.rs": "a6d832c46a328b1274031133cfbaa4d833b20dd678dcab03d2e0e1a859220645",
     "poc/components/lib/amisad-common/BUILD.bazel": "3bf5f97350d97a2011c7d5bf399c365b088d9af96652759b10e7ec0f66889b78",
     "poc/components/lib/amisad-common/Cargo.toml": "eeba89c7686b98e03a1f89a24d4714fb2c203f404a04b213c272431f2257f344",
-    "poc/components/lib/amisad-common/locales/en-US.json": "70dc45d617a7a5b3788adda931c3c3b53abc710eb92659e7abb3fa9412bc339e",
-    "poc/components/lib/amisad-common/locales/he-IL.json": "4fb9a7960b9f29b402531f0122c8f740d422e39375c9397fc58e726f86e0d15a",
-    "poc/components/lib/amisad-common/locales/pt-BR.json": "996273270fa23294b882468e42b0800dccbfd232070667b36df772f5a62b5b45",
-    "poc/components/lib/amisad-common/locales/zh-CN.json": "34cababb49f7b6908c35bd5cbea88c99b7babb501bf44be2d35e4f9e92681fbc",
-    "poc/components/lib/amisad-common/src/database.rs": "57f830c2332b13642c72f52bc27514079071af2a87581e3edc0addcc37f2684f",
+    "poc/components/lib/amisad-common/locales/en-US.json": "5a8d3e5aec154bb265d6e201b0ebe39695ff5ec12ad18ab149a3a1f1243e05d8",
+    "poc/components/lib/amisad-common/locales/he-IL.json": "257483089d788de5c08e07338b55fbb81f0b2d3d282833ee30c3089b5da09dba",
+    "poc/components/lib/amisad-common/locales/pt-BR.json": "fd02c9497efeb4bb573446805b9ab298b1a6bdbde73b04b12122d315def316bb",
+    "poc/components/lib/amisad-common/locales/zh-CN.json": "7c5cc869cecfe4ccc727ad7a8e05e46c4f9bcb39ffc28daef2abc20d1fb735ea",
+    "poc/components/lib/amisad-common/src/database.rs": "e172f3a57eea79fca7e1b10287c5c9bf06c9b12a32ce93aedadb0b6c8b32261a",
     "poc/components/lib/amisad-common/src/i18n.rs": "482633837a3a54d8f822adba777c115d199fb96ee6ecd7d5f683fc4dc6743bf4",
-    "poc/components/lib/amisad-common/src/lib.rs": "22a427eae8ab914393cc0c92075d399487f905ff262fc8e700b40a46ced36eda",
+    "poc/components/lib/amisad-common/src/lib.rs": "6a752ed0ffacb90e39f0e9645aabaa35ae526e8e64c97b1701ebf0bdf39d456f",
     "poc/components/lib/amisad-common/src/shutdown.rs": "65b628c84aaadfba6474de2212f1b0b559863d651a7b89211b0ec0ab876e82d2",
     "poc/components/services/ads-svc/BUILD.bazel": "0aa174658c9b13595640af5f2c11ca12b9025d42cd03797f0ea0147f66322ee5",
     "poc/components/services/ads-svc/Cargo.toml": "6617bd22dff522e404bb3d625198c24feca549aa27c29adf05c6dc0bb907b23a",
     "poc/components/services/ads-svc/Dockerfile": "17c1d76563a144ec95d072669d460cdfdd926b4916eb1fc0dcee5caecb8eb295",
-    "poc/components/services/ads-svc/src/main.rs": "ab710bda3c4034bc44eceedf9e6e9b11bd0da46e113a4e60e12de8ade84a4f7e",
+    "poc/components/services/ads-svc/src/main.rs": "66563115ca31d0184f29a2660d663e32979b178a8ea717a4f9b1679b45ac75f1",
     "poc/components/services/audit-svc/BUILD.bazel": "da8930b3bc517a075d664fdc4db82a0f2aa9535bf6bde014e9b92efbd5714cff",
     "poc/components/services/audit-svc/Cargo.toml": "7cafe2b3aa10aaa6d789e3b373eeed56cfe07c01e93bc57a42f41622ad5d0290",
     "poc/components/services/audit-svc/Dockerfile": "6db7fc6ff61bc4b03691981f55ffaabe0d2891e8477cfc416951f5e8b81a72bd",
-    "poc/components/services/audit-svc/src/main.rs": "12b00242bd659723dc3ddd055585b69c1b4e36cb2875ab6f4401f28842296511",
+    "poc/components/services/audit-svc/src/main.rs": "7d4e8d8d84ddad1f92669c9e527f506a089b667ce318ce13e573b9d55d618f23",
     "poc/components/services/connect-svc/BUILD.bazel": "45a0d5d351338a5071dd17037f1ac91ab76244a1ac4f794c44ec11b281452810",
     "poc/components/services/connect-svc/Cargo.toml": "e131c3d5e7134712b3183e3e5ff46af2ca54af2681ff73066411c41bf8d12613",
     "poc/components/services/connect-svc/Dockerfile": "6f2762ea7b64ea294d949b2b565278625c1e2749ed2c025a266aa37bb3e38767",
-    "poc/components/services/connect-svc/src/main.rs": "97c68c0c4b12a21676afdf11b7f5c885072c6288c9602eeaafb699b3a2e23263",
+    "poc/components/services/connect-svc/src/main.rs": "90b005bbd6a45cc648d824b27e3a58a5f928937edce30107c6ab66a1da6f7d16",
     "poc/components/services/fabric-coordinator/BUILD.bazel": "0cb7ccc9c576c55233b41f7499f81b599eb8a2b1112f61541c81d6bd154b5391",
     "poc/components/services/fabric-coordinator/Cargo.toml": "b796862e675871df224f35d6e041bec21f98ea25d051b8d617f39a30b16d62d5",
     "poc/components/services/fabric-coordinator/Dockerfile": "eb7668dc043b590d707d3424b789b915ec95c2f878d1eef8d343634b9ee4a5b0",
-    "poc/components/services/fabric-coordinator/src/main.rs": "813a5e244fe7f39cb0a8b36107fdd1eee182dc8c91c888b0bac16a9865eae48b",
+    "poc/components/services/fabric-coordinator/src/main.rs": "ec5d46dfaf0a741aefddccdafc2d59bcfcf0e19e8371e1f05a118efb8593e0d7",
     "poc/components/services/identity-mock/BUILD.bazel": "0ac9baab651e196f50321ddb238a196eafd6b7b30d04973569c14958cf619060",
     "poc/components/services/identity-mock/Cargo.toml": "032725b563bf78ba85d260e9d2b3747e78f8822f3163f612d2824c99acc1a0ca",
     "poc/components/services/identity-mock/Dockerfile": "9f9ec7b63f87a481a4367ced7e330b6acccf33bde868c39d7fa32bcebe8063d5",
-    "poc/components/services/identity-mock/src/main.rs": "09660c8a71a8c514d00d9388114be824110330fc1811ecdb2058e9018f1763a0",
+    "poc/components/services/identity-mock/src/main.rs": "71b681fa29b7031c6aeba95b9cfb520a34db175b42ff15dbb128fade1535c95f",
     "poc/components/services/insights-svc/BUILD.bazel": "c5358b1b25dcfbe5469e14e28b912b32dfaa8696212606d4cb0382fbdfa61fc8",
     "poc/components/services/insights-svc/Cargo.toml": "cd2448405fdad27f88aa75f61235b2e33e1c29eaa54d5683aa1c59a9c9100aed",
     "poc/components/services/insights-svc/Dockerfile": "63d1e8360f075466e9eaaa7c345bc65502fa8c7754945b5deeb7d6653129f749",
-    "poc/components/services/insights-svc/src/main.rs": "d5f5961ffef970b9bfd27fc8b306f8eaaa14cbdbce6a67384313e75362a79fb3",
+    "poc/components/services/insights-svc/src/main.rs": "f3648c772c34df1098b917a855e5b57ad9155cba865ff9c5bed4c7e34e93cb9f",
     "poc/components/services/ledger-svc/BUILD.bazel": "03e35e8deadbfa4338eff5bd6e0a4a4f87a2026bb07fba06e2ed7b00119abec8",
     "poc/components/services/ledger-svc/Cargo.toml": "26bf818337d3cbd2321f104c5db1c887f9a4c12f47408f7568049c49bc3dc353",
     "poc/components/services/ledger-svc/Dockerfile": "d546a6c6bb43b9c3183221d31c2e02cbc8ef45ff018633221e08e3907029de37",
-    "poc/components/services/ledger-svc/src/main.rs": "5cdd40c5389f4a16f2481520ba8698850a001844a75d159c68312fce8fbb84a7",
+    "poc/components/services/ledger-svc/src/main.rs": "b50ae787f22b906e24a0ef4fe4f86ad1885e3a9d90f93f4a22c31f2b9fe3c014",
     "poc/components/services/platform-svc/BUILD.bazel": "4f760a291a539fb073f62180f7d189a096a4ac35612007282ebedb06ba97f7d8",
     "poc/components/services/platform-svc/Cargo.toml": "a99a432d7422667d400f6573bc3a5271c174eb8f484450868408e271f3789e96",
     "poc/components/services/platform-svc/Dockerfile": "6d5ba85843a9bcdc478c46a7916dfba6b515e6551749df291963db8e102ad38f",
-    "poc/components/services/platform-svc/src/main.rs": "c076862183ef92a7a32b6cc80e70ec405b47386387c21695f64602f7b7e7d645",
-    "poc/components/services/resource-svc/BUILD.bazel": "cb3e19c2192e0b3043e1e3865547e1a35116b5395fa15f630a04289d6f4505fe",
-    "poc/components/services/resource-svc/Cargo.toml": "d91ff44c25112d303fc776df4831258e8cc994088a196e18c54d37654685a0a0",
+    "poc/components/services/platform-svc/src/main.rs": "2dd040444cc8006a784ccbfa2001097b5f2ea2962072dcb2d23c24f1c226923b",
+    "poc/components/services/resource-svc/BUILD.bazel": "638c6e1b7a763de6461c11d8f321bf1d98f8fa589be53b10ede24bb8010aa975",
+    "poc/components/services/resource-svc/Cargo.toml": "cd1632f288e33cc1e3d7e969d2f6b4e924ba5287226d8c5ac3dc70166e5bbf55",
     "poc/components/services/resource-svc/Dockerfile": "50eeb08156a158172e3e53d45f4260dc60245c66f1ea12ad0227ac98d105deef",
-    "poc/components/services/resource-svc/src/main.rs": "b529975d6e86734075f3e96f7e0132f0dd39bef150995328f95916be5bf48382",
+    "poc/components/services/resource-svc/src/main.rs": "b3e296bbf33db51085d8b64a4e2df229c3132232304b417da0e3f7906ed73c89",
     "poc/components/services/seller-svc/BUILD.bazel": "fac2bd494156c4192d7576ed0d2ff73440ef698f653ad38740d350de6ddb513b",
     "poc/components/services/seller-svc/Cargo.toml": "20f3d155a6ed90cfda32a78ce4456d2681ea19caafc85e9dc06f73b46acad476",
     "poc/components/services/seller-svc/Dockerfile": "2b7daa8525eb0702e9cac4f34e82c1bd96a181fedfea8dfa496dbc388c6fac86",
-    "poc/components/services/seller-svc/src/main.rs": "c946111a96f7e4e283bbd7d1f6ae8fb91835f4b42f92a779227e4f2a87c588f1",
+    "poc/components/services/seller-svc/src/main.rs": "abf675562e5e4424662f9f482966942be8b5b2128825e0f5baa203016d9d4d3e",
     "poc/config/localhost/components.yml": "1040172ca96c604adc236f497c831050c91154b22ac099e3fba4f5c3024b9b9a",
     "poc/config/localhost/resources.yml": "cc2fc062240f36154efa3c334aefe4337bed8d9c04098ab6c9d96e8c6abe59cb",
     "poc/config/localhost/workloads.yml": "ace010622b6f78055c4dd891a0f99d8c9f22e0462a10539ad59963997ad0c4fa",
@@ -150,16 +150,16 @@
     "poc/contracts/openapi/ads-svc.yaml": "90e50ea6d0553c3eac87549fc8842a8f4b1787b02eb908f4f0ff9ac02ba63685",
     "poc/contracts/openapi/audit-svc.yaml": "8bb0bb5455d07a5e46476cb03431ebdd09ccdde756d1605b01cbbc3b077585be",
     "poc/contracts/openapi/connect-svc.yaml": "fc8ccd7e520d2109e941da42e11f6cf09b14ee72a3c2c0423ac6a58833393c9f",
-    "poc/contracts/openapi/fabric-coordinator.yaml": "b71ef2fd99deae076b01e43e9271a372307e06d7fb5f3cb9bf87e12f93e940a2",
+    "poc/contracts/openapi/fabric-coordinator.yaml": "f238c8f564d1714adc8d2d55561b9581000de932276b5f7fdc47f40a4d8e3630",
     "poc/contracts/openapi/identity-mock.yaml": "f87baaf897ad8a044b61d29bb1fe628e9348eb6d8fba86feef8e721a99149d85",
     "poc/contracts/openapi/insights-svc.yaml": "3c84ba77e3838063ae6ddd97fe310f1dda4a14b82cdafadb59edffa87edc63be",
-    "poc/contracts/openapi/ledger-svc.yaml": "addc58dd857c53a257b62e5360292160447b8cb112a44a7e68a363eeb4a69cd5",
-    "poc/contracts/openapi/platform-svc.yaml": "34c918fb5f3ab38de0659fc11a77f2b9dd1870ee022ee86c10b412a4acf0994f",
-    "poc/contracts/openapi/resource-svc.yaml": "3a0c197b82c4672731294ab15efdd9e8799d642e9efc7886a62b2deee27740f9",
+    "poc/contracts/openapi/ledger-svc.yaml": "0ebd215345572bf016401ca37cfe78a22b97c6c3482c1a834f316fea9918e0ca",
+    "poc/contracts/openapi/platform-svc.yaml": "797a06087355bc8f2def81548923b47f5bba45d265a22e754e555fa78670b973",
+    "poc/contracts/openapi/resource-svc.yaml": "cb6938b90245349705c8fa9971c16f41aaa29df430550226bdf00b75d6917543",
     "poc/contracts/openapi/seller-svc.yaml": "3dad989a97f7abed9a31fb6ec41e2b4422fcc6fa4ca564fb66131afd7720dba6",
-    "poc/contracts/openapi/slice-runtime.yaml": "1353d4ec02cb53d05219e2cf7e5642ac32308485000c8a37b3bffe015947c88c",
-    "poc/contracts/service-behavior.md": "e1216cfc2b4bb386e582242c2c252d3d713a4ee175f0a5b5887c8ae3f1e10491",
-    "poc/db/schema.sql": "b1995f5b29718f7512fc654986c7d45f2c6cec316f6ac4020b3cf4b2ede7742b",
+    "poc/contracts/openapi/slice-runtime.yaml": "70865f7dd25d494747c1035068d38a70a3a41ace959dd40a544c9e0e897b5a73",
+    "poc/contracts/service-behavior.md": "4cc4bd1c1a0ba7376803b7ac146a1ed871413e12fe224e9d222a30e97285100b",
+    "poc/db/schema.sql": "b79d72ae8a2cf193a39f6a9ec596f1a4d025f6007099b4269897bf89f838cb79",
     "poc/db/seed/s001.fulfillment.sql": "74dc16216613c722fd1669eaec398e65243d54d62c9199fbfa3042da042a0916",
     "poc/db/seed/s002.fitting.sql": "c8350095066c40e539fa79e447d74e13c6a7c63ad91d6522010ffdccbafc802f",
     "poc/db/seed/s003.silence.sql": "2c3ae93ab7e46a987bd531ebf619135a687d5706e413dd58617e1064934c8fe4",
@@ -170,60 +170,63 @@
     "poc/db/seed/s008.mediation.sql": "b0e9c7fb4b900219501e6aafc3b4cccdd9c968c1adcd29dcaf9e517054eecb5c",
     "poc/db/seed/s009.suppression.sql": "92ec83a01eac04e6083ba84bd68fafd23b1d635eb5d51515e234658b760831b1",
     "poc/db/seed/s010.certification.sql": "8f6582565d162df759b13b9da23ad4f6649e8bd81f42f3f64ceef7f88facc02b",
-    "poc/demo.md": "a60ab58786a47d2ebe39c5e716c1cecdda7b2e9c9fe3b6e0b9e7d31b5317353f",
+    "poc/demo.md": "73bc0885a71b540909554330d67b44bbf515ca3443fb11f165cb9d39fb5de690",
     "poc/demo/AmisAd.DemoHost.psm1": "9757e32cecc3143d97c1bf4fcc3e780d9422930a11df33d4c483c84229482241",
-    "poc/demo/README.md": "1ea3a101ff7e7be1294587b1b3f8bfbb628c67cb82384584d0eb7affb3fe09e5",
-    "poc/demo/by-act/README.md": "359d0ce9126d7d1d6318043cbbabeef270ce6db27531d0db8b6832f999fde9bb",
-    "poc/demo/by-act/serve-by-act.ps1": "aae973a2a28c7d85fe0681fab3a7456ff338d885274d470479aa4fc8a3c27d68",
+    "poc/demo/README.md": "b53f15e7437a79a9b646605e792b680421363e5d4d958e74b7bbc364247b9eaa",
+    "poc/demo/by-act/README.md": "18799171af6218f9f12fe1c6f1e118ab3eb851e04e4a1a278852dc518824a9a0",
+    "poc/demo/by-act/serve-by-act.ps1": "5ec6a790afff307cc6d80a5c201411a24f868555696dc3a69f142b78715151e6",
     "poc/demo/by-act/slides.html": "4997bc6ffa55eaef3eb0b82593c27a3eadb48693e27155edb79db98c840ca495",
-    "poc/demo/by-act/ui/app.js": "9e8e83767b67ae823d21f41074c0853197abf7d3879d99430d2f0526709e0ae5",
-    "poc/demo/by-act/ui/index.html": "25e6b0b2f47effcdb68600aafe86e34bb479256f95790393b9c29679a3443eba",
+    "poc/demo/by-act/ui/app.js": "8d728b327a396b9ab98facaafbd1e89b94b217449df977bee65faae3360f29a2",
+    "poc/demo/by-act/ui/index.html": "c39847a5e19b3fb36e6ffbc0aed7425338f1951080763aedaaa7039822b39694",
     "poc/demo/by-act/ui/style.css": "c1d36af1b1dfea4ae5c498d393653daebf7400ec059f1e339f52a0967afc0cba",
+    "poc/demo/common/scenario-script.js": "fae3607305115e3c7d5717b1c3402253895fa0587e9febea1c796dfe38d1ef63",
     "poc/demo/data-view/PLAN.md": "ae3a64711438a2ac73d397fdff1148756969cfeb801194e1f81cad5845bf7592",
-    "poc/demo/data-view/README.md": "40512b627ff333bf9efc710e1b92dc628cf7e0460950624687437bdcd178350b",
-    "poc/demo/data-view/serve-data-view.ps1": "888acd938c71237641062459ca92419f1ad3f05fd7e22bc16ee6ab64c84ddabe",
+    "poc/demo/data-view/README.md": "dfb9b6a050043bb4687a481f874052ecd062a00f82ac62bd8f26481478934570",
+    "poc/demo/data-view/serve-data-view.ps1": "74150f182b5423fb5f326fe3a8fe81ee82608c811cbb0ff8c77e6ff2a2de5628",
     "poc/demo/data-view/slides.html": "8bdb09d67c33f3b969abd8032ae5778dd682592c9c8407b278df56a3169e9fe5",
-    "poc/demo/data-view/ui/actions.html": "c7b38b3578c7cc7735c87d2c29ef14a9a649408cf9051378498dbc8a2c3d82e3",
+    "poc/demo/data-view/ui/actions.html": "01c283db523846ea62991b04bd1815748e154c7a8ff8ae7282dce4a1eb658a91",
     "poc/demo/data-view/ui/actions.js": "716ecdfc49b183213d5d776ea6cd4317ba9bb966c13699be0941ae3124449e63",
-    "poc/demo/data-view/ui/data.html": "a23b6017a8f1b684b97081240ee676c0c04e7e662d3bb5df18e683c5121a2ad0",
+    "poc/demo/data-view/ui/data.html": "df9c399f9162c3180c0763bce1c342ffd83cae5dbdc69c5e0e2e4a05a97d68a3",
     "poc/demo/data-view/ui/data.js": "b7ca248f27500ed9dee8f75163d55401379a277b69450dd198547ad68e808dbf",
     "poc/demo/data-view/ui/shared.css": "3c3318e07860a8160992390cf8361af2bfc48ee65b6d43fa0d9c2678eb32ae8e",
-    "poc/demo/data-view/ui/shared.js": "3a51e142527c4d6b344de096f3bb086909472ec72f273b767625021513863aeb",
-    "poc/test.md": "85f75e7791cde8f5c6bac526b642f4088460adadae35743c2249aaabe4fb6008",
-    "poc/test/amisad-scenario.sh": "8a4f227480dbeb231e77b20260b71e35037d2bdd28a096f2ca9181cd8ff7fffd",
+    "poc/demo/data-view/ui/shared.js": "522039ae6e558829166350be1dba97025760e8c20db1ea3cb9073a0f9ab53e6e",
+    "poc/test.md": "132659c859d03f2408d88441bea47b67f9b39a1e373615b38126be78f9f26ffc",
+    "poc/test/amisad-scenario.sh": "f0c1fbb85b34469a4061a5317118e5c8d275cf03b5bee900a320dfd3c5fb9599",
     "poc/test/bash_contract_support.py": "5fe6459be21dd3e601a9d1e0d5536a6d06b88174b332dbe46943979a374360ff",
     "poc/test/bash_contracts.py": "f9832f68c0e2e2234ec8a324f1ec31e18b56cc440dfe4c3cb68563bb0725df73",
     "poc/test/build_contracts.py": "ad2885a20e4817ed8fb29360e0387a42e3727a0683f8e77d6ca4b73a27633f95",
-    "poc/test/check_messages.py": "72fd0cad76a11c8727f1fd08df7388c95aa04fd9a4767834911aefb5c9a39803",
+    "poc/test/check_messages.py": "91a2ad5340f716d6538f67f9afcfcf3be898b05b0632ce1998667de83865999a",
     "poc/test/cluster_ready_contracts.py": "f6547386756779fd631a6242cd36097d86027077c38eac3c1e42998f5eec4895",
-    "poc/test/database_policy_contracts.py": "23501a62886bead1feea97a9682ede4fbe1837ed9e96f138c766ae7bfeaea9e4",
-    "poc/test/deep_find_contracts.cjs": "ca805b49f07082281f213abfc1385936165438779748c5c4d657077cfc4aab55",
+    "poc/test/database_policy_contracts.py": "ffc656dcd888fa8a1d5de12390e79c27cf5603ce54bb29861eeb6e5617c61b05",
+    "poc/test/database_secret_contracts.py": "734d77e82e1d88f5a0e74a2822a72a7af8f60e92b251216e5eb9a388de338fab",
+    "poc/test/deep_find_contracts.cjs": "50efae8852b386baee6fda77e3e98cd1cd8319965265f93a6b4447fac255a56b",
+    "poc/test/demo_script_contracts.cjs": "ee22844e5833145303efe8d34dfff7baeb69c451316646c68298833fbb6cad34",
     "poc/test/download_contracts.py": "5473c28c604a92fab1ad791f570cdfed3dc1043d7ada763147665c1a5dbf4cbb",
-    "poc/test/fixtures/http_lifecycle.rs": "49170066bf5cc2df52d1a749449982105fa3bdd818df6b7c01342c73dbe0009d",
+    "poc/test/fixtures/http_lifecycle.rs": "57bbeab21402a2f4a0b26e1d816f89030ac59d4c3d3ae5fe8f8146e986c1c328",
     "poc/test/host_contracts.ps1": "1a8ae7595259c23053765b1b3fc82d37a4c01a18088685ed3c8cb9e15d3cc604",
-    "poc/test/http_shutdown_contracts.py": "f62c4070affa397e864ede90c4e51a810b117efc430ef4cdcd73c4ff623bd798",
-    "poc/test/image_import_contracts.py": "1d33f609f632fc249b99f2f769af0b9ec586df50b6fe707e18bfa80657e0b219",
+    "poc/test/http_shutdown_contracts.py": "ff91c78a1a3623d6bb835a3f918477738c58ac78539e26fddb8badc3516a3fe1",
+    "poc/test/image_import_contracts.py": "61ba2211293a728f2582552d989e7a4628ee892b0fc70aca4d9b33a077cd2ca7",
     "poc/test/low_browser_contracts.cjs": "190989eb9bd3b599429e8a6892c90f8c125268925669e70928cd2345d3479f34",
     "poc/test/nats_installer_contracts.py": "b9a3c428f4e7e34759db9bd001b3b312d004f02c7c6a105cf887582860cc4c6a",
-    "poc/test/service_contracts.py": "69ac8bd8f41ec1672b8d42c667a0880493fbcde33c589d84241d538f347fc207",
-    "poc/test/slice_runtime_http_contracts.py": "379e113ed91955dcd874ed59f61252cce463afbd836d8e91d61232212c0d466c",
-    "poc/test/slice_runtime_stop_contracts.py": "d3a1a0e08d7f304cac868aff5896a8c844c717a48d1c6351ed33b438dcd786a7",
+    "poc/test/service_contracts.py": "73819f180ac81cf3f1dc90dc60ab53b67b321daba363dc30e2297798e8f48310",
+    "poc/test/slice_runtime_http_contracts.py": "b7c28fd614db512217f28761faf498fe9181ce3d273cbd0b35d47f1d1b660826",
+    "poc/test/slice_runtime_stop_contracts.py": "edee72b88866a9ee313550cccf08eb684f9a16c98f3234fb76f72d972b10d379",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh": "1de07eaf61eba3c9f3e632651da4b4f9d56625cb80954b4d1022c171d7a02f84",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh": "ee915de52428e28c430fc4e19796bdd19777b5b3640a661e0bc98368ce34212c",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh": "14f1b4df3bcead43ff6d05c00f669c3fb7da6572c12c39e63def226961bf963a",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh": "244d70a9625abe64a86bb48ecd7cf0a3e6e0d4299895e21b2e20d8d741444822",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh": "1e9d353954f7316b607b66bbcc173c0cd1b7454b910bcd014f3a0a38c4e360bd",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh": "0a5199b2af24e453318cf8e12c9a42da70b395959e9c5ae64ebcf9d3dc561f0c",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh": "3d6b18e395647ae84767278f2b455aa6815f659b54e1f10141afec3f153c17d5",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh": "0e00b555eefacb8ba9ff261ba6e1da5b3d0371c6ca6a43f9fa8cf0359a7b9576",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s001.fulfillment.sh": "f84670bfc1e1009238f722b7fa7a04816c3fc0e8285ab463f70ee2bf3c6a5fc8",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s002.fitting.sh": "c5687d0d1018a5b1ced8fc1c5e18e37a206452332aa4877a4358cb402e74dd92",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s003.silence.sh": "da015c7ae4d4077cf7845efae1b95c06faee524e399d43c077be93f221d8c108",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s004.failover.sh": "ab800fd31d5c5c8e86357fcc4b7fd20b24632fedeb4b3065733cbec9a015e947",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s005.attribution.sh": "92388d594a288585be0bb7d043f7c02c8bfc6254efd8f0c4db8ebc2695f99d81",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s006.mandate.sh": "0de1c9e7a9adcfa2b6603993a8a69100b0d1371aed6b2e74d8b2312be898e9fd",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s007.inventory.sh": "74d90dffe7186bbfd08b5aa365ab6393c66854bf1d22b03c8a21bf3dbfc133f7",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s008.mediation.sh": "57d530832e2f7b44345c1e492aafa9b118e40ddc3ec2d62d0df24b52cbae68b1",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s001.fulfillment.sh": "0f1d0806f66c1ecca7bf57516eff8beba13db864820129f5eedf91426d0c2b41",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s002.fitting.sh": "6de7548d5edf3f0759b5a168466b6e2e1f4cabbb5f87b18336aeb91af86766fe",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s003.silence.sh": "0ea609a68bf762770e29964b4a5bdd5cad35baf8457f7c14d9165ecac1fe4148",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s004.failover.sh": "5a0b89e5c0b7e163e40f63a1b730579112791dcfaa2b710d940213733193f12d",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s005.attribution.sh": "449c192e8de976c1a666768886d40036287dfc20d0d1557fd90662f48ad616b8",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s006.mandate.sh": "bd008dbe7a8257a5f22bc97e106b088e391f1513fdb69ce58b46fa23b34de4a2",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s007.inventory.sh": "c1fa75b5509c5f9aa53524c4fe4a027c630dbfccc2c3e807170b37ffe1f4271c",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s008.mediation.sh": "ad7443e60ec24bd05994588116714fb22b49de04d0f6142dd48029ad983fc541",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s009.suppression.sh": "93b0bba5b2789da173b568257c683a1f2f8da3b99ab1a93c15827f8a00b9adf0",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh": "4f860daecea80e1f298adebc9d7fc3e5f30304313403ff75764e8542b39c1f30",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh": "9e3e654a4323d87681b2ea7261c0fb20a31e24930e1c9c1835db5d450ffbfc7a",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.users.sh": "091a3672f850acb4cd65e4911f85348fc24849989eeab16db7dac764c133ca68",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-edge.setup.sh": "12331520662233c28a7cc277c18fa161bcbc90198fb92cd579f9ea23d3e2fb21",
     "poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh": "9a99fd6f3e9b6270601d4bc2a258724cff3a65fc89d5dc0c0596b53326e13fcd",
@@ -244,7 +247,7 @@
     "poc/test/workload.guest.ubuntu.server.24.amisad-edge-a.baseline.yml": "568bab6a883a958da574b2c6e7f18329c59354f4b6a693774c7a6fa810fa882c",
     "poc/test/workload.guest.ubuntu.server.24.amisad-edge-b.baseline.yml": "1d2f54f8cbb1ba195dcd9ffebaf21f048c955d020d0532a8eba310d992f4c4a2",
     "poc/test/workload_contracts.py": "2bdcad966a3fbd3ae6bc1e743812ecf6810ce7fac74d7db52432ebb285191641",
-    "poc/usernames.md": "8f7935d84ecf1464ee649dbfadd0866a46879937f100a2bfacaa3d45e1e0ec0a",
+    "poc/usernames.md": "d9ece1fcd1c5692a96d01444dcbb47146241481052e991677fb02f4bafa635f8",
     "poc/workloads/services/ads-svc/Chart.yaml": "1f13883daa63e8356a0ada4db6eff24cd254f4180fedace69f5efb2cfad3117d",
     "poc/workloads/services/ads-svc/templates/01-ads-svc.yml": "e71adeb94c2b7885af40405025c7cfd084020c26e6d672ef3cb3a31dbd2aa2f0",
     "poc/workloads/services/ads-svc/values.yaml": "da0058c230cb6e01944aa34d21142de2bad0121442e0cfd3b33024c78e24cb9b",
@@ -255,8 +258,8 @@
     "poc/workloads/services/connect-svc/templates/01-connect-svc.yml": "08decabec1b069c5c322ebd68625a32c499b6a2196b3e0f38d0bc77c914b19ee",
     "poc/workloads/services/connect-svc/values.yaml": "e22049767e35a1237521b8722e25c26e35f9a9f0aadcb06dbeef13b723416d63",
     "poc/workloads/services/fabric-coordinator/Chart.yaml": "74615610241b80e48d91b67d7b2d331164e4bc69509ff9e6bb17f4726553dcc2",
-    "poc/workloads/services/fabric-coordinator/templates/01-fabric-coordinator.yml": "c3bec0da0e10b3708c63de2c9e86657d028415497cd783a0332d5e3afc0544fa",
-    "poc/workloads/services/fabric-coordinator/values.yaml": "4fa1468e644dbd84500760d33d4c42d4c8d5d645c0acf3e060cb6b7fc441e788",
+    "poc/workloads/services/fabric-coordinator/templates/01-fabric-coordinator.yml": "8c899db97324f5fff8a977399bb2a89732a2c7c8ac9ad9c029d75a0ca3b52367",
+    "poc/workloads/services/fabric-coordinator/values.yaml": "1d8602654823fbfee823271bb80baba7bd258e81dc28a6a1c483e4ce5491e43c",
     "poc/workloads/services/identity-mock/Chart.yaml": "b01363d8a4d6feed896af9ccdcf26394acb958bb7f83d7ce68855af317554da7",
     "poc/workloads/services/identity-mock/templates/01-identity-mock.yml": "2ae8e2e2c60083a0f07267eb0db06e2315997f8b06b42d323c08cd6e3d8e93c5",
     "poc/workloads/services/identity-mock/values.yaml": "a53e401e928ea3622be563a7ae765dc3dc7f44ab1f6537226e63fd7fd366d1f3",
@@ -264,25 +267,25 @@
     "poc/workloads/services/insights-svc/templates/01-insights-svc.yml": "4344c6a15c76043b59f5058eb1213eac93093a933907d46a294cc14e7de01a1e",
     "poc/workloads/services/insights-svc/values.yaml": "6c5f766dd58faa00e14134516f241c6bea07f95a3ff034d324ad6b642f4ca7c5",
     "poc/workloads/services/ledger-svc/Chart.yaml": "ee4418f24d22c357626c14980467ffe7baf1156a0a52ced3ef6a95688d01604b",
-    "poc/workloads/services/ledger-svc/templates/01-ledger-svc.yml": "82a145b0653c96b98a508dd9e57638fbbf3df0debed649ff23c9189849316e47",
-    "poc/workloads/services/ledger-svc/values.yaml": "29fb38d9507d46f5526394e12cd830baa04170a40d514446055f505973488afc",
+    "poc/workloads/services/ledger-svc/templates/01-ledger-svc.yml": "579d61a00f5d1c5a733e4464987855f80cd903c250dd78711d7ff8ccf45ec155",
+    "poc/workloads/services/ledger-svc/values.yaml": "40cd3f8754b5753f53b0f9e63c4065ffce58309f0c096534bf1577813c619848",
     "poc/workloads/services/platform-svc/Chart.yaml": "aef6823c4f35f3f00cd49529dd9f803ce1ca07a5bf8ff30026cf485efbb9b4b4",
-    "poc/workloads/services/platform-svc/templates/01-platform-svc.yml": "c8da76d3413b4286af9c56c68c199116c600ddc3f10626bc272b0bc18326acbf",
-    "poc/workloads/services/platform-svc/values.yaml": "b29d908e3093f5fde8372be39f008e129b9f9854a4139c71954034baa4bd8db1",
+    "poc/workloads/services/platform-svc/templates/01-platform-svc.yml": "cf2fa60d150e0e9a1168e8f1fc363dfaa826f694f12ce1fedab6f8a241a39e56",
+    "poc/workloads/services/platform-svc/values.yaml": "65014e896b29fba55994c64408ef9035ca183d1e46e66e82bc271437934e194e",
     "poc/workloads/services/resource-svc/Chart.yaml": "a6496d5570c0f4f724524212ddbe67f27082a26c978b50f4ba9af93c283421a5",
-    "poc/workloads/services/resource-svc/templates/01-resource-svc.yml": "e4b1388cab3d48917685cab781469e4c587d1d4263d58b912fc67dd8bb7966b3",
-    "poc/workloads/services/resource-svc/values.yaml": "3e56b09350a10a9c893d3efb8d37fce7be5175ad9b15d0dfec32f4f242abe83c",
+    "poc/workloads/services/resource-svc/templates/01-resource-svc.yml": "a5c128c79444f662431d73f7d672a13d0a5ab27c479a7605307c1eb7fe2e9228",
+    "poc/workloads/services/resource-svc/values.yaml": "19b3b6f5491cf7fd482f19b91bc8e005a35d42a28201f1d156f31caef7c66caa",
     "poc/workloads/services/seller-svc/Chart.yaml": "c579003454a7788605a4edd3f3821175603c1342008eb28835506ac71380ef33",
-    "poc/workloads/services/seller-svc/templates/01-seller-svc.yml": "d104102d6c9c6bc2a13fbd80f2290c9d89ea854182aeed9eed79a891113e6894",
-    "poc/workloads/services/seller-svc/values.yaml": "9bd4476a5c8f56b9ea2fea462eb26934455adae6dcd74ad3b243ca6826fb42eb",
+    "poc/workloads/services/seller-svc/templates/01-seller-svc.yml": "cb61804f743c453f26eaf23ed8c0975b0f68291729c4992a44c3f390efa61276",
+    "poc/workloads/services/seller-svc/values.yaml": "7dc7ca7c30c40121a51b567be1b25bf80c5f482d8007622f9ae641163b234ac1",
     "test/AmisAd.HostCommon.ps1": "7004a864eb1863aae32ccd916ee6ea58bf081c55d2de5fe1d99c020132546bda",
     "test/AmisAd.Lab.psm1": "037fea79b6d033b7144976d046e00f01fde8c7e28aa98d91a3f7212031b92244",
-    "test/AmisAd.Regression.Tests.ps1": "7233d5e03a6ba9843e5c324dbf476ce8bca4b85e0ec88e976f21c5b6448dca87",
+    "test/AmisAd.Regression.Tests.ps1": "9c665aa1ea62726f4e721b84c9a72966812d4dd74503b0f06b711a6201d40536",
     "test/AmisAd.StashService.psm1": "a07f69d5b51fcf122547c234352b6c0be727db9664da6a7984e869ae86a2095d",
     "test/Clear-Lab.ps1": "658d8a1c4c3802d6b2114e0dd0f41678b0d8221cc35b7a0ff87168de35467cee",
     "test/Initialize-Lab.ps1": "3b772baeecfad0c111a99e8d0d6d2c7c066e867934bb4c3780cce922075cf1dd",
     "test/amisad.end-to-end.yml": "31c885f7e54c86ec104b51e9208702e7a0e7a4aab87317dc6d484782db2f765c",
-    "test/demo-polling.test.js": "531a4d88c552e8876b57fbe9cf5fa909bd410ebae4bb2507d503ccf6bcf4edc2",
+    "test/demo-polling.test.js": "ce717285741bf1ee9fc82adc9611b03fecbeab062637d6351fe75f71d9a4fa48",
     "test/host-storage.requirements.json": "8721da4fe2ffa29968217d8a3ef0071d722f4e383608d1966cec042090b22dad",
     "test/initialize-lab.yml": "f566ce34e4c4eb2756536dce8a6f954553f8cda4f0da3d2d11031b5347210192",
     "test/test.runner.yml": "f315e7d902ff077437dbf14febb1d02a6bbdb0e2de0635cc90bc1e027fc8b38d",
@@ -420,12 +423,12 @@
             "detail": "Cargo dependency declaration"
           },
           {
-            "path": "poc/components/services/resource-svc/Cargo.toml",
-            "line": 11,
+            "path": "poc/components/services/ledger-svc/Cargo.toml",
+            "line": 13,
             "detail": "Cargo dependency declaration"
           },
           {
-            "path": "poc/components/services/ledger-svc/Cargo.toml",
+            "path": "poc/components/services/resource-svc/Cargo.toml",
             "line": 13,
             "detail": "Cargo dependency declaration"
           },
@@ -1896,6 +1899,11 @@
             "detail": "Cargo dependency declaration"
           },
           {
+            "path": "poc/components/services/resource-svc/Cargo.toml",
+            "line": 16,
+            "detail": "Cargo dependency declaration"
+          },
+          {
             "path": "poc/components/services/seller-svc/Cargo.toml",
             "line": 16,
             "detail": "Cargo dependency declaration"
@@ -2112,7 +2120,8 @@
         ],
         "hashes": [],
         "dependencies": [
-          "cargo:amisad-common@0.1.0"
+          "cargo:amisad-common@0.1.0",
+          "cargo:postgres@0.19.14"
         ],
         "completeness": "locked",
         "notes": [
@@ -2129,7 +2138,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 514,
+            "line": 515,
             "detail": "Declared dependency"
           }
         ],
@@ -2155,7 +2164,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 520,
+            "line": 521,
             "detail": "Declared dependency"
           }
         ],
@@ -2186,7 +2195,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 526,
+            "line": 527,
             "detail": "Declared dependency"
           }
         ],
@@ -2210,7 +2219,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 534,
+            "line": 535,
             "detail": "Declared dependency"
           }
         ],
@@ -2238,7 +2247,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 543,
+            "line": 544,
             "detail": "Declared dependency"
           }
         ],
@@ -2266,7 +2275,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 552,
+            "line": 553,
             "detail": "Declared dependency"
           }
         ],
@@ -2296,7 +2305,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 563,
+            "line": 564,
             "detail": "Declared dependency"
           }
         ],
@@ -2326,7 +2335,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 574,
+            "line": 575,
             "detail": "Declared dependency"
           }
         ],
@@ -2352,7 +2361,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 580,
+            "line": 581,
             "detail": "Declared dependency"
           }
         ],
@@ -2383,7 +2392,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 586,
+            "line": 587,
             "detail": "Declared dependency"
           }
         ],
@@ -2406,7 +2415,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 593,
+            "line": 594,
             "detail": "Declared dependency"
           }
         ],
@@ -2432,7 +2441,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 599,
+            "line": 600,
             "detail": "Declared dependency"
           }
         ],
@@ -2461,7 +2470,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 609,
+            "line": 610,
             "detail": "Declared dependency"
           }
         ],
@@ -2491,7 +2500,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 620,
+            "line": 621,
             "detail": "Declared dependency"
           }
         ],
@@ -2521,7 +2530,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 631,
+            "line": 632,
             "detail": "Declared dependency"
           }
         ],
@@ -2547,7 +2556,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 651,
+            "line": 652,
             "detail": "Declared dependency"
           }
         ],
@@ -2592,7 +2601,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 677,
+            "line": 678,
             "detail": "Declared dependency"
           }
         ],
@@ -2625,7 +2634,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 637,
+            "line": 638,
             "detail": "Declared dependency"
           }
         ],
@@ -2658,7 +2667,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 691,
+            "line": 692,
             "detail": "Declared dependency"
           }
         ],
@@ -2684,7 +2693,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 697,
+            "line": 698,
             "detail": "Declared dependency"
           }
         ],
@@ -2710,7 +2719,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 703,
+            "line": 704,
             "detail": "Declared dependency"
           }
         ],
@@ -2736,7 +2745,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 709,
+            "line": 710,
             "detail": "Declared dependency"
           }
         ],
@@ -2764,7 +2773,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 718,
+            "line": 719,
             "detail": "Declared dependency"
           }
         ],
@@ -2790,7 +2799,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 724,
+            "line": 725,
             "detail": "Declared dependency"
           }
         ],
@@ -2816,7 +2825,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 730,
+            "line": 731,
             "detail": "Declared dependency"
           }
         ],
@@ -2844,7 +2853,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 739,
+            "line": 740,
             "detail": "Declared dependency"
           }
         ],
@@ -2872,7 +2881,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 748,
+            "line": 749,
             "detail": "Declared dependency"
           }
         ],
@@ -2900,7 +2909,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 780,
+            "line": 781,
             "detail": "Declared dependency"
           }
         ],
@@ -2932,7 +2941,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 770,
+            "line": 771,
             "detail": "Declared dependency"
           }
         ],
@@ -2961,7 +2970,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 793,
+            "line": 794,
             "detail": "Declared dependency"
           }
         ],
@@ -2989,7 +2998,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 757,
+            "line": 758,
             "detail": "Declared dependency"
           }
         ],
@@ -3021,7 +3030,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 802,
+            "line": 803,
             "detail": "Declared dependency"
           }
         ],
@@ -3050,7 +3059,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 812,
+            "line": 813,
             "detail": "Declared dependency"
           }
         ],
@@ -3082,7 +3091,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 825,
+            "line": 826,
             "detail": "Declared dependency"
           }
         ],
@@ -3108,7 +3117,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 831,
+            "line": 832,
             "detail": "Declared dependency"
           }
         ],
@@ -3136,7 +3145,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 840,
+            "line": 841,
             "detail": "Declared dependency"
           }
         ],
@@ -6246,7 +6255,7 @@
     },
     {
       "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s007.inventory.sh",
-      "line": 149,
+      "line": 111,
       "detail": "download action has no literal software-artifact URL: OOS_CODE=$(curl -s -o /tmp/oos.out -w '%{http_code}' -X POST \"${CONNECT}/v1/query\"  -d \"{\\\"credential\\\":\\\"${CRED}\\\",\\\"resource\\\":\\\"settlement\\\"}\")",
       "status": "unresolved"
     },
@@ -6300,7 +6309,7 @@
     },
     {
       "path": "poc/workloads/services/resource-svc/templates/01-resource-svc.yml",
-      "line": 23,
+      "line": 30,
       "detail": "container image declaration: unresolved image reference {{",
       "status": "unresolved"
     },

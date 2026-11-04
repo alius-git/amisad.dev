@@ -6,7 +6,7 @@
       "source": "poc/test.md",
       "locale": "pt-BR",
       "translated": "docs/pt-BR/poc/test.md",
-      "sourceHash": "72e1411b48beb3c06cb8884d73bba22b8747108b2b3882467525b863e1e56c42",
+      "sourceHash": "132659c859d03f2408d88441bea47b67f9b39a1e373615b38126be78f9f26ffc",
       "origin": "machine"
     },
     {
@@ -14,7 +14,7 @@
       "source": "poc/usernames.md",
       "locale": "pt-BR",
       "translated": "docs/pt-BR/poc/usernames.md",
-      "sourceHash": "8f7935d84ecf1464ee649dbfadd0866a46879937f100a2bfacaa3d45e1e0ec0a",
+      "sourceHash": "d9ece1fcd1c5692a96d01444dcbb47146241481052e991677fb02f4bafa635f8",
       "origin": "machine"
     }
   ]

@@ -2,7 +2,7 @@
 // Copyright (c) 2019-2026 by Alisson Sol et al.
 // GUID: 422bbb4f-4958-4325-a525-520899dc2e3e
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),path=require('node:path');
-const source=fs.readFileSync(path.join(__dirname,'../demo/data-view/ui/shared.js'),'utf8');
+const source=fs.readFileSync(path.join(__dirname,'../demo/common/scenario-script.js'),'utf8');
 const start=source.indexOf('  function deepFindAll('),end=source.indexOf('\n\n',start);
 const ctx={};vm.runInNewContext(source.slice(start,end),ctx);
 const shared={id:'repeat'},node={id:'first',a:[shared,{id:42},{id:'first'},shared],b:{id:false,c:{id:'last'}}};

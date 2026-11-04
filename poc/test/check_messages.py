@@ -10,6 +10,9 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCALES = ROOT / 'components/lib/amisad-common/locales'
+# Services that answer every error with a catalog code, which clients branch on;
+# a free-text Response::error there would hand them a message to parse instead.
+CODED_SERVICES = ['services/fabric-coordinator/src/main.rs', 'services/resource-svc/src/main.rs']
 
 
 def check():
@@ -18,7 +21,12 @@ def check():
     source = catalogs['en-US']['messages']
     used = set()
     for path in (ROOT / 'components').rglob('*.rs'):
-        used.update(re.findall(r'Response::problem\(\s*\d+,\s*"([^"]+)"', path.read_text(encoding='utf-8')))
+        used.update(re.findall(r'Response::problem(?:_detail)?\(\s*\d+,\s*"([^"]+)"', path.read_text(encoding='utf-8')))
+    for service in CODED_SERVICES:
+        sites = (ROOT / 'components' / service).read_text(encoding='utf-8').count('Response::error(')
+        if sites:
+            raise ValueError(f'{service}: {sites} free-text Response::error sites; answer with a catalog code '
+                             'through Response::problem or Response::problem_detail')
     if set(source) != used:
         raise ValueError(f'Catalog keys differ from code: missing={used - set(source)}, unused={set(source) - used}')
     for locale, catalog in catalogs.items():

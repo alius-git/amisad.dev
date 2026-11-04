@@ -509,6 +509,7 @@ name = "resource-svc"
 version = "0.1.0"
 dependencies = [
  "amisad-common",
+ "postgres",
 ]
 
 [[package]]

@@ -6,3 +6,6 @@ image: localhost:5000/amisad/fabric-coordinator:latest
 port: 8080
 replicas: 1
 pullPolicy: IfNotPresent
+# Secret holding the ledger write token under key 'token', read into
+# LEDGER_WRITE_TOKEN; empty = no token variable.
+ledgerWriteSecret: ""

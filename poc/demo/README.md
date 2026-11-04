@@ -22,6 +22,11 @@ Run them one at a time. They use different ports and different browser
 storage so they *can* coexist, but two consoles writing to one lab during a
 presentation muddies both stories.
 
+Both run one scenario script, [`common/scenario-script.js`](common/scenario-script.js):
+the cast, the acts and every step with the API calls it makes. Each console
+renders it its own way and runs its steps through its own proxy and browser
+notebook; both servers serve the file at `/common/scenario-script.js`.
+
 ## Both servers, same host behavior
 
 `AmisAd.DemoHost.psm1` holds the parts that are about the host rather than

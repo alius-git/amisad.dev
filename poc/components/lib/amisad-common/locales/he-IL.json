@@ -48,6 +48,102 @@
       "sourceHash": "5a5995df081fb2c4b33941350d3134990a331b173ae00637d0a6bf435dab23fc",
       "origin": "machine",
       "description": "An inventory timestamp is older, or a replay changes stock at the same timestamp."
+    },
+    "service_stopping": {
+      "text": "השירות נעצר ולא הריץ את הבקשה הזו. יש לנסות שוב את הבקשה.",
+      "sourceHash": "38e934181b12035681176dfbfeabf49b944a430a3eee93c56651b18ccc8510b3",
+      "origin": "machine",
+      "description": "Shutdown was requested before the handler started, so the request was not run."
+    },
+    "service_stalled": {
+      "text": "השירות אינו מתקדם בבקשה הנוכחית.",
+      "sourceHash": "721793ae0bed67dac689b7ea65c22c68e3b7393968f11f9d126d9bcadf9f25fa",
+      "origin": "machine",
+      "description": "The running handler made no outbound progress within the stall limit; liveness probes restart the service."
+    },
+    "unverified_actor": {
+      "text": "לא ניתן היה לאמת את אסימון הגורם הפועל.",
+      "sourceHash": "3c77ea036341177309d17a540fdbec939f3ed5f96add727b328fb98dceb8b1f4",
+      "origin": "machine",
+      "description": "Identity did not accept the actor token the request carried."
+    },
+    "held_match_not_found": {
+      "text": "אין התאמה מוחזקת עם המזהה הזה שממתינה לאישור של המרשה הזה.",
+      "sourceHash": "21a5c8b1256ce2aefa3374dd975722536f2b7b8939196a0b4e7f3e38bde60b59",
+      "origin": "machine",
+      "description": "The handle names no over-cap match held for the verified principal: it was never held, its approval already committed, or its mandate was revoked."
+    },
+    "unknown_handle": {
+      "text": "המזהה הזה אינו מוכר.",
+      "sourceHash": "355d5054cbe8f06fc321f3492672fe7e73008f02ad9cebd15ef453d176265cfd",
+      "origin": "machine",
+      "description": "No shortlist or order is kept under the handle; handles do not survive a coordinator restart."
+    },
+    "offer_not_on_shortlist": {
+      "text": "ההצעה אינה ברשימה המקוצרת הזו.",
+      "sourceHash": "7ad436d938b22d8d5a4dda022ff8620f09ae33c3c831b3bd0ab52a5fe0a8266e",
+      "origin": "machine",
+      "description": "A booking named an offer that the environment did not shortlist for the handle."
+    },
+    "slot_not_offered": {
+      "text": "ההצעה אינה כוללת את משבצת הזמן המבוקשת.",
+      "sourceHash": "9498515103ae191fd2ddfd4129a57d6f59618a0608997eba2c99ee22b232f8e8",
+      "origin": "machine",
+      "description": "A booking named a fitting slot that the shortlisted offer does not carry."
+    },
+    "already_booked": {
+      "text": "הרשימה המקוצרת הזו כבר הוזמנה עם בחירה אחרת.",
+      "sourceHash": "7f18e530239f602af1e9175851234458f16e52996785dcd548b3016a8baa64bc",
+      "origin": "machine",
+      "description": "The handle has a completed booking for another offer or slot; an identical replay answers 200 instead."
+    },
+    "not_found": {
+      "text": "המשאב המבוקש אינו קיים.",
+      "sourceHash": "a8deda015c682a3469c94e5ee6b1734fd27e07d5b4caf2b9b6f56e769943d812",
+      "origin": "machine",
+      "description": "No route matches the request's method and path."
+    },
+    "upstream_unavailable": {
+      "text": "לא ניתן היה להגיע לשירות שהבקשה הזו תלויה בו. יש לנסות שוב את הבקשה.",
+      "sourceHash": "0bf7631c40c95bfdf07835f906f578407d78a525652c142f201a0e0e2dbb599d",
+      "origin": "machine",
+      "description": "A call to another service failed before it returned an answer; detail names the service and the error."
+    },
+    "upstream_failed": {
+      "text": "שירות שהבקשה הזו תלויה בו החזיר תשובה לא צפויה.",
+      "sourceHash": "7d67a9ba668890961e16cd7d9870add6be53ab1edfefebb2c5aac3f37f07ed78",
+      "origin": "machine",
+      "description": "Another service answered with an unexpected status or a body that could not be read; detail carries its answer."
+    },
+    "no_compliant_edge": {
+      "text": "אין צומת קצה באזור תואם עם קיבולת עבור תחום השיפוט הזה.",
+      "sourceHash": "f745532fea7757512a4c3b4d0509bce4145beb51c190ec73e60ac4cbdfdc154e",
+      "origin": "machine",
+      "description": "Placement found no registered edge with capacity and an unexpired lease in a region the jurisdiction's policy allows."
+    },
+    "environment_aborted": {
+      "text": "סביבת ההתאמה בוטלה בכל הניסיונות.",
+      "sourceHash": "a095fe9226cae865b9f419e407d338efb027d71e49a49ae41f35611abac4b57a",
+      "origin": "machine",
+      "description": "All three attempts in the compliant placement ended with the environment aborting; nothing was matched."
+    },
+    "manual_dispatch_ignored": {
+      "text": "סביבת ההתאמה התעלמה ממדיניות הסגירה הידנית.",
+      "sourceHash": "33c1bb484e9cfc3e9a6986159b26333730bfe3c458c86615549f3481caa3a518",
+      "origin": "machine",
+      "description": "A delegated need was dispatched for a shortlist and a match record came back; no consent use or order was recorded for it."
+    },
+    "store_unavailable": {
+      "text": "האחסון הקבוע של השירות אינו זמין. יש לנסות שוב את הבקשה.",
+      "sourceHash": "7df6832805f837f8c65b2c24c50d2a0e9b60cc3e471ab89fb836ae1e6f62f175",
+      "origin": "machine",
+      "description": "A PostgreSQL statement failed while the connection stayed open, so the request was not applied; detail names the store and the error."
+    },
+    "write_token_required": {
+      "text": "הוספה לפנקס מחייבת את אסימון הכתיבה שלו.",
+      "sourceHash": "4ce9ea791fd8e0f6e55c1f54523c0942aab041f013a7e982b96629911234f5f9",
+      "origin": "machine",
+      "description": "A POST to ledger-svc carried no Authorization bearer, or one other than the write token the deploy step made for this build."
     }
   }
 }

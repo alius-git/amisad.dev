@@ -9,8 +9,9 @@
 // write through to PostgreSQL first and reload on start (catalog and order
 // board survive pod restarts); without it the store is in-memory.
 
-use amisad_common::{json, request, serve_app, Request, Response, ServiceInfo};
+use amisad_common::{json, post_to_ledger, request, serve_app, Request, Response, ServiceInfo};
 use postgres::Client;
+use std::time::Duration;
 #[path = "../../../lib/amisad-common/src/database.rs"]
 mod database;
 
@@ -103,10 +104,58 @@ fn insights_url() -> String {
     std::env::var("INSIGHTS_URL").unwrap_or_else(|_| String::from("http://insights-svc:8080"))
 }
 
+/// The waits before each resend of an event: 5 attempts, at most 15 s.
+const EVENT_RESEND_WAITS: [Duration; 4] = [
+    Duration::from_secs(1),
+    Duration::from_secs(2),
+    Duration::from_secs(4),
+    Duration::from_secs(8),
+];
+
+/// Sends one event, at most 5 times, and says whether its consumer took it. A
+/// 2xx ends it. Any other status below 500 is logged once and not resent: the
+/// same bytes would be refused again. A transport error or a 5xx is resent
+/// after each wait in EVENT_RESEND_WAITS; when those run out, the last failure
+/// is logged with the attempt count and the event is dropped. request() never
+/// resends a POST whose bytes may have reached the peer; resending here is safe
+/// because both consumers tolerate a repeat: the coordinator's matching cycle
+/// removes each need it matches, so a repeat cannot match or order a need
+/// twice (it only dispatches the needs still open again), and connect-svc
+/// drops a repeated (match_id, state) delivery and never moves its mirror
+/// backwards. send and wait are parameters so tests can run the policy without
+/// a network or a clock.
+fn deliver_event(
+    label: &str,
+    mut send: impl FnMut() -> Result<(u16, String), String>,
+    mut wait: impl FnMut(Duration),
+) -> bool {
+    let mut attempts = 0;
+    loop {
+        attempts += 1;
+        let failure = match send() {
+            Ok((status, _)) if (200..300).contains(&status) => return true,
+            Ok((status, body)) if status < 500 => {
+                eprintln!("{label} refused with {status}: {body}");
+                return false;
+            }
+            Ok((status, body)) => format!("returned {status}: {body}"),
+            Err(e) => format!("failed: {e}"),
+        };
+        match EVENT_RESEND_WAITS.get(attempts - 1) {
+            Some(delay) => wait(*delay),
+            None => {
+                eprintln!("{label} {failure} (gave up after {attempts} attempts)");
+                return false;
+            }
+        }
+    }
+}
+
 /// Order-lifecycle event to the integration gateway (s007.inventory): every
-/// order state transition is mirrored to the connector's ERP feed. Detached
-/// and best-effort, like the offer-published event - the seller never blocks
-/// on connect.
+/// order state transition is mirrored to the connector's ERP feed. Detached,
+/// like the offer-published event - the seller never blocks on connect - and
+/// sent by deliver_event, which resends it only after a transport error or a
+/// 5xx, at most 5 attempts in all.
 fn notify_order_event(match_id: String, tenant: String, state: String) {
     std::thread::spawn(move || {
         let body = json::obj(vec![
@@ -115,34 +164,32 @@ fn notify_order_event(match_id: String, tenant: String, state: String) {
             ("state", json::s(&state)),
         ])
         .dump();
-        match request("POST", &format!("{}/v1/orders/events", connect_url()), Some(&body)) {
-            Ok((status, resp)) if status >= 300 => {
-                eprintln!("order-event to connect returned {status}: {resp}");
-            }
-            Err(e) => eprintln!("order-event to connect failed: {e}"),
-            Ok(_) => {}
-        }
+        let url = format!("{}/v1/orders/events", connect_url());
+        deliver_event(
+            "order-event to connect",
+            || request("POST", &url, Some(&body)),
+            std::thread::sleep,
+        );
     });
 }
 
 /// Offer-published event to the fabric (s003: a new offer may fit an open
-/// need). Detached thread on purpose: this single-threaded server must NOT
-/// block on the coordinator, whose matching cycle calls back into our
-/// catalog - a synchronous notify would deadlock the pair. (Direct HTTP
-/// event; NATS JetStream remains the target transport - poc/README.md.)
+/// need). Detached thread on purpose: this server runs one handler at a time
+/// and must NOT block on the coordinator, whose matching cycle calls back
+/// into our catalog - a synchronous notify would deadlock the pair. The
+/// coordinator runs a matching cycle only on this event or a participation
+/// re-grant, so a lost event would leave a fitting open need unmatched;
+/// deliver_event resends it after a transport error or a 5xx, at most 5
+/// attempts in all. (Direct HTTP event; NATS JetStream remains the
+/// target transport - poc/README.md.)
 fn notify_offer_published(offer: String) {
     std::thread::spawn(move || {
-        match request(
-            "POST",
-            &format!("{}/v1/offers/published", coordinator_url()),
-            Some(&offer),
-        ) {
-            Ok((status, body)) if status >= 300 => {
-                eprintln!("offer-published event returned {status}: {body}");
-            }
-            Err(e) => eprintln!("offer-published event failed: {e}"),
-            Ok(_) => {}
-        }
+        let url = format!("{}/v1/offers/published", coordinator_url());
+        deliver_event(
+            "offer-published event",
+            || request("POST", &url, Some(&offer)),
+            std::thread::sleep,
+        );
     });
 }
 
@@ -341,10 +388,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
             if requested == "fulfilled" {
                 let confirm_body =
                     json::obj(vec![("match_id", json::s(&match_id))]).dump();
-                match request(
-                    "POST",
+                match post_to_ledger(
                     &format!("{}/v1/settlements/confirm", ledger_url()),
-                    Some(&confirm_body),
+                    &confirm_body,
                 ) {
                     Ok((200 | 201, _)) => final_state = String::from("settled"),
                     // A previous attempt already confirmed (crash or 503
@@ -549,5 +595,44 @@ mod tests {
         for marker in ["buyer", "identity", "subscriber", "maya", "token"] {
             assert!(!text.contains(marker), "appointment leaked marker: {marker}");
         }
+    }
+
+    /// Runs deliver_event against scripted answers; returns whether it
+    /// delivered, how many sends it made and the waits it asked for.
+    fn deliver_with(answers: Vec<Result<(u16, String), String>>) -> (bool, usize, Vec<u64>) {
+        let mut answers = answers.into_iter();
+        let mut sends = 0;
+        let mut waits = Vec::new();
+        let delivered = deliver_event(
+            "fixture event",
+            || {
+                sends += 1;
+                answers.next().unwrap_or_else(|| Err(String::from("fixture: no answer left")))
+            },
+            |delay| waits.push(delay.as_secs()),
+        );
+        (delivered, sends, waits)
+    }
+
+    #[test]
+    fn event_delivery_resends_server_errors_and_transport_failures_then_stops() {
+        let answers = vec![
+            Err(String::from("connect fixture: Connection refused")),
+            Ok((503, String::from("{}"))),
+            Ok((200, String::from("{}"))),
+        ];
+        assert_eq!(deliver_with(answers), (true, 3, vec![1, 2]));
+    }
+
+    #[test]
+    fn event_delivery_is_bounded() {
+        let answers = (0..10).map(|_| Err(String::from("connect fixture: timed out"))).collect();
+        assert_eq!(deliver_with(answers), (false, 5, vec![1, 2, 4, 8]));
+    }
+
+    #[test]
+    fn a_refused_event_is_not_resent() {
+        let answers = vec![Ok((400, String::from("{}"))), Ok((200, String::from("{}")))];
+        assert_eq!(deliver_with(answers), (false, 1, vec![]));
     }
 }

@@ -19,7 +19,7 @@
 // it, and a disclosure records its use once delivered, so the auditor can
 // replay the chain and prove each one was allowed at the moment it executed.
 
-use amisad_common::{ad_split, json, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
+use amisad_common::{ad_split, correlation_id, json, post_to_ledger, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct Shortlist {
@@ -52,6 +52,7 @@ struct Mandate {
 
 /// An over-cap match awaiting the principal's approval (s006 step 5): the
 /// offer is chosen but NOTHING commits until Maya approves.
+#[derive(Clone)]
 struct Held {
     handle: String,
     principal: String,
@@ -115,6 +116,12 @@ fn now_secs() -> i64 {
         .unwrap_or(0)
 }
 
+/// The id of the request being handled, for the coordinator's own stderr
+/// lines: the X-Request-Id its answer carries and its calls forward.
+fn request_id() -> String {
+    correlation_id().unwrap_or_else(|| String::from("-"))
+}
+
 /// Verify the buyer token with identity and derive the pseudonymous subject.
 fn verify_subject(token: &str) -> Result<String, Response> {
     let verify_body = json::obj(vec![("token", json::s(token))]).dump();
@@ -128,10 +135,10 @@ fn verify_subject(token: &str) -> Result<String, Response> {
                 v.str_of("actor").unwrap_or(""),
                 v.str_of("class").unwrap_or(""),
             )),
-            Err(e) => Err(Response::error(502, &format!("bad identity: {e}"))),
+            Err(e) => Err(Response::problem_detail(502, "upstream_failed", &format!("bad identity: {e}"))),
         },
-        Ok(_) => Err(Response::error(401, "unverified actor")),
-        Err(e) => Err(Response::error(503, &format!("identity unavailable: {e}"))),
+        Ok((status, _)) => Err(Response::problem_detail(401, "unverified_actor", &format!("identity answered {status}"))),
+        Err(e) => Err(Response::problem_detail(503, "upstream_unavailable", &format!("identity unavailable: {e}"))),
     }
 }
 
@@ -147,10 +154,10 @@ fn consent_granted(subject: &str, grant_type: &str) -> Result<bool, Response> {
             // Fail CLOSED on anything unexpected: for a kill switch, only an
             // explicit granted/none may pass, not a missing field.
             Ok(c) => Ok(matches!(c.str_of(grant_type), Some("granted") | Some("none"))),
-            Err(e) => Err(Response::error(502, &format!("bad consent state: {e}"))),
+            Err(e) => Err(Response::problem_detail(502, "upstream_failed", &format!("bad consent state: {e}"))),
         },
-        Ok((status, _)) => Err(Response::error(502, &format!("consent lookup ({status})"))),
-        Err(e) => Err(Response::error(503, &format!("ledger unavailable: {e}"))),
+        Ok((status, _)) => Err(Response::problem_detail(502, "upstream_failed", &format!("consent lookup ({status})"))),
+        Err(e) => Err(Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}"))),
     }
 }
 
@@ -179,12 +186,16 @@ fn buyer_status(seller_state: &str) -> &'static str {
 /// Ok(Some(response)) when something was delivered/committed, Ok(None) when
 /// no offer fits (the need can stay open), Err(response) on infrastructure
 /// errors. handle_override keeps an open need's handle stable across cycles.
+/// manual_only dispatches with policy "manual", so the environment returns a
+/// shortlist whatever the sealed envelope says; a match record that comes
+/// back anyway is refused before anything is recorded or ordered for it.
 fn attempt_match(
     state: &mut State,
     subject: &str,
     jurisdiction: &str,
     envelope: &str,
     handle_override: Option<&str>,
+    manual_only: bool,
 ) -> Result<Option<json::Json>, Response> {
     // 1. Jurisdiction-compliant placement.
     let placement_body = json::obj(vec![("jurisdiction", json::s(jurisdiction))]).dump();
@@ -195,10 +206,11 @@ fn attempt_match(
     ) {
         Ok((200, text)) => match json::parse(&text) {
             Ok(p) => p,
-            Err(e) => return Err(Response::error(502, &format!("bad placement: {e}"))),
+            Err(e) => return Err(Response::problem_detail(502, "upstream_failed", &format!("bad placement: {e}"))),
         },
-        Ok((status, _)) => return Err(Response::error(503, &format!("no placement ({status})"))),
-        Err(e) => return Err(Response::error(503, &format!("resource unavailable: {e}"))),
+        Ok((409, _)) => return Err(Response::problem_detail(503, "no_compliant_edge", "no placement (409)")),
+        Ok((status, _)) => return Err(Response::problem_detail(503, "upstream_failed", &format!("no placement ({status})"))),
+        Err(e) => return Err(Response::problem_detail(503, "upstream_unavailable", &format!("resource unavailable: {e}"))),
     };
     let endpoint = placement.str_of("endpoint").unwrap_or("").to_string();
 
@@ -210,10 +222,10 @@ fn attempt_match(
     ) {
         Ok((200, text)) => match json::parse(&text) {
             Ok(o) => o.get("offers").cloned().unwrap_or(json::arr(Vec::new())),
-            Err(e) => return Err(Response::error(502, &format!("bad offers: {e}"))),
+            Err(e) => return Err(Response::problem_detail(502, "upstream_failed", &format!("bad offers: {e}"))),
         },
-        Ok((status, _)) => return Err(Response::error(502, &format!("offers ({status})"))),
-        Err(e) => return Err(Response::error(503, &format!("seller unavailable: {e}"))),
+        Ok((status, _)) => return Err(Response::problem_detail(502, "upstream_failed", &format!("offers ({status})"))),
+        Err(e) => return Err(Response::problem_detail(503, "upstream_unavailable", &format!("seller unavailable: {e}"))),
     };
 
     // 3. Active campaigns for this region are public and travel in with the
@@ -233,13 +245,16 @@ fn attempt_match(
     };
 
     // 4. The envelope, offers, and campaigns travel INTO the environment.
-    let dispatch = json::obj(vec![
+    let mut dispatch = vec![
         ("jurisdiction", json::s(jurisdiction)),
         ("envelope", json::s(envelope)),
         ("offers", offers),
         ("campaigns", campaigns),
-    ])
-    .dump();
+    ];
+    if manual_only {
+        dispatch.push(("policy", json::s("manual")));
+    }
+    let dispatch = json::obj(dispatch).dump();
     // An aborted environment (isolation fault, s004.failover) retries
     // AUTOMATICALLY: a fresh environment in the same compliant placement, up
     // to three attempts total. Fail-safe is the environment's job; recovery
@@ -256,7 +271,7 @@ fn attempt_match(
                     match_record = Some(m);
                     break;
                 }
-                Err(e) => return Err(Response::error(502, &format!("bad match record: {e}"))),
+                Err(e) => return Err(Response::problem_detail(502, "upstream_failed", &format!("bad match record: {e}"))),
             },
             Ok((404, _)) => return Ok(None),
             Ok((503, body))
@@ -266,18 +281,18 @@ fn attempt_match(
                     .unwrap_or(false) =>
             {
                 if attempt < 3 {
-                    eprintln!("environment aborted (attempt {attempt}); retrying in the same placement");
+                    eprintln!("environment aborted (attempt {attempt}); retrying in the same placement (request {})", request_id());
                 }
             }
             Ok((status, body)) => {
-                return Err(Response::error(502, &format!("environment ({status}): {body}")))
+                return Err(Response::problem_detail(502, "upstream_failed", &format!("environment ({status}): {body}")))
             }
-            Err(e) => return Err(Response::error(503, &format!("slice unavailable: {e}"))),
+            Err(e) => return Err(Response::problem_detail(503, "upstream_unavailable", &format!("slice unavailable: {e}"))),
         }
     }
     let match_record = match match_record {
         Some(m) => m,
-        None => return Err(Response::error(502, "environment aborted repeatedly")),
+        None => return Err(Response::problem(502, "environment_aborted")),
     };
 
     // 4a. Manual policy: the environment returned a shortlist, not a match.
@@ -307,6 +322,19 @@ fn attempt_match(
         return Ok(Some(response));
     }
 
+    // A manual dispatch that comes back closed: the environment ignored the
+    // policy and posted its own settlement instruction. Recording a use or
+    // ordering would back a closing nobody decided; refusing leaves that
+    // instruction unbacked, which the auditor reports.
+    if manual_only {
+        let environment_id = match_record.str_of("environment_id").unwrap_or("");
+        return Err(Response::problem_detail(
+            502,
+            "manual_dispatch_ignored",
+            &format!("environment {environment_id} returned a match record"),
+        ));
+    }
+
     // 4b. Committed order to the seller: need context only, no identity.
     // The environment already closed the match, so the consent evidence is
     // recorded before the seller sees the order.
@@ -330,9 +358,9 @@ fn attempt_match(
     ) {
         Ok((201, _)) => {}
         Ok((status, body)) => {
-            return Err(Response::error(502, &format!("order create ({status}): {body}")))
+            return Err(Response::problem_detail(502, "upstream_failed", &format!("order create ({status}): {body}")))
         }
-        Err(e) => return Err(Response::error(502, &format!("order create failed: {e}"))),
+        Err(e) => return Err(Response::problem_detail(502, "upstream_unavailable", &format!("order create failed: {e}"))),
     }
 
     let handle = handle_override
@@ -374,19 +402,19 @@ fn run_cycle(state: &mut State) -> i64 {
                 continue;
             }
             Err(resp) => {
-                eprintln!("cycle: consent lookup failed ({}); need stays open", resp.status);
+                eprintln!("cycle: consent lookup failed ({}); need stays open (request {})", resp.status, request_id());
                 index += 1;
                 continue;
             }
         }
-        match attempt_match(state, &subject, &jurisdiction, &envelope, Some(&handle)) {
+        match attempt_match(state, &subject, &jurisdiction, &envelope, Some(&handle), false) {
             Ok(Some(_)) => {
                 state.open_needs.remove(index);
                 matched += 1;
             }
             Ok(None) => index += 1,
             Err(resp) => {
-                eprintln!("cycle: match attempt failed ({}); need stays open", resp.status);
+                eprintln!("cycle: match attempt failed ({}); need stays open (request {})", resp.status, request_id());
                 index += 1;
             }
         }
@@ -397,17 +425,16 @@ fn run_cycle(state: &mut State) -> i64 {
 /// Record a consent-ledger entry (s006 mandates ride the same chain as buyer
 /// consents). Returns the entry hash.
 fn record_consent(entry: &json::Json) -> Result<String, Response> {
-    match request(
-        "POST",
+    match post_to_ledger(
         &format!("{}/v1/consents", ledger_url()),
-        Some(&entry.dump()),
+        &entry.dump(),
     ) {
         Ok((201, text)) => Ok(json::parse(&text)
             .ok()
             .and_then(|r| r.str_of("hash").map(|h| h.to_string()))
             .unwrap_or_default()),
-        Ok((status, body)) => Err(Response::error(502, &format!("consent record ({status}): {body}"))),
-        Err(e) => Err(Response::error(503, &format!("ledger unavailable: {e}"))),
+        Ok((status, body)) => Err(Response::problem_detail(502, "upstream_failed", &format!("consent record ({status}): {body}"))),
+        Err(e) => Err(Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}"))),
     }
 }
 
@@ -437,6 +464,10 @@ fn record_participation_use(subject: &str, match_id: &str) -> Result<String, Res
 /// Commit a delegated match: settlement instruction, seller order, dual
 /// attribution on the principal's activity trail. `via` is "delegate" (Pat's
 /// own authority) or "approval" (over-cap, closed by Maya). Returns match_id.
+/// The match id is deterministic, so the ledger and the seller answer an
+/// identical instruction or order with 200: an approval retry after a failed
+/// attempt records another mandate use and resumes the writes that attempt
+/// made.
 fn commit_delegated(
     state: &mut State,
     principal: &str,
@@ -479,16 +510,15 @@ fn commit_delegated(
         ),
     ])
     .dump();
-    match request(
-        "POST",
+    match post_to_ledger(
         &format!("{}/v1/settlements/instructions", ledger_url()),
-        Some(&instruction),
+        &instruction,
     ) {
-        Ok((201, _)) => {}
+        Ok((200 | 201, _)) => {}
         Ok((status, body)) => {
-            return Err(Response::error(502, &format!("settlement instruction ({status}): {body}")))
+            return Err(Response::problem_detail(502, "upstream_failed", &format!("settlement instruction ({status}): {body}")))
         }
-        Err(e) => return Err(Response::error(503, &format!("ledger unavailable: {e}"))),
+        Err(e) => return Err(Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}"))),
     }
     let order_body = json::obj(vec![
         ("match_id", json::s(&match_id)),
@@ -502,11 +532,11 @@ fn commit_delegated(
         &format!("{}/v1/orders", seller_url()),
         Some(&order_body),
     ) {
-        Ok((201, _)) => {}
+        Ok((200 | 201, _)) => {}
         Ok((status, body)) => {
-            return Err(Response::error(502, &format!("order create ({status}): {body}")))
+            return Err(Response::problem_detail(502, "upstream_failed", &format!("order create ({status}): {body}")))
         }
-        Err(e) => return Err(Response::error(502, &format!("order create failed: {e}"))),
+        Err(e) => return Err(Response::problem_detail(502, "upstream_unavailable", &format!("order create failed: {e}"))),
     }
     // Dual attribution on the principal's trail: actor, principal, mandate ref.
     state.activity.push((
@@ -535,7 +565,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             // Opaque: read as a string, never parsed here.
             let envelope = match body.str_of("envelope") {
                 Some(e) => e.to_string(),
-                None => return Response::error(400, "envelope required"),
+                None => return Response::problem_detail(400, "invalid_request", "envelope required"),
             };
 
             // Verified subscriber only, then the execution-time consent gate:
@@ -558,7 +588,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(resp) => return resp,
             }
 
-            match attempt_match(state, &subject, &jurisdiction, &envelope, None) {
+            match attempt_match(state, &subject, &jurisdiction, &envelope, None, false) {
                 Ok(Some(response)) => {
                     // A direct match satisfies any earlier open registration
                     // of the same need - drop it, or a later cycle would
@@ -601,8 +631,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
             if !matches!(grant_type.as_str(), "participation" | "contribution")
                 || !matches!(action.as_str(), "grant" | "revoke")
             {
-                return Response::error(
+                return Response::problem_detail(
                     400,
+                    "invalid_request",
                     "grant_type (participation|contribution) and action (grant|revoke) required",
                 );
             }
@@ -618,22 +649,21 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ("ts", json::n(ts)),
             ])
             .dump();
-            let hash = match request(
-                "POST",
+            let hash = match post_to_ledger(
                 &format!("{}/v1/consents", ledger_url()),
-                Some(&entry),
+                &entry,
             ) {
                 Ok((201, text)) => match json::parse(&text)
                     .ok()
                     .and_then(|r| r.str_of("hash").map(|h| h.to_string()))
                 {
                     Some(h) => h,
-                    None => return Response::error(502, "consent record unreadable"),
+                    None => return Response::problem_detail(502, "upstream_failed", "consent record unreadable"),
                 },
                 Ok((status, body)) => {
-                    return Response::error(502, &format!("consent record ({status}): {body}"))
+                    return Response::problem_detail(502, "upstream_failed", &format!("consent record ({status}): {body}"))
                 }
-                Err(e) => return Response::error(503, &format!("ledger unavailable: {e}")),
+                Err(e) => return Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}")),
             };
             // Re-granting participation re-serves the open needs immediately:
             // resumption IS a matching cycle.
@@ -669,10 +699,10 @@ fn handle(state: &mut State, req: &Request) -> Response {
             ) {
                 Ok((200, text)) => match json::parse(&text) {
                     Ok(c) => Response::json(200, &c),
-                    Err(e) => Response::error(502, &format!("bad consent state: {e}")),
+                    Err(e) => Response::problem_detail(502, "upstream_failed", &format!("bad consent state: {e}")),
                 },
-                Ok((status, _)) => Response::error(502, &format!("consent lookup ({status})")),
-                Err(e) => Response::error(503, &format!("ledger unavailable: {e}")),
+                Ok((status, _)) => Response::problem_detail(502, "upstream_failed", &format!("consent lookup ({status})")),
+                Err(e) => Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}")),
             }
         }
         // s006.mandate: Maya grants Pat a scoped mandate. Recorded on the
@@ -691,7 +721,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let per_item_cents = body.i64_of("per_item_cents").unwrap_or(0);
             let expiry_ts = body.i64_of("expiry_ts").unwrap_or(now_secs() + 90 * 86400);
             if delegate_actor.is_empty() || category.is_empty() || per_item_cents <= 0 {
-                return Response::error(400, "delegate, category, per_item_cents required");
+                return Response::problem_detail(400, "invalid_request", "delegate, category, per_item_cents required");
             }
             let delegate = subject_for(delegate_actor, "person");
             let ts = now_secs();
@@ -809,7 +839,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let jurisdiction = body.str_of("jurisdiction").unwrap_or("").to_string();
             let envelope = match body.str_of("envelope") {
                 Some(e) => e.to_string(),
-                None => return Response::error(400, "envelope required"),
+                None => return Response::problem_detail(400, "invalid_request", "envelope required"),
             };
             let now = now_secs();
             let mandate = state
@@ -842,9 +872,10 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     ]),
                 );
             }
-            // Manual dispatch so nothing auto-commits; the coordinator decides
-            // commit-vs-hold from the matched price.
-            let shortlist = match attempt_match(state, &principal, &jurisdiction, &envelope, None) {
+            // Manual dispatch, whatever the sealed envelope says, so nothing
+            // closes inside the environment; the coordinator decides
+            // commit-vs-hold from the matched price against the cap.
+            let shortlist = match attempt_match(state, &principal, &jurisdiction, &envelope, None, true) {
                 Ok(Some(r)) => r,
                 Ok(None) => {
                     return Response::json(
@@ -854,9 +885,14 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 }
                 Err(resp) => return resp,
             };
-            // The freshly pushed shortlist is the last one; take its cheapest
-            // qualifying entry.
-            let sl = state.shortlists.last().unwrap();
+            // The shortlist this dispatch delivered, found by the handle it
+            // returned; take its cheapest qualifying entry.
+            let Some(sl) = shortlist
+                .str_of("handle")
+                .and_then(|handle| state.shortlists.iter().rev().find(|s| s.handle == handle))
+            else {
+                return Response::problem(502, "manual_dispatch_ignored");
+            };
             let environment_id = sl.environment_id.clone();
             let need_context = sl.need_context.clone();
             let best = sl
@@ -864,7 +900,6 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 .iter()
                 .min_by_key(|e| e.i64_of("price_cents").unwrap_or(i64::MAX))
                 .cloned();
-            let _ = shortlist;
             let offer = match best {
                 Some(o) => o,
                 None => {
@@ -950,13 +985,17 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(resp) => return resp,
             };
             let handle = body.str_of("handle").unwrap_or("").to_string();
-            let held_index = state
+            // The hold stays until its commit succeeds: a failed commit keeps
+            // it for the principal's retry, which resumes the writes. Only a
+            // committed approval leaves the held list, so its replay finds
+            // nothing.
+            let held = match state
                 .held
                 .iter()
-                .position(|h| h.handle == handle && h.principal == principal);
-            let held = match held_index {
-                Some(i) => state.held.remove(i),
-                None => return Response::error(404, "no held match for this principal"),
+                .find(|h| h.handle == handle && h.principal == principal)
+            {
+                Some(h) => h.clone(),
+                None => return Response::problem(404, "held_match_not_found"),
             };
             let match_id = match commit_delegated(
                 state, &held.principal, &held.delegate, &held.environment_id,
@@ -965,6 +1004,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Ok(m) => m,
                 Err(resp) => return resp,
             };
+            state
+                .held
+                .retain(|h| !(h.handle == handle && h.principal == principal));
             Response::json(
                 201,
                 &json::obj(vec![
@@ -991,7 +1033,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             let artifact = body.str_of("artifact").unwrap_or("").to_string();
             let ttl = body.i64_of("ttl_secs").unwrap_or(2).clamp(1, 3600);
             if case_id.is_empty() || artifact.is_empty() {
-                return Response::error(400, "case_id and artifact required");
+                return Response::problem_detail(400, "invalid_request", "case_id and artifact required");
             }
             let ts = now_secs();
             let expiry_ts = ts + ttl;
@@ -1023,9 +1065,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
             ) {
                 Ok((200, _)) => {}
                 Ok((status, body)) => {
-                    return Response::error(502, &format!("disclosure delivery ({status}): {body}"))
+                    return Response::problem_detail(502, "upstream_failed", &format!("disclosure delivery ({status}): {body}"))
                 }
-                Err(e) => return Response::error(503, &format!("platform unavailable: {e}")),
+                Err(e) => return Response::problem_detail(503, "upstream_unavailable", &format!("platform unavailable: {e}")),
             }
             // The delivery is the use of this grant, inside its one-case scope.
             if let Err(resp) = record_consent(&use_entry(
@@ -1065,9 +1107,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
             Response::json(200, &json::obj(vec![("activity", json::arr(list))]))
         }
         ("POST", "/v1/offers/published") => {
-            // Event from seller-svc (fire-and-forget thread on its side): a
-            // new offer may fit an open need - run a matching cycle. The
-            // consent gate inside the cycle is what makes revocation SILENT.
+            // Event from seller-svc (sent from a detached thread on its side
+            // and resent after a transport error or a 5xx, so it can arrive
+            // twice): a new offer may fit an open need - run a matching cycle.
+            // The cycle removes each need it matches, so a repeat cannot match
+            // or order a need twice; it only dispatches the needs still open
+            // again, each in a new attested environment. The consent gate
+            // inside the cycle is what makes revocation SILENT.
             let rematched = run_cycle(state);
             Response::json(200, &json::obj(vec![("rematched", json::n(rematched))]))
         }
@@ -1095,21 +1141,21 @@ fn handle(state: &mut State, req: &Request) -> Response {
             };
             let (handle, offer_id) = match (body.str_of("handle"), body.str_of("offer_id")) {
                 (Some(h), Some(o)) => (h.to_string(), o.to_string()),
-                _ => return Response::error(400, "handle, offer_id required"),
+                _ => return Response::problem_detail(400, "invalid_request", "handle, offer_id required"),
             };
             // slot_id is optional: a fitting need (s002) books an appointment;
             // a plain accept (s005) commits with no slot.
             let slot_id = body.str_of("slot_id").unwrap_or("").to_string();
             let index = match state.shortlists.iter().position(|s| s.handle == handle) {
                 Some(i) => i,
-                None => return Response::error(404, "unknown handle"),
+                None => return Response::problem(404, "unknown_handle"),
             };
             if let Some(booking) = &state.shortlists[index].booking {
                 if booking.str_of("offer_id") == Some(offer_id.as_str())
                     && booking.str_of("slot_id") == Some(slot_id.as_str()) {
                     return Response::json(200, booking);
                 }
-                return Response::error(409, "already booked");
+                return Response::problem(409, "already_booked");
             }
             // A booking is an execution: the same participation gate as a
             // direct match, then the consent evidence before anything commits.
@@ -1135,7 +1181,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                     .find(|e| e.str_of("offer_id") == Some(offer_id.as_str()))
                 {
                     Some(e) => e.clone(),
-                    None => return Response::error(404, "offer not on shortlist"),
+                    None => return Response::problem(404, "offer_not_on_shortlist"),
                 };
                 (sl.environment_id.clone(), sl.need_context.clone(), entry)
             };
@@ -1154,7 +1200,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
                             .and_then(|s| s.str_of("day").map(|d| d.to_string()))
                     }) {
                     Some(d) => d,
-                    None => return Response::error(404, "slot not offered"),
+                    None => return Response::problem(404, "slot_not_offered"),
                 }
             };
             let tenant = entry.str_of("tenant").unwrap_or("").to_string();
@@ -1199,16 +1245,15 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ("splits", splits),
             ])
             .dump();
-            match request(
-                "POST",
+            match post_to_ledger(
                 &format!("{}/v1/settlements/instructions", ledger_url()),
-                Some(&instruction),
+                &instruction,
             ) {
                 Ok((200 | 201, _)) => {}
                 Ok((status, body)) => {
-                    return Response::error(502, &format!("settlement instruction ({status}): {body}"))
+                    return Response::problem_detail(502, "upstream_failed", &format!("settlement instruction ({status}): {body}"))
                 }
-                Err(e) => return Response::error(503, &format!("ledger unavailable: {e}")),
+                Err(e) => return Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}")),
             }
             let order_body = json::obj(vec![
                 ("match_id", json::s(&match_id)),
@@ -1226,9 +1271,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
             ) {
                 Ok((200 | 201, _)) => {}
                 Ok((status, body)) => {
-                    return Response::error(502, &format!("order create ({status}): {body}"))
+                    return Response::problem_detail(502, "upstream_failed", &format!("order create ({status}): {body}"))
                 }
-                Err(e) => return Response::error(502, &format!("order create failed: {e}")),
+                Err(e) => return Response::problem_detail(502, "upstream_unavailable", &format!("order create failed: {e}")),
             }
             // Record ad attribution and decrement the campaign budget. The
             // settlement is already durable, so a failed attribution is
@@ -1247,8 +1292,8 @@ fn handle(state: &mut State, req: &Request) -> Response {
                         Some(&attribution),
                     ) {
                         Ok((201, _)) => {}
-                        Ok((status, body)) => eprintln!("attribution ({status}): {body}"),
-                        Err(e) => eprintln!("attribution failed: {e}"),
+                        Ok((status, body)) => eprintln!("attribution ({status}): {body} (request {})", request_id()),
+                        Err(e) => eprintln!("attribution failed: {e} (request {})", request_id()),
                     }
                 }
             }
@@ -1291,7 +1336,7 @@ fn handle(state: &mut State, req: &Request) -> Response {
             {
                 let match_id = match state.orders.iter().find(|(h, _)| h == handle) {
                     Some((_, m)) => m.clone(),
-                    None => return Response::error(404, "unknown handle"),
+                    None => return Response::problem(404, "unknown_handle"),
                 };
                 return match request(
                     "GET",
@@ -1309,13 +1354,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
                                 ]),
                             )
                         }
-                        Err(e) => Response::error(502, &format!("bad order: {e}")),
+                        Err(e) => Response::problem_detail(502, "upstream_failed", &format!("bad order: {e}")),
                     },
-                    Ok((status, _)) => Response::error(502, &format!("order lookup ({status})")),
-                    Err(e) => Response::error(503, &format!("seller unavailable: {e}")),
+                    Ok((status, _)) => Response::problem_detail(502, "upstream_failed", &format!("order lookup ({status})")),
+                    Err(e) => Response::problem_detail(503, "upstream_unavailable", &format!("seller unavailable: {e}")),
                 };
             }
-            Response::error(404, "not found")
+            Response::problem(404, "not_found")
         }
     }
 }

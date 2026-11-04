@@ -70,12 +70,24 @@ port then gets them.
   `/api/topology` (VM IPs from the framework's per-hypervisor host driver),
   and proxies `/api/core/<nodeport>/...` and `/api/edge-a|b/...` to the lab --
   the POC services send no CORS headers, so the browser goes same-origin
-  through the proxy. It changes nothing on the VMs beyond the API calls the
-  action window makes.
+  through the proxy. `<nodeport>` is one of the ten service NodePorts
+  (30080-30089); any other port answers 404. It changes nothing on the VMs
+  beyond the API calls the action window makes.
+- A VM whose address cannot be reached, or that leaves a connection
+  unanswered for 3 seconds, is not dialed again for 30 seconds: the proxy
+  answers 502 for it at once, so a stopped VM does not hold up the ticker and
+  the action window, and a VM that comes back shows within 30 seconds. A
+  refused connection or a slow reply still goes to the VM every time.
+- The step script is shared with the by-act demo:
+  [`../common/scenario-script.js`](../common/scenario-script.js) holds the cast
+  and every step, and `ui/shared.js` adds what only this demo has -- the box
+  registry, the journal client and the swimlane renderer.
 - `/api/journal` is the synchronization bus: the action window appends step
   events, every window polls them, so any number of viewers on any machine
-  reconstruct the same timeline. It is in-memory only -- a restart clears it,
-  and clients detect that from a sequence number going backwards.
+  reconstruct the same timeline. Each window keeps one poll in flight at a
+  time and takes each event once, however late an answer arrives. It is
+  in-memory only -- a restart clears it, and clients detect that from a
+  sequence number going backwards.
 
 ## Stage setup
 

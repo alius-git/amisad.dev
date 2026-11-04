@@ -30,26 +30,19 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
     echo "no host.env - cannot resolve the edges" >&2
     exit 2
 fi
-SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
 # See https://yuruna.link/4220a755-0019
 # --- REGION: start_slice
 start_slice() { # <edge-hostname> <region>
     # Runs inside $( ) - errexit does NOT reach in here, so every step fails
     # loudly by hand; the exit code escapes through pipefail to the caller.
-    local edge="$1" region="$2" ip host
+    local edge="$1" region="$2" ip
     ip=$(amisad_edge_addr "$edge")
     if [ -z "$ip" ]; then
         echo "edge ${edge} IP report missing - s004 requires both edges live" >&2
         exit 7
     fi
-    host="${edge}-admin@${ip}"
-    amisad_stop_slice_runtime "$host" "${SSH_OPTS[@]}" \
-        || { echo "stopping slice-runtime on ${edge} (${ip}) failed" >&2; exit 7; }
-    scp "${SSH_OPTS[@]}" target/release/slice-runtime "${host}:/tmp/slice-runtime" \
-        || { echo "scp slice-runtime to ${edge} failed" >&2; exit 7; }
-    ssh "${SSH_OPTS[@]}" "$host" \
-        "PORT=8080 REGION=${region} LEDGER_URL=$LEDGER RESOURCE_URL=$RESOURCE nohup /tmp/slice-runtime >/tmp/slice-runtime.log 2>&1 & sleep 1; echo ${edge}-started" \
-        || { echo "slice-runtime start on ${edge} failed" >&2; exit 7; }
+    amisad_deliver_slice_runtime "${edge}-admin@${ip}" "$LEDGER" "$RESOURCE" "$region" \
+        || { echo "slice-runtime delivery to ${edge} (${ip}) failed" >&2; exit 7; }
     echo "$ip"
 }
 EDGE_A_IP=$(start_slice amisad-edge-a region-a | tail -n 1)
@@ -57,11 +50,7 @@ EDGE_B_IP=$(start_slice amisad-edge-b region-b | tail -n 1)
 SLICE_A="http://${EDGE_A_IP}:8080"
 SLICE_B="http://${EDGE_B_IP}:8080"
 for ep in "$SLICE_A" "$SLICE_B"; do
-    for _ in $(seq 1 15); do
-        if curl -sf "${ep}/health" >/dev/null 2>&1; then break; fi
-        sleep 2
-    done
-    curl -sf "${ep}/health" >/dev/null
+    amisad_wait_slice_runtime "$ep"
 done
 echo "slices: region-a at ${SLICE_A}, region-b at ${SLICE_B}"
 

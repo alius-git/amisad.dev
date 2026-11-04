@@ -26,8 +26,8 @@ sequenceDiagram
     Pat->>BuyerApp: State in-scope need under the per-item limit
     BuyerApp->>Coordinator: Delegated need - principal named, envelope sealed
     Coordinator->>Coordinator: Mandate scope checked BEFORE any dispatch
-    Coordinator->>SliceRT: Environment - envelope and offers travel in
-    SliceRT-->>Coordinator: Match within the cap
+    Coordinator->>SliceRT: Environment dispatched manual - envelope and offers travel in
+    SliceRT-->>Coordinator: Shortlist - the coordinator takes the cheapest in-scope entry, within the cap
     Coordinator->>LedgerSvc: Settlement instruction - closing on Pat's authority
     Coordinator->>Coordinator: Dual attribution on Maya's activity trail (actor Pat, principal Maya, mandate)
     BuyerApp-->>Maya: Activity trail shows the delegated action

@@ -354,6 +354,7 @@ mod tests {
         Request {
             method: method.to_string(),
             path: path.to_string(),
+            headers: Vec::new(),
             body: body.to_string(),
         }
     }

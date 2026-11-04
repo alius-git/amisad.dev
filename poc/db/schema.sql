@@ -113,3 +113,14 @@ CREATE TABLE IF NOT EXISTS seller.orders (
     created_at   timestamptz NOT NULL DEFAULT now(),
     updated_at   timestamptz NOT NULL DEFAULT now()
 );
+
+-- Jurisdiction policies (resource-svc): the operator's allocation rules. A
+-- jurisdiction with no policy is placed on any region, so a policy lost in a
+-- restart would let a restricted jurisdiction fail open; resource-svc writes
+-- here first and reloads on start. regions is the canonical JSON array of the
+-- allowed region names. Apply this additive migration before starting
+-- resource-svc with DATABASE_URL against an existing database.
+CREATE TABLE IF NOT EXISTS resource.allocation_policies (
+    jurisdiction text PRIMARY KEY,
+    regions      text NOT NULL
+);

@@ -21,16 +21,27 @@ emissor exclusivo desse teste. Execute `python3 test/slice_runtime_http_contract
 para verificar os oito envios HTTP do ciclo de vida pelo binário de produção a
 serviços isolados de ledger e telemetria, com respostas de sucesso e de falha.
 As duas verificações exigem que o aborto mantenha o envelope lacrado e não gere
-registros de correspondência nem de lista de candidatos.
+registros de correspondência nem de lista de candidatos. A mesma suíte verifica
+que um runtime iniciado com `ADVERTISE_URL` se registra no resource-svc com um
+lease de 30 segundos e se registra novamente para renová-lo, que os casos de
+ciclo de vida, que não definem `ADVERTISE_URL`, recebem apenas envios de
+telemetria, e que os acréscimos ao ledger levam o token de gravação, enquanto a
+telemetria não o leva.
 
 Execute `python3 test/http_shutdown_contracts.py -v` para as
 [verificações compartilhadas do ciclo de vida HTTP](../../../poc/test/http_shutdown_contracts.py).
 Elas compilam uma implementação de teste que usa apenas a biblioteca padrão em uma
 pasta temporária com `rustc` (`RUSTC` pode selecionar o compilador;
 `AMISAD_LIFECYCLE_BINARY` pode selecionar uma implementação de teste já compilada).
-As verificações HTTP comuns também são executadas no Windows. As verificações Unix
+As verificações HTTP comuns também são executadas no Windows: `/health` e
+`/version` respondem enquanto um handler é executado, um cliente que para no meio
+de uma solicitação não atrasa nenhuma outra, um pânico em um handler encerra o
+processo com o status 101, toda resposta retorna um `X-Request-Id` que os corpos de
+erro repetem como `correlation_id`, e uma chamada de saída feita dentro de um
+handler o encaminha. As verificações Unix
 exigem que SIGTERM interrompa a aceitação de novas solicitações, conclua a gravação
-e a resposta ativas, descarte o estado do serviço e preserve o diário após uma
+e a resposta ativas, responda 503 `service_stopping` a uma solicitação que ainda não
+havia começado, descarte o estado do serviço e preserve o diário após uma
 reinicialização. No Linux, também verificam o comportamento real do PID 1 em
 namespaces privados de `unshare`; esses casos são ignorados quando namespaces sem
 privilégios estão indisponíveis. Os serviços mantêm seus prazos para solicitações,
@@ -40,7 +51,8 @@ com um único gravador.
 Para verificar a recuperação persistente, inicialize um **banco de dados PostgreSQL vazio e descartável**
 com `db/schema.sql`, defina `AMISAD_TEST_DATABASE_URL` com sua URL de conexão e execute
 `python3 test/service_contracts.py DurableContracts -v`. Essa suíte explícita grava
-ofertas, instruções, pedidos e reembolsos de teste e depois reinicia os serviços.
+ofertas, instruções, pedidos, reembolsos e uma política de jurisdição de teste e
+depois reinicia os serviços.
 Use um banco de dados novo em cada execução; nunca aponte para o banco de dados da demonstração.
 A suíte comum usa armazenamento em memória, independentemente de `DATABASE_URL` definido pelo chamador.
 
@@ -207,16 +219,22 @@ usam esse endpoint e verificam o conteúdo recebido antes de extraí-lo (veja
 PAT do cofre em uma etapa `sensitive: true`.
 
 **Armazenamento persistente.** A etapa de banco de dados provisiona o banco `amisad` com o papel de aplicação
-`amisad` (senha fixa de laboratório `amisadpoc2026` -- ela é incluída em uma URL, por isso
-é alfanumérica), abre `listen_addresses`/pg_hba para as redes dos pods e dos nós
+`amisad`, que ela cria sem senha, abre `listen_addresses`/pg_hba para as redes dos pods e dos nós
 e concede SELECT e INSERT nas três tabelas de ledger que só permitem acréscimos,
 sem conceder UPDATE ou DELETE. Também concede SELECT, INSERT e UPDATE em
 `ledger.settlement_instructions`. A mesma
 papel de aplicação recebe SELECT, INSERT e UPDATE em `seller.offers`, `seller.orders`
 e `seller.inventory`; o acesso ao inventário é necessário tanto na inicialização do serviço seller
-quanto nas atualizações de estoque.
-`deploy.sh` passa `DATABASE_URL` (IP do nó:5432)
-para ledger-svc e seller-svc pelo valor Helm `databaseUrl`; as gravações
+quanto nas atualizações de estoque. Também recebe SELECT, INSERT e UPDATE em
+`resource.allocation_policies`, que o resource-svc lê na inicialização e atualiza
+quando uma política é definida.
+`deploy.sh` dá ao papel uma nova senha a cada build (48 caracteres hexadecimais,
+para caber em uma URL): o psql a lê pela entrada padrão com o registro de
+instruções desativado, e somente o Secret `amisad-database` a guarda. `deploy.sh` passa
+`DATABASE_URL` (IP do nó:5432) para ledger-svc, seller-svc e resource-svc pelo valor Helm
+`databaseUrl`, escrita com `$(AMISAD_DB_PASSWORD)` e `$(NODE_IP)`, e indica o
+Secret no valor `databasePasswordSecret`, de modo que cada pod monta a URL ao
+iniciar e nem a release do Helm nem o Deployment guardam a senha; as gravações
 vão primeiro para o PostgreSQL, e os pods recarregam o estado na inicialização. s001 verifica se as linhas
 foram gravadas e se um `kubectl rollout restart` recarrega as cadeias verificáveis e o
 pedido liquidado; s002 verifica a linha do agendamento reservado; s003 verifica as
@@ -229,16 +247,33 @@ certificação independente em quatro dimensões e a localização de adulteraç
 `databaseUrl` vazio (o padrão do chart) mantém um serviço em memória -- é assim que `cargo test`
 e os serviços básicos são executados.
 
-Os snapshots `amisad-core-k8s` e `amisad-core` existentes, criados antes da concessão de acesso ao inventário,
-precisam ser reconstruídos ou reparados antes de serem reutilizados. O ciclo completo normal
+**Token de gravação do ledger.** A função `amisad_publish_ledger_write_token` de `deploy.sh`,
+executada logo após a senha do banco de dados, cria um token de 64 caracteres hexadecimais a cada build e
+o publica somente como o Secret `amisad/amisad-ledger-write` (chave `token`; o
+anterior é excluído, e o novo é criado a partir da entrada padrão). Os charts de ledger-svc,
+fabric-coordinator, seller-svc e platform-svc o leem em
+`LEDGER_WRITE_TOKEN` (`ledgerWriteSecret`). O ledger-svc responde a qualquer POST sem
+`Authorization: Bearer <token>` com 401 `write_token_required`; os GETs continuam abertos.
+`test/amisad-scenario.sh` lê o Secret em `amisad-core` e envia o token pela
+entrada padrão do ssh da borda, onde o comando de inicialização o carrega no ambiente
+do slice-runtime; o fallback de VM única faz o mesmo localmente. s008
+e s010 fazem o reembolso pelo `POST /v1/support/cases/refund` do platform-svc. Os serviços
+iniciados sem a variável, como fazem `cargo test` e a maioria dos casos de contrato, mantêm
+os acréscimos abertos; os casos de contrato do token iniciam o ledger-svc com um token.
+
+Os snapshots `amisad-core-k8s` e `amisad-core` existentes, criados antes das concessões de acesso ao inventário
+e às políticas, precisam ser reconstruídos ou reparados antes de serem reutilizados. O ciclo completo normal
 remove e recria essas VMs automaticamente. Para um laboratório mantido, aplique o
 `db/schema.sql` atual como administrador do banco de dados e execute o comando abaixo no banco
 `amisad`. Capture novamente o snapshot de infraestrutura reparado e reconstrua a partir dele
 o snapshot `amisad-core` implantado; para uma VM implantada em execução, reinicie seller após
-aplicar a concessão:
+aplicar as concessões. O resource-svc lê a tabela de políticas assim que uma implantação lhe passa
+`databaseUrl`.
 
 ```sql
 GRANT SELECT, INSERT, UPDATE ON seller.inventory TO amisad;
+GRANT USAGE ON SCHEMA resource TO amisad;
+GRANT SELECT, INSERT, UPDATE ON resource.allocation_policies TO amisad;
 ```
 
 <a id="verified-nested-downloads"></a>
@@ -303,6 +338,10 @@ seus digests juntos.
 isso: as cópias dos auxiliares permanecem idênticas, cada script verifica antes de extrair, os
 comandos de inicialização incluem cada variável lida pelo respectivo script, e um download que
 não corresponde ao digest é rejeitado e removido.
+
+`test/workload_contracts.py` exige um `--timeout` em cada exclusão de namespace nos
+arquivos de workload do localhost, para que um namespace preso em `Terminating` não
+possa bloquear a fila.
 
 **Itens deliberadamente fora do escopo:**
 
@@ -396,7 +435,7 @@ de outra arquitetura.
 ## Verificações específicas de recuperação e empacotamento
 
 Após `cargo build --workspace --locked`, execute `python3 test/service_contracts.py`
-e `python3 test/check_messages.py`. Para verificar a recuperação persistente do inventário e das liquidações,
+e `python3 test/check_messages.py`. Para verificar a recuperação persistente do inventário, das liquidações e das políticas,
 aplique `db/schema.sql` a um banco de dados PostgreSQL descartável, defina
 `AMISAD_TEST_DATABASE_URL` e execute `python3 test/service_contracts.py DurableContracts`.
 Esses testes criam registros e reiniciam seus próprios processos locais de serviço.
@@ -405,15 +444,20 @@ Esses testes criam registros e reiniciam seus próprios processos locais de serv
 `pwsh test/host_contracts.ps1` usam caminhos descartáveis e comandos nativos substituídos por implementações de teste;
 eles não modificam o firewall do hospedeiro, não instalam serviços de sistema nem implantam VMs.
 Execute `python3 test/bash_contracts.py -v`, `python3 test/cluster_ready_contracts.py -v`,
-`python3 test/image_import_contracts.py -v` e `python3 test/slice_runtime_stop_contracts.py -v`
-para verificar a prontidão do cluster restaurado, a entrega das imagens leves e a
-parada do slice-runtime na borda. Os testes cobrem requisições à API e
+`python3 test/database_secret_contracts.py -v`, `python3 test/image_import_contracts.py -v`
+e `python3 test/slice_runtime_stop_contracts.py -v`
+para verificar a prontidão do cluster restaurado, as credenciais criadas a cada build,
+a entrega das imagens leves e a parada e a inicialização do slice-runtime na borda.
+Os testes cobrem requisições à API e
 aos NodePorts com prazo limitado, evidências do Flannel na inicialização atual,
-desvio de proxies, recuperação por novas tentativas e falhas antes que o Helm
+desvio de proxies, recuperação por novas tentativas, uma senha de papel que chega
+ao psql e ao seu Secret somente pela entrada padrão, um token de gravação do ledger
+que chega ao seu Secret e à borda somente pela entrada padrão, a ausência de senha
+fixa de banco de dados em qualquer arquivo versionado e falhas antes que o Helm
 implante uma imagem que não foi importada. A prontidão continua exigindo o rollout
 de cada implantação e todos os dez NodePorts; cada verificação de inicialização
 ou HTTP mantém seu limite de 300 segundos. O arquivo
-`test/AmisAd.Regression.Tests.ps1` do repositório também executa as quatro suítes.
+`test/AmisAd.Regression.Tests.ps1` do repositório também executa as cinco suítes.
 Elas exigem Python 3 e um Bash funcional; uma verificação com prazo limitado em
 um sistema de arquivos privado ignora iniciadores ausentes ou incompatíveis.
 A verificação cobre caminhos com espaços, comandos de teste sem extensão e as
@@ -424,18 +468,21 @@ correspondentes serem ignorados.
 Execute `flutter test` e `flutter analyze` em `components/apps/buyer-flutter` para
 verificar prazos limite de requisição, navegação/liberação de recursos e respostas desatualizadas.
 
-Os diagnósticos HTTP dos cenários e a resolução dos nós de borda são compartilhados em `test/amisad-scenario.sh`,
+Os diagnósticos HTTP dos cenários, a resolução dos nós de borda e a inicialização do
+slice-runtime (entrega à borda, o fallback condicionado de VM única e a espera pela
+verificação de saúde) são compartilhados em `test/amisad-scenario.sh`,
 carregado do arquivo extraído do projeto. `build/Publish-ProjectArchive.ps1`
 é o comando canônico de arquivamento; `build/serve-local.ps1` encaminha a chamada por compatibilidade.
-Seller e ledger compilam diretamente o módulo de banco de dados `amisad-common/src/database.rs`;
+Seller, ledger e resource compilam diretamente o módulo de banco de dados `amisad-common/src/database.rs`;
 a biblioteca common em si continua usando apenas std. Erros SQL retornam
-503 sem encerrar uma conexão ativa; uma conexão fechada provoca a saída para reinicialização.
+503 `store_unavailable` sem encerrar uma conexão ativa; uma conexão fechada provoca a saída para reinicialização.
 `test/database_policy_contracts.py` verifica os dois casos em um banco de dados PostgreSQL
 descartável escolhido por `DATABASE_POLICY_URL` (nunca use um banco de laboratório existente).
 Execute-o com uma conexão administrativa a um cluster PostgreSQL descartável e
 `PSQL` apontando para `psql` se ele estiver fora do PATH. Seu teste de regressão de provisionamento aplica
 `db/schema.sql` e o bloco real de concessões do script de banco de dados do convidado em uma transação revertida;
-depois, faz leituras e gravações de inventário com o papel `amisad`, sem privilégios de superusuário,
+depois, faz leituras e gravações de inventário e uma gravação de política de jurisdição
+com o papel `amisad`, sem privilégios de superusuário,
 e verifica se UPDATE/DELETE do ledger continuam proibidos. Execute essa
 verificação isoladamente com:
 

@@ -78,10 +78,13 @@ captured ids -- driving one demo from two browsers splits the state.
   from the framework's per-hypervisor host driver, so Hyper-V, KVM and UTM
   hosts all resolve), and proxies `/api/core/<nodeport>/...` and
   `/api/edge-a|b/...` to the lab -- the POC services send no CORS headers, so
-  the browser goes same-origin through the proxy.
-- `ui/app.js` holds the whole demo script: each scenario panel lists its
-  steps in order with the acting persona on every row; the dropdown enables
-  that persona's buttons. Ids returned by the system (match, handle,
+  the browser goes same-origin through the proxy. `<nodeport>` is one of the
+  ten service NodePorts (30080-30089); any other port answers 404.
+- `ui/app.js` renders the demo script, which lives in
+  [`../common/scenario-script.js`](../common/scenario-script.js) because the
+  data-view demo runs the same one: each scenario panel lists its steps in
+  order with the acting persona on every row; the dropdown enables that
+  persona's buttons. Ids returned by the system (match, handle,
   campaign, case, credential...) are captured into the **notebook**
   (localStorage) and reused by later steps -- including across scenarios
   (s008 disputes the s001 order; s010 certifies the whole session).

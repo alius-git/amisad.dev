@@ -27,6 +27,15 @@ spec:
           env:
             - name: PORT
               value: {{ .Values.port | quote }}
+            {{- if .Values.ledgerWriteSecret }}
+            # The bearer token ledger-svc requires on appends. Only this Secret
+            # carries it; the deploy step makes a new one for each build.
+            - name: LEDGER_WRITE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ledgerWriteSecret | quote }}
+                  key: token
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health

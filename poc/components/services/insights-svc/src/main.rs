@@ -235,6 +235,7 @@ mod tests {
             &Request {
                 method: "GET".to_string(),
                 path: "/v1/aggregates".to_string(),
+                headers: Vec::new(),
                 body: String::new(),
             },
         );

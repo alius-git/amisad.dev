@@ -1,6 +1,9 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2019-2026 by Alisson Sol et al.
 # GUID: 421e5f30-6f0c-49fc-bbb6-11c28856d4c5
+{{- if ne (toString .Values.replicas) "1" -}}
+{{- fail "replicas must be exactly 1 for this cached single-writer service" -}}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -10,6 +13,10 @@ metadata:
     app: {{ .Chart.Name }}
 spec:
   replicas: {{ .Values.replicas }}
+  # Single-writer store: never let an old and a new pod overlap, or two
+  # in-memory copies of the edge registry and the policies could diverge.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: {{ .Chart.Name }}
@@ -27,6 +34,26 @@ spec:
           env:
             - name: PORT
               value: {{ .Values.port | quote }}
+            {{- if .Values.databaseUrl }}
+            # NODE_IP resolves at pod start (snapshot restores can change the
+            # node address); databaseUrl may reference it as $(NODE_IP).
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            {{- if .Values.databasePasswordSecret }}
+            # The role password exists only in this Secret, which the deploy
+            # step sets for each build. Kubernetes expands $(NAME) only from
+            # variables defined earlier in this list, so DATABASE_URL comes last.
+            - name: AMISAD_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.databasePasswordSecret | quote }}
+                  key: password
+            {{- end }}
+            - name: DATABASE_URL
+              value: {{ .Values.databaseUrl | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
               path: /health

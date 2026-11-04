@@ -127,8 +127,17 @@ $mime = @{
     '.md'   = 'text/plain; charset=utf-8'
     '.ico'  = 'image/x-icon'
 }
-$http = [System.Net.Http.HttpClient]::new()
-$http.Timeout = [TimeSpan]::FromSeconds(30)
+# A connection gets 3 s of its own, which tells an address that answers
+# nothing apart from a slow reply. Every request's deadline is its own token in
+# Invoke-Proxy, so the client itself never times out: a timeout in a failure
+# can then only be the connect timeout.
+$proxyHandler = [System.Net.Http.SocketsHttpHandler]::new()
+$proxyHandler.ConnectTimeout = [TimeSpan]::FromSeconds(3)
+$http = [System.Net.Http.HttpClient]::new($proxyHandler)
+$http.Timeout = [System.Threading.Timeout]::InfiniteTimeSpan
+# VM address -> the time (UTC) before which Invoke-Proxy answers 502 for it
+# without dialing.
+$proxyDownUntil = @{}
 
 # --- REGION: Read-RequestBody
 function Read-RequestBody($Request) {
@@ -139,12 +148,27 @@ function Read-RequestBody($Request) {
 
 # Forward one browser request to a lab endpoint, body and method intact, and
 # relay the upstream status + body verbatim (non-2xx included: refusal statuses
-# like 403/410 are demo evidence, not proxy errors). Reads get a short deadline
-# of their own: the data view polls continuously, and one unreachable VM must
-# not stall the single-threaded loop for the full client timeout.
+# like 403/410 are demo evidence, not proxy errors). Each request has its own
+# deadline, 8 s for a read and 30 s otherwise: the data view polls
+# continuously, and this loop answers one request at a time. A VM whose
+# address could not be reached, or that left a connection unanswered for the
+# 3 s connect timeout, is not dialed again for 30 s: its requests get 502 at
+# once, so the polls of a stopped VM do not hold every other request behind
+# them, and a VM that comes back shows within 30 s. A refused connection or a
+# slow reply does not count, since the VM is up and a slow service (the
+# coordinator during a failover) must not hide the others.
 # --- REGION: Invoke-Proxy
 function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
     $uri = $TargetBase + $Rest + $Request.Url.Query
+    $vm = ([Uri]$TargetBase).Host
+    $quietUntil = $proxyDownUntil[$vm]
+    if ($quietUntil -and $quietUntil -gt [DateTime]::UtcNow) {
+        Write-Json -Response $Response -Status 502 -Object @{
+            error = "$vm did not answer a connection attempt; asking again after $($quietUntil.ToLocalTime().ToString('HH:mm:ss'))"
+            target = $uri
+        }
+        return
+    }
     $msg = [System.Net.Http.HttpRequestMessage]::new(
         [System.Net.Http.HttpMethod]::new($Request.HttpMethod), $uri)
     $up = $null
@@ -154,18 +178,22 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
         if ($body) {
             $msg.Content = [System.Net.Http.StringContent]::new($body, [Text.Encoding]::UTF8, 'application/json')
         }
-        if ($Request.HttpMethod -eq 'GET') {
-            $cts = [System.Threading.CancellationTokenSource]::new([TimeSpan]::FromSeconds(8))
-            $up = $http.SendAsync($msg, $cts.Token).GetAwaiter().GetResult()
-        } else {
-            $up = $http.SendAsync($msg).GetAwaiter().GetResult()
-        }
+        $deadline = if ($Request.HttpMethod -eq 'GET') { 8 } else { 30 }
+        $cts = [System.Threading.CancellationTokenSource]::new([TimeSpan]::FromSeconds($deadline))
+        $up = $http.SendAsync($msg, $cts.Token).GetAwaiter().GetResult()
         $text = $up.Content.ReadAsStringAsync().GetAwaiter().GetResult()
         $ct = if ($up.Content.Headers.ContentType) { $up.Content.Headers.ContentType.ToString() } else { 'application/json' }
         $Response.Headers['Cache-Control'] = 'no-store'
         $bytes = [Text.Encoding]::UTF8.GetBytes($text)
         Write-Body -Response $Response -Status ([int]$up.StatusCode) -Bytes $bytes -ContentType $ct
     } catch {
+        for ($cause = $_.Exception; $cause; $cause = $cause.InnerException) {
+            if ($cause -is [TimeoutException] -or ($cause -is [System.Net.Sockets.SocketException] -and
+                    $cause.SocketErrorCode -in 'HostUnreachable', 'HostDown', 'NetworkUnreachable', 'TimedOut')) {
+                $proxyDownUntil[$vm] = [DateTime]::UtcNow.AddSeconds(30)
+                break
+            }
+        }
         Write-Json -Response $Response -Status 502 -Object @{ error = $_.Exception.Message; target = $uri }
     } finally {
         if ($cts) { $cts.Dispose() }
@@ -181,9 +209,16 @@ function Send-StaticFile($Response, [string]$UrlPath) {
     $rel = $UrlPath.TrimStart('/')
     if ($rel -eq '') { $rel = 'ui/actions.html' }
     elseif ($rel -eq 'data') { $rel = 'ui/data.html' }
-    if ($rel -like 'art/*') { $root = $artRoot; $rel = $rel.Substring(4) } else { $root = $demoRoot }
+    # common/ is the scenario script both demos run, beside this demo's folder.
+    if ($rel -like 'art/*') { $root = $artRoot; $rel = $rel.Substring(4) }
+    elseif ($rel -like 'common/*') { $root = [IO.Path]::GetFullPath((Join-Path $demoRoot '../common')); $rel = $rel.Substring(7) }
+    else { $root = $demoRoot }
     $full = [IO.Path]::GetFullPath((Join-Path $root $rel))
-    if (-not $full.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or
+    # Compare against the root plus a separator: a bare prefix would also admit
+    # a sibling whose name starts with the root's (common-x beside common).
+    $inside = [IO.Path]::GetFullPath($root).TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar) +
+        [IO.Path]::DirectorySeparatorChar
+    if (-not $full.StartsWith($inside, [StringComparison]::OrdinalIgnoreCase) -or
         -not (Test-Path -LiteralPath $full -PathType Leaf)) {
         Write-Json -Response $Response -Status 404 -Object @{ error = "not found: $UrlPath" }
         return
@@ -301,7 +336,10 @@ try {
                     $events = @($script:journal | Where-Object { $_.seq -gt $since })
                     Write-Json -Response $res -Status 200 -Depth 12 -Object ([ordered]@{ latest = $script:journalSeq; events = $events })
                 }
-            } elseif ($path -match '^/api/core/(\d+)(/.*)$') {
+            } elseif ($path -match '^/api/core/(3008[0-9])(/.*)$') {
+                # Only the ten service NodePorts the deploy step exposes; any other
+                # port of amisad-core (SSH, PostgreSQL, NATS monitoring) is not
+                # proxied: its path falls through to the static files, which answer 404.
                 if ($CoreIp) { Invoke-Proxy -Request $req -Response $res -TargetBase "http://${CoreIp}:$($Matches[1])" -Rest $Matches[2] }
                 else { Write-Json -Response $res -Status 503 -Object @{ error = 'amisad-core IP unresolved; restart with -CoreIp <ip>' } }
             } elseif ($path -match '^/api/(edge-a|edge-b)(/.*)$') {

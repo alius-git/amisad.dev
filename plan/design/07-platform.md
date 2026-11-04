@@ -24,6 +24,7 @@ flowchart TD
     cases --> disclosure
     coordinator -->|"granted artifact + expiry, after recording the consent"| disclosure
     ledger -.->|"settlement entries - metadata"| oversight
+    cases -->|"refund on a case - compensating entries, with the write token"| ledger
     cases -.->|"adjustment proposals -> compensating entries"| ledger
 
     classDef planned stroke-dasharray: 5 5
@@ -36,7 +37,7 @@ flowchart TD
 - **Zero-knowledge is structural:** case records reference orders, environments, and settlement entries by ID; there is no join path from a case to buyer identity -- the record has no such field (s008.mediation asserts the case record is identity-free throughout).
 - **Escalation is deliberately inbound.** Nothing in this service reaches into another: an abort pattern in Tom's queue and a certification finding from Ingrid both arrive as posted cases carrying only a summary and the environment ids they link, which is what keeps the stewardship console free of any path into match content.
 - **Disclosure is a two-service flow:** Sam requests it here, the buyer grants it through the coordinator, and the coordinator records the grant on the consent ledger under the buyer's pseudonymous subject before delivering the artifact here with its expiry. This service then serves that one artifact read-only until the expiry passes, after which the access path returns gone rather than forbidden (s008.mediation step 8).
-- **Adjustments are posted to ledger-svc** as compensating entries referencing the case, so history is never edited. Routing them as proposals the counterparty accepts in their own application -- with the entries posted only on acceptance -- is designed but not built.
+- **Adjustments are posted to ledger-svc** as compensating entries referencing the case, so history is never edited. Sam refunds a case through this service (`POST /v1/support/cases/refund` with the case id): the refund reverses the match recorded on the case, whatever the request body says, and the ledger's answer is relayed as given, an identical replay answering 200 with the prior outcome. ledger-svc takes appends only with the write token the deploy step makes for each build, and this service is one of its holders, so Sam's refund reaches the ledger only through this service. The support routes take no credential, however: anyone who can reach this service's NodePort (30086) can open a case for any match and refund that match once, the one refund per match the ledger allows. That is the reach a direct ledger refund would have without the token; the token closes direct ledger appends, not refunds through this service. Scoping these routes to Sam's role claim is the growth-path step above. Routing adjustments as proposals the counterparty accepts in their own application -- with the entries posted only on acceptance -- is designed but not built.
 - **Anomaly detection** over settlement and case metadata (rates, conflicts, repeat patterns) is designed as rule-based, with statistical models on the growth path. In the POC the recurring pattern is spotted by the operator, who escalates it as a case.
 
 **Scenario coverage:** s004.failover, s008.mediation, s010.certification.

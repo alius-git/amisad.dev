@@ -138,19 +138,21 @@ sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='amisad'" | g
 sudo -u postgres psql -v ON_ERROR_STOP=1 -d amisad -f - < "$SCHEMA"
 rm -f "$SCHEMA"
 
-# App role 'amisad' (name also hardcoded in the grants and pg_hba below).
-# ALTER runs unconditionally so a password change here lands on re-runs.
-APP_PASSWORD=amisadpoc2026
+# App role 'amisad' (name also hardcoded in the grants and pg_hba below). It
+# gets no password here: the deploy step gives it a new one for each build and
+# publishes it only as the Kubernetes Secret the ledger, seller and resource
+# pods read.
 sudo -u postgres psql -tc "SELECT 1 FROM pg_roles WHERE rolname='amisad'" | grep -q 1 || \
     sudo -u postgres psql -v ON_ERROR_STOP=1 -c "CREATE ROLE amisad LOGIN"
-sudo -u postgres psql -v ON_ERROR_STOP=1 -c "ALTER ROLE amisad LOGIN PASSWORD '${APP_PASSWORD}'"
 sudo -u postgres psql -v ON_ERROR_STOP=1 -d amisad <<'SQL'
-GRANT USAGE ON SCHEMA ledger, seller TO amisad;
+GRANT USAGE ON SCHEMA ledger, seller, resource TO amisad;
 -- Ledgers: append-only for the app role; no UPDATE, no DELETE.
 GRANT SELECT, INSERT ON ledger.consent_ledger, ledger.settlement_ledger, ledger.attestation_ledger TO amisad;
 -- Instructions are working state: confirmed flips true once.
 GRANT SELECT, INSERT, UPDATE ON ledger.settlement_instructions TO amisad;
 GRANT SELECT, INSERT, UPDATE ON seller.offers, seller.orders, seller.inventory TO amisad;
+-- Jurisdiction policies are replaced in place when the operator sets them again.
+GRANT SELECT, INSERT, UPDATE ON resource.allocation_policies TO amisad;
 SQL
 
 # Reachable from pods: listen on every interface, allow the pod/node networks.

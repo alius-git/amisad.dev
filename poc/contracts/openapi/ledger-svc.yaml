@@ -4,8 +4,17 @@
 openapi: 3.0.3
 info:
   title: ledger-svc
-  description: "Append-only hash-chained attestation and settlement ledgers with chain verification (s001.fulfillment surface)"
+  description: "Append-only hash-chained attestation and settlement ledgers with chain verification (s001.fulfillment surface). Every POST is an append and needs the per-build write token as a bearer when the service was started with LEDGER_WRITE_TOKEN; reads are open, and the chains are plain SHA-256 so an auditor recomputes them without a secret."
   version: 0.1.0
+components:
+  securitySchemes:
+    ledgerWrite:
+      type: http
+      scheme: bearer
+      description: "LEDGER_WRITE_TOKEN, made by the deploy step for each build. With none configured, appends are open."
+  responses:
+    WriteTokenRequired:
+      description: "write_token_required: no Authorization bearer, or one other than the write token"
 paths:
   /health:
     get:
@@ -19,6 +28,7 @@ paths:
         "200": { description: "Service name and version" }
   /v1/attestations:
     post:
+      security: [{ ledgerWrite: [] }]
       summary: "Append an attestation record (body: environment_id, lifecycle, ...)"
       requestBody:
         required: true
@@ -27,6 +37,7 @@ paths:
             schema: { type: object }
       responses:
         "201": { description: "Appended (index, hash)" }
+        "401": { $ref: "#/components/responses/WriteTokenRequired" }
     get:
       summary: "All attestation entries with hashes and head"
       responses:
@@ -44,6 +55,7 @@ paths:
       responses:
         "200": { description: "instructions: [{match_id, value_cents, confirmed, splits: [{party, amount_cents}]}]" }
     post:
+      security: [{ ledgerWrite: [] }]
       summary: "Store a pending settlement instruction; splits must sum to value_cents (body: match_id, value_cents, splits{seller_cents, network_cents, platform_cents, ads_cents})"
       requestBody:
         required: true
@@ -55,8 +67,10 @@ paths:
         "400": { description: "Splits do not sum to value" }
         "200": { description: "Identical instruction replay; existing pending or confirmed status" }
         "409": { description: "Existing match_id has a different value or splits" }
+        "401": { $ref: "#/components/responses/WriteTokenRequired" }
   /v1/settlements/confirm:
     post:
+      security: [{ ledgerWrite: [] }]
       summary: "Confirm settlement: appends one chained entry per party (body: match_id)"
       requestBody:
         required: true
@@ -67,6 +81,7 @@ paths:
         "201": { description: "Entries appended (entries, head)" }
         "404": { description: "No instruction" }
         "200": { description: "Already confirmed; no ledger entries appended" }
+        "401": { $ref: "#/components/responses/WriteTokenRequired" }
   /v1/settlements/match/{matchId}:
     get:
       summary: "Settlement view for a match"
@@ -81,6 +96,7 @@ paths:
         "200": { description: "attestation_ok, settlement_ok, consent_ok, lengths" }
   /v1/consents:
     post:
+      security: [{ ledgerWrite: [] }]
       summary: "Append a consent entry to the hash-chained consent ledger (body: subject, grant_type participation|contribution, action grant|revoke, ts)"
       requestBody:
         required: true
@@ -89,6 +105,7 @@ paths:
             schema: { type: object }
       responses:
         "201": { description: "index, hash" }
+        "401": { $ref: "#/components/responses/WriteTokenRequired" }
   /v1/consents/subject/{subject}:
     get:
       summary: "Newest-wins consent state per grant type + full immutable history for one pseudonymous subject"
@@ -98,6 +115,7 @@ paths:
         "200": { description: "subject, participation, contribution, history" }
   /v1/settlements/adjust:
     post:
+      security: [{ ledgerWrite: [] }]
       summary: "s008: post compensating entries reversing a confirmed settlement, referencing a support case (body: match_id, case_id); history is not edited"
       requestBody:
         required: true
@@ -110,4 +128,5 @@ paths:
         "200": { description: "Identical refund replay; prior outcome with no new entries" }
         "400": { description: "Missing or empty case_id" }
         "409": { description: "Unconfirmed settlement, conflicting case, or existing inconsistent adjustment" }
+        "401": { $ref: "#/components/responses/WriteTokenRequired" }
   # GET /v1/settlements and GET /v1/consents -> raw chain dumps ({payload, prev, hash}) for independent audit (s010)

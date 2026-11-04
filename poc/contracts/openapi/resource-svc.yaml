@@ -4,7 +4,7 @@
 openapi: 3.0.3
 info:
   title: resource-svc
-  description: "Carrier control plane: edge registration with capacity, capacity-greedy placement under jurisdiction policies, slice telemetry, operator incident queue (s001.fulfillment + s004.failover surface)"
+  description: "Carrier control plane: edge registration with capacity and optional leases, capacity-greedy placement under jurisdiction policies, slice telemetry, operator incident queue (s001.fulfillment + s004.failover surface). Every error is a catalog problem: code (stable, for clients to branch on), error (localized by Accept-Language), detail when present (an untranslated diagnostic), and correlation_id (the X-Request-Id this response carries)."
   version: 0.1.0
 paths:
   /health:
@@ -19,21 +19,22 @@ paths:
         "200": { description: "Service name and version" }
   /v1/edges:
     post:
-      summary: "Register or replace an edge slice endpoint (body: region, endpoint, capacity?)"
+      summary: "Register or replace an edge slice endpoint (body: region, endpoint, capacity?, lease_secs?). With lease_secs (an integer from 1 to 3600) the registration lapses unless the edge registers again within it, and a lapsed edge gets no placement; without it the registration stays until replaced."
       requestBody:
         required: true
         content:
           application/json:
             schema: { type: object }
       responses:
-        "201": { description: "Edge registered" }
+        "201": { description: "Edge registered (region, endpoint, capacity, and lease_secs when leased)" }
+        "400": { description: "Missing region or endpoint, a capacity that is not an integer, or lease_secs outside 1..3600 (invalid_request)" }
     get:
       summary: "List registered edges"
       responses:
-        "200": { description: "edges: [{region, endpoint, capacity}]" }
+        "200": { description: "edges: [{region, endpoint, capacity, lease_remaining_secs}]; lease_remaining_secs only for leased edges, 0 once lapsed" }
   /v1/policies:
     post:
-      summary: "Set a jurisdiction policy: allocation for this jurisdiction is restricted to the listed regions (body: jurisdiction, regions[])"
+      summary: "Set a jurisdiction policy: allocation for this jurisdiction is restricted to the listed regions (body: jurisdiction, regions[]). With DATABASE_URL the policy is written to PostgreSQL before it applies and reloads on start."
       requestBody:
         required: true
         content:
@@ -41,6 +42,8 @@ paths:
             schema: { type: object }
       responses:
         "201": { description: "Policy stored" }
+        "400": { description: "Missing jurisdiction or an empty regions array (invalid_request)" }
+        "503": { description: "The policy store refused the write (store_unavailable); nothing changed" }
   /v1/placements:
     post:
       summary: "Request a placement (body: jurisdiction). Default is capacity-greedy across ALL regions; a jurisdiction policy restricts to its compliant regions at allocation time."
@@ -51,7 +54,7 @@ paths:
             schema: { type: object }
       responses:
         "200": { description: "Placement (region, endpoint)" }
-        "409": { description: "No compliant edge with capacity for jurisdiction" }
+        "409": { description: "No compliant edge with capacity and an unexpired lease for the jurisdiction (no_compliant_edge)" }
   /v1/telemetry:
     post:
       summary: "Record slice lifecycle telemetry (body: environment_id, event)"

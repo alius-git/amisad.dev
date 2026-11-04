@@ -119,9 +119,16 @@ function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
 function Send-StaticFile($Response, [string]$UrlPath) {
     $rel = $UrlPath.TrimStart('/')
     if ($rel -eq '') { $rel = 'ui/index.html' }
-    if ($rel -like 'art/*') { $root = $artRoot; $rel = $rel.Substring(4) } else { $root = $demoRoot }
+    # common/ is the scenario script both demos run, beside this demo's folder.
+    if ($rel -like 'art/*') { $root = $artRoot; $rel = $rel.Substring(4) }
+    elseif ($rel -like 'common/*') { $root = [IO.Path]::GetFullPath((Join-Path $demoRoot '../common')); $rel = $rel.Substring(7) }
+    else { $root = $demoRoot }
     $full = [IO.Path]::GetFullPath((Join-Path $root $rel))
-    if (-not $full.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) -or
+    # Compare against the root plus a separator: a bare prefix would also admit
+    # a sibling whose name starts with the root's (common-x beside common).
+    $inside = [IO.Path]::GetFullPath($root).TrimEnd([IO.Path]::DirectorySeparatorChar, [IO.Path]::AltDirectorySeparatorChar) +
+        [IO.Path]::DirectorySeparatorChar
+    if (-not $full.StartsWith($inside, [StringComparison]::OrdinalIgnoreCase) -or
         -not (Test-Path -LiteralPath $full -PathType Leaf)) {
         Write-Json -Response $Response -Status 404 -Object @{ error = "not found: $UrlPath" }
         return
@@ -199,7 +206,10 @@ try {
                 }
             } elseif ($path -eq '/api/topology') {
                 Write-Json -Response $res -Status 200 -Object ([ordered]@{ core = $CoreIp; edgeA = $EdgeAIp; edgeB = $EdgeBIp })
-            } elseif ($path -match '^/api/core/(\d+)(/.*)$') {
+            } elseif ($path -match '^/api/core/(3008[0-9])(/.*)$') {
+                # Only the ten service NodePorts the deploy step exposes; any other
+                # port of amisad-core (SSH, PostgreSQL, NATS monitoring) is not
+                # proxied: its path falls through to the static files, which answer 404.
                 if ($CoreIp) { Invoke-Proxy -Request $req -Response $res -TargetBase "http://${CoreIp}:$($Matches[1])" -Rest $Matches[2] }
                 else { Write-Json -Response $res -Status 503 -Object @{ error = 'amisad-core IP unresolved; restart with -CoreIp <ip>' } }
             } elseif ($path -match '^/api/(edge-a|edge-b)(/.*)$') {

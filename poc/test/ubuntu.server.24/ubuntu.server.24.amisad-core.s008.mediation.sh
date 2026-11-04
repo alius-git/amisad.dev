@@ -22,45 +22,7 @@ SELLER="http://${NODE_IP}:30083"
 PLATFORM="http://${NODE_IP}:30086"
 
 echo "== slice-runtime (edge amisad-edge-a) =="
-if [ -r /etc/yuruna/host.env ]; then
-    # shellcheck disable=SC1091
-    . /etc/yuruna/host.env
-fi
-SSH_OPTS=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
-# --- REGION: Resolve edge address
-# See https://yuruna.link/4220a755-0019
-if [ -z "${EDGE_HOST:-}" ] && [ -n "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
-    EDGE_IP=$(amisad_edge_addr amisad-edge-a)
-    if [ -n "$EDGE_IP" ]; then EDGE_HOST="amisad-edge-a-admin@${EDGE_IP}"; fi
-fi
-if [ -n "${EDGE_HOST:-}" ]; then
-    echo "edge: ${EDGE_HOST}"
-    amisad_stop_slice_runtime "$EDGE_HOST" "${SSH_OPTS[@]}"
-    scp "${SSH_OPTS[@]}" target/release/slice-runtime "${EDGE_HOST}:/tmp/slice-runtime"
-    ssh "${SSH_OPTS[@]}" "$EDGE_HOST" \
-        "PORT=8080 LEDGER_URL=$LEDGER RESOURCE_URL=$RESOURCE nohup /tmp/slice-runtime >/tmp/slice-runtime.log 2>&1 & sleep 1; echo edge-started"
-    EDGE_IP=$(ssh "${SSH_OPTS[@]}" "$EDGE_HOST" "hostname -I | awk '{print \$1}'")
-    SLICE_EP="http://${EDGE_IP}:8080"
-else
-    # --- REGION: Single-VM fallback
-    # See https://yuruna.link/4220a755-004e
-    if [ "${AMISAD_ALLOW_SINGLE_VM:-0}" != "1" ]; then
-        echo "edge unresolved, and AMISAD_ALLOW_SINGLE_VM is not set: refusing to assert a distributed scenario against a single-VM topology." >&2
-        exit 4
-    fi
-    echo "edge unresolved - slice-runtime on this VM (single-VM degraded fallback)"
-    amisad_stop_slice_runtime ''
-    PORT=8090 LEDGER_URL="$LEDGER" RESOURCE_URL="$RESOURCE" \
-        nohup target/release/slice-runtime >/tmp/slice-runtime.log 2>&1 &
-    sleep 1
-    SLICE_EP="http://${NODE_IP}:8090"
-fi
-for _ in $(seq 1 15); do
-    if curl -sf "${SLICE_EP}/health" >/dev/null 2>&1; then break; fi
-    sleep 2
-done
-curl -sf "${SLICE_EP}/health" >/dev/null
-echo "slice-runtime at ${SLICE_EP}"
+amisad_start_slice_runtime "$LEDGER" "$RESOURCE"
 
 export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
 # --- REGION: PSQL
@@ -126,7 +88,9 @@ print('ASSERT disclosure grant scoped + time-boxed on the consent ledger OK')
 "
 
 echo "== refund posts as compensating entries; original history untouched =="
-amisad_curl -X POST "${LEDGER}/v1/settlements/adjust" -d "{\"match_id\":\"${MATCH_ID}\",\"case_id\":\"${CASE_ID}\"}" \
+# Sam refunds through the support desk: platform-svc takes the match from the
+# case and holds the token the ledger requires on appends.
+amisad_curl -X POST "${PLATFORM}/v1/support/cases/refund" -d "{\"case_id\":\"${CASE_ID}\"}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["adjustment_entries"]==4;print("ASSERT compensating entries posted OK")'
 RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
 echo "$RESP" | python3 -c "

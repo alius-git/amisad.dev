@@ -27,7 +27,7 @@ pub fn store_error(service: &str, db: &Client, what: &str, e: postgres::Error) -
         eprintln!("{service}: {what}: connection lost ({e}); exiting to reload");
         std::process::exit(1);
     }
-    Response::error(503, &format!("{what} unavailable: {e}"))
+    Response::problem_detail(503, "store_unavailable", &format!("{what} unavailable: {e}"))
 }
 
 #[cfg(test)]

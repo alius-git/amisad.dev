@@ -4,7 +4,7 @@
 openapi: 3.0.3
 info:
   title: fabric-coordinator
-  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope. Consent-gated execution, open needs, matching cycles, and automatic abort retry (s001-s004 surface)"
+  description: "Routes opaque need envelopes to sealed slice environments; never parses the envelope. Consent-gated execution, open needs, matching cycles, and automatic abort retry (s001-s004 surface). Every error is a catalog problem: code (stable, for clients to branch on), error (localized by Accept-Language), detail when present (an untranslated diagnostic, such as the upstream answer), and correlation_id (the X-Request-Id this response carries). Consent and mandate refusals keep status and reason."
   version: 0.2.0
 paths:
   /health:
@@ -28,9 +28,9 @@ paths:
       responses:
         "201": { description: "Match (handle, match_id, environment_id, offer), shortlist (handle, environment_id, shortlist) for manual policy, or open (handle, status='open') when nothing fits yet" }
         "403": { description: "Participation consent revoked - no environment is created" }
-        "401": { description: "Unverified actor" }
+        "401": { description: "Unverified actor (unverified_actor)" }
         "404": { description: "No fitting offer" }
-        "503": { description: "No placement / dependency unavailable" }
+        "503": { description: "No compliant edge (no_compliant_edge) or a dependency unavailable (upstream_unavailable, upstream_failed)" }
   /v1/bookings:
     post:
       summary: "Book a shortlist offer's fitting slot (body: handle, offer_id, slot_id). This is the commitment for a manual-policy need: posts the settlement instruction and creates the seller order with the appointment - need context only, no buyer identity."
@@ -42,9 +42,9 @@ paths:
       responses:
         "201": { description: "Booking (handle, match_id, offer_id, slot_id, slot_day, state committed); delivers the booking-confirmed notification" }
         "400": { description: "Missing handle/offer_id/slot_id" }
-        "404": { description: "Unknown handle / offer not on shortlist / slot not offered" }
+        "404": { description: "Unknown handle / offer not on shortlist / slot not offered (unknown_handle, offer_not_on_shortlist, slot_not_offered)" }
         "200": { description: "Identical completed booking replay; no duplicate notification or attribution" }
-        "409": { description: "Handle already booked with a different offer or slot" }
+        "409": { description: "Handle already booked with a different offer or slot (already_booked)" }
         "502": { description: "Ledger or seller rejected the commitment; an identical retry resumes matching durable writes" }
         "503": { description: "Ledger unavailable" }
   /v1/notifications/{handle}:
@@ -61,7 +61,7 @@ paths:
         - { name: handle, in: path, required: true, schema: { type: string } }
       responses:
         "200": { description: "handle, status" }
-        "404": { description: "Unknown handle" }
+        "404": { description: "Unknown handle (unknown_handle)" }
   /v1/consents:
     post:
       summary: "Record a consent action for the verified subject and, on a participation grant, re-serve open needs (body: token, grant_type participation|contribution, action grant|revoke)"
@@ -114,15 +114,17 @@ paths:
         "201": { description: "revoked, hash" }
   /v1/mandates/approve:
     post:
-      summary: "Principal approves a held over-cap match (body: token, handle)"
+      summary: "Principal approves a held over-cap match (body: token, handle). The match stays held until its commit succeeds."
       requestBody:
         required: true
         content:
           application/json:
             schema: { type: object }
       responses:
-        "201": { description: "committed via approval" }
-        "404": { description: "no held match" }
+        "201": { description: "committed via approval; the match leaves the held list" }
+        "404": { description: "no held match for this principal and handle (held_match_not_found): never held, already committed, or revoked" }
+        "502": { description: "The commit failed (upstream_failed, upstream_unavailable); the match stays held, and a retry records another mandate use and resumes the instruction and order, whose identical replays answer 200" }
+        "503": { description: "A dependency was unavailable (upstream_unavailable); the match stays held for a retry, as for 502" }
   /v1/delegate/workspace:
     post:
       summary: "The delegate's principals + scope (empty after revocation; body: token)"
@@ -135,7 +137,7 @@ paths:
         "200": { description: "principals: [...]" }
   /v1/delegate/needs:
     post:
-      summary: "A delegated need: scope-checked, under-cap closes, over-cap held (body: token, principal, category, jurisdiction, envelope)"
+      summary: "A delegated need: scope-checked, then dispatched with policy manual whatever the sealed envelope says, so the environment returns a shortlist and the coordinator decides: under-cap closes, over-cap held (body: token, principal, category, jurisdiction, envelope)"
       requestBody:
         required: true
         content:
@@ -144,6 +146,7 @@ paths:
       responses:
         "201": { description: "committed | held-for-approval | no-match" }
         "403": { description: "no valid mandate | out of scope" }
+        "502": { description: "The environment closed a match despite the manual dispatch (manual_dispatch_ignored); nothing is recorded or ordered for it" }
   /v1/activity:
     post:
       summary: "The principal's activity trail (dual attribution; body: token)"

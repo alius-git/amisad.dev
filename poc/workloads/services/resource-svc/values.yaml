@@ -6,3 +6,9 @@ image: localhost:5000/amisad/resource-svc:latest
 port: 8080
 replicas: 1
 pullPolicy: IfNotPresent
+# Set to a postgres:// URL to use the durable store; empty = in-memory.
+databaseUrl: ""
+# Secret holding the database role's password under key 'password', read into
+# AMISAD_DB_PASSWORD so databaseUrl can reference $(AMISAD_DB_PASSWORD);
+# empty = no password variable.
+databasePasswordSecret: ""
