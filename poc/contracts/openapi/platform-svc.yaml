@@ -6,6 +6,12 @@ info:
   title: platform-svc
   description: "Marketplace stewardship: cross-party incident cases (s004.failover); the support desk with metadata-only cases and scoped time-boxed disclosures (s008.mediation)"
   version: 0.1.0
+components:
+  securitySchemes:
+    ledgerWrite:
+      type: http
+      scheme: bearer
+      description: "LEDGER_WRITE_TOKEN, the per-build write token fabric-coordinator also holds. With none configured, the disclosure grant route is open."
 paths:
   /health:
     get:
@@ -60,7 +66,7 @@ paths:
         "404": { description: "Unknown case" }
   /v1/support/cases:
     post:
-      summary: "s008: open a support case carrying operational metadata only (body: match_id, metadata)"
+      summary: "s008: Sam opens a support case carrying operational metadata only (body: token, match_id, metadata; token is Sam's identity-mock token)"
       requestBody:
         required: true
         content:
@@ -68,9 +74,13 @@ paths:
             schema: { type: object }
       responses:
         "201": { description: "case_id" }
+        "401": { description: "unverified_actor: identity-mock did not accept the token" }
+        "403": { description: "support_agent_required: the token's actor is not the support agent (Sam)" }
+        "502": { description: "upstream_failed: identity-mock's answer could not be read; nothing changed" }
+        "503": { description: "upstream_unavailable: identity-mock could not be reached; nothing changed" }
   /v1/support/cases/disclosure/request:
     post:
-      summary: "Sam requests a scoped disclosure (body: case_id)"
+      summary: "Sam requests a scoped disclosure (body: token, case_id; token is Sam's identity-mock token)"
       requestBody:
         required: true
         content:
@@ -78,9 +88,15 @@ paths:
             schema: { type: object }
       responses:
         "200": { description: "stage" }
+        "404": { description: "Unknown case" }
+        "401": { description: "unverified_actor: identity-mock did not accept the token" }
+        "403": { description: "support_agent_required: the token's actor is not the support agent (Sam)" }
+        "502": { description: "upstream_failed: identity-mock's answer could not be read; nothing changed" }
+        "503": { description: "upstream_unavailable: identity-mock could not be reached; nothing changed" }
   /v1/support/cases/disclosure/grant:
     post:
-      summary: "Deliver the artifact to the case, time-boxed (body: case_id, artifact, expiry_ts)"
+      summary: "fabric-coordinator delivers the buyer's granted artifact to the case, time-boxed (body: case_id, artifact, expiry_ts); it acts for the buyer, so it carries the per-build write token as a bearer instead of Sam's token"
+      security: [{ ledgerWrite: [] }]
       requestBody:
         required: true
         content:
@@ -88,9 +104,11 @@ paths:
             schema: { type: object }
       responses:
         "200": { description: "stage" }
+        "401": { description: "grant_token_required: this service was started with LEDGER_WRITE_TOKEN and the request carried no Authorization bearer, or another value; nothing changed" }
+        "404": { description: "Unknown case" }
   /v1/support/cases/refund:
     post:
-      summary: "Sam refunds the case's match: posts compensating entries referencing the case to ledger-svc's /v1/settlements/adjust with the ledger write token and relays its status and body (body: case_id)"
+      summary: "Sam refunds the case's match: posts compensating entries referencing the case to ledger-svc's /v1/settlements/adjust with the ledger write token and relays its status and body (body: token, case_id; token is Sam's identity-mock token)"
       requestBody:
         required: true
         content:
@@ -101,12 +119,14 @@ paths:
         "200": { description: "Ledger answer to an identical replay: the prior outcome, no new entries" }
         "400": { description: "Body is not JSON" }
         "404": { description: "Unknown case, or the ledger's answer for a match with no settlement" }
-        "401": { description: "Ledger answer: this service holds no valid write token" }
+        "401": { description: "unverified_actor: identity-mock did not accept the token; or the ledger's answer write_token_required: this service holds no valid write token" }
+        "403": { description: "support_agent_required: the token's actor is not the support agent (Sam)" }
         "409": { description: "Ledger answer: unconfirmed settlement, conflicting case, or inconsistent prior adjustment" }
-        "503": { description: "upstream_unavailable: the ledger could not be reached" }
+        "502": { description: "upstream_failed: identity-mock's answer could not be read; nothing was posted" }
+        "503": { description: "upstream_unavailable: identity-mock or the ledger could not be reached" }
   /v1/support/cases/resolve:
     post:
-      summary: "Resolve the case (body: case_id)"
+      summary: "Sam resolves the case (body: token, case_id; token is Sam's identity-mock token)"
       requestBody:
         required: true
         content:
@@ -114,4 +134,9 @@ paths:
             schema: { type: object }
       responses:
         "200": { description: "stage" }
+        "404": { description: "Unknown case" }
+        "401": { description: "unverified_actor: identity-mock did not accept the token" }
+        "403": { description: "support_agent_required: the token's actor is not the support agent (Sam)" }
+        "502": { description: "upstream_failed: identity-mock's answer could not be read; nothing changed" }
+        "503": { description: "upstream_unavailable: identity-mock could not be reached; nothing changed" }
   # GET /v1/support/cases/{id} -> the metadata-only case; GET /v1/support/cases/{id}/disclosure -> the artifact, 410 after expiry

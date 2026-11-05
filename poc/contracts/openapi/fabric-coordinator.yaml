@@ -104,7 +104,7 @@ paths:
         "201": { description: "principal, delegate, scope, hash" }
   /v1/mandates/revoke:
     post:
-      summary: "Revoke a mandate (body: token, delegate)"
+      summary: "Revoke a mandate (body: token, delegate); its held matches and pending under-cap commits are dropped"
       requestBody:
         required: true
         content:
@@ -122,6 +122,7 @@ paths:
             schema: { type: object }
       responses:
         "201": { description: "committed via approval; the match leaves the held list" }
+        "403": { description: "The mandate no longer covers the held match (mandate_not_valid): it expired, or was re-granted for another category; nothing is recorded and the match stays held" }
         "404": { description: "no held match for this principal and handle (held_match_not_found): never held, already committed, or revoked" }
         "502": { description: "The commit failed (upstream_failed, upstream_unavailable); the match stays held, and a retry records another mandate use and resumes the instruction and order, whose identical replays answer 200" }
         "503": { description: "A dependency was unavailable (upstream_unavailable); the match stays held for a retry, as for 502" }
@@ -144,9 +145,10 @@ paths:
           application/json:
             schema: { type: object }
       responses:
-        "201": { description: "committed | held-for-approval | no-match" }
+        "201": { description: "committed | held-for-approval | no-match; a retry of a need whose under-cap commit failed resumes that commit with the same match_id" }
         "403": { description: "no valid mandate | out of scope" }
-        "502": { description: "The environment closed a match despite the manual dispatch (manual_dispatch_ignored); nothing is recorded or ordered for it" }
+        "502": { description: "The environment closed a match despite the manual dispatch (manual_dispatch_ignored), nothing recorded or ordered for it; or an under-cap commit failed (upstream_failed, upstream_unavailable) and stays pending: the delegate's retry of the same need (same envelope and jurisdiction, same principal) resumes it, whose identical instruction and order replays answer 200. A seller's outright refusal of the order (a 4xx) leaves nothing pending, so the next statement of the need dispatches anew" }
+        "503": { description: "A dependency was unavailable (upstream_unavailable); an under-cap commit stays pending for a retry, as for 502" }
   /v1/activity:
     post:
       summary: "The principal's activity trail (dual attribution; body: token)"
@@ -168,4 +170,4 @@ paths:
           application/json:
             schema: { type: object }
       responses:
-        "201": { description: "case_id, scope, expiry_ts, hash" }
+        "201": { description: "case_id, scope, expiry_ts, hash; the delivery to platform-svc carries LEDGER_WRITE_TOKEN as a bearer when this service has one" }

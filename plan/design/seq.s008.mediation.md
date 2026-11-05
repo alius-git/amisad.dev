@@ -16,8 +16,9 @@ sequenceDiagram
 
     Note over Maya,Priya: Seeded - a settled order (s001.fulfillment style) whose delivery confirmation conflicts with reality
     Maya->>BuyerApp: Report non-delivery
-    BuyerApp->>PlatformSvc: Case opens - order state and settlement metadata only, no identity
-    PlatformSvc->>Sam: Case in support queue
+    BuyerApp->>Sam: Report reaches the support desk
+    Note over Sam,PlatformSvc: Every support case write carries Sam's identity-mock token; the platform verifies it, reads stay open
+    Sam->>PlatformSvc: Case opens - order state and settlement metadata only, no identity
     Sam->>PlatformSvc: Review - carrier confirmation conflicts with the report
     alt metadata cannot resolve the case
         Sam->>PlatformSvc: Request consented disclosure - minimal scope, time-boxed

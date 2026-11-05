@@ -8,9 +8,11 @@
 // can be attached and read only until it expires, after which the access path
 // is gone. Nothing buyer-derived ever reaches this service. Sam's refund goes
 // through this desk to ledger-svc, which takes appends only with the write
-// token this service holds.
+// token this service holds. Opening, advancing, refunding and resolving a
+// support case need Sam's identity-mock token; the coordinator's delivery of
+// a disclosure grant needs that same write token as a bearer; reads stay open.
 
-use amisad_common::{json, post_to_ledger, serve_app, Request, Response, ServiceInfo};
+use amisad_common::{bearer_matches, json, post_to_ledger, request, serve_app, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct SupportCase {
@@ -26,10 +28,37 @@ struct SupportCase {
 struct State {
     cases: Vec<json::Json>,
     support: Vec<SupportCase>,
+    /// LEDGER_WRITE_TOKEN; None leaves the disclosure grant route open.
+    write_token: Option<String>,
 }
 
 fn ledger_url() -> String {
     std::env::var("LEDGER_URL").unwrap_or_else(|_| String::from("http://ledger-svc:8080"))
+}
+fn identity_url() -> String {
+    std::env::var("IDENTITY_URL").unwrap_or_else(|_| String::from("http://identity-mock:8080"))
+}
+
+/// The support desk's actor (s008.mediation): the only one who opens,
+/// advances, refunds and resolves support cases.
+const SUPPORT_AGENT: &str = "sam";
+
+/// Verify the request's identity token with identity-mock, as
+/// fabric-coordinator does for buyers, and require the support agent as its
+/// actor: 401 when identity does not accept the token, 403 for another actor.
+/// A route that names a case answers 404 for an unknown one first: case
+/// records are readable without a token, so that answer reveals nothing.
+fn verify_support_agent(body: &json::Json) -> Result<(), Response> {
+    let verify_body = json::obj(vec![("token", json::s(body.str_of("token").unwrap_or("")))]).dump();
+    match request("POST", &format!("{}/v1/verify", identity_url()), Some(&verify_body)) {
+        Ok((200, text)) => match json::parse(&text) {
+            Ok(v) if v.str_of("actor") == Some(SUPPORT_AGENT) => Ok(()),
+            Ok(_) => Err(Response::problem(403, "support_agent_required")),
+            Err(e) => Err(Response::problem_detail(502, "upstream_failed", &format!("bad identity: {e}"))),
+        },
+        Ok((status, _)) => Err(Response::problem_detail(401, "unverified_actor", &format!("identity answered {status}"))),
+        Err(e) => Err(Response::problem_detail(503, "upstream_unavailable", &format!("identity unavailable: {e}"))),
+    }
 }
 
 fn now_secs() -> i64 {
@@ -107,6 +136,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(m) => m.to_string(),
                 None => return Response::error(400, "match_id required"),
             };
+            if let Err(resp) = verify_support_agent(&body) {
+                return resp;
+            }
             let metadata = body.get("metadata").cloned().unwrap_or(json::Json::Null);
             let id = format!("support-{:04}", state.support.len() + 1);
             state.support.push(SupportCase {
@@ -131,6 +163,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(c) => c,
                 None => return Response::error(404, "unknown case"),
             };
+            if let Err(resp) = verify_support_agent(&body) {
+                return resp;
+            }
             case.stage = String::from("disclosure-requested");
             case.lifecycle.push(json::obj(vec![
                 ("stage", json::s("request")),
@@ -139,8 +174,17 @@ fn handle(state: &mut State, req: &Request) -> Response {
             Response::json(200, &json::obj(vec![("case_id", json::s(&case_id)), ("stage", json::s("disclosure-requested"))]))
         }
         // Maya's grant delivers the artifact, scoped to this case and
-        // time-boxed. The coordinator posts it after recording the consent.
+        // time-boxed. The coordinator posts it after recording the consent;
+        // that delivery acts for the buyer, not the support agent, so this
+        // route takes the per-build write token both services hold, as a
+        // bearer, instead of Sam's token. Without a configured token (unit
+        // tests, hand runs) it stays open, like the ledger.
         ("POST", "/v1/support/cases/disclosure/grant") => {
+            if let Some(token) = state.write_token.as_deref() {
+                if !bearer_matches(token, req.header("authorization")) {
+                    return Response::problem(401, "grant_token_required");
+                }
+            }
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
                 Err(_) => return Response::problem(400, "invalid_request"),
@@ -161,12 +205,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
         }
         // Sam refunds the case's match: the ledger posts compensating entries
         // referencing the case. The match is always the one recorded on the
-        // case, never one from the body. Neither this route nor case creation
-        // takes a credential, so anyone who reaches the service can open a
-        // case for any match and refund it once (the ledger allows one refund
-        // per match); the write token this service holds closes direct ledger
-        // appends, not this route. The ledger's answer is relayed as it came,
-        // so an identical replay answers 200 with the prior outcome.
+        // case, never one from the body, and only Sam's token reaches the
+        // ledger call, as for case creation. The ledger's answer is relayed as
+        // it came, so an identical replay answers 200 with the prior outcome.
         ("POST", "/v1/support/cases/refund") => {
             let body = match json::parse(&req.body) {
                 Ok(b) => b,
@@ -177,6 +218,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(c) => c,
                 None => return Response::error(404, "unknown case"),
             };
+            if let Err(resp) = verify_support_agent(&body) {
+                return resp;
+            }
             let adjustment = json::obj(vec![
                 ("match_id", json::s(&case.match_id)),
                 ("case_id", json::s(&case.id)),
@@ -192,10 +236,14 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Err(_) => return Response::problem(400, "invalid_request"),
             };
             let case_id = body.str_of("case_id").unwrap_or("").to_string();
-            match state.support.iter_mut().find(|c| c.id == case_id) {
-                Some(c) => c.stage = String::from("resolved"),
+            let case = match state.support.iter_mut().find(|c| c.id == case_id) {
+                Some(c) => c,
                 None => return Response::error(404, "unknown case"),
+            };
+            if let Err(resp) = verify_support_agent(&body) {
+                return resp;
             }
+            case.stage = String::from("resolved");
             Response::json(200, &json::obj(vec![("case_id", json::s(&case_id)), ("stage", json::s("resolved"))]))
         }
         _ => {
@@ -240,12 +288,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
 }
 
 fn main() -> std::io::Result<()> {
+    let write_token = std::env::var("LEDGER_WRITE_TOKEN").ok().filter(|token| !token.is_empty());
     serve_app(
         ServiceInfo {
             name: "platform-svc",
             version: env!("CARGO_PKG_VERSION"),
         },
-        State { cases: Vec::new(), support: Vec::new() },
+        State { cases: Vec::new(), support: Vec::new(), write_token },
         handle,
     )
 }
@@ -265,7 +314,7 @@ mod tests {
 
     #[test]
     fn case_links_environment_lifecycles_and_rejects_empty() {
-        let mut state = State { cases: Vec::new(), support: Vec::new() };
+        let mut state = State { cases: Vec::new(), support: Vec::new(), write_token: None };
         let missing = handle(
             &mut state,
             &req("POST", "/v1/incidents", "{\"summary\":\"x\",\"from\":\"resource-ops\"}"),
@@ -303,7 +352,7 @@ mod tests {
 
     #[test]
     fn refund_needs_a_known_case() {
-        let mut state = State { cases: Vec::new(), support: Vec::new() };
+        let mut state = State { cases: Vec::new(), support: Vec::new(), write_token: None };
         // Answered before any ledger call: nothing listens on the default ledger host here.
         for body in ["{\"case_id\":\"support-0001\"}", "{}"] {
             assert_eq!(handle(&mut state, &req("POST", "/v1/support/cases/refund", body)).status, 404, "{body}");

@@ -121,11 +121,20 @@ them:
   slice-runtime on ssh standard input. The chains stay plain SHA-256, so
   audit-svc verifies them with no secret. The token admits the writer set, not
   an individual caller. Without it (`cargo test`, hand runs) appends are open
-  and ledger-svc says so on stderr. Refunds stay reachable without a
-  credential: platform-svc's support routes are open like the other
-  NodePorts, so anyone who can reach platform `30086` can open a case for any
-  match and refund it once, the same reach a direct ledger refund would have
-  without the token. The token closes direct ledger appends, not that route.
+  and ledger-svc says so on stderr. Refunds go through platform-svc, whose
+  support case writes (open a case, request a disclosure, refund, resolve)
+  need Sam's identity-mock token in the body: platform-svc verifies it with
+  identity-mock, as the coordinator does for buyers, and answers 401
+  `unverified_actor` for a token identity does not accept and 403
+  `support_agent_required` for another actor. That check binds a write to
+  the actor `sam`, not to an authenticated person: identity-mock, the one
+  mock identity every persona uses, issues a token for whatever actor
+  `POST /v1/tokens` names, with no credential, on NodePort `30084`, so anyone
+  who can reach the node can still mint Sam's token, open a case for any
+  match and refund it once. Case reads stay open. The coordinator's delivery of a buyer's
+  disclosure grant carries the write token instead, which platform-svc then
+  requires (401 `grant_token_required`); without one it stays open, like the
+  ledger.
 - **Envelope opacity instead of encryption.** Upstream services carry the
   envelope as an opaque string and never parse it (checkable in code and by
   the egress assert); actual envelope crypto is TODO.
@@ -227,9 +236,14 @@ grant type ('mandate') and held in the coordinator for scope. Pat's delegate
 workspace shows Maya as principal. Every delegated need is dispatched with a
 manual policy, so the environment returns a shortlist whatever the sealed
 envelope says and the coordinator decides commit or hold against the cap; an
-approval whose commit fails stays held for Maya's retry. An in-scope, under-cap need closes on Pat's
-authority with dual attribution (actor Pat, principal Maya, mandate ref) on
-Maya's activity trail; an over-cap match is HELD - the closing exists only
+approval whose commit fails stays held for Maya's retry, and one given after
+the mandate expired, or was re-granted for another category, is refused (403
+`mandate_not_valid`). An in-scope, under-cap need closes on Pat's authority
+with dual attribution (actor Pat, principal Maya, mandate ref) on Maya's
+activity trail, and a commit that fails part-way stays pending, so Pat's retry
+of the same need resumes it with the same match (unless the seller refused the
+order outright or the mandate was revoked, which leave nothing pending); an
+over-cap match is HELD - the closing exists only
 after Maya's recorded approval; an out-of-scope category is refused at
 submission (scope is fabric-enforceable, so it is checked before any
 environment - zero environments, zero ledger entries); and revocation clears

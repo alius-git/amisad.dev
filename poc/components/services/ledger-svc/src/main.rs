@@ -22,7 +22,7 @@
 // Without a token (unit tests, hand runs) appends are open to any caller, and
 // the service says so on stderr at start.
 
-use amisad_common::{json, serve_app, sha256, Request, Response, ServiceInfo};
+use amisad_common::{bearer_matches, json, serve_app, sha256, Request, Response, ServiceInfo};
 use postgres::Client;
 #[path = "../../../lib/amisad-common/src/database.rs"]
 mod database;
@@ -112,15 +112,6 @@ struct State {
     db: Option<Client>,
     /// LEDGER_WRITE_TOKEN; None leaves appends open.
     write_token: Option<String>,
-}
-
-/// Whether `authorization` is `Bearer <token>`. The token is compared in time
-/// that does not depend on where the first wrong character is.
-fn bearer_matches(token: &str, authorization: Option<&str>) -> bool {
-    let Some((scheme, presented)) = authorization.and_then(|value| value.split_once(' ')) else { return false };
-    scheme.eq_ignore_ascii_case("bearer")
-        && presented.len() == token.len()
-        && presented.bytes().zip(token.bytes()).fold(0u8, |difference, (a, b)| difference | (a ^ b)) == 0
 }
 
 // participation/contribution are the buyer's own consents (s003.silence);

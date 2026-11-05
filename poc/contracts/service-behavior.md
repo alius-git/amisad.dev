@@ -65,9 +65,26 @@ one busy with a slow database statement. The charts' liveness probe reads
   commit or hold against the mandate cap. A match record that comes back anyway
   answers 502 `manual_dispatch_ignored` with no consent use or order recorded,
   which leaves the environment's own instruction for the auditor to report as
-  unbacked. An under-cap delegated commit keeps no hold: a retry after its
-  failure is a new delegated need with a new match ID, and a settlement
-  instruction the failed attempt wrote stays without its order.
+  unbacked. Approving a held match whose mandate no longer covers it -- the
+  mandate expired, or was re-granted for another category -- answers 403
+  `mandate_not_valid` with no mandate use, instruction or order recorded, and
+  the match stays held; the cap is not re-checked, since approving an over-cap
+  match is the approval's purpose. An under-cap delegated commit that fails
+  part-way answers 502 or 503 and stays pending for the same need: the same
+  opaque envelope for the same jurisdiction, stated by the same delegate for
+  the same principal. The delegate's retry of that need resumes it with the
+  same environment, offer and match ID instead of a new dispatch, recording
+  one more mandate use while the instruction and order replay with 200; a
+  committed need leaves nothing pending, so stating it again is a new
+  purchase. The retry passes the mandate check first, so an expired mandate
+  refuses it, and a pending commit the current mandate's cap or scope no
+  longer covers is dropped and the need dispatched anew. Revoking the mandate
+  drops its pending commits, as it drops holds, so a re-grant dispatches the
+  need anew. A seller that refuses the order outright (a 4xx, such as 409 or
+  400 for an offer it no longer knows) leaves nothing pending either, so the
+  next statement of the need dispatches anew; a 5xx or a lost connection keeps
+  the commit pending. A dropped commit's settlement instruction stays without
+  its order. Pending commits stay in memory, like holds.
 - Fulfillment advances an order to `settled` only after ledger confirmation.
   Confirmation failure returns 503 without advancing the order. Repeating the
   confirmation is safe, including after service restart or an ambiguous response.
@@ -86,10 +103,23 @@ one busy with a slow database statement. The charts' liveness probe reads
   `POST /v1/support/cases/refund` with a `case_id` answers 404 for
   an unknown case, otherwise posts the adjustment for the case's own match (a
   `match_id` in the body is ignored) and relays the ledger's status and body, so
-  an identical replay answers 200 with the prior outcome. Neither that route nor
-  `POST /v1/support/cases` takes a credential, so refunds stay reachable without
-  one: anyone who reaches platform-svc can open a case for any match and refund
-  it once. The token closes direct ledger appends, not this route.
+  an identical replay answers 200 with the prior outcome. That route, case
+  creation, the disclosure request and resolution need Sam's identity-mock
+  token (`token` in the body): platform-svc verifies it with identity-mock and
+  answers 401 `unverified_actor` when identity does not accept it and 403
+  `support_agent_required` for another actor, before any change or ledger call;
+  an unreachable identity-mock answers 503 `upstream_unavailable` and an
+  unreadable answer 502 `upstream_failed`, also before any change. A route
+  that names an unknown case answers 404 first; case reads stay open. The
+  check binds a write to the actor `sam`, not to an authenticated person:
+  identity-mock mints a token for any actor named in `POST /v1/tokens` with no
+  credential, so a caller who reaches identity-mock can obtain Sam's token.
+  The coordinator's delivery of a disclosure grant
+  (`POST /v1/support/cases/disclosure/grant`) needs the write token instead:
+  when platform-svc has one, a delivery without
+  `Authorization: Bearer <LEDGER_WRITE_TOKEN>`, or with another value, answers
+  401 `grant_token_required` and changes nothing; without one it stays open.
+  fabric-coordinator sends it on that delivery whenever it was started with it.
 - Audit certification requires a well-formed chain envelope, every row's payload
   and hashes, and a matching head. Explicit empty chains with the genesis head are
   accepted; missing evidence returns 502. Each environment must contain exactly

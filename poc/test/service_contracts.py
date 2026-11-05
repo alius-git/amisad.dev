@@ -23,6 +23,17 @@ INSTRUCTION = dict(match_id='m1', value_cents=100, splits=dict(seller_cents=80, 
 # The ledger write token for services started with one, and the header that carries it.
 WRITE_TOKEN = 'contract-write-token'
 BEARER = {'Authorization': f'Bearer {WRITE_TOKEN}'}
+# identity-mock tokens for the contracts' actors; platform-svc's support case
+# writes take Sam's (the support agent's) token in the body.
+ACTORS = {'sam-token': 'sam', 'maya-token': 'maya'}
+SAM = {'token': 'sam-token'}
+
+
+def identity(path, body):
+    """A peer handler answering identity-mock's /v1/verify for ACTORS."""
+    if path == '/v1/verify' and body.get('token') in ACTORS:
+        return 200, {'actor': ACTORS[body['token']], 'class': 'person'}
+    return 404, {'error': 'unknown token'}
 
 
 def exchange(url, path, body=None, headers=None, timeout=3):
@@ -454,6 +465,214 @@ class Contracts(unittest.TestCase):
                 self.assertEqual(call(ledger, '/v1/consents')[1], consents)
                 self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
 
+    def test_a_held_match_is_not_approved_after_its_mandate_expires(self):
+        # The approval executes under the mandate, so the mandate must still be
+        # valid then: a use recorded after expiry is a violation to the auditor.
+        vase = {**OFFER, 'offer_id': 'vase', 'category': 'housewares', 'price_cents': 18000}
+        entry = dict(offer_id='vase', tenant='tenant-b', category='housewares', price_cents=18000)
+        with peer(lambda *_: (200, {})) as sink, service('seller-svc', COORDINATOR_URL=sink, CONNECT_URL=sink) as seller, service('ledger-svc') as ledger:
+            self.assertEqual(call(seller, '/v1/offers', vase)[0], 201)
+            def upstream(path, body):
+                if path == '/v1/verify':
+                    return 200, {'actor': body['token'], 'class': 'person'}
+                if path == '/v1/placements':
+                    return 200, dict(endpoint=stub)
+                if path.startswith('/v1/campaigns/'):
+                    return 200, dict(campaigns=[])
+                if path == '/v1/environments':
+                    return 201, dict(environment_id='e-vase', need_context='vase', shortlist=[entry])
+                return call(seller, path, body)
+            with peer(upstream) as stub, service('fabric-coordinator', IDENTITY_URL=stub, RESOURCE_URL=stub, ADS_URL=stub, SELLER_URL=stub, LEDGER_URL=ledger) as coordinator:
+                expiry = int(time.time()) + 2
+                self.assertEqual(call(coordinator, '/v1/mandates', dict(self.MANDATE, expiry_ts=expiry))[0], 201)
+                status, held = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+                self.assertEqual((status, held.get('status')), (201, 'held-for-approval'), held)
+                consents = call(ledger, '/v1/consents')[1]
+                while time.time() < expiry:
+                    time.sleep(.05)
+                approval = dict(token='maya', handle=held['handle'])
+                for _ in range(2):
+                    status, refused = call(coordinator, '/v1/mandates/approve', approval)
+                    self.assertEqual((status, refused.get('code')), (403, 'mandate_not_valid'), refused)
+                self.assertEqual(call(ledger, '/v1/consents')[1], consents, 'no mandate use after expiry')
+                self.assertEqual(call(ledger, '/v1/settlements/instructions')[1]['instructions'], [])
+                self.assertEqual(call(seller, '/v1/orders')[1]['count'], 0)
+                with service('audit-svc', LEDGER_URL=ledger) as audit:
+                    self.assertTrue(call(audit, '/v1/certify', {})[1]['consent']['ok'])
+
+    def test_a_held_match_is_not_approved_under_a_mandate_re_granted_for_another_category(self):
+        # The approval re-checks the mandate's scope as well: after the mandate
+        # expired, a re-grant for another category does not cover the held
+        # match, so its approval is refused and records nothing, while a
+        # re-grant for the held match's own category approves it.
+        vase = {**OFFER, 'offer_id': 'vase', 'category': 'housewares', 'price_cents': 18000}
+        entry = dict(offer_id='vase', tenant='tenant-b', category='housewares', price_cents=18000)
+        with peer(lambda *_: (200, {})) as sink, service('seller-svc', COORDINATOR_URL=sink, CONNECT_URL=sink) as seller, service('ledger-svc') as ledger:
+            self.assertEqual(call(seller, '/v1/offers', vase)[0], 201)
+            def upstream(path, body):
+                if path == '/v1/verify':
+                    return 200, {'actor': body['token'], 'class': 'person'}
+                if path == '/v1/placements':
+                    return 200, dict(endpoint=stub)
+                if path.startswith('/v1/campaigns/'):
+                    return 200, dict(campaigns=[])
+                if path == '/v1/environments':
+                    return 201, dict(environment_id='e-vase', need_context='vase', shortlist=[entry])
+                return call(seller, path, body)
+            with peer(upstream) as stub, service('fabric-coordinator', IDENTITY_URL=stub, RESOURCE_URL=stub, ADS_URL=stub, SELLER_URL=stub, LEDGER_URL=ledger) as coordinator:
+                expiry = int(time.time()) + 2
+                self.assertEqual(call(coordinator, '/v1/mandates', dict(self.MANDATE, expiry_ts=expiry))[0], 201)
+                status, held = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+                self.assertEqual((status, held.get('status')), (201, 'held-for-approval'), held)
+                while time.time() < expiry:
+                    time.sleep(.05)
+                self.assertEqual(call(coordinator, '/v1/mandates', dict(self.MANDATE, category='dresses'))[0], 201)
+                consents = call(ledger, '/v1/consents')[1]
+                approval = dict(token='maya', handle=held['handle'])
+                for _ in range(2):
+                    status, refused = call(coordinator, '/v1/mandates/approve', approval)
+                    self.assertEqual((status, refused.get('code')), (403, 'mandate_not_valid'), refused)
+                self.assertEqual(call(ledger, '/v1/consents')[1], consents, 'no mandate use out of scope')
+                self.assertEqual(call(ledger, '/v1/settlements/instructions')[1]['instructions'], [])
+                self.assertEqual(call(seller, '/v1/orders')[1]['count'], 0)
+                self.assertEqual(call(coordinator, '/v1/mandates', self.MANDATE)[0], 201)
+                status, committed = call(coordinator, '/v1/mandates/approve', approval)
+                self.assertEqual((status, committed.get('via')), (201, 'approval'), committed)
+                self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
+                with service('audit-svc', LEDGER_URL=ledger) as audit:
+                    self.assertTrue(call(audit, '/v1/certify', {})[1]['consent']['ok'])
+
+    def test_an_under_cap_delegated_commit_resumes_after_a_failed_order(self):
+        # A part-way failure keeps the commit pending for the same need; the
+        # delegate's retry resumes it with the same environment, offer and
+        # match id instead of dispatching anew, so the instruction the failed
+        # attempt wrote gets its order and nothing is written twice.
+        for lose_response in [False, True]:
+            with self.subTest(lose_response=lose_response):
+                self.retry_under_cap_after_a_failed_order(lose_response)
+
+    def test_a_revoked_mandate_drops_its_pending_under_cap_commit(self):
+        # The retry is still checked against the mandate, so revoked it is
+        # refused; revocation drops the pending commit as it drops holds, so a
+        # re-grant dispatches the need anew instead of resuming it.
+        with self.under_cap_lab(503) as (coordinator, seller, ledger, dispatches):
+            self.assertEqual(call(coordinator, '/v1/mandates/revoke', dict(token='maya', delegate='pat'))[0], 201)
+            status, refused = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+            self.assertEqual((status, refused.get('reason')), (403, 'no valid mandate'), refused)
+            self.assertEqual(len(dispatches), 1)
+            self.assertEqual(self.instructions(ledger), [(self.pot_match(1), 12000)])
+            self.assertEqual(call(seller, '/v1/orders')[1]['count'], 0)
+            self.assertEqual(call(coordinator, '/v1/mandates', self.MANDATE)[0], 201)
+            status, committed = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+            self.assertEqual((status, committed.get('status')), (201, 'committed'), committed)
+            self.assertEqual((len(dispatches), committed['match_id']), (2, self.pot_match(2)), 'dispatched anew')
+            self.assertEqual(self.instructions(ledger), [(self.pot_match(1), 12000), (self.pot_match(2), 12000)])
+            self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
+
+    def test_a_definitive_order_refusal_leaves_nothing_pending(self):
+        # A seller that refuses the order outright (409, or 400 for an offer it
+        # no longer knows) would refuse every resumed retry, so the next
+        # statement of the need dispatches anew; a 5xx keeps the commit pending.
+        for refusal in [409, 400]:
+            with self.subTest(refusal=refusal), self.under_cap_lab(refusal) as (coordinator, seller, ledger, dispatches):
+                status, committed = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+                self.assertEqual((status, committed.get('status')), (201, 'committed'), committed)
+                self.assertEqual((len(dispatches), committed['match_id']), (2, self.pot_match(2)), 'dispatched anew')
+                self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
+
+    def test_only_the_same_need_resumes_a_pending_commit(self):
+        # The pending commit belongs to one delegate's one need: another
+        # envelope, or another delegate stating the same envelope, dispatches
+        # anew, and the first need still resumes its own match afterwards.
+        with self.under_cap_lab(503) as (coordinator, seller, ledger, dispatches):
+            status, other = call(coordinator, '/v1/delegate/needs', dict(self.DELEGATED_NEED, envelope='another'))
+            self.assertEqual((status, other.get('match_id')), (201, self.pot_match(2)), other)
+            self.assertEqual(call(coordinator, '/v1/mandates', dict(self.MANDATE, delegate='quinn'))[0], 201)
+            status, quinn = call(coordinator, '/v1/delegate/needs', dict(self.DELEGATED_NEED, token='quinn'))
+            self.assertEqual((status, quinn.get('match_id')), (201, self.pot_match(3)), quinn)
+            status, resumed = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+            self.assertEqual((status, resumed.get('match_id')), (201, self.pot_match(1)), resumed)
+            self.assertEqual(len(dispatches), 3)
+            self.assertEqual(call(seller, '/v1/orders')[1]['count'], 3)
+
+    def test_a_pending_commit_the_re_granted_mandate_no_longer_covers_is_not_resumed(self):
+        # The resume re-checks the current mandate's cap and scope: after a
+        # re-grant below the price the need is dispatched anew and held, and
+        # after a re-grant for another category the match is out of scope.
+        cases = [(dict(per_item_cents=10000), {}, (201, 'held-for-approval', None)),
+                 (dict(category='dresses'), dict(category='dresses'), (403, 'refused', 'out of mandate scope'))]
+        for regrant, need, expected in cases:
+            with self.subTest(regrant=regrant), self.under_cap_lab(503) as (coordinator, seller, ledger, dispatches):
+                self.assertEqual(call(coordinator, '/v1/mandates', dict(self.MANDATE, **regrant))[0], 201)
+                status, result = call(coordinator, '/v1/delegate/needs', dict(self.DELEGATED_NEED, **need))
+                self.assertEqual((status, result.get('status'), result.get('reason')), expected, result)
+                self.assertEqual(len(dispatches), 2, 'dispatched anew')
+                self.assertEqual(call(seller, '/v1/orders')[1]['count'], 0)
+
+    @staticmethod
+    def pot_match(dispatch):
+        import hashlib
+        return hashlib.sha256(f'e{dispatch}|pot'.encode()).hexdigest()
+
+    @staticmethod
+    def instructions(ledger):
+        return [(i['match_id'], i['value_cents']) for i in call(ledger, '/v1/settlements/instructions')[1]['instructions']]
+
+    @contextlib.contextmanager
+    def under_cap_lab(self, first_order, lose_response=False):
+        """Seller, ledger and coordinator after Pat's under-cap pot need failed
+        part-way: the first order answers `first_order` (with the seller's own
+        201 lost first when `lose_response`), the instruction is written and the
+        coordinator answered 502. Every dispatch is environment e<n>. Yields
+        (coordinator, seller, ledger, dispatches)."""
+        pot = {**OFFER, 'offer_id': 'pot', 'category': 'housewares', 'price_cents': 12000}
+        entry = dict(offer_id='pot', tenant='tenant-b', category='housewares', price_cents=12000)
+        dispatches, failed = [], [False]
+        with peer(lambda *_: (200, {})) as sink, service('seller-svc', COORDINATOR_URL=sink, CONNECT_URL=sink) as seller, service('ledger-svc', LEDGER_WRITE_TOKEN=WRITE_TOKEN) as ledger:
+            self.assertEqual(call(seller, '/v1/offers', pot)[0], 201)
+            def upstream(path, body):
+                if path == '/v1/verify':
+                    return 200, {'actor': body['token'], 'class': 'person'}
+                if path == '/v1/placements':
+                    return 200, dict(endpoint=stub)
+                if path.startswith('/v1/campaigns/'):
+                    return 200, dict(campaigns=[])
+                if path == '/v1/environments':
+                    dispatches.append(body)
+                    return 201, dict(environment_id=f'e{len(dispatches)}', need_context='pot', shortlist=[entry])
+                if path == '/v1/orders' and not failed[0]:
+                    failed[0] = True
+                    if lose_response:
+                        self.assertEqual(call(seller, path, body)[0], 201)
+                    return first_order, {'error': 'refused'}
+                return call(seller, path, body)
+            with peer(upstream) as stub, service('fabric-coordinator', IDENTITY_URL=stub, RESOURCE_URL=stub, ADS_URL=stub, SELLER_URL=stub, LEDGER_URL=ledger, LEDGER_WRITE_TOKEN=WRITE_TOKEN) as coordinator:
+                self.assertEqual(call(coordinator, '/v1/mandates', self.MANDATE)[0], 201)
+                status, failure = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+                self.assertEqual((status, failure.get('code')), (502, 'upstream_failed'), failure)
+                self.assertEqual(self.instructions(ledger), [(self.pot_match(1), 12000)])
+                yield coordinator, seller, ledger, dispatches
+
+    def retry_under_cap_after_a_failed_order(self, lose_response):
+        with self.under_cap_lab(503, lose_response) as (coordinator, seller, ledger, dispatches):
+            first_match = self.pot_match(1)
+            status, committed = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+            self.assertEqual((status, committed.get('status'), committed.get('via')), (201, 'committed', 'delegate'), committed)
+            self.assertEqual(committed['match_id'], first_match)
+            self.assertEqual(len(dispatches), 1, 'the retry resumed instead of dispatching anew')
+            self.assertEqual(self.instructions(ledger), [(first_match, 12000)])
+            self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
+            uses = [e['payload'] for e in call(ledger, '/v1/consents')[1]['entries'] if e['payload']['action'] == 'use']
+            self.assertEqual([(u['grant_type'], u['via'], u['match_id']) for u in uses], [('mandate', 'delegate', first_match)] * 2)
+            activity = call(coordinator, '/v1/activity', dict(token='maya'))[1]['activity']
+            self.assertEqual([(a['kind'], a['match_id']) for a in activity], [('delegated-match', first_match)])
+            with service('audit-svc', LEDGER_URL=ledger) as audit:
+                self.assertTrue(call(audit, '/v1/certify', {})[1]['consent']['ok'])
+            # A committed need leaves nothing pending: stating it again is a new purchase.
+            status, again = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+            self.assertEqual((status, again.get('status')), (201, 'committed'), again)
+            self.assertEqual((len(dispatches), again['match_id']), (2, self.pot_match(2)))
+
     def test_edge_lease_lapses_and_renews(self):
         edge = dict(region='eu', endpoint='http://edge-eu:8080', lease_secs=1)
         with service('resource-svc') as resource:
@@ -512,35 +731,112 @@ class Contracts(unittest.TestCase):
             self.assertEqual(len(call(ledger, '/v1/attestations')[1]['entries']), 1)
             self.assertTrue(call(ledger, '/v1/verify')[1]['attestation_ok'])
 
-    def test_platform_refunds_a_case_through_the_ledger_with_the_write_token(self):
-        with service('ledger-svc', LEDGER_WRITE_TOKEN=WRITE_TOKEN) as ledger, \
-                service('platform-svc', LEDGER_URL=ledger, LEDGER_WRITE_TOKEN=WRITE_TOKEN) as platform:
+    def test_support_case_writes_need_the_support_agents_identity_token(self):
+        # Opening, advancing, refunding and resolving a support case are Sam's
+        # actions: no token, a token identity does not know, or another
+        # actor's token is refused with a code and changes nothing. Reads stay open.
+        refused = [({}, (401, 'unverified_actor')), ({'token': 'forged'}, (401, 'unverified_actor')),
+                   ({'token': 'maya-token'}, (403, 'support_agent_required'))]
+        with peer(identity) as idp, service('ledger-svc', LEDGER_WRITE_TOKEN=WRITE_TOKEN) as ledger, \
+                service('platform-svc', LEDGER_URL=ledger, LEDGER_WRITE_TOKEN=WRITE_TOKEN, IDENTITY_URL=idp) as platform:
             self.assertEqual(call(ledger, '/v1/settlements/instructions', INSTRUCTION, BEARER)[0], 201)
             self.assertEqual(call(ledger, '/v1/settlements/confirm', {'match_id': 'm1'}, BEARER)[0], 201)
-            self.assertEqual(call(platform, '/v1/support/cases/refund', {'case_id': 'support-0001'})[0], 404)
-            case_id = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}))[1]['case_id']
-            status, refund = call(platform, '/v1/support/cases/refund', {'case_id': case_id})
+            for credential, expected in refused:
+                status, body = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **credential))
+                self.assertEqual((status, body.get('code')), expected, credential)
+            status, opened = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM))
+            self.assertEqual((status, opened.get('case_id')), (201, 'support-0001'), 'a refused open made no case')
+            case_id = opened['case_id']
+            for path in ['/v1/support/cases/disclosure/request', '/v1/support/cases/refund', '/v1/support/cases/resolve']:
+                for credential, expected in refused:
+                    status, body = call(platform, path, dict(case_id=case_id, **credential))
+                    self.assertEqual((status, body.get('code')), expected, (path, credential))
+            status, case = call(platform, f'/v1/support/cases/{case_id}')
+            self.assertEqual((status, case['stage'], case['lifecycle']), (200, 'opened', []), case)
+            self.assertEqual(call(ledger, '/v1/settlements/match/m1')[1]['total_cents'], 100)
+            self.assertEqual(call(platform, '/v1/support/cases/disclosure/request', dict(case_id=case_id, **SAM))[0], 200)
+            self.assertEqual(call(platform, '/v1/support/cases/refund', dict(case_id=case_id, **SAM))[0], 201)
+            self.assertEqual(call(platform, '/v1/support/cases/resolve', dict(case_id=case_id, **SAM))[0], 200)
+            self.assertEqual(call(platform, f'/v1/support/cases/{case_id}')[1]['stage'], 'resolved')
+            self.assertEqual(call(ledger, '/v1/settlements/match/m1')[1]['total_cents'], 0)
+
+    def test_support_case_writes_fail_closed_when_identity_is_unreachable(self):
+        with socket.socket() as closed:
+            closed.bind(('127.0.0.1', 0))
+            nobody = f'http://127.0.0.1:{closed.getsockname()[1]}'
+        with service('platform-svc', IDENTITY_URL=nobody) as platform:
+            # The refused dial is retried once after 2 s before the call fails.
+            status, body, _ = exchange(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM), timeout=10)
+            self.assertEqual((status, body.get('code')), (503, 'upstream_unavailable'), body)
+            self.assertIn('identity unavailable', body['detail'])
+            self.assertEqual(call(platform, '/v1/support/cases/support-0001')[0], 404, 'no case was created')
+
+    def test_the_disclosure_grant_needs_the_write_token_when_one_is_configured(self):
+        # Only the coordinator delivers a grant, with the per-build write token
+        # both services hold; with none configured the route stays open.
+        grant = dict(case_id='support-0001', artifact='carrier photo', expiry_ts=int(time.time()) + 60)
+        with peer(identity) as idp, service('platform-svc', IDENTITY_URL=idp, LEDGER_WRITE_TOKEN=WRITE_TOKEN) as platform:
+            self.assertEqual(call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM))[0], 201)
+            for headers in [{}, {'Authorization': 'Bearer wrong'}, {'Authorization': f'Bearer {WRITE_TOKEN}x'},
+                            {'Authorization': WRITE_TOKEN}]:
+                status, body = call(platform, '/v1/support/cases/disclosure/grant', grant, headers)
+                self.assertEqual((status, body.get('code')), (401, 'grant_token_required'), headers)
+            status, case = call(platform, '/v1/support/cases/support-0001')
+            self.assertEqual((status, case['stage'], case['lifecycle']), (200, 'opened', []), case)
+            self.assertEqual(call(platform, '/v1/support/cases/support-0001/disclosure')[0], 404)
+            self.assertEqual(call(platform, '/v1/support/cases/disclosure/grant', grant, BEARER)[0], 200)
+            self.assertEqual(call(platform, '/v1/support/cases/support-0001/disclosure'), (200, dict(artifact='carrier photo')))
+        with peer(identity) as idp, service('platform-svc', IDENTITY_URL=idp) as platform:
+            self.assertEqual(call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM))[0], 201)
+            self.assertEqual(call(platform, '/v1/support/cases/disclosure/grant', grant)[0], 200)
+
+    def test_the_coordinator_delivers_a_disclosure_grant_with_the_write_token(self):
+        # s008: Sam opens the case and requests a disclosure; Maya's grant goes
+        # through the coordinator, which records it and delivers the artifact
+        # to the case carrying the write token platform-svc requires.
+        token = dict(LEDGER_WRITE_TOKEN=WRITE_TOKEN)
+        with peer(identity) as idp, service('ledger-svc', **token) as ledger, \
+                service('platform-svc', LEDGER_URL=ledger, IDENTITY_URL=idp, **token) as platform, \
+                service('fabric-coordinator', IDENTITY_URL=idp, LEDGER_URL=ledger, PLATFORM_URL=platform, **token) as coordinator:
+            case_id = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM))[1]['case_id']
+            self.assertEqual(call(platform, '/v1/support/cases/disclosure/request', dict(case_id=case_id, **SAM))[0], 200)
+            status, granted = call(coordinator, '/v1/disclosures', dict(token='maya-token', case_id=case_id, artifact='carrier photo', ttl_secs=60))
+            self.assertEqual((status, granted.get('scope')), (201, case_id), granted)
+            self.assertEqual(call(platform, f'/v1/support/cases/{case_id}')[1]['stage'], 'disclosed')
+            self.assertEqual(call(platform, f'/v1/support/cases/{case_id}/disclosure'), (200, dict(artifact='carrier photo')))
+            consents = [(e['payload']['grant_type'], e['payload']['action']) for e in call(ledger, '/v1/consents')[1]['entries']]
+            self.assertEqual(consents, [('disclosure', 'grant'), ('disclosure', 'use')])
+
+    def test_platform_refunds_a_case_through_the_ledger_with_the_write_token(self):
+        with peer(identity) as idp, service('ledger-svc', LEDGER_WRITE_TOKEN=WRITE_TOKEN) as ledger, \
+                service('platform-svc', LEDGER_URL=ledger, LEDGER_WRITE_TOKEN=WRITE_TOKEN, IDENTITY_URL=idp) as platform:
+            self.assertEqual(call(ledger, '/v1/settlements/instructions', INSTRUCTION, BEARER)[0], 201)
+            self.assertEqual(call(ledger, '/v1/settlements/confirm', {'match_id': 'm1'}, BEARER)[0], 201)
+            self.assertEqual(call(platform, '/v1/support/cases/refund', {'case_id': 'support-0001', **SAM})[0], 404)
+            case_id = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM))[1]['case_id']
+            status, refund = call(platform, '/v1/support/cases/refund', {'case_id': case_id, **SAM})
             self.assertEqual((status, refund), (201, dict(match_id='m1', case_id=case_id, adjustment_entries=4)))
-            self.assertEqual(call(platform, '/v1/support/cases/refund', {'case_id': case_id}), (200, refund))
+            self.assertEqual(call(platform, '/v1/support/cases/refund', {'case_id': case_id, **SAM}), (200, refund))
             settlement = call(ledger, '/v1/settlements/match/m1')[1]
             self.assertEqual(settlement['total_cents'], 0, settlement)
             self.assertEqual({e['case_id'] for e in settlement['entries'] if e.get('entry_type') == 'adjustment'}, {case_id})
         # Without the token the ledger's refusal comes back as it was answered.
-        with service('ledger-svc', LEDGER_WRITE_TOKEN=WRITE_TOKEN) as ledger, service('platform-svc', LEDGER_URL=ledger) as platform:
-            case_id = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}))[1]['case_id']
-            status, body = call(platform, '/v1/support/cases/refund', {'case_id': case_id})
+        with peer(identity) as idp, service('ledger-svc', LEDGER_WRITE_TOKEN=WRITE_TOKEN) as ledger, \
+                service('platform-svc', LEDGER_URL=ledger, IDENTITY_URL=idp) as platform:
+            case_id = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM))[1]['case_id']
+            status, body = call(platform, '/v1/support/cases/refund', {'case_id': case_id, **SAM})
             self.assertEqual((status, body.get('code')), (401, 'write_token_required'), body)
 
     def test_platform_refunds_the_case_match_whatever_the_body_names(self):
         other = {**INSTRUCTION, 'match_id': 'other'}
-        with service('ledger-svc', LEDGER_WRITE_TOKEN=WRITE_TOKEN) as ledger, \
-                service('platform-svc', LEDGER_URL=ledger, LEDGER_WRITE_TOKEN=WRITE_TOKEN) as platform:
+        with peer(identity) as idp, service('ledger-svc', LEDGER_WRITE_TOKEN=WRITE_TOKEN) as ledger, \
+                service('platform-svc', LEDGER_URL=ledger, LEDGER_WRITE_TOKEN=WRITE_TOKEN, IDENTITY_URL=idp) as platform:
             for instruction in (INSTRUCTION, other):
                 self.assertEqual(call(ledger, '/v1/settlements/instructions', instruction, BEARER)[0], 201)
                 self.assertEqual(call(ledger, '/v1/settlements/confirm', {'match_id': instruction['match_id']}, BEARER)[0], 201)
             untouched = call(ledger, '/v1/settlements/match/other')[1]
-            case_id = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}))[1]['case_id']
-            status, refund = call(platform, '/v1/support/cases/refund', {'case_id': case_id, 'match_id': 'other'})
+            case_id = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM))[1]['case_id']
+            status, refund = call(platform, '/v1/support/cases/refund', {'case_id': case_id, 'match_id': 'other', **SAM})
             self.assertEqual((status, refund.get('match_id')), (201, 'm1'), refund)
             settlement = call(ledger, '/v1/settlements/match/m1')[1]
             self.assertEqual(settlement['total_cents'], 0, settlement)
@@ -563,10 +859,10 @@ class Contracts(unittest.TestCase):
                 if path.startswith('/v1/campaigns/'):
                     return 200, dict(campaigns=[])
                 return call(seller, path, body)
-            with peer(upstream) as stub, \
+            with peer(upstream) as stub, peer(identity) as idp, \
                     service('fabric-coordinator', IDENTITY_URL=stub, RESOURCE_URL=stub, ADS_URL=stub, SELLER_URL=stub,
                             LEDGER_URL=ledger, **token) as coordinator, \
-                    service('platform-svc', LEDGER_URL=ledger, **token) as platform:
+                    service('platform-svc', LEDGER_URL=ledger, IDENTITY_URL=idp, **token) as platform:
                 status, need = call(coordinator, '/v1/needs', dict(token='token', jurisdiction='eu', envelope='sealed'))
                 self.assertEqual(status, 201, need)
                 status, booked = call(coordinator, '/v1/bookings', dict(handle=need['handle'], offer_id='o1'))
@@ -577,8 +873,8 @@ class Contracts(unittest.TestCase):
                 self.assertEqual(order['state'], 'settled')
                 status, revoked = call(coordinator, '/v1/consents', dict(token='token', grant_type='participation', action='revoke'))
                 self.assertEqual(status, 201, revoked)
-                case_id = call(platform, '/v1/support/cases', dict(match_id=booked['match_id'], metadata={}))[1]['case_id']
-                self.assertEqual(call(platform, '/v1/support/cases/refund', {'case_id': case_id})[0], 201)
+                case_id = call(platform, '/v1/support/cases', dict(match_id=booked['match_id'], metadata={}, **SAM))[1]['case_id']
+                self.assertEqual(call(platform, '/v1/support/cases/refund', {'case_id': case_id, **SAM})[0], 201)
                 consents = [e['payload']['action'] for e in call(ledger, '/v1/consents')[1]['entries']]
                 self.assertEqual(consents, ['use', 'revoke'])
                 settlement = call(ledger, '/v1/settlements/match/' + booked['match_id'])[1]

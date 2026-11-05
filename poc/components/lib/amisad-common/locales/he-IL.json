@@ -73,6 +73,18 @@
       "origin": "machine",
       "description": "The handle names no over-cap match held for the verified principal: it was never held, its approval already committed, or its mandate was revoked."
     },
+    "mandate_not_valid": {
+      "text": "ייפוי הכוח כבר אינו חל על התאמה זו: הוא פג, בוטל או מציין כעת קטגוריה אחרת.",
+      "sourceHash": "9973d8c38daa22a82f164d2b7e5761129a1caff612ab1ca3b48c55515e6d30d4",
+      "origin": "machine",
+      "description": "A held match was approved while its mandate no longer covered it (expired, or re-granted for another category); no mandate use, settlement instruction or order was recorded, and the match stays held. Revoking a mandate drops its holds instead."
+    },
+    "support_agent_required": {
+      "text": "פעולה זו בתיק התמיכה מחייבת את הזהות של נציג התמיכה.",
+      "sourceHash": "f34866e9986071d654c40e9675b68b93ec5cf8930915bda6ddad7600e39d0867",
+      "origin": "machine",
+      "description": "A support case write carried an identity token that identity-mock verified for an actor other than the support agent."
+    },
     "unknown_handle": {
       "text": "המזהה הזה אינו מוכר.",
       "sourceHash": "355d5054cbe8f06fc321f3492672fe7e73008f02ad9cebd15ef453d176265cfd",
@@ -144,6 +156,12 @@
       "sourceHash": "4ce9ea791fd8e0f6e55c1f54523c0942aab041f013a7e982b96629911234f5f9",
       "origin": "machine",
       "description": "A POST to ledger-svc carried no Authorization bearer, or one other than the write token the deploy step made for this build."
+    },
+    "grant_token_required": {
+      "text": "מסירת הענקת חשיפה מחייבת את אסימון הכתיבה של גרסת הבנייה.",
+      "sourceHash": "2bf48af65f14fd10d23ab8e323edaf3d9c826d0808d792ab2259184d5995114a",
+      "origin": "machine",
+      "description": "A POST to platform-svc's disclosure grant route carried no Authorization bearer, or one other than the per-build write token that fabric-coordinator sends when it delivers a buyer's grant."
     }
   }
 }

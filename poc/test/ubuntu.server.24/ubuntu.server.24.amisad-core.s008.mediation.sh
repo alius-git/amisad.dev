@@ -25,6 +25,10 @@ echo "== slice-runtime (edge amisad-edge-a) =="
 amisad_start_slice_runtime "$LEDGER" "$RESOURCE"
 
 export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
+# Sam works the case: platform-svc takes support case writes only with his
+# identity-mock token.
+SAM_TOKEN=$(amisad_curl -X POST "${IDENTITY_URL}/v1/tokens" -d '{"actor":"sam","class":"person"}' \
+    | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])')
 # --- REGION: PSQL
 PSQL() { sudo -u postgres psql -d amisad -tAc "$1"; }
 
@@ -41,7 +45,7 @@ amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID
 echo "== Maya reports non-delivery -> a support case opens with METADATA ONLY =="
 SETTLEMENT=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
 CASE=$(amisad_curl -X POST "${PLATFORM}/v1/support/cases" \
-    -d "{\"match_id\":\"${MATCH_ID}\",\"metadata\":{\"order_state\":\"settled\",\"carrier_confirmation\":\"delivered\",\"value_cents\":11000}}")
+    -d "{\"token\":\"${SAM_TOKEN}\",\"match_id\":\"${MATCH_ID}\",\"metadata\":{\"order_state\":\"settled\",\"carrier_confirmation\":\"delivered\",\"value_cents\":11000}}")
 CASE_ID=$(echo "$CASE" | python3 -c 'import sys,json;print(json.load(sys.stdin)["case_id"])')
 echo "support case: ${CASE_ID}"
 RESP=$(amisad_curl "${PLATFORM}/v1/support/cases/${CASE_ID}")
@@ -55,7 +59,7 @@ print('ASSERT case carries metadata only, no buyer identity OK')
 "
 
 echo "== Sam requests, Maya grants a scoped time-boxed disclosure =="
-amisad_curl -X POST "${PLATFORM}/v1/support/cases/disclosure/request" -d "{\"case_id\":\"${CASE_ID}\"}"
+amisad_curl -X POST "${PLATFORM}/v1/support/cases/disclosure/request" -d "{\"token\":\"${SAM_TOKEN}\",\"case_id\":\"${CASE_ID}\"}"
 # TTL 10s: a generous window for the immediate read below, but well under the
 # post-refund sleep that proves expiry - even on a heavily loaded box.
 target/release/buyer-client disclose "${CASE_ID}" "delivery-photo-ref-77" 10 | python3 -c "
@@ -90,7 +94,7 @@ print('ASSERT disclosure grant scoped + time-boxed on the consent ledger OK')
 echo "== refund posts as compensating entries; original history untouched =="
 # Sam refunds through the support desk: platform-svc takes the match from the
 # case and holds the token the ledger requires on appends.
-amisad_curl -X POST "${PLATFORM}/v1/support/cases/refund" -d "{\"case_id\":\"${CASE_ID}\"}" \
+amisad_curl -X POST "${PLATFORM}/v1/support/cases/refund" -d "{\"token\":\"${SAM_TOKEN}\",\"case_id\":\"${CASE_ID}\"}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["adjustment_entries"]==4;print("ASSERT compensating entries posted OK")'
 RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
 echo "$RESP" | python3 -c "
@@ -108,7 +112,7 @@ print('ASSERT refund as compensating entries, original untouched OK')
 "
 
 echo "== Sam resolves; recurring-pattern escalates to Priya =="
-curl -sf -X POST "${PLATFORM}/v1/support/cases/resolve" -d "{\"case_id\":\"${CASE_ID}\"}" >/dev/null
+curl -sf -X POST "${PLATFORM}/v1/support/cases/resolve" -d "{\"token\":\"${SAM_TOKEN}\",\"case_id\":\"${CASE_ID}\"}" >/dev/null
 amisad_curl -X POST "${PLATFORM}/v1/incidents" \
     -d "{\"summary\":\"recurring non-delivery pattern\",\"from\":\"support-desk\",\"environment_ids\":[\"${ENV_ID}\"]}" \
     | python3 -c 'import sys,json;assert json.load(sys.stdin)["case_id"];print("ASSERT recurring-pattern escalation OK")'

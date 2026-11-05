@@ -678,7 +678,7 @@ var AmisAdScript = (function () {
         touches: ["platform.disclosure"],
         run: async function () {
           return [mk("open case", await post("core/30086/v1/support/cases",
-            { match_id: state.s001_match, metadata: { order_state: "settled" } }))];
+            { token: await token("sam"), match_id: state.s001_match, metadata: { order_state: "settled" } }))];
         },
         capture: function (rs) { state.s008_case = deepFind(rs, "case_id"); } },
       { scenario: "s008", persona: "sam", label: "Request a consented disclosure", needs: ["s008_case"],
@@ -686,7 +686,7 @@ var AmisAdScript = (function () {
         touches: ["platform.disclosure"],
         run: async function () {
           return [mk("request disclosure", await post("core/30086/v1/support/cases/disclosure/request",
-            { case_id: state.s008_case }))];
+            { token: await token("sam"), case_id: state.s008_case }))];
         } },
       { scenario: "s008", persona: "maya", label: "Grant it -- minimal and time-boxed", needs: ["s008_case"],
         explain: "One artifact, 20 seconds, logged immutably on the consent ledger under her pseudonym. The countdown starts now.",
@@ -710,7 +710,7 @@ var AmisAdScript = (function () {
         run: async function () {
           return [
             mk("refund", await post("core/30086/v1/support/cases/refund",
-              { case_id: state.s008_case })),
+              { token: await token("sam"), case_id: state.s008_case })),
             mk("settlement after", await get("core/30081/v1/settlements/match/" + state.s001_match))
           ];
         } },

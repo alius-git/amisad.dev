@@ -50,12 +50,15 @@ target/release/buyer-client pause >/dev/null         # participation revoke
 target/release/buyer-client grant-mandate pat housewares 14000 >/dev/null
 
 # (5) a disclosure grant + a settlement adjustment referencing a support case.
+# Sam's identity-mock token carries the support case writes.
+SAM_TOKEN=$(amisad_curl -X POST "${IDENTITY_URL}/v1/tokens" -d '{"actor":"sam","class":"person"}' \
+    | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])')
 CASE_ID=$(amisad_curl -X POST "${PLATFORM}/v1/support/cases" \
-    -d "{\"match_id\":\"${MATCH_ID}\",\"metadata\":{\"order_state\":\"settled\"}}" \
+    -d "{\"token\":\"${SAM_TOKEN}\",\"match_id\":\"${MATCH_ID}\",\"metadata\":{\"order_state\":\"settled\"}}" \
     | python3 -c 'import sys,json;print(json.load(sys.stdin)["case_id"])')
-curl -sf -X POST "${PLATFORM}/v1/support/cases/disclosure/request" -d "{\"case_id\":\"${CASE_ID}\"}" >/dev/null
+curl -sf -X POST "${PLATFORM}/v1/support/cases/disclosure/request" -d "{\"token\":\"${SAM_TOKEN}\",\"case_id\":\"${CASE_ID}\"}" >/dev/null
 target/release/buyer-client disclose "${CASE_ID}" "delivery-photo-ref-77" 120 >/dev/null
-curl -sf -X POST "${PLATFORM}/v1/support/cases/refund" -d "{\"case_id\":\"${CASE_ID}\"}" >/dev/null
+curl -sf -X POST "${PLATFORM}/v1/support/cases/refund" -d "{\"token\":\"${SAM_TOKEN}\",\"case_id\":\"${CASE_ID}\"}" >/dev/null
 echo "corpus seeded"
 
 echo "== Ingrid runs the certification: all four dimensions, zero violations =="

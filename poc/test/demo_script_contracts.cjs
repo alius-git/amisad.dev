@@ -104,6 +104,18 @@ test('every step runs through the console transport under a stable per-scenario 
   assert.match(String(api.state.s001_match), /^match-\d+$/);
 });
 
+test("Sam's support case writes carry his identity token", async () => {
+  // platform-svc takes support case writes only with the support agent's token.
+  const { calls, api } = consoleApi();
+  Object.assign(api.state, NOTEBOOK_SEED);
+  for (const step of load().steps(api)) await step.run();
+  const writes = calls.filter((call) => call.method === 'POST' && call.url.startsWith('core/30086/v1/support/cases'));
+  assert.deepEqual(writes.map((call) => call.url).sort(), [
+    'core/30086/v1/support/cases', 'core/30086/v1/support/cases/disclosure/request', 'core/30086/v1/support/cases/refund'
+  ]);
+  for (const call of writes) assert.equal(call.body.token, 'token-sam', call.url);
+});
+
 test('the s003 silence step reads the notification list the coordinator answers', () => {
   const { api } = consoleApi();
   const silence = load().steps(api).find((step) => step.scenario === 's003' && step.label === '...silence');

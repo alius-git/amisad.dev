@@ -233,12 +233,14 @@ curl -sf -X POST http://$NODE_IP:30083/v1/offers -d '{"offer_id":"serving-set-01
 target/release/buyer-client submit                                   # capture <match_id>
 curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"provisioning"}'
 curl -X POST http://$NODE_IP:30083/v1/orders/advance -d '{"match_id":"<id>","state":"fulfilled"}'
-# Maya reports non-delivery -> a case opens with metadata only (no identity):
-curl -s -X POST http://$NODE_IP:30086/v1/support/cases -d '{"match_id":"<id>","metadata":{"order_state":"settled"}}'   # capture <case_id>
-curl -s -X POST http://$NODE_IP:30086/v1/support/cases/disclosure/request -d '{"case_id":"<case_id>"}'
+# Sam's identity token: platform-svc takes support case writes only with it.
+curl -s -X POST $IDENTITY_URL/v1/tokens -d '{"actor":"sam","class":"person"}'   # capture <sam_token>
+# Maya reports non-delivery -> Sam opens a case with metadata only (no identity):
+curl -s -X POST http://$NODE_IP:30086/v1/support/cases -d '{"token":"<sam_token>","match_id":"<id>","metadata":{"order_state":"settled"}}'   # capture <case_id>
+curl -s -X POST http://$NODE_IP:30086/v1/support/cases/disclosure/request -d '{"token":"<sam_token>","case_id":"<case_id>"}'
 target/release/buyer-client disclose <case_id> delivery-photo-ref-77 4   # Maya grants, 4s TTL
 curl -s http://$NODE_IP:30086/v1/support/cases/<case_id>/disclosure     # artifact readable now
-curl -s -X POST http://$NODE_IP:30086/v1/support/cases/refund -d '{"case_id":"<case_id>"}'   # refund: compensating entries on the ledger
+curl -s -X POST http://$NODE_IP:30086/v1/support/cases/refund -d '{"token":"<sam_token>","case_id":"<case_id>"}'   # refund: compensating entries on the ledger
 curl -s http://$NODE_IP:30081/v1/settlements/match/<id>                 # original untouched, net 0
 sleep 5; curl -s -o /dev/null -w '%{http_code}\n' http://$NODE_IP:30086/v1/support/cases/<case_id>/disclosure   # 410: expired
 ```

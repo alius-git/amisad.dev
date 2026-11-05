@@ -551,6 +551,16 @@ pub fn ledger_write_authorization() -> Option<String> {
         .map(|token| format!("Bearer {token}"))
 }
 
+/// Whether `authorization` is `Bearer <token>`, the check a holder of the
+/// write token applies to a caller. The token is compared in time that does
+/// not depend on where the first wrong character is.
+pub fn bearer_matches(token: &str, authorization: Option<&str>) -> bool {
+    let Some((scheme, presented)) = authorization.and_then(|value| value.split_once(' ')) else { return false };
+    scheme.eq_ignore_ascii_case("bearer")
+        && presented.len() == token.len()
+        && presented.bytes().zip(token.bytes()).fold(0u8, |difference, (a, b)| difference | (a ^ b)) == 0
+}
+
 /// POSTs `body` to a ledger-svc append endpoint, carrying the write token's
 /// Authorization header when this process has one.
 pub fn post_to_ledger(url: &str, body: &str) -> Result<(u16, String), String> {

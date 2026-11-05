@@ -19,7 +19,7 @@
 // it, and a disclosure records its use once delivered, so the auditor can
 // replay the chain and prove each one was allowed at the moment it executed.
 
-use amisad_common::{ad_split, correlation_id, json, post_to_ledger, request, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
+use amisad_common::{ad_split, correlation_id, json, ledger_write_authorization, post_to_ledger, request, request_with_headers, serve_app, sha256, splits_for, Request, Response, ServiceInfo};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 struct Shortlist {
@@ -65,6 +65,23 @@ struct Held {
     category: String, // the mandate scope the match was checked against
 }
 
+/// An under-cap delegated commit that failed part-way (s006 step 4), kept so
+/// the delegate's retry of the same need resumes it instead of dispatching
+/// anew. The same need is the same opaque envelope for the same jurisdiction,
+/// stated by the same delegate for the same principal.
+struct PendingCommit {
+    principal: String,
+    delegate: String,
+    jurisdiction: String,
+    envelope: String,
+    environment_id: String,
+    offer_id: String,
+    tenant: String,
+    price_cents: i64,
+    need_context: String,
+    category: String, // the mandate scope the match was checked against
+}
+
 struct State {
     orders: Vec<(String, String)>, // (handle, match_id)
     shortlists: Vec<Shortlist>,
@@ -72,6 +89,7 @@ struct State {
     open_needs: Vec<OpenNeed>,
     mandates: Vec<Mandate>,
     held: Vec<Held>,
+    pending: Vec<PendingCommit>,
     activity: Vec<(String, json::Json)>, // (principal subject, entry) - Maya's trail
 }
 
@@ -461,13 +479,27 @@ fn record_participation_use(subject: &str, match_id: &str) -> Result<String, Res
     record_consent(&use_entry(subject, "participation", vec![("match_id", json::s(match_id))], now_secs()))
 }
 
+/// Why a delegated commit stopped: the answer to relay, and whether the seller
+/// refused the order outright (a 4xx), an answer a resumed retry would only
+/// repeat.
+struct CommitFailure {
+    response: Response,
+    order_refused: bool,
+}
+
+impl From<Response> for CommitFailure {
+    fn from(response: Response) -> Self {
+        CommitFailure { response, order_refused: false }
+    }
+}
+
 /// Commit a delegated match: settlement instruction, seller order, dual
 /// attribution on the principal's activity trail. `via` is "delegate" (Pat's
 /// own authority) or "approval" (over-cap, closed by Maya). Returns match_id.
 /// The match id is deterministic, so the ledger and the seller answer an
-/// identical instruction or order with 200: an approval retry after a failed
-/// attempt records another mandate use and resumes the writes that attempt
-/// made.
+/// identical instruction or order with 200: a retry after a failed attempt
+/// (an approval, or the delegate's resumed under-cap need) records another
+/// mandate use and resumes the writes that attempt made.
 fn commit_delegated(
     state: &mut State,
     principal: &str,
@@ -479,7 +511,7 @@ fn commit_delegated(
     need_context: &str,
     category: &str,
     via: &str,
-) -> Result<String, Response> {
+) -> Result<String, CommitFailure> {
     let match_id = booking_match_id(environment_id, offer_id);
     // The mandate is the consent this match executes under: record the use
     // with the scope and price the auditor re-checks against the grant.
@@ -516,9 +548,9 @@ fn commit_delegated(
     ) {
         Ok((200 | 201, _)) => {}
         Ok((status, body)) => {
-            return Err(Response::problem_detail(502, "upstream_failed", &format!("settlement instruction ({status}): {body}")))
+            return Err(Response::problem_detail(502, "upstream_failed", &format!("settlement instruction ({status}): {body}")).into())
         }
-        Err(e) => return Err(Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}"))),
+        Err(e) => return Err(Response::problem_detail(503, "upstream_unavailable", &format!("ledger unavailable: {e}")).into()),
     }
     let order_body = json::obj(vec![
         ("match_id", json::s(&match_id)),
@@ -534,9 +566,12 @@ fn commit_delegated(
     ) {
         Ok((200 | 201, _)) => {}
         Ok((status, body)) => {
-            return Err(Response::problem_detail(502, "upstream_failed", &format!("order create ({status}): {body}")))
+            return Err(CommitFailure {
+                response: Response::problem_detail(502, "upstream_failed", &format!("order create ({status}): {body}")),
+                order_refused: (400..500).contains(&status),
+            })
         }
-        Err(e) => return Err(Response::problem_detail(502, "upstream_unavailable", &format!("order create failed: {e}"))),
+        Err(e) => return Err(Response::problem_detail(502, "upstream_unavailable", &format!("order create failed: {e}")).into()),
     }
     // Dual attribution on the principal's trail: actor, principal, mandate ref.
     state.activity.push((
@@ -551,6 +586,45 @@ fn commit_delegated(
         ]),
     ));
     Ok(match_id)
+}
+
+/// The principal's mandate to the delegate, when it is neither revoked nor
+/// expired at `now`.
+fn valid_mandate<'a>(mandates: &'a [Mandate], principal: &str, delegate: &str, now: i64) -> Option<&'a Mandate> {
+    mandates
+        .iter()
+        .find(|m| m.principal == principal && m.delegate == delegate && !m.revoked && m.expiry_ts > now)
+}
+
+/// Close an under-cap delegated match on the delegate's authority. A commit
+/// that fails part-way stays pending, so the delegate's retry of the same need
+/// resumes it with the same environment, offer and match id: the instruction
+/// and order the failed attempt wrote replay with 200, as on the approval
+/// path, instead of a new dispatch leaving them without their order. A seller
+/// that refuses the order outright (a 4xx, such as a conflict or an offer it
+/// no longer knows) would refuse every resumed retry too, so that commit is
+/// not kept and the next statement of the need dispatches anew; a 5xx or a
+/// lost connection keeps it.
+fn commit_under_cap(state: &mut State, commit: PendingCommit) -> Response {
+    match commit_delegated(
+        state, &commit.principal, &commit.delegate, &commit.environment_id, &commit.offer_id, &commit.tenant,
+        commit.price_cents, &commit.need_context, &commit.category, "delegate",
+    ) {
+        Ok(match_id) => Response::json(
+            201,
+            &json::obj(vec![
+                ("status", json::s("committed")),
+                ("match_id", json::s(&match_id)),
+                ("via", json::s("delegate")),
+            ]),
+        ),
+        Err(failure) => {
+            if !failure.order_refused {
+                state.pending.push(commit);
+            }
+            failure.response
+        }
+    }
 }
 
 fn handle(state: &mut State, req: &Request) -> Response {
@@ -786,10 +860,15 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 }
             }
             // Revocation is immediate for pending work too: any over-cap match
-            // held under this mandate can no longer be approved.
+            // held under this mandate can no longer be approved, and an
+            // under-cap commit that failed part-way is not resumed, even after
+            // a re-grant.
             state
                 .held
                 .retain(|h| !(h.principal == principal && h.delegate == delegate));
+            state
+                .pending
+                .retain(|p| !(p.principal == principal && p.delegate == delegate));
             Response::json(
                 201,
                 &json::obj(vec![("revoked", json::b(true)), ("hash", json::s(&hash))]),
@@ -841,15 +920,10 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(e) => e.to_string(),
                 None => return Response::problem_detail(400, "invalid_request", "envelope required"),
             };
-            let now = now_secs();
-            let mandate = state
-                .mandates
-                .iter()
-                .find(|m| m.principal == principal && m.delegate == delegate);
-            let (per_item, mandate_category) = match mandate {
-                Some(m) if !m.revoked && m.expiry_ts > now => (m.per_item_cents, m.category.clone()),
+            let (per_item, mandate_category) = match valid_mandate(&state.mandates, &principal, &delegate, now_secs()) {
+                Some(m) => (m.per_item_cents, m.category.clone()),
                 // No mandate, revoked, or expired: nothing may happen.
-                _ => {
+                None => {
                     return Response::json(
                         403,
                         &json::obj(vec![
@@ -871,6 +945,20 @@ fn handle(state: &mut State, req: &Request) -> Response {
                         ("reason", json::s("out of mandate scope")),
                     ]),
                 );
+            }
+            // A retry of a need whose under-cap commit failed part-way resumes
+            // that commit. The mandate check above still applies, so an
+            // expired mandate refuses the retry (revocation already dropped
+            // the commit); a pending commit the current mandate's cap or scope
+            // no longer covers (a re-grant changed them) is dropped, and the
+            // need is dispatched anew.
+            if let Some(index) = state.pending.iter().position(|p| {
+                p.principal == principal && p.delegate == delegate && p.jurisdiction == jurisdiction && p.envelope == envelope
+            }) {
+                let commit = state.pending.remove(index);
+                if commit.price_cents <= per_item && commit.category == mandate_category {
+                    return commit_under_cap(state, commit);
+                }
             }
             // Manual dispatch, whatever the sealed envelope says, so nothing
             // closes inside the environment; the coordinator decides
@@ -928,20 +1016,20 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 );
             }
             if price_cents <= per_item {
-                let match_id = match commit_delegated(
-                    state, &principal, &delegate, &environment_id, &offer_id, &tenant,
-                    price_cents, &need_context, &mandate_category, "delegate",
-                ) {
-                    Ok(m) => m,
-                    Err(resp) => return resp,
-                };
-                Response::json(
-                    201,
-                    &json::obj(vec![
-                        ("status", json::s("committed")),
-                        ("match_id", json::s(&match_id)),
-                        ("via", json::s("delegate")),
-                    ]),
+                commit_under_cap(
+                    state,
+                    PendingCommit {
+                        principal,
+                        delegate,
+                        jurisdiction,
+                        envelope,
+                        environment_id,
+                        offer_id,
+                        tenant,
+                        price_cents,
+                        need_context,
+                        category: mandate_category,
+                    },
                 )
             } else {
                 // Over cap: match permitted, closing WITHHELD for approval.
@@ -997,12 +1085,27 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(h) => h.clone(),
                 None => return Response::problem(404, "held_match_not_found"),
             };
+            // The approval executes under the mandate, so the mandate must
+            // cover the held match when it is approved, not only when the
+            // match was held: an approval after expiry, or after a re-grant
+            // for another category, would record a mandate use the auditor
+            // counts as a violation. The scope is re-checked as on the
+            // under-cap resume; the cap is not, since approving an over-cap
+            // match is what the approval is for. The hold stays, so a repeat
+            // answers the same refusal; revocation already dropped the holds
+            // it covers.
+            if valid_mandate(&state.mandates, &held.principal, &held.delegate, now_secs())
+                .filter(|m| m.category == held.category)
+                .is_none()
+            {
+                return Response::problem(403, "mandate_not_valid");
+            }
             let match_id = match commit_delegated(
                 state, &held.principal, &held.delegate, &held.environment_id,
                 &held.offer_id, &held.tenant, held.price_cents, &held.need_context, &held.category, "approval",
             ) {
                 Ok(m) => m,
-                Err(resp) => return resp,
+                Err(failure) => return failure.response,
             };
             state
                 .held
@@ -1058,10 +1161,15 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 ("expiry_ts", json::n(expiry_ts)),
             ])
             .dump();
-            match request(
+            // platform-svc takes the delivery only with the per-build write
+            // token both services hold, sent the way ledger appends send it.
+            let authorization = ledger_write_authorization();
+            let headers: Vec<(&str, &str)> = authorization.iter().map(|value| ("Authorization", value.as_str())).collect();
+            match request_with_headers(
                 "POST",
                 &format!("{}/v1/support/cases/disclosure/grant", platform_url()),
                 Some(&deliver),
+                &headers,
             ) {
                 Ok((200, _)) => {}
                 Ok((status, body)) => {
@@ -1378,6 +1486,7 @@ fn main() -> std::io::Result<()> {
             open_needs: Vec::new(),
             mandates: Vec::new(),
             held: Vec::new(),
+            pending: Vec::new(),
             activity: Vec::new(),
         },
         handle,
