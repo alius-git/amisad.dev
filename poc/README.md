@@ -118,7 +118,7 @@ them:
   token for each build and keeps it only in Secret `amisad/amisad-ledger-write`,
   which the ledger-svc, fabric-coordinator, seller-svc and platform-svc charts
   read (`ledgerWriteSecret`); the scenario start hands it to the edges'
-  slice-runtime on ssh standard input. The chains stay plain SHA-256, so
+  slice-runtime on SSH standard input. The chains stay plain SHA-256, so
   audit-svc verifies them with no secret. The token admits the writer set, not
   an individual caller. Without it (`cargo test`, hand runs) appends are open
   and ledger-svc says so on stderr. Refunds go through platform-svc, whose

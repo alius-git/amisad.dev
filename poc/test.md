@@ -242,7 +242,7 @@ fabric-coordinator, seller-svc and platform-svc charts read it into
 `LEDGER_WRITE_TOKEN` (`ledgerWriteSecret`). ledger-svc answers any POST without
 `Authorization: Bearer <token>` with 401 `write_token_required`; GETs stay open.
 `test/amisad-scenario.sh` reads the Secret on `amisad-core` and pipes the token
-into the edge's ssh standard input, where the start command reads it into
+into the edge's SSH standard input, where the start command reads it into
 slice-runtime's environment; the single-VM fallback does the same locally. s008
 and s010 refund through platform-svc's `POST /v1/support/cases/refund`. Services
 started without the variable, as `cargo test` and most contract cases do, keep
