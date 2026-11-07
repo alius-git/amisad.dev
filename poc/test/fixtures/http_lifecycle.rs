@@ -38,7 +38,8 @@ fn handle(state: &mut Journal, request: &Request) -> Response {
     }
     if request.path == "/commit-after-release" {
         fs::write(state.directory.join("started"), "handler started\n").unwrap();
-        let deadline = Instant::now() + Duration::from_secs(10);
+        // Outlasts the shared stall limit, so a contract can see /health report it.
+        let deadline = Instant::now() + Duration::from_secs(180);
         while !state.directory.join("release").exists() {
             if Instant::now() >= deadline { return Response::error(503, "release timed out"); }
             std::thread::sleep(Duration::from_millis(10));

@@ -25,6 +25,8 @@ import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+# Seconds; amisad-common's STALL_LIMIT, which no setting overrides.
+STALL_LIMIT = 120
 
 
 def wait_for(predicate, timeout=5):
@@ -208,6 +210,35 @@ class HttpLifecycle(LifecycleFixture):
                 service.directory.joinpath('release').touch()
                 thread.join(timeout=5)
             self.assertEqual(result, [(201, {'committed': True})])
+
+    def test_health_reports_a_handler_wedged_past_the_stall_limit(self):
+        # Waits the limit out in real time. The handler makes no outbound call,
+        # so it counts from its start, which is after `started`: an answer
+        # sooner than the limit is one the stall rule should not have given.
+        with self.service() as service:
+            result = []
+            started = time.monotonic()
+            thread = threading.Thread(target=lambda: result.append(
+                service.call('/commit-after-release', 'wedged', timeout=STALL_LIMIT + 30)))
+            thread.start()
+            try:
+                wait_for(service.directory.joinpath('started').exists)
+                deadline = started + STALL_LIMIT + 15
+                while (answer := service.exchange('/health', headers={'X-Request-Id': 'probe-3'}))[0] == 200 \
+                        and time.monotonic() < deadline:
+                    time.sleep(.5)
+                elapsed = time.monotonic() - started
+                status, headers, body = answer
+                self.assertEqual((status, body.get('code'), body.get('correlation_id'), headers['X-Request-Id']),
+                                 (503, 'service_stalled', 'probe-3', 'probe-3'), body)
+                self.assertGreater(elapsed, STALL_LIMIT, 'reported before the limit passed')
+                self.assertEqual(service.call('/version', timeout=2)[0], 200)
+            finally:
+                service.directory.joinpath('release').touch()
+                thread.join(timeout=5)
+            self.assertEqual(result, [(201, {'committed': True})], 'the report does not end the handler')
+            self.assertEqual(service.call('/health'), (200, {'status': 'ok', 'service': 'lifecycle-fixture'}))
+            self.assertRegex(service.output(), r'lifecycle-fixture answered 503 service_stalled to GET /health \(request probe-3\)')
 
     def test_a_stalled_client_does_not_delay_other_requests(self):
         with self.service() as service:

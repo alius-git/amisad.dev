@@ -9,6 +9,7 @@ import http.server
 import json
 import os
 from pathlib import Path
+import shutil
 import socket
 import subprocess
 import tempfile
@@ -53,7 +54,8 @@ def call(url, path, body=None, headers=None):
 
 @contextlib.contextmanager
 def peer(handler, seen=None):
-    """A stub service; when given, `seen` collects (path, headers) per request."""
+    """A stub service; when given, `seen` collects (path, headers) per request.
+    A handler's bytes result goes out as it is, anything else as JSON."""
     class Handler(http.server.BaseHTTPRequestHandler):
         def do_GET(self):
             if seen is not None:
@@ -69,7 +71,7 @@ def peer(handler, seen=None):
             self.reply(status, result)
 
         def reply(self, status, result):
-            data = json.dumps(result).encode()
+            data = result if isinstance(result, bytes) else json.dumps(result).encode()
             self.send_response(status)
             self.send_header('Content-Length', str(len(data)))
             self.end_headers()
@@ -90,12 +92,13 @@ def peer(handler, seen=None):
 
 
 @contextlib.contextmanager
-def service(name, **env):
+def service(name, log=None, **env):
+    """A built service; when given, the open binary file `log` collects its output."""
     with socket.socket() as port_socket:
         port_socket.bind(('127.0.0.1', 0))
         port = port_socket.getsockname()[1]
     url = f'http://127.0.0.1:{port}'
-    with tempfile.TemporaryFile() as log:
+    with contextlib.nullcontext(log) if log else tempfile.TemporaryFile() as log:
         process = subprocess.Popen([str(BIN / name)], stdout=log, stderr=log,
                                    env={**os.environ, 'PORT': str(port), 'DATABASE_URL': '', **env})
         try:
@@ -569,6 +572,32 @@ class Contracts(unittest.TestCase):
             self.assertEqual(self.instructions(ledger), [(self.pot_match(1), 12000), (self.pot_match(2), 12000)])
             self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
 
+    def test_an_expired_mandate_refuses_the_under_cap_retry_and_keeps_the_commit(self):
+        # The retry is checked against the mandate before the pending commit is
+        # looked up, so after expiry it is refused with nothing dispatched or
+        # recorded. Unlike revocation, expiry does not drop the commit: a
+        # re-grant resumes the same match instead of dispatching anew.
+        with self.under_cap_lab(503) as (coordinator, seller, ledger, dispatches):
+            expiry = int(time.time()) + 1
+            self.assertEqual(call(coordinator, '/v1/mandates', dict(self.MANDATE, expiry_ts=expiry))[0], 201)
+            consents = call(ledger, '/v1/consents')[1]
+            while time.time() < expiry:
+                time.sleep(.05)
+            for _ in range(2):
+                status, refused = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+                self.assertEqual((status, refused.get('reason')), (403, 'no valid mandate'), refused)
+            self.assertEqual(call(ledger, '/v1/consents')[1], consents, 'no mandate use after expiry')
+            self.assertEqual(len(dispatches), 1)
+            self.assertEqual(call(seller, '/v1/orders')[1]['count'], 0)
+            self.assertEqual(call(coordinator, '/v1/mandates', self.MANDATE)[0], 201)
+            status, resumed = call(coordinator, '/v1/delegate/needs', self.DELEGATED_NEED)
+            self.assertEqual((status, resumed.get('status'), resumed.get('match_id')), (201, 'committed', self.pot_match(1)), resumed)
+            self.assertEqual(len(dispatches), 1, 'the retry resumed instead of dispatching anew')
+            self.assertEqual(self.instructions(ledger), [(self.pot_match(1), 12000)])
+            self.assertEqual(call(seller, '/v1/orders')[1]['count'], 1)
+            with service('audit-svc', LEDGER_URL=ledger) as audit:
+                self.assertTrue(call(audit, '/v1/certify', {})[1]['consent']['ok'])
+
     def test_a_definitive_order_refusal_leaves_nothing_pending(self):
         # A seller that refuses the order outright (409, or 400 for an offer it
         # no longer knows) would refuse every resumed retry, so the next
@@ -771,6 +800,13 @@ class Contracts(unittest.TestCase):
             self.assertIn('identity unavailable', body['detail'])
             self.assertEqual(call(platform, '/v1/support/cases/support-0001')[0], 404, 'no case was created')
 
+    def test_support_case_writes_fail_closed_when_identity_answers_an_unreadable_body(self):
+        with peer(lambda *_: (200, b'not json')) as idp, service('platform-svc', IDENTITY_URL=idp) as platform:
+            status, body = call(platform, '/v1/support/cases', dict(match_id='m1', metadata={}, **SAM))
+            self.assertEqual((status, body.get('code')), (502, 'upstream_failed'), body)
+            self.assertIn('bad identity', body['detail'])
+            self.assertEqual(call(platform, '/v1/support/cases/support-0001')[0], 404, 'no case was created')
+
     def test_the_disclosure_grant_needs_the_write_token_when_one_is_configured(self):
         # Only the coordinator delivers a grant, with the per-build write token
         # both services hold; with none configured the route stays open.
@@ -948,6 +984,36 @@ class DurableContracts(unittest.TestCase):
                 self.assertEqual(call(resource, '/v1/edges', dict(region=region, endpoint=f'http://{region}:8080', capacity=capacity))[0], 201)
             self.assertEqual(call(resource, '/v1/placements', dict(jurisdiction='durable-eu')),
                              (200, dict(region='durable-eu', endpoint='http://durable-eu:8080')))
+
+    def test_a_stored_policy_with_unreadable_regions_places_nothing(self):
+        # A jurisdiction with no policy lands on any region, so a stored row
+        # whose regions cannot be read must not load as no policy. The API
+        # refuses such a row, so it goes straight into the table. Setting the
+        # policy again restores placement.
+        database = os.environ['AMISAD_TEST_DATABASE_URL']
+        psql = shutil.which('psql')
+        if not psql:
+            self.skipTest('psql is required to store a row that POST /v1/policies refuses')
+        stored = {'durable-garbled': 'not json', 'durable-object': '{"regions":["durable-roomy"]}', 'durable-empty': '[]'}
+        rows = ', '.join(f"('{jurisdiction}', '{regions}')" for jurisdiction, regions in stored.items())
+        subprocess.run([psql, database, '-v', 'ON_ERROR_STOP=1', '-c',
+                        f'INSERT INTO resource.allocation_policies (jurisdiction, regions) VALUES {rows} '
+                        'ON CONFLICT (jurisdiction) DO UPDATE SET regions = EXCLUDED.regions'],
+                       check=True, capture_output=True, timeout=30)
+        edge = dict(region='durable-roomy', endpoint='http://durable-roomy:8080')
+        with tempfile.TemporaryFile() as log:
+            with service('resource-svc', log=log, DATABASE_URL=database) as resource:
+                self.assertEqual(call(resource, '/v1/edges', edge)[0], 201)
+                for jurisdiction in stored:
+                    status, body = call(resource, '/v1/placements', dict(jurisdiction=jurisdiction))
+                    self.assertEqual((status, body.get('code')), (409, 'no_compliant_edge'), jurisdiction)
+                self.assertEqual(call(resource, '/v1/placements', dict(jurisdiction='durable-open'))[0], 200)
+                self.assertEqual(call(resource, '/v1/policies', dict(jurisdiction='durable-garbled', regions=[edge['region']]))[0], 201)
+                self.assertEqual(call(resource, '/v1/placements', dict(jurisdiction='durable-garbled'))[0], 200)
+            log.seek(0)
+            output = log.read().decode(errors='replace')
+        for jurisdiction, regions in stored.items():
+            self.assertIn(f'WARNING policy for {jurisdiction} has no usable regions ({regions})', output)
 
 
 if __name__ == '__main__':

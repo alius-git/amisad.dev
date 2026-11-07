@@ -301,6 +301,18 @@ mod tests {
     }
 
     #[test]
+    fn stored_regions_that_cannot_be_read_place_nothing() {
+        let edges = edges();
+        for text in ["not json", "", "{\"regions\":[\"region-b\"]}", "\"region-b\"", "[]", "[1,2]"] {
+            let regions = region_list(json::parse(text).ok().as_ref());
+            assert!(regions.is_empty(), "{text}");
+            let policies = vec![("region-x".to_string(), regions)];
+            assert!(place(&edges, &policies, "region-x", Instant::now()).is_none(), "{text}");
+            assert!(place(&edges, &policies, "region-y", Instant::now()).is_some(), "{text}");
+        }
+    }
+
+    #[test]
     fn place_skips_lapsed_leases() {
         let start = Instant::now();
         let mut edges = edges();
