@@ -12,6 +12,15 @@ framework that can deploy it.
 ## 2026.11.08
 
 - Align script versions and generated inventories with Yuruna `2026.11.08`.
+- The k8s workload script runs its local registry as `registry:2.8.3`,
+  published on `127.0.0.1` only, and the k8s, NATS and build-tool steps wait
+  out a GitHub release outage of about half an hour.
+- Contract tests cover expired retries, unreadable bodies and rows, and the
+  stall report; `poc/test.md` says the unreadable-row case needs `psql`.
+
+## 2026.11.05
+
+- Align script versions and generated inventories with Yuruna `2026.11.05`.
 - Licensed under the Yuruna License (LICENSE.md), which every file's license
   pointer already named, in place of the MIT License text.
 
@@ -21,7 +30,7 @@ framework that can deploy it.
   preserves per-VM startup evidence. Disk-full failures stop without resource
   retries and retain their original error codes and failure stage.
 
-## 2026.11.08
+## 2026.11.05
 
 - Core deployment imports the ten service images in one archive, sharing their
   common base layers. Restore readiness retains its API, current-boot Flannel,

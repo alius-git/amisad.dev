@@ -2,21 +2,21 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "0b8138b52792ca9b5a527fc368ecc649b375f7d2506c877b501a5f7280d6c92a",
+  "sourceInputsSha256": "2d9e1bbc112416e745214f92d108e06bfdac400aab233a38802f4f7ea8d7557e",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
     "AGENTS.md": "922383a64c07560724695aa1c3f153d3874a1cbab6204ad03e8b4a64fb6f285d",
-    "CHANGELOG.md": "177ca3f768c3cb4b707b8ccbd35a5d98872fdcc277b33ea85c6dfcce2edb9486",
+    "CHANGELOG.md": "4e86a5979f63873c68fd1f28c8865764d936751fc7906a1820fb10ee15a11099",
     "CLAUDE.md": "cf5bfc36262f054c8c51d4170a9052be7e931fbb199eb38c21689c9f93268c00",
     "LICENSE.md": "78959bcccd8dbd121b3316f0d8ea6c0d85b2e6efbbac699c6fa55043f5e6e10c",
     "PSScriptAnalyzerSettings.psd1": "2fce3dd3c806fac5df0b7e1740968b89dd577c24e2a78763e607bbd3253c9c21",
     "README.md": "b42c097e3a3466ecdddc3ce60cf549c07cd55ee89c8d95aefea2bd760a26878b",
     "VERSION": "bb8ecc2f1dc289c8090c65e3022a6e7777d145e9904a108157ce1b87e2922308",
     "docs/pt-BR/index.md": "e16a26a2802fa9dc1b3de9b09cb8bd91386781de6058a0b01179a92789bb14c1",
-    "docs/pt-BR/poc/test.md": "8c89b9bafef7d7cb4f4f8efee5d6e4dbb30f17f8ae4d398a613ce16706045faa",
+    "docs/pt-BR/poc/test.md": "a63c64f07981f09ebbbdd5bdb2afa08c21eb75a6228397fbf3288a7800e7abef",
     "docs/pt-BR/poc/usernames.md": "0d93214007311d0c921a426ac333884e0076546130306ca7864e80a41930ed2e",
-    "globalization/manifests/doc-translations.json": "a21d9a7ec9527c4aafa437f579b45fcfc98cddb94f8fe77982bd339a9f946308",
+    "globalization/manifests/doc-translations.json": "2a73d73f785f4fdbd306be2e2e65837ed66aa849719ea05f98ee2b5742992c37",
     "plan/applications.md": "e8721203f340718cf2dd6bd09c0eb99cafa1106a8af7b008238e6c643ecb236c",
     "plan/design.md": "d5557094f458a5a560f8b673a43572aff43810042a6161ae2be9d3dbe34cbb6e",
     "plan/design/01-overview.md": "fb28eee8ea715ff54a5a4934bb623ee795b384130767e1f3078b1e960adbd1ea",
@@ -190,7 +190,7 @@
     "poc/demo/data-view/ui/data.js": "b7ca248f27500ed9dee8f75163d55401379a277b69450dd198547ad68e808dbf",
     "poc/demo/data-view/ui/shared.css": "3c3318e07860a8160992390cf8361af2bfc48ee65b6d43fa0d9c2678eb32ae8e",
     "poc/demo/data-view/ui/shared.js": "522039ae6e558829166350be1dba97025760e8c20db1ea3cb9073a0f9ab53e6e",
-    "poc/test.md": "9fedbe91cda7d24b9ace73c3e0b09da3871b9fd6bbc117ef112270e436d88fbb",
+    "poc/test.md": "3da0fe1994745f020cc3a054ad4741612638a95a1aa012d0f0a44dcf40c439c1",
     "poc/test/amisad-scenario.sh": "f0c1fbb85b34469a4061a5317118e5c8d275cf03b5bee900a320dfd3c5fb9599",
     "poc/test/bash_contract_support.py": "5fe6459be21dd3e601a9d1e0d5536a6d06b88174b332dbe46943979a374360ff",
     "poc/test/bash_contracts.py": "f9832f68c0e2e2234ec8a324f1ec31e18b56cc440dfe4c3cb68563bb0725df73",
@@ -212,7 +212,7 @@
     "poc/test/slice_runtime_http_contracts.py": "b7c28fd614db512217f28761faf498fe9181ce3d273cbd0b35d47f1d1b660826",
     "poc/test/slice_runtime_stop_contracts.py": "edee72b88866a9ee313550cccf08eb684f9a16c98f3234fb76f72d972b10d379",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh": "1de07eaf61eba3c9f3e632651da4b4f9d56625cb80954b4d1022c171d7a02f84",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh": "ee915de52428e28c430fc4e19796bdd19777b5b3640a661e0bc98368ce34212c",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh": "dd1f286bdde43ff7b96371e6c0ab8a214ac1174eaaad5db8e63bd6251a7642bd",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh": "1e9d353954f7316b607b66bbcc173c0cd1b7454b910bcd014f3a0a38c4e360bd",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh": "0a5199b2af24e453318cf8e12c9a42da70b395959e9c5ae64ebcf9d3dc561f0c",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh": "3d6b18e395647ae84767278f2b455aa6815f659b54e1f10141afec3f153c17d5",
@@ -229,11 +229,11 @@
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh": "da62634ae761a89484119ddd8c40a6e7fe0e174da14cf7e42b73af830daf0d02",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.users.sh": "091a3672f850acb4cd65e4911f85348fc24849989eeab16db7dac764c133ca68",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-edge.setup.sh": "12331520662233c28a7cc277c18fa161bcbc90198fb92cd579f9ea23d3e2fb21",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh": "9a99fd6f3e9b6270601d4bc2a258724cff3a65fc89d5dc0c0596b53326e13fcd",
-    "poc/test/workload.guest.ubuntu.server.24.amisad-build.baseline.yml": "1f3741c5b3e3dde0a27ea0d97ad1d3b2716922834bdbe24ef8ab423bcf919092",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh": "837afe05dabd214f9bf6d959499fded414bdf68cd5de7fff854a7acac5c4fe65",
+    "poc/test/workload.guest.ubuntu.server.24.amisad-build.baseline.yml": "3fa50ce9bd9f278e8c3b0e46534131fd2ae566bd4ea4813618a712e53b2f0b35",
     "poc/test/workload.guest.ubuntu.server.24.amisad-build.compile.yml": "70965df550ad471ad25f33d3349b3b0d98835f6c13c3906dd395561269238477",
     "poc/test/workload.guest.ubuntu.server.24.amisad-core.deploy.yml": "7234777cdaf25c3247d7218c0af968fcef0530272cc34f7d9b64b9ac590151a5",
-    "poc/test/workload.guest.ubuntu.server.24.amisad-core.k8s.yml": "6a85f62e4901238b8b39c3568bf1524b0701c57b43444545247f5389cded484b",
+    "poc/test/workload.guest.ubuntu.server.24.amisad-core.k8s.yml": "3860469d95dd0015ddd4d00d9dff738d016226e3cf1b9e0c98436f7006b44004",
     "poc/test/workload.guest.ubuntu.server.24.amisad-core.s001.fulfillment.yml": "30a1b26a73e0be4e725501aa2635d3ed9539eaaa6eb237b7a141adfe45433caa",
     "poc/test/workload.guest.ubuntu.server.24.amisad-core.s002.fitting.yml": "0a7dae2f47a3012c0ee5d0c2bb0ea2c200f184fc15b26aabf5c3ceb78d7b957e",
     "poc/test/workload.guest.ubuntu.server.24.amisad-core.s003.silence.yml": "cf90c8bdbe78083cb3c6b9d0af597245a37026d639c985edb4beb54fa1bfd54c",
@@ -6105,8 +6105,8 @@
         "evidence": [
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh",
-            "line": 18,
-            "detail": "target=ubuntu-server-24; action=container run; reference=registry:2; tags may move; transitive image contents unresolved"
+            "line": 30,
+            "detail": "target=ubuntu-server-24; action=container run; reference=registry:2.8.3; tags may move; transitive image contents unresolved"
           }
         ],
         "hashes": [],
@@ -6115,7 +6115,7 @@
         "notes": [
           "Conditional source declaration; installed state and transitive dependencies are not resolved."
         ],
-        "versionConstraint": "2"
+        "versionConstraint": "2.8.3"
       },
       {
         "name": "rust",

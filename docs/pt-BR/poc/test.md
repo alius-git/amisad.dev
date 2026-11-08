@@ -53,6 +53,9 @@ com `db/schema.sql`, defina `AMISAD_TEST_DATABASE_URL` com sua URL de conexão e
 `python3 test/service_contracts.py DurableContracts -v`. Essa suíte explícita grava
 ofertas, instruções, pedidos, reembolsos e uma política de jurisdição de teste e
 depois reinicia os serviços.
+O caso de uma política armazenada cujas regiões não podem ser lidas grava essa
+linha com `psql`, porque a API a recusa; sem `psql` no PATH, esse caso é pulado,
+e a execução informa o pulo.
 Use um banco de dados novo em cada execução; nunca aponte para o banco de dados da demonstração.
 A suíte comum usa armazenamento em memória, independentemente de `DATABASE_URL` definido pelo chamador.
 

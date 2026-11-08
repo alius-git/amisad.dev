@@ -43,6 +43,9 @@ with `db/schema.sql`, set `AMISAD_TEST_DATABASE_URL` to its connection URL, and 
 `python3 test/service_contracts.py DurableContracts -v`. This explicit suite writes
 fixture offers, instructions, orders, refunds, and a jurisdiction policy, then
 restarts the services.
+Its case for a stored policy whose regions cannot be read writes that row with
+`psql`, because the API refuses it; without `psql` on PATH that case is skipped,
+and the run reports the skip.
 Use a fresh database for each invocation; never point it at the demo database.
 The regular suite uses memory stores regardless of the caller's `DATABASE_URL`.
 

@@ -137,7 +137,12 @@ if ! command -v bazel >/dev/null 2>&1; then
         *) BARCH=amd64 ;;
     esac
     BAZELISK_DIR=$(mktemp -d "${TMPDIR:-/tmp}/amisad-bazelisk.XXXXXX")
-    amisad_retry bazelisk_install amisad_install_bazelisk
+    # A GitHub release fetch gets the retry library's release window: 30 minutes
+    # with each backoff capped at two minutes (automation/yuruna-retry.sh,
+    # _yuruna_retry_release_bounds), so a release outage is waited out.
+    YURUNA_RETRY_WINDOW_SECONDS="${YURUNA_RETRY_WINDOW_SECONDS:-1800}" \
+    YURUNA_RETRY_MAX_DELAY_SECONDS="${YURUNA_RETRY_MAX_DELAY_SECONDS:-120}" \
+        amisad_retry bazelisk_install amisad_install_bazelisk
     sudo install -m 0755 "$BAZELISK_DIR/bazelisk" /usr/local/bin/bazel
     rm -rf -- "$BAZELISK_DIR"
 fi

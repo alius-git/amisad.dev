@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:a4491e86-3de5-5d04-9e5f-02d8ce863788",
+  "serialNumber": "urn:uuid:86593cd8-d23a-5528-a8ce-76d8d32c48bc",
   "version": 1,
   "metadata": {
     "component": {
@@ -11,7 +11,7 @@
       "properties": [
         {
           "name": "yuruna:source-inputs-sha256",
-          "value": "0b8138b52792ca9b5a527fc368ecc649b375f7d2506c877b501a5f7280d6c92a"
+          "value": "2d9e1bbc112416e745214f92d108e06bfdac400aab233a38802f4f7ea8d7557e"
         },
         {
           "name": "yuruna:inventory-kind",
@@ -284,7 +284,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=container run; reference=registry:2; tags may move; transitive image contents unresolved\", \"line\": 18, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"2\"}"
+          "value": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=container run; reference=registry:2.8.3; tags may move; transitive image contents unresolved\", \"line\": 30, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"2.8.3\"}"
         }
       ],
       "group": "amisad.dev:guests:ubuntu-server-24"
