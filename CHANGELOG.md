@@ -9,6 +9,10 @@ Versions track the framework release the material was last exercised against,
 not an independent release line -- the POC is only meaningful paired with a
 framework that can deploy it.
 
+## 2026.11.11
+
+- Align script versions and generated inventories with Yuruna `2026.11.11`.
+
 ## 2026.11.08
 
 - Align script versions and generated inventories with Yuruna `2026.11.08`.
@@ -76,6 +80,6 @@ LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2019-2026 by Alisson Sol et al.
 
-Last review: 2026.11.08
+Last review: 2026.11.11
 
 Back to [Yuruna](https://yuruna.com)
