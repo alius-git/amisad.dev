@@ -308,7 +308,7 @@ executed: participation not revoked, or an active in-scope mandate within its
 cap or approved, and every disclosure delivered inside its case and window),
 and settlement evidence (every party and amount matches
 its instruction, payments and refunds are complete, and cases do not conflict)
--- trusting no self-report from the ledger (it recomputes the sha256 chains
+-- trusting no self-report from the ledger (it recomputes the SHA-256 chains
 from the raw dumps). Because each scenario restores a fresh snapshot, s010 self-seeds a
 representative corpus (a completed match + an injected abort, consent
 grant/revoke, a mandate, a disclosure + adjustment, each match and delivery

@@ -2,7 +2,7 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "2d9e1bbc112416e745214f92d108e06bfdac400aab233a38802f4f7ea8d7557e",
+  "sourceInputsSha256": "04c6444e4693694dc7a80227a89c781fbc7bc8d490abe1ad8280faa3d921733d",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
@@ -49,7 +49,7 @@
     "poc/Cargo.lock": "5639d1a2b95c32e6c91c76a9db416297f7f7db5862d9ef36a03da3b4b262c17f",
     "poc/Cargo.toml": "aaa5f34c499592e78b37669d4ddbec2ffa34efc2f136ed9c43bc00c0e954f67f",
     "poc/MODULE.bazel": "1102044178454f002fa96cf0d93b2707bbb11cfc0e8b1cc082897d585fba7099",
-    "poc/README.md": "d9fef701c820dc0979a710614b17dbdf5b1be08d2721af781929c6d17f0f48d7",
+    "poc/README.md": "93d64fe606a05b456442983444a05d3620bf8fda7a9bfab4c54695f45b184645",
     "poc/STATUS.s001.fulfillment.md": "ccb534288ad77c76896b343614db0846d8ed08a34184c05bf924a1c65cc3ab8c",
     "poc/build/Publish-ProjectArchive.ps1": "8fd044fbca63f59139e10632496b9b8b7c92609b5b48c5a2f2708e54287dd7fb",
     "poc/build/build-all.ps1": "f251ed304325df9ea1be49a409b7dd45b948c922f1fa23354240a1800d5bbd01",
