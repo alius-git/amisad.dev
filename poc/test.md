@@ -38,6 +38,15 @@ when unprivileged namespaces are unavailable. The services retain their request
 deadlines, Kubernetes termination grace, and single-writer `Recreate` deployment
 policy.
 
+On Windows, an MSVC Rust toolchain needs Microsoft's linker; Git for Windows'
+`link.exe` is a different program and cannot link the fixture. If the GNU Rust
+toolchain is already installed, select it for one run without changing the
+default toolchain or the caller's environment:
+
+```powershell
+rustup run stable-x86_64-pc-windows-gnu python test/http_shutdown_contracts.py -v
+```
+
 To check durable recovery, initialize an **empty disposable PostgreSQL database**
 with `db/schema.sql`, set `AMISAD_TEST_DATABASE_URL` to its connection URL, and run
 `python3 test/service_contracts.py DurableContracts -v`. This explicit suite writes

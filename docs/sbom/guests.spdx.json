@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-guests",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/72ead8f03f260718db30258e7ed923d1e2a32889f2581c1290e588575520e6d8",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/38656a3e6c514d62549d340d3ae4fd3543930a942e53b0944114b0d373705662",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,7 +25,7 @@
       "licenseDeclared": "LicenseRef-Yuruna",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared guests inventory; source-inputs SHA256 72ead8f03f260718db30258e7ed923d1e2a32889f2581c1290e588575520e6d8. Not an installed-system scan.",
+      "comment": "Declared guests inventory; source-inputs SHA256 38656a3e6c514d62549d340d3ae4fd3543930a942e53b0944114b0d373705662. Not an installed-system scan.",
       "versionInfo": "2026.11.15"
     },
     {

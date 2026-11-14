@@ -17,12 +17,14 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest import mock
 
 from bash_contract_support import find_usable_bash
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh'
 BASH = find_usable_bash()
+CURL = shutil.which('curl')
 SERVICES = ['seller-svc', 'resource-svc', 'ads-svc', 'insights-svc', 'platform-svc',
             'audit-svc', 'connect-svc', 'fabric-coordinator', 'identity-mock', 'ledger-svc']
 
@@ -271,7 +273,7 @@ sleep() {
         self.assertEqual(sleeps, [])
 
 
-@unittest.skipUnless(BASH and shutil.which('curl'), 'Usable Bash and curl are required')
+@unittest.skipUnless(BASH and CURL, 'Usable Bash and curl are required')
 class RealNodePortHttp(unittest.TestCase):
     def probe(self, port, budget=2, env=None):
         source = SCRIPT.read_text()
@@ -279,6 +281,9 @@ class RealNodePortHttp(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / 'bin').mkdir()
+            # Git Bash can prepend a different curl to PATH at startup. Execute
+            # the native client selected by this suite's prerequisite check.
+            write_command(root, 'curl', f'exec {shlex.quote(Path(CURL).as_posix())} "$@"')
             (root / 'case.sh').write_bytes(('set -euo pipefail\n' + function +
                                             f'amisad_wait_nodeport 127.0.0.1 {port} {budget}\n').encode())
             started = time.monotonic()
@@ -291,6 +296,21 @@ class RealNodePortHttp(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(requests, ['/health'])
         self.assertLess(elapsed, 2)
+
+    def test_probe_keeps_selected_curl_when_shell_path_has_another_client(self):
+        with tempfile.TemporaryDirectory(prefix='amisad selected curl ') as directory:
+            root = Path(directory)
+            (root / 'bin').mkdir()
+            calls = root / 'curl.calls'
+            write_command(root, 'selected-curl', f'printf "%s\\n" "$*" >> {shlex.quote(calls.as_posix())}\n'
+                          f'exec {shlex.quote(Path(shutil.which("curl")).as_posix())} "$@"')
+            with mock.patch.dict(globals(), {'CURL': str(root / 'bin' / 'selected-curl')}), peer() as (port, requests):
+                result, _ = self.probe(port)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(requests, ['/health'])
+            self.assertTrue(calls.is_file(), 'the probe must execute the selected curl client')
+            self.assertEqual(calls.read_text().splitlines(),
+                             [f'--noproxy * --connect-timeout 1 --max-time 2 -sf http://127.0.0.1:{port}/health'])
 
     def test_http_failure_can_recover_on_next_probe(self):
         with peer([503, 200]) as (port, requests):

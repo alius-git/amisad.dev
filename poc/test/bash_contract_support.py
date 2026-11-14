@@ -32,6 +32,24 @@ def bash_candidates():
     return candidates
 
 
+def run_probe(command, *, timeout, **options):
+    with subprocess.Popen(command, **options) as process:
+        try:
+            process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            try:
+                if os.name == 'nt':
+                    # Descendants can retain the probe's working directory after
+                    # its launcher exits, preventing Windows from removing it.
+                    subprocess.run(['taskkill', '/PID', str(process.pid), '/T', '/F'],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
+            finally:
+                process.kill()
+                process.wait()
+            raise
+        return process
+
+
 def find_usable_bash(timeout=2):
     deadline = time.monotonic() + timeout
     for candidate in bash_candidates():
@@ -66,9 +84,9 @@ printf 'amisad-bash-fixture\\n' > verified
                     break
                 # The proof file is authoritative; descendants cannot hold an
                 # output pipe open after the immediate launcher's deadline.
-                result = subprocess.run([candidate, '--noprofile', '--norc', '-c', command],
-                                        cwd=root, env={**os.environ, 'AMISAD_BASH_PROBE_FILE': source.as_posix()},
-                                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=remaining)
+                result = run_probe([candidate, '--noprofile', '--norc', '-c', command],
+                                   cwd=root, env={**os.environ, 'AMISAD_BASH_PROBE_FILE': source.as_posix()},
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=remaining)
             except (OSError, subprocess.TimeoutExpired):
                 continue
             proof = root / 'verified'

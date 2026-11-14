@@ -385,7 +385,8 @@ class StartSliceRuntime(unittest.TestCase):
         self.assertEqual(leftovers, [], 'the token is in a file')
         # The edge side of the start: its shell reads the line into the runtime's environment.
         start = self.calls('ssh')[1][-1].replace('/tmp/slice-runtime >/tmp/slice-runtime.log', 'target/release/slice-runtime >edge.log')
-        edge = subprocess.run([BASH, '-c', start], cwd=self.root, input=TOKEN + '\n', capture_output=True, text=True,
+        # Preserve the guest pipe's LF framing instead of Windows text-mode CRLF.
+        edge = subprocess.run([BASH, '-c', start], cwd=self.root, input=(TOKEN + '\n').encode('ascii'), capture_output=True,
                               env={**os.environ, 'AMISAD_FIXTURE_DIR': self.root.as_posix()}, timeout=30)
         self.assertEqual(edge.returncode, 0, edge.stderr)
         self.assertTrue(wait_until(lambda: self.calls('slice-runtime')), 'the edge runtime never started')

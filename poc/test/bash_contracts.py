@@ -29,13 +29,13 @@ def load_suite(name):
 
 class BashPrerequisites(unittest.TestCase):
     def failed_launcher(self, body, timeout=0.25):
-        native_run = subprocess.run
+        native_probe = support.run_probe
 
         def launch(_command, **options):
-            return native_run([sys.executable, '-c', body], **options)
+            return native_probe([sys.executable, '-c', body], **options)
 
         with mock.patch.object(support, 'bash_candidates', return_value=[sys.executable]), \
-                mock.patch.object(support.subprocess, 'run', side_effect=launch):
+                mock.patch.object(support, 'run_probe', side_effect=launch):
             return support.find_usable_bash(timeout=timeout)
 
     def assert_both_suites_skip(self, bash):
@@ -79,64 +79,71 @@ class BashPrerequisites(unittest.TestCase):
                 self.assertEqual(support.bash_candidates(), [str(launchers[-1].resolve())])
 
     def test_one_deadline_bounds_multiple_hanging_candidates(self):
-        native_run = subprocess.run
+        native_probe = support.run_probe
 
         def launch(_command, **options):
-            return native_run([sys.executable, '-c', 'import time; time.sleep(30)'], **options)
+            return native_probe([sys.executable, '-c', 'import time; time.sleep(30)'], **options)
 
         started = time.monotonic()
         with mock.patch.object(support, 'bash_candidates', return_value=['first', 'second', 'third']), \
-                mock.patch.object(support.subprocess, 'run', side_effect=launch) as runner:
+                mock.patch.object(support, 'run_probe', side_effect=launch) as runner:
             self.assertIsNone(support.find_usable_bash(timeout=0.25))
         self.assertLess(time.monotonic() - started, 5)
         self.assertEqual(runner.call_count, 1)
 
     def test_descendant_inheriting_output_handles_cannot_delay_launcher_result(self):
-        native_run = subprocess.run
+        native_probe = support.run_probe
         with tempfile.TemporaryDirectory(prefix='amisad descendant ') as directory:
             root = Path(directory)
             pid_file = root / 'child.pid'
+            cwd_file = root / 'child.cwd'
             body = ('import subprocess, sys, time\nfrom pathlib import Path\n'
-                    'child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(20)"], '
-                    f'cwd={str(root)!r})\n'
+                    'child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(20)"])\n'
                     f'Path({str(pid_file)!r}).write_text(str(child.pid))\n'
+                    f'Path({str(cwd_file)!r}).write_text(str(Path.cwd()))\n'
                     'time.sleep(30)\n')
 
             def launch(_command, **options):
-                return native_run([sys.executable, '-c', body], **options)
+                return native_probe([sys.executable, '-c', body], **options)
 
             try:
                 started = time.monotonic()
                 with mock.patch.object(support, 'bash_candidates', return_value=[sys.executable]), \
-                        mock.patch.object(support.subprocess, 'run', side_effect=launch):
+                        mock.patch.object(support, 'run_probe', side_effect=launch):
                     self.assertIsNone(support.find_usable_bash(timeout=2))
                 self.assertLess(time.monotonic() - started, 6)
                 self.assertTrue(pid_file.is_file(), 'the launcher must start its inheriting descendant')
+                self.assertFalse(Path(cwd_file.read_text()).exists(), 'the probe directory must be removed')
             finally:
                 if pid_file.is_file():
-                    try:
-                        os.kill(int(pid_file.read_text()), signal.SIGTERM)
-                    except ProcessLookupError:
-                        pass
+                    child_pid = int(pid_file.read_text())
+                    if os.name == 'nt':
+                        subprocess.run(['taskkill', '/PID', str(child_pid), '/T', '/F'],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
+                    else:
+                        try:
+                            os.kill(child_pid, signal.SIGTERM)
+                        except ProcessLookupError:
+                            pass
 
     def test_bad_candidate_does_not_hide_a_later_usable_bash(self):
         bash = support.find_usable_bash()
         if bash is None:
             self.skipTest('No usable native-filesystem Bash is available')
-        native_run = subprocess.run
+        native_probe = support.run_probe
 
         def launch(command, **options):
             if command[0] == 'unusable':
-                return native_run([sys.executable, '-c', 'raise SystemExit(126)'], **options)
-            return native_run(command, **options)
+                return native_probe([sys.executable, '-c', 'raise SystemExit(126)'], **options)
+            return native_probe(command, **options)
 
         with mock.patch.object(support, 'bash_candidates', return_value=['unusable', bash]), \
-                mock.patch.object(support.subprocess, 'run', side_effect=launch):
+                mock.patch.object(support, 'run_probe', side_effect=launch):
             self.assertEqual(support.find_usable_bash(), bash)
 
     def test_launch_error_is_not_usable(self):
         with mock.patch.object(support, 'bash_candidates', return_value=['missing-bash']), \
-                mock.patch.object(support.subprocess, 'run', side_effect=OSError('fixture missing')):
+                mock.patch.object(support, 'run_probe', side_effect=OSError('fixture missing')):
             self.assertIsNone(support.find_usable_bash())
 
     def test_native_bash_proves_paths_shims_and_posix_tools(self):
