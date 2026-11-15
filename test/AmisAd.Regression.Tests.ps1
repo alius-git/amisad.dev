@@ -570,6 +570,23 @@ Export-ModuleMember -Function Write-CycleInfraFailure
         $captured.DependencyFailures[0].errorCode | Should -Be '0x80070070'
     }
 
+    It 'retains the failed SSH probe and its exact VM and address in the cycle record' {
+        $env:YURUNA_LOG_DIR = Join-Path $TestDrive 'ssh-record-log'
+        New-Item -ItemType Directory -Path $env:YURUNA_LOG_DIR -Force | Out-Null
+        Write-AmisAdLabFailure -YurunaRoot $script:RecordFramework -HostType 'host.windows.hyper-v' -Stage 'Sync-AmisAdDemoKey' `
+            -FailureClass 'provisioning_failure' -ErrorMessage 'edge SSH timed out' -VMName 'amisad-edge-b' -Address '192.168.7.188' `
+            -ProbeFailure @{ success = $false; exitCode = 255; output = 'Connection timed out' } | Should -BeTrue
+        $captured = Get-Content -Raw -LiteralPath (Join-Path $env:YURUNA_LOG_DIR 'captured.json') | ConvertFrom-Json
+        $captured.VMName | Should -Be 'amisad-edge-b'
+        $captured.Stage | Should -Be 'Sync-AmisAdDemoKey'
+        $row = $captured.DependencyFailures | Where-Object area -eq 'guest-ssh'
+        $row.vmName | Should -Be 'amisad-edge-b'
+        $row.address | Should -Be '192.168.7.188'
+        $row.outcome | Should -Be 'probe-failed'
+        $row.exitCode | Should -Be 255
+        $row.output | Should -Be 'Connection timed out'
+    }
+
     It 'never fails the stage when the framework writer is missing' {
         $env:YURUNA_LOG_DIR = Join-Path $TestDrive 'record-log-missing'
         New-Item -ItemType Directory -Path $env:YURUNA_LOG_DIR -Force | Out-Null
@@ -673,6 +690,11 @@ function Start-AmisAdEdge {
 }
 function Sync-AmisAdDemoKey {
     Add-Trace 'start:core'
+    if ($env:AMISAD_FIXTURE_BLOCK -eq 'HandoffProbe') {
+        return @{ Ok = $false; Lines = @(); Stage = 'Sync-AmisAdDemoKey'; FailureClass = 'provisioning_failure'; VMName = 'amisad-edge-b';
+                  Reason = 'edge SSH timed out'; StartupFailure = @{}; Address = '192.168.7.188';
+                  ProbeFailure = @{ success = $false; exitCode = 255; output = 'Connection timed out' } }
+    }
     return @{ Ok = $false; Lines = @(); Stage = 'Start-AmisAdCore'; FailureClass = 'provisioning_failure'; VMName = 'amisad-core';
               Reason = 'amisad-core did not start: VMRS volume full'; StartupFailure = @{ errorCode = '0x80070070'; hostStorage = @{ freeBytes = 9GB } } }
 }
@@ -682,8 +704,8 @@ function Save-AmisAdEdgeAddressEvidence {
     return @{ Lines = @(); Written = $true }
 }
 function Write-AmisAdLabFailure {
-    param($YurunaRoot, $HostType, $Stage, $FailureClass, $ErrorMessage, $VMName, $StartupFailure)
-    @{ Stage = $Stage; VMName = $VMName; StartupFailure = $StartupFailure } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath "$env:AMISAD_FIXTURE_TRACE.json"
+    param($YurunaRoot, $HostType, $Stage, $FailureClass, $ErrorMessage, $VMName, $StartupFailure, $Address, $ProbeFailure)
+    @{ Stage = $Stage; VMName = $VMName; StartupFailure = $StartupFailure; Address = $Address; ProbeFailure = $ProbeFailure } | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath "$env:AMISAD_FIXTURE_TRACE.json"
     return $true
 }
 Export-ModuleMember -Function *
@@ -732,6 +754,24 @@ Export-ModuleMember -Function *
         $errorText = Get-Content -LiteralPath "$env:AMISAD_FIXTURE_TRACE.err" -Raw
         $errorText | Should -Match 'VMRS volume full'
         $errorText | Should -Not -Match 'do not trust'
+    }
+
+    It '<Entry> forwards the exact failed SSH probe to the cycle record' -TestCases @(
+        @{ Entry = 'test/Initialize-Lab.ps1' }
+        @{ Entry = 'poc/build/run-tests.ps1' }
+    ) {
+        param($Entry)
+        $env:AMISAD_FIXTURE_TRACE = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $env:AMISAD_FIXTURE_BLOCK = 'HandoffProbe'
+        $arguments = @('-YurunaRoot', $script:EntryFramework, '-LogDir', $script:Logs)
+        Invoke-AmisAdScript -ScriptPath (Join-Path $script:EntryProject $Entry) -ScriptArguments $arguments `
+            -OutputPath "$env:AMISAD_FIXTURE_TRACE.out" -ErrorPath "$env:AMISAD_FIXTURE_TRACE.err" | Should -Be 1
+        $record = Get-Content -LiteralPath "$env:AMISAD_FIXTURE_TRACE.json" -Raw | ConvertFrom-Json
+        $record.Stage | Should -Be 'Sync-AmisAdDemoKey'
+        $record.VMName | Should -Be 'amisad-edge-b'
+        $record.Address | Should -Be '192.168.7.188'
+        $record.ProbeFailure.exitCode | Should -Be 255
+        $record.ProbeFailure.output | Should -Be 'Connection timed out'
     }
 }
 
@@ -1573,6 +1613,19 @@ Export-ModuleMember -Function Get-VMState, Start-VM, Set-KeyFixtureState
             ($script:Calls | Where-Object { $_.Command -like 'umask 077*' }).Count | Should -Be 0
         }
 
+        It 'identifies edge-b and retains the probe when it stops answering after its address report' {
+            $script:Answers['probe|amisad-edge-b'] = @{ success = $false; exitCode = 255; output = 'Connection timed out' }
+            $result = Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -InvokeGuest $script:Guest -PollSeconds 0 -ReadySeconds 0 `
+                -EdgeAddress @{ 'amisad-edge-a' = '192.168.7.61'; 'amisad-edge-b' = '192.168.7.188' } -Confirm:$false
+            $result.Ok | Should -BeFalse
+            $result.Stage | Should -Be 'Sync-AmisAdDemoKey'
+            $result.VMName | Should -Be 'amisad-edge-b'
+            $result.Address | Should -Be '192.168.7.188'
+            $result.ProbeFailure.exitCode | Should -Be 255
+            $result.ProbeFailure.output | Should -Be 'Connection timed out'
+            @($script:Calls | Where-Object { $_.VM -eq 'amisad-edge-b' -and $_.Command -like 'umask 077*' }).Count | Should -Be 0
+        }
+
         It 'stops at the first edge that cannot be authorized and names it' {
             $script:Answers['authorize|amisad-edge-a'] = @{ success = $false; exitCode = 255; output = 'Permission denied (publickey)' }
             $result = Sync-AmisAdDemoKey -YurunaRoot $script:FixtureRoot -InvokeGuest $script:Guest -PollSeconds 0 -ReadySeconds 5 -Confirm:$false
@@ -1664,7 +1717,7 @@ Describe 'AmisAd edge address evidence' {
     AfterEach {
         # Unqualified on purpose: Remove-Item does not resolve a global:
         # qualifier on the function drive from a nested scope.
-        foreach ($fake in 'Get-VMIp', 'Save-VMNetworkState') {
+        foreach ($fake in 'Get-VMIp', 'Save-VMNetworkState', 'Save-VMSerialCapture', 'Get-VMScreenshot') {
             if (Get-Command $fake -CommandType Function -ErrorAction SilentlyContinue) { Remove-Item -Path "function:$fake" -Force }
         }
     }
@@ -1715,6 +1768,127 @@ Describe 'AmisAd edge address evidence' {
             $record = Get-Content -LiteralPath (Join-Path $script:EvidenceDir "$vm/vm-network.state.json") -Raw | ConvertFrom-Json
             $record.vmName | Should -Be $vm
         }
+    }
+
+    It 'preserves a separate serial capture and frame for every unique involved VM' {
+        $script:AmisAdArtifactCaptures = [System.Collections.Generic.List[string]]::new()
+        Set-Item -Path 'function:global:Save-VMSerialCapture' -Value {
+            param([string]$VMName, [string]$OutputDirectory)
+            $script:AmisAdArtifactCaptures.Add("serial:$VMName")
+            New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $OutputDirectory 'serial-console.log') -Value "serial $VMName"
+            return $true
+        }
+        Set-Item -Path 'function:global:Get-VMScreenshot' -Value {
+            param([string]$VMName, [string]$Source, [string]$OutFile)
+            $script:AmisAdArtifactCaptures.Add("frame:$VMName")
+            $Source | Should -Be 'frame'
+            Set-Content -LiteralPath $OutFile -Value "frame $VMName"
+            return $OutFile
+        }
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-a', 'amisad-edge-b' -AdditionalVm 'amisad-core', 'amisad-edge-b' -LogDir $script:EvidenceDir
+        $result.Written | Should -BeTrue
+        $record = Get-Content -LiteralPath $result.Path -Raw | ConvertFrom-Json -AsHashtable
+        $record.vmDiagnostics.Count | Should -Be 3
+        $script:AmisAdArtifactCaptures | Should -Be @('serial:amisad-edge-a', 'frame:amisad-edge-a', 'serial:amisad-edge-b', 'frame:amisad-edge-b', 'serial:amisad-core', 'frame:amisad-core')
+        foreach ($vm in 'amisad-edge-a', 'amisad-edge-b', 'amisad-core') {
+            Get-Content -LiteralPath (Join-Path $script:EvidenceDir "$vm/serial-console.log") | Should -Be "serial $vm"
+            Get-Content -LiteralPath (Join-Path $script:EvidenceDir "$vm/console.png") | Should -Be "frame $vm"
+            $record.vmDiagnostics[$vm].serialCapture.outcome | Should -Be 'saved'
+            $record.vmDiagnostics[$vm].screenshot.outcome | Should -Be 'saved'
+        }
+    }
+
+    It 'continues every capture and keeps the primary evidence when optional capture verbs throw' {
+        Set-Item -Path 'function:global:Save-VMSerialCapture' -Value {
+            param([string]$VMName, [string]$OutputDirectory)
+            if ($VMName -eq 'amisad-edge-a') { throw 'serial reader unavailable' }
+            New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $OutputDirectory 'serial-console.log') -Value "serial $VMName"
+            return $true
+        }
+        Set-Item -Path 'function:global:Get-VMScreenshot' -Value {
+            param([string]$VMName, [string]$Source, [string]$OutFile)
+            $null = $Source
+            if ($VMName -eq 'amisad-edge-b') { throw 'frame capture unavailable' }
+            Set-Content -LiteralPath $OutFile -Value "frame $VMName"
+            return $OutFile
+        }
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-a', 'amisad-edge-b' -AdditionalVm 'amisad-core' `
+            -EdgeAddress @{ 'amisad-edge-b' = '192.168.7.188' } -LogDir $script:EvidenceDir
+        $result.Written | Should -BeTrue
+        $record = Get-Content -LiteralPath $result.Path -Raw | ConvertFrom-Json -AsHashtable
+        $record.vmDiagnostics['amisad-edge-a'].serialCapture.outcome | Should -Be 'error'
+        $record.vmDiagnostics['amisad-edge-a'].serialCapture.reason | Should -Match 'serial reader unavailable'
+        $record.vmDiagnostics['amisad-edge-a'].screenshot.outcome | Should -Be 'saved'
+        $record.vmDiagnostics['amisad-edge-b'].serialCapture.outcome | Should -Be 'saved'
+        $record.vmDiagnostics['amisad-edge-b'].screenshot.outcome | Should -Be 'error'
+        $record.vmDiagnostics['amisad-core'].serialCapture.outcome | Should -Be 'saved'
+        $record.vmDiagnostics['amisad-core'].screenshot.outcome | Should -Be 'saved'
+        ($record.edges | Where-Object vm -eq 'amisad-edge-b').reportedAddress | Should -Be '192.168.7.188'
+    }
+
+    It 'records unavailable optional capture verbs without failing the evidence write' {
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-b' -LogDir $script:EvidenceDir
+        $result.Written | Should -BeTrue
+        $record = Get-Content -LiteralPath $result.Path -Raw | ConvertFrom-Json -AsHashtable
+        $record.vmDiagnostics['amisad-edge-b'].serialCapture.outcome | Should -Be 'unavailable'
+        $record.vmDiagnostics['amisad-edge-b'].screenshot.outcome | Should -Be 'unavailable'
+    }
+
+    It 'distinguishes an empty capture from an unavailable verb and preserves the reader account' {
+        Set-Item -Path 'function:global:Save-VMSerialCapture' -Value {
+            param([string]$VMName, [string]$OutputDirectory)
+            New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $OutputDirectory 'serial-console.info.txt') -Value "no bytes for $VMName"
+            return $false
+        }
+        Set-Item -Path 'function:global:Get-VMScreenshot' -Value {
+            param([string]$VMName, [string]$Source, [string]$OutFile)
+            $null = $VMName, $Source
+            Set-Content -LiteralPath $OutFile -Value '' -NoNewline
+            return $OutFile
+        }
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-b' -LogDir $script:EvidenceDir
+        $result.Written | Should -BeTrue
+        $record = Get-Content -LiteralPath $result.Path -Raw | ConvertFrom-Json -AsHashtable
+        $record.vmDiagnostics['amisad-edge-b'].serialCapture.outcome | Should -Be 'not-saved'
+        $record.vmDiagnostics['amisad-edge-b'].screenshot.outcome | Should -Be 'not-saved'
+        Get-Content -LiteralPath (Join-Path $script:EvidenceDir 'amisad-edge-b/serial-console.info.txt') | Should -Be 'no bytes for amisad-edge-b'
+    }
+
+    It 'retains a frame at the path returned by the host driver when PNG conversion is unavailable' {
+        Set-Item -Path 'function:global:Get-VMScreenshot' -Value {
+            param([string]$VMName, [string]$Source, [string]$OutFile)
+            $null = $VMName, $Source
+            $ppmPath = [IO.Path]::ChangeExtension($OutFile, '.ppm')
+            Set-Content -LiteralPath $ppmPath -Value 'P3 1 1 255 0 0 0'
+            return $ppmPath
+        }
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-b' -LogDir $script:EvidenceDir
+        $result.Written | Should -BeTrue
+        $record = Get-Content -LiteralPath $result.Path -Raw | ConvertFrom-Json -AsHashtable
+        $record.vmDiagnostics['amisad-edge-b'].screenshot.outcome | Should -Be 'saved'
+        $record.vmDiagnostics['amisad-edge-b'].screenshot.path | Should -Be (Join-Path $script:EvidenceDir 'amisad-edge-b/console.ppm')
+        Get-Content -LiteralPath $record.vmDiagnostics['amisad-edge-b'].screenshot.path | Should -Be 'P3 1 1 255 0 0 0'
+    }
+
+    It 'does not claim an old frame when the driver returns no capture' {
+        $directory = Join-Path $script:EvidenceDir 'amisad-edge-b'
+        New-Item -ItemType Directory -Path $directory -Force | Out-Null
+        $oldFrame = Join-Path $directory 'console.png'
+        Set-Content -LiteralPath $oldFrame -Value 'previous frame'
+        Set-Item -Path 'function:global:Get-VMScreenshot' -Value {
+            param([string]$VMName, [string]$Source, [string]$OutFile)
+            $null = $VMName, $Source, $OutFile
+            return $null
+        }
+        $result = Save-AmisAdEdgeAddressEvidence -EdgeVm 'amisad-edge-b' -LogDir $script:EvidenceDir
+        $result.Written | Should -BeTrue
+        $record = Get-Content -LiteralPath $result.Path -Raw | ConvertFrom-Json -AsHashtable
+        $record.vmDiagnostics['amisad-edge-b'].screenshot.outcome | Should -Be 'not-saved'
+        $record.vmDiagnostics['amisad-edge-b'].screenshot.path | Should -BeNullOrEmpty
+        Get-Content -LiteralPath $oldFrame | Should -Be 'previous frame'
     }
 }
 

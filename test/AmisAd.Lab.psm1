@@ -454,9 +454,13 @@ function Write-AmisAdLabFailure {
     .PARAMETER DependencyFailures
         Per-item evidence rows, kept under context.dependencyFailures.
     .PARAMETER VMName
-        The VM whose startup failed, when the stage names one.
+        The VM whose startup or guest operation failed.
     .PARAMETER StartupFailure
         Structured driver evidence retained through the startup wrappers.
+    .PARAMETER Address
+        The address used by a failed SSH readiness probe.
+    .PARAMETER ProbeFailure
+        The result of a failed SSH readiness probe running only 'true'.
     .OUTPUTS
         [bool] $true when the record was handed to the framework writer.
     #>
@@ -472,7 +476,9 @@ function Write-AmisAdLabFailure {
         [Parameter(Mandatory)][string]$ErrorMessage,
         [hashtable[]]$DependencyFailures = @(),
         [string]$VMName = '',
-        [hashtable]$StartupFailure = @{}
+        [hashtable]$StartupFailure = @{},
+        [string]$Address = '',
+        [hashtable]$ProbeFailure = @{}
     )
     if ([string]::IsNullOrWhiteSpace($env:YURUNA_LOG_DIR)) { return $false }
     try {
@@ -489,6 +495,10 @@ function Write-AmisAdLabFailure {
                 if ($StartupFailure.Contains($field)) { $row[$field] = $StartupFailure[$field] }
             }
             $rows += $row
+        }
+        if ($ProbeFailure.Count) {
+            $rows += @{ area = 'guest-ssh'; vmName = $VMName; address = $Address; outcome = 'probe-failed';
+                exitCode = $ProbeFailure.exitCode; output = $ProbeFailure.output }
         }
         $writeArgs = @{ Stage = $Stage; FailureClass = $FailureClass; Severity = 'hard'; GuestKey = '(orchestration)';
             VMName = $VMName; ErrorMessage = $ErrorMessage; HostType = $HostType; DependencyFailures = [hashtable[]]$rows }
@@ -555,7 +565,10 @@ function Save-AmisAdEdgeAddressEvidence {
         dialing the bare VM name fails in DNS), and the hypervisor's view of
         the guest's network. edge-address-evidence.json keeps the first two;
         a driver with Save-VMNetworkState (Hyper-V) adds its network-state
-        capture. Nothing here can fail the stage.
+        capture. Serial readers and passive console frames, where supported,
+        keep the guest's remaining evidence when it no longer answers SSH.
+        Each optional capture has an independent outcome; nothing here can
+        fail the stage.
     .PARAMETER EdgeVm
         The edge VM names.
     .PARAMETER EdgeAddress
@@ -584,6 +597,8 @@ function Save-AmisAdEdgeAddressEvidence {
     $records = [System.Collections.Generic.List[object]]::new()
     $canDiscover = [bool](Get-Command -Name Get-VMIp -ErrorAction SilentlyContinue)
     $canCapture = [bool](Get-Command -Name Save-VMNetworkState -ErrorAction SilentlyContinue)
+    $canSaveSerial = [bool](Get-Command -Name Save-VMSerialCapture -ErrorAction SilentlyContinue)
+    $canSaveFrame = [bool](Get-Command -Name Get-VMScreenshot -ErrorAction SilentlyContinue)
     $diagnostics = @{}
     foreach ($vm in (@($EdgeVm) + @($AdditionalVm) | Select-Object -Unique)) {
         # Driver filenames are fixed. Each VM needs its own directory so a
@@ -594,12 +609,38 @@ function Save-AmisAdEdgeAddressEvidence {
             try { $captured = [bool](Save-VMNetworkState -VMName $vm -OutputDirectory $directory) }
             catch { $captured = $false; Write-Verbose "Save-VMNetworkState ${vm}: $($_.Exception.Message)" }
         }
+        $serial = @{ outcome = 'unavailable' }
+        if ($canSaveSerial) {
+            try {
+                $saved = [bool](Save-VMSerialCapture -VMName $vm -OutputDirectory $directory)
+                $serial = @{ outcome = if ($saved) { 'saved' } else { 'not-saved' } }
+            } catch {
+                $serial = @{ outcome = 'error'; reason = $_.Exception.Message }
+                Write-Verbose "Save-VMSerialCapture ${vm}: $($_.Exception.Message)"
+            }
+        }
+        $screenshot = @{ outcome = 'unavailable' }
+        if ($canSaveFrame) {
+            try {
+                New-Item -ItemType Directory -Force -Path $directory -ErrorAction Stop | Out-Null
+                $framePath = Join-Path $directory 'console.png'
+                $capturedFrame = Get-VMScreenshot -VMName $vm -Source frame -OutFile $framePath
+                $saved = -not [string]::IsNullOrWhiteSpace($capturedFrame) -and
+                    (Test-Path -LiteralPath $capturedFrame -PathType Leaf) -and (Get-Item -LiteralPath $capturedFrame -ErrorAction Stop).Length -gt 0
+                $screenshot = @{ outcome = if ($saved) { 'saved' } else { 'not-saved' } }
+                if ($saved) { $screenshot.path = $capturedFrame }
+            } catch {
+                $screenshot = @{ outcome = 'error'; reason = $_.Exception.Message }
+                Write-Verbose "Get-VMScreenshot ${vm}: $($_.Exception.Message)"
+            }
+        }
         $storage = @{ status = 'unknown'; reason = 'The host driver does not expose storage capacity evidence.' }
         if (Get-Command Test-VMStorageCapacity -ErrorAction SilentlyContinue) {
             try { $storage = Test-VMStorageCapacity -VMName $vm }
             catch { $storage = @{ status = 'unknown'; reason = $_.Exception.Message } }
         }
-        $diagnostics[$vm] = @{ directory = $directory; networkStateSaved = $captured; hostStorage = $storage }
+        $diagnostics[$vm] = @{ directory = $directory; networkStateSaved = $captured; hostStorage = $storage;
+            serialCapture = $serial; screenshot = $screenshot }
     }
     foreach ($edge in $EdgeVm) {
         $discovered = $null
@@ -828,12 +869,14 @@ function Sync-AmisAdDemoKey {
 
     $lines = [System.Collections.Generic.List[string]]::new()
     $fail = {
-        param([string]$Reason, [string]$Stage = 'Sync-AmisAdDemoKey', [string]$VMName = '', [hashtable]$StartupFailure = @{})
+        param([string]$Reason, [string]$Stage = 'Sync-AmisAdDemoKey', [string]$VMName = '', [hashtable]$StartupFailure = @{},
+            [string]$Address = '', [hashtable]$ProbeFailure = @{})
         $label = if ($Stage -eq 'Start-AmisAdCore') { "$VMName startup failed" } else { 'Demo key hand-off failed' }
         $lines.Add("${label}: $Reason")
         $failureClass = if ($StartupFailure.Contains('controlHung') -and $StartupFailure.controlHung) { 'hypervisor_unresponsive' } else { 'provisioning_failure' }
         return [pscustomobject]@{ Ok = $false; Lines = [string[]]$lines; Fingerprint = ''; Reason = $Reason;
-            Stage = $Stage; VMName = $VMName; StartupFailure = $StartupFailure; FailureClass = $failureClass }
+            Stage = $Stage; VMName = $VMName; StartupFailure = $StartupFailure; FailureClass = $failureClass;
+            Address = $Address; ProbeFailure = $ProbeFailure }
     }
     if (-not $PSCmdlet.ShouldProcess("$CoreVm -> $($EdgeVm -join ', ')", 'Authorize the demo public key on the edges')) {
         return [pscustomobject]@{ Ok = $true; Lines = [string[]]@(); Fingerprint = ''; Reason = '' }
@@ -867,15 +910,15 @@ function Sync-AmisAdDemoKey {
         if ($probe.success) { $answering = $true; break }
         Start-Sleep -Seconds $PollSeconds
     } while ((Get-Date) -lt $deadline)
-    if (-not $answering) { return (& $fail "$CoreVm did not answer SSH within ${ReadySeconds}s ($($probe.output))") }
+    if (-not $answering) { return (& $fail "$CoreVm did not answer SSH within ${ReadySeconds}s ($($probe.output))" -VMName $CoreVm -ProbeFailure $probe) }
 
     # --- REGION: Read demo public key
     $read = & $InvokeGuest $CoreVm $coreUser 'cat "$HOME/.ssh/amisad-demo-key.pub"' 60
     if (-not $read.success) {
-        return (& $fail "could not read $CoreVm's demo public key (exit $($read.exitCode)); did the users step of the deploy run? $($read.output)")
+        return (& $fail "could not read $CoreVm's demo public key (exit $($read.exitCode)); did the users step of the deploy run? $($read.output)" -VMName $CoreVm)
     }
     try { $publicKey = ConvertTo-AmisAdDemoPublicKey -Text $read.output }
-    catch { return (& $fail "$CoreVm's demo public key is unusable: $($_.Exception.Message)") }
+    catch { return (& $fail "$CoreVm's demo public key is unusable: $($_.Exception.Message)" -VMName $CoreVm) }
     $fingerprint = Get-AmisAdKeyFingerprint -PublicKey $publicKey
     $lines.Add("$CoreVm demo key: $fingerprint")
 
@@ -895,7 +938,7 @@ function Sync-AmisAdDemoKey {
             Start-Sleep -Seconds $PollSeconds
         } while ((Get-Date) -lt $edgeDeadline)
         if (-not $edgeProbe.success) {
-            return (& $fail "$edge did not answer SSH $where within ${ReadySeconds}s (exit $($edgeProbe.exitCode)): $($edgeProbe.output)")
+            return (& $fail "$edge did not answer SSH $where within ${ReadySeconds}s (exit $($edgeProbe.exitCode)): $($edgeProbe.output)" -VMName $edge -Address $edgeTarget -ProbeFailure $edgeProbe)
         }
         $done = $null
         foreach ($attempt in 1..3) {
@@ -903,7 +946,7 @@ function Sync-AmisAdDemoKey {
             if ($done.success) { break }
             if ($attempt -lt 3) { Start-Sleep -Seconds $PollSeconds }
         }
-        if (-not $done.success) { return (& $fail "could not authorize the demo key on $edge $where (exit $($done.exitCode)): $($done.output)") }
+        if (-not $done.success) { return (& $fail "could not authorize the demo key on $edge $where (exit $($done.exitCode)): $($done.output)" -VMName $edge -Address $edgeTarget) }
         $lines.Add("$edge now trusts $fingerprint (any earlier amisad-demo entry replaced).")
     }
 
@@ -924,7 +967,7 @@ function Sync-AmisAdDemoKey {
             if ($attempt -lt 6) { Start-Sleep -Seconds $PollSeconds }
         }
         if (-not $proved.success) {
-            return (& $fail "$CoreVm cannot log in to $edge at $address with the demo key (exit $($proved.exitCode)): $($proved.output)")
+            return (& $fail "$CoreVm cannot log in to $edge at $address with the demo key (exit $($proved.exitCode)): $($proved.output)" -VMName $edge -Address $address.Trim())
         }
         $lines.Add("$CoreVm logs in to $edge at $address with the demo key.")
     }

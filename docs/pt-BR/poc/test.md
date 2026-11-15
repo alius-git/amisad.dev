@@ -48,6 +48,16 @@ privilégios estão indisponíveis. Os serviços mantêm seus prazos para solici
 o período de encerramento do Kubernetes e a política de implantação `Recreate`
 com um único gravador.
 
+No Windows, uma cadeia de ferramentas Rust MSVC precisa do vinculador da Microsoft;
+o `link.exe` do Git for Windows é outro programa e não consegue vincular a
+implementação de teste. Se a cadeia de ferramentas Rust GNU já estiver instalada,
+selecione-a para uma única execução sem alterar a cadeia de ferramentas padrão
+nem o ambiente do chamador:
+
+```powershell
+rustup run stable-x86_64-pc-windows-gnu python test/http_shutdown_contracts.py -v
+```
+
 Para verificar a recuperação persistente, inicialize um **banco de dados PostgreSQL vazio e descartável**
 com `db/schema.sql`, defina `AMISAD_TEST_DATABASE_URL` com sua URL de conexão e execute
 `python3 test/service_contracts.py DurableContracts -v`. Essa suíte explícita grava

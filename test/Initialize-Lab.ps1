@@ -201,7 +201,8 @@ if (-not $keyHandoff.Ok) {
     $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -AdditionalVm 'amisad-core' -EdgeAddress $edgeAddress -ReportedAt $edgeStartup.ReportedAt -LogDir $LogDir
     foreach ($line in $evidence.Lines) { Write-Information $line }
     $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage $keyHandoff.Stage -FailureClass $keyHandoff.FailureClass `
-        -ErrorMessage $keyHandoff.Reason -VMName $keyHandoff.VMName -StartupFailure $keyHandoff.StartupFailure
+        -ErrorMessage $keyHandoff.Reason -VMName $keyHandoff.VMName -StartupFailure $keyHandoff.StartupFailure `
+        -Address $keyHandoff.Address -ProbeFailure $keyHandoff.ProbeFailure
     Write-Error "$($keyHandoff.Stage): $($keyHandoff.Reason). Stopping the warm-up before the scenarios."
     exit 1
 }
