@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh'
 BASH = find_usable_bash()
 CURL = shutil.which('curl')
+KUBECTL = shutil.which('kubectl')
 SERVICES = ['seller-svc', 'resource-svc', 'ads-svc', 'insights-svc', 'platform-svc',
             'audit-svc', 'connect-svc', 'fabric-coordinator', 'identity-mock', 'ledger-svc']
 
@@ -55,11 +56,11 @@ def peer(responses=None, stall=0, observed_auth=None, tls_context=None):
             index = len(requests) - 1
             if stall:
                 time.sleep(stall)
-            self.send_response(responses[min(index, len(responses) - 1)])
-            self.end_headers()
             try:
+                self.send_response(responses[min(index, len(responses) - 1)])
+                self.end_headers()
                 self.wfile.write(b'healthy\n')
-            except (BrokenPipeError, ConnectionResetError):
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
                 pass
 
         def log_message(self, *_):
@@ -92,7 +93,8 @@ class ClusterGates(unittest.TestCase):
         if short_budget:
             text = text.replace('amisad_wait_nodeport "$NODE_IP" "$port" ||',
                                 'amisad_wait_nodeport "$NODE_IP" "$port" 0 ||')
-        text = 'sleep() { SECONDS=$((SECONDS + $1)); }\n' + text
+        text = ('fixture_seconds=0\nsleep() { fixture_seconds=$((fixture_seconds + $1)); }\n'
+                + text.replace('SECONDS', 'fixture_seconds'))
         (root / 'case.sh').write_bytes(text.encode())
         if subnet:
             (root / 'subnet.env').write_text('FLANNEL_SUBNET=fixture\n')
@@ -179,7 +181,7 @@ class ClusterGates(unittest.TestCase):
 
 @unittest.skipUnless(BASH, 'A usable native-filesystem Bash is required for guest shell contracts')
 class RestoredGateInputs(unittest.TestCase):
-    def run_gate(self, name, budget, ready_after=None, file_after=None, api_error=''):
+    def run_gate(self, name, budget, ready_after=None, file_after=None, api_error='', api_delay=0):
         source = SCRIPT.read_text()
         self.assertIn(name + '() {', source)
         function = name + '() {' + source.split(name + '() {', 1)[1].split('\n}', 1)[0] + '\n}\n'
@@ -187,16 +189,21 @@ class RestoredGateInputs(unittest.TestCase):
             root = Path(directory)
             (root / 'bin').mkdir()
             function = function.replace('/run/flannel/subnet.env', shlex.quote((root / 'subnet.env').as_posix()))
+            # A plain counter keeps slow fixture processes from advancing the
+            # simulated clock, unlike Bash's wall-clock SECONDS variable.
+            function = function.replace('SECONDS', 'fixture_seconds')
             write_command(root, 'kubectl', 'echo "$*" >> calls\n'
                           'count=0; if [ -f count ]; then read -r count < count; fi\n'
                           'count=$((count + 1)); echo "$count" > count\n'
+                          'if [ -n "${API_DELAY:-}" ]; then sleep "$API_DELAY"; fi\n'
                           'printf "%s" "${API_ERROR:-}" >&2\n'
                           '[ -n "${READY_AFTER:-}" ] && [ "$count" -ge "$READY_AFTER" ]')
             prefix = '''set -euo pipefail
+fixture_seconds=0
 sleep() {
     echo "$1" >> sleeps
-    SECONDS=$((SECONDS + $1))
-    if [ -n "${FILE_AFTER:-}" ] && [ "$SECONDS" -ge "$FILE_AFTER" ]; then
+    fixture_seconds=$((fixture_seconds + $1))
+    if [ -n "${FILE_AFTER:-}" ] && [ "$fixture_seconds" -ge "$FILE_AFTER" ]; then
         printf 'FLANNEL_SUBNET=fixture\\n' > subnet.env
     fi
 }
@@ -204,7 +211,7 @@ sleep() {
             (root / 'case.sh').write_bytes((prefix + function + f'{name} {budget}\n').encode())
             result = run_case(root, {'READY_AFTER': '' if ready_after is None else str(ready_after),
                                      'FILE_AFTER': '' if file_after is None else str(file_after),
-                                     'API_ERROR': api_error})
+                                     'API_ERROR': api_error, 'API_DELAY': str(api_delay) if api_delay else ''})
             calls = (root / 'calls').read_text().splitlines() if (root / 'calls').exists() else []
             sleeps = (root / 'sleeps').read_text().splitlines() if (root / 'sleeps').exists() else []
             return result, calls, sleeps
@@ -225,7 +232,7 @@ sleep() {
         self.assertEqual(sleeps, ['1'])
 
     def test_api_failure_deadline_bounds_final_request_and_sleep(self):
-        result, calls, sleeps = self.run_gate('amisad_wait_apiserver', 3)
+        result, calls, sleeps = self.run_gate('amisad_wait_apiserver', 3, api_delay=1.1)
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(calls, ['--request-timeout=2s get --raw=/readyz'] * 2 +
                                 ['--request-timeout=1s get --raw=/readyz'])
@@ -364,7 +371,7 @@ class RealNodePortHttp(unittest.TestCase):
         self.assertEqual(proxy_requests, [])
 
 
-@unittest.skipUnless(BASH and shutil.which('kubectl'), 'Usable Bash and kubectl are required')
+@unittest.skipUnless(BASH and KUBECTL, 'Usable Bash and kubectl are required')
 class RealApiHttp(unittest.TestCase):
     def probe(self, port, budget=2, tls_ca=None):
         source = SCRIPT.read_text()
@@ -372,6 +379,10 @@ class RealApiHttp(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='amisad API ') as directory:
             root = Path(directory)
             (root / 'bin').mkdir()
+            # Native kubectl needs a URL path, not Git Bash's Windows path
+            # translation of --raw=/readyz. Limit the exclusion to that option.
+            write_command(root, 'kubectl',
+                          f'MSYS2_ARG_CONV_EXCL=--raw= exec {shlex.quote(Path(KUBECTL).as_posix())} "$@"')
             config = root / 'config'
             scheme = 'https' if tls_ca is not None else 'http'
             ca = '' if tls_ca is None else '\n    certificate-authority: ' + json.dumps(str(tls_ca))

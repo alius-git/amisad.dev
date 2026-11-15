@@ -86,7 +86,8 @@ Describe 'AmisAd guest deployment contracts' {
             Set-ItResult -Skipped -Because 'A runnable Python 3 interpreter is required.'
             return
         }
-        if (-not (Test-Path -LiteralPath (Join-Path $bin $Binary))) {
+        $binaryName = if ($IsWindows) { "$Binary.exe" } else { $Binary }
+        if (-not (Test-Path -LiteralPath (Join-Path $bin $binaryName))) {
             Set-ItResult -Skipped -Because "the services are not built: run cargo build --workspace --locked in poc/ (or set AMISAD_BIN_DIR)"
             return
         }

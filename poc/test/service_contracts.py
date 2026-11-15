@@ -283,12 +283,14 @@ class Contracts(unittest.TestCase):
                 self.assertTrue(sock.recv(1024).startswith(b'HTTP/1.1 400'))
             for locale in ['en-US', 'pt-BR', 'zh-CN', 'he-IL']:
                 conn = http.client.HTTPConnection(host, port, timeout=3)
-                conn.request('POST', '/v1/partners', '{}', headers={'Accept-Language': locale, 'Content-Length': str(1024 * 1024 + 1)})
+                # The declared limit is rejected before reading a body. A late
+                # body can race that response and reset the socket on Windows.
+                conn.request('POST', '/v1/partners', headers={'Accept-Language': locale, 'Content-Length': str(1024 * 1024 + 1)})
                 response = conn.getresponse()
                 body = json.loads(response.read())
                 self.assertEqual(response.status, 413)
                 self.assertEqual(body['code'], 'request_too_large')
-                catalog = json.loads((Path(__file__).resolve().parents[1] / 'components/lib/amisad-common/locales' / (locale + '.json')).read_text())
+                catalog = json.loads((Path(__file__).resolve().parents[1] / 'components/lib/amisad-common/locales' / (locale + '.json')).read_text(encoding='utf-8'))
                 self.assertEqual(body['error'], catalog['messages']['request_too_large']['text'])
                 conn.close()
 
