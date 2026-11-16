@@ -3,7 +3,7 @@
 # GUID: 424fc348-2c93-45e3-9164-cd72253f6d0b
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/fabric-coordinator/Dockerfile -t amisad/fabric-coordinator .
-FROM rust:1.98-slim-bookworm AS build
+FROM rust:1.99-slim-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY components ./components

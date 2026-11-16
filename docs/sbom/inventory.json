@@ -2,7 +2,7 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "015a88998af6451c30e05dab13abd0ecb43e192015b722f642256ebb5b87fd60",
+  "sourceInputsSha256": "5547085eae915a577d8d0e537c110cc32245f53b08a7d04e57410d2dd78c354f",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
@@ -16,7 +16,7 @@
     "docs/pt-BR/index.md": "e16a26a2802fa9dc1b3de9b09cb8bd91386781de6058a0b01179a92789bb14c1",
     "docs/pt-BR/poc/test.md": "251d9e3a309358ea8cd9fcc7a1156fe9db4fbc96eff80492dff94869456e8e3e",
     "docs/pt-BR/poc/usernames.md": "0d93214007311d0c921a426ac333884e0076546130306ca7864e80a41930ed2e",
-    "globalization/manifests/doc-translations.json": "05f1c68a4e24a1023b8de1153f6a9423703a6755db58556b57a8c14e101dd177",
+    "globalization/manifests/doc-translations.json": "f0787b49c84a95213078b419f6a21a57c4b89dcd728d9316c40a8397c3ad29e8",
     "plan/applications.md": "e8721203f340718cf2dd6bd09c0eb99cafa1106a8af7b008238e6c643ecb236c",
     "plan/design.md": "d5557094f458a5a560f8b673a43572aff43810042a6161ae2be9d3dbe34cbb6e",
     "plan/design/01-overview.md": "fb28eee8ea715ff54a5a4934bb623ee795b384130767e1f3078b1e960adbd1ea",
@@ -42,18 +42,18 @@
     "plan/prompts.txt": "914b4e3a887c83aeb3ac78927437dc22df59c30afba208bdc27155f6d56c190e",
     "plan/scenarios.md": "a5f5afdaf51d2e714240c15e1cbac02948a4615c45b8fb77aedb412e5db6c59e",
     "poc/.bazelrc": "cdf41772f403272271a926b340e80dafb54413dcaeed7620f11ca74acf0aa822",
-    "poc/.bazelversion": "14ebdd5f5d8dfccb0fc574ea9aabecc07d7cdd99d53e4fc01e58f9c3d23d18ef",
+    "poc/.bazelversion": "4d9dfd02f463b487bd0bff68cf9292b3626b31c81febb54e8911e493f64793d0",
     "poc/.dockerignore": "6c3aa38c25893c8008c339a577cd8dff854769fffb1e183ccc044e8d05bdfe05",
     "poc/.gitignore": "96be5462d0193b7f7550fd82821252288b03c40e37fc7efb9f4ee4024a973b9f",
     "poc/BUILD.bazel": "e07d948b2b811798f05c5081ba1169b14fc7bfbb04ca1308997cdebe7a297b2e",
-    "poc/Cargo.lock": "5639d1a2b95c32e6c91c76a9db416297f7f7db5862d9ef36a03da3b4b262c17f",
+    "poc/Cargo.lock": "d3ec902def739fed7c0eb3767723d71bb0616bb985d22901f8734cab92e54103",
     "poc/Cargo.toml": "aaa5f34c499592e78b37669d4ddbec2ffa34efc2f136ed9c43bc00c0e954f67f",
-    "poc/MODULE.bazel": "1102044178454f002fa96cf0d93b2707bbb11cfc0e8b1cc082897d585fba7099",
-    "poc/README.md": "93d64fe606a05b456442983444a05d3620bf8fda7a9bfab4c54695f45b184645",
+    "poc/MODULE.bazel": "6cf8b0cc754ac3835569155d01a4f9fdaffa61a3016d994d3905643635016375",
+    "poc/README.md": "5aeea683eb477243a5e5a6fabd55cea8a0dc1d477186c89aeec423a8af816d73",
     "poc/STATUS.s001.fulfillment.md": "ccb534288ad77c76896b343614db0846d8ed08a34184c05bf924a1c65cc3ab8c",
     "poc/build/Publish-ProjectArchive.ps1": "91179aebfbe5f6473e016f231398d3f2604def0ec9bcd85e5df933863a2624a9",
     "poc/build/build-all.ps1": "0f12b851ae24a9076514b012fe25da85cfe51e4293fe42f3dd15da4742a63b3c",
-    "poc/build/doctor.ps1": "2dcd2e9bd14645b894327cb8eed6721381020645bd7703a7ebaed93b931f01b4",
+    "poc/build/doctor.ps1": "834c9b351c8ed2427786f22d4c39a013cb7c13f6707aeadafd79472127e70361",
     "poc/build/images.ps1": "b25602b51dcb76a48f575596483c0816822b0da005def2dd62e9c856444c76af",
     "poc/build/run-tests.ps1": "8536842e098036f32cc0da31480f9a95627fae68eddb6efa6969c64bc510d770",
     "poc/build/serve-local.ps1": "92369043907a531fe29f4aa9b3c5f5d22add7c71e4695e2ba1a78177d021f3b9",
@@ -72,8 +72,8 @@
     "poc/components/apps/web-spa/BUILD.bazel": "2cb03dd6245b343c7f8ad693de8d5ce0c7f7de2657f5a0debc8b703e2a46511e",
     "poc/components/apps/web-spa/build.sh": "81fa8c414540a2c2e927b230e72dbefa99fa57bc49f668535d2a4169f052154b",
     "poc/components/apps/web-spa/index.html": "6de5c5c55ecf8b112ae2b8270dbedfed1904f2b3d90c0c9ab8ec251324205238",
-    "poc/components/apps/web-spa/package-lock.json": "cc62ce3c071908da3e1f926c236f98ea471872f9808a8e7aa0c31416ab6860f7",
-    "poc/components/apps/web-spa/package.json": "1099ce1370d217cf526fb068483b2d87ae4af2322f71cad2e59b5cd9df33d139",
+    "poc/components/apps/web-spa/package-lock.json": "da89853a8ed4e70facde55252505d229e6d310beab66f07c64bc667e7b7495a2",
+    "poc/components/apps/web-spa/package.json": "5e271a85d18e1c31c2aec59e7d6a020eb1d49f0ee488f63fc296880ece0a6b81",
     "poc/components/apps/web-spa/public/icon-64.png": "56dc53a5ce9210e8fba09db3f06f11bc5d16a82adfc40582305fc5b2e3194235",
     "poc/components/apps/web-spa/public/icon.svg": "cfed608569683e5d021c554483cfed2f6ece70fa956a8a9705616caf9f19edca",
     "poc/components/apps/web-spa/src/App.tsx": "ddfc452f930d2a61529a1c0fa1749144c1492e2bcd13eb8fccb98444175f6c9f",
@@ -91,8 +91,8 @@
     "poc/components/art/palette.json": "c4292f8ea397838c7812411d77e779ba034ecc90d297e1b42a2c66f544a86021",
     "poc/components/edge/slice-runtime/BUILD.bazel": "153579eb6bacd43a8421f5b2180ca1c80ce1ad674e7ec85f0bc5d3dee150a99b",
     "poc/components/edge/slice-runtime/Cargo.toml": "a41e936ff8efcf49db84e1fb18751991d4753105cb388c38b96ff3685d32b905",
-    "poc/components/edge/slice-runtime/Dockerfile": "373175c4dd886eda31bf89abebe0b4a874091fccf2c0896355d3abec648927b1",
-    "poc/components/edge/slice-runtime/src/main.rs": "a6d832c46a328b1274031133cfbaa4d833b20dd678dcab03d2e0e1a859220645",
+    "poc/components/edge/slice-runtime/Dockerfile": "9e9b0e885154916466615f8c25110f9217311d041ec7f6bafc51f4014e6750c1",
+    "poc/components/edge/slice-runtime/src/main.rs": "598ed7c60118caaeae993dadaec0c3a638ab263b98777011a762a3c8b6477c6e",
     "poc/components/lib/amisad-common/BUILD.bazel": "3bf5f97350d97a2011c7d5bf399c365b088d9af96652759b10e7ec0f66889b78",
     "poc/components/lib/amisad-common/Cargo.toml": "eeba89c7686b98e03a1f89a24d4714fb2c203f404a04b213c272431f2257f344",
     "poc/components/lib/amisad-common/locales/en-US.json": "8f14944ecd46027571fc58fa7b678c722694f6323c83761608edc8ffea6ec642",
@@ -105,43 +105,43 @@
     "poc/components/lib/amisad-common/src/shutdown.rs": "65b628c84aaadfba6474de2212f1b0b559863d651a7b89211b0ec0ab876e82d2",
     "poc/components/services/ads-svc/BUILD.bazel": "0aa174658c9b13595640af5f2c11ca12b9025d42cd03797f0ea0147f66322ee5",
     "poc/components/services/ads-svc/Cargo.toml": "6617bd22dff522e404bb3d625198c24feca549aa27c29adf05c6dc0bb907b23a",
-    "poc/components/services/ads-svc/Dockerfile": "17c1d76563a144ec95d072669d460cdfdd926b4916eb1fc0dcee5caecb8eb295",
+    "poc/components/services/ads-svc/Dockerfile": "f591b23a2dd9bca41aaf0681762462cd5266dae4f28e1183a4f515d0d4930bfc",
     "poc/components/services/ads-svc/src/main.rs": "66563115ca31d0184f29a2660d663e32979b178a8ea717a4f9b1679b45ac75f1",
     "poc/components/services/audit-svc/BUILD.bazel": "da8930b3bc517a075d664fdc4db82a0f2aa9535bf6bde014e9b92efbd5714cff",
     "poc/components/services/audit-svc/Cargo.toml": "7cafe2b3aa10aaa6d789e3b373eeed56cfe07c01e93bc57a42f41622ad5d0290",
-    "poc/components/services/audit-svc/Dockerfile": "6db7fc6ff61bc4b03691981f55ffaabe0d2891e8477cfc416951f5e8b81a72bd",
+    "poc/components/services/audit-svc/Dockerfile": "565129f44c17ee6602de7569aa2b634473d0ed44ab21bd0e6d616caaf8764d32",
     "poc/components/services/audit-svc/src/main.rs": "7d4e8d8d84ddad1f92669c9e527f506a089b667ce318ce13e573b9d55d618f23",
     "poc/components/services/connect-svc/BUILD.bazel": "45a0d5d351338a5071dd17037f1ac91ab76244a1ac4f794c44ec11b281452810",
     "poc/components/services/connect-svc/Cargo.toml": "e131c3d5e7134712b3183e3e5ff46af2ca54af2681ff73066411c41bf8d12613",
-    "poc/components/services/connect-svc/Dockerfile": "6f2762ea7b64ea294d949b2b565278625c1e2749ed2c025a266aa37bb3e38767",
+    "poc/components/services/connect-svc/Dockerfile": "34c82dcf0e14659228ad141697c6dbca6c4eaba1406763f135525ec7f6e677f9",
     "poc/components/services/connect-svc/src/main.rs": "90b005bbd6a45cc648d824b27e3a58a5f928937edce30107c6ab66a1da6f7d16",
     "poc/components/services/fabric-coordinator/BUILD.bazel": "0cb7ccc9c576c55233b41f7499f81b599eb8a2b1112f61541c81d6bd154b5391",
     "poc/components/services/fabric-coordinator/Cargo.toml": "b796862e675871df224f35d6e041bec21f98ea25d051b8d617f39a30b16d62d5",
-    "poc/components/services/fabric-coordinator/Dockerfile": "eb7668dc043b590d707d3424b789b915ec95c2f878d1eef8d343634b9ee4a5b0",
+    "poc/components/services/fabric-coordinator/Dockerfile": "d6bec649085a4bfdc9797ef43b76f5e6d6afc5c0c95026dec0dd0f997493c69d",
     "poc/components/services/fabric-coordinator/src/main.rs": "489cbd737fa44e3d656c2a58e393b0ca12528bf493c05c626ed1dd1282025567",
     "poc/components/services/identity-mock/BUILD.bazel": "0ac9baab651e196f50321ddb238a196eafd6b7b30d04973569c14958cf619060",
     "poc/components/services/identity-mock/Cargo.toml": "032725b563bf78ba85d260e9d2b3747e78f8822f3163f612d2824c99acc1a0ca",
-    "poc/components/services/identity-mock/Dockerfile": "9f9ec7b63f87a481a4367ced7e330b6acccf33bde868c39d7fa32bcebe8063d5",
+    "poc/components/services/identity-mock/Dockerfile": "a8a3a4749a8c893215a6d1de589eb7f7faa04f361cfa6ae0636584e3c8e8bd48",
     "poc/components/services/identity-mock/src/main.rs": "71b681fa29b7031c6aeba95b9cfb520a34db175b42ff15dbb128fade1535c95f",
     "poc/components/services/insights-svc/BUILD.bazel": "c5358b1b25dcfbe5469e14e28b912b32dfaa8696212606d4cb0382fbdfa61fc8",
     "poc/components/services/insights-svc/Cargo.toml": "cd2448405fdad27f88aa75f61235b2e33e1c29eaa54d5683aa1c59a9c9100aed",
-    "poc/components/services/insights-svc/Dockerfile": "63d1e8360f075466e9eaaa7c345bc65502fa8c7754945b5deeb7d6653129f749",
+    "poc/components/services/insights-svc/Dockerfile": "5623b6d41f5e9bebbde97feb350db78f303746756da243292f83d0030c75c7b7",
     "poc/components/services/insights-svc/src/main.rs": "f3648c772c34df1098b917a855e5b57ad9155cba865ff9c5bed4c7e34e93cb9f",
     "poc/components/services/ledger-svc/BUILD.bazel": "03e35e8deadbfa4338eff5bd6e0a4a4f87a2026bb07fba06e2ed7b00119abec8",
-    "poc/components/services/ledger-svc/Cargo.toml": "26bf818337d3cbd2321f104c5db1c887f9a4c12f47408f7568049c49bc3dc353",
-    "poc/components/services/ledger-svc/Dockerfile": "d546a6c6bb43b9c3183221d31c2e02cbc8ef45ff018633221e08e3907029de37",
+    "poc/components/services/ledger-svc/Cargo.toml": "3785dbbe8c00498dc3c735c43a4838624983b8698bf76b1084fd072dabd31602",
+    "poc/components/services/ledger-svc/Dockerfile": "4d56e2758836a0c466cb55233dd789b34005551ffff7ae1b371f52c73d4b805a",
     "poc/components/services/ledger-svc/src/main.rs": "c94acf8d40682161fdddebf87fd46e3491511ff7d144f7a7006597e860ca99dd",
     "poc/components/services/platform-svc/BUILD.bazel": "4f760a291a539fb073f62180f7d189a096a4ac35612007282ebedb06ba97f7d8",
     "poc/components/services/platform-svc/Cargo.toml": "a99a432d7422667d400f6573bc3a5271c174eb8f484450868408e271f3789e96",
-    "poc/components/services/platform-svc/Dockerfile": "6d5ba85843a9bcdc478c46a7916dfba6b515e6551749df291963db8e102ad38f",
+    "poc/components/services/platform-svc/Dockerfile": "936329bbd0cca489f20b5558baf20ead16997416fd6de1b85ee3c4cf63f4f130",
     "poc/components/services/platform-svc/src/main.rs": "e95e85fb218103ebb5a48fa803ee7010ab01370806db673797a917a5536d33c3",
     "poc/components/services/resource-svc/BUILD.bazel": "638c6e1b7a763de6461c11d8f321bf1d98f8fa589be53b10ede24bb8010aa975",
-    "poc/components/services/resource-svc/Cargo.toml": "cd1632f288e33cc1e3d7e969d2f6b4e924ba5287226d8c5ac3dc70166e5bbf55",
-    "poc/components/services/resource-svc/Dockerfile": "50eeb08156a158172e3e53d45f4260dc60245c66f1ea12ad0227ac98d105deef",
+    "poc/components/services/resource-svc/Cargo.toml": "863dbca9629bc867db598c40542b6d6412bb1f7b5f13d75c4544f5b80f0cdece",
+    "poc/components/services/resource-svc/Dockerfile": "3d3f95744296fa3eade67936c82da61063eec27aeca694de5aba7c63dd666067",
     "poc/components/services/resource-svc/src/main.rs": "5b5588bd5b70ec8c7fbf8298fa15b4e456b271ada46ff60b8e1c0cd84286386f",
     "poc/components/services/seller-svc/BUILD.bazel": "fac2bd494156c4192d7576ed0d2ff73440ef698f653ad38740d350de6ddb513b",
-    "poc/components/services/seller-svc/Cargo.toml": "20f3d155a6ed90cfda32a78ce4456d2681ea19caafc85e9dc06f73b46acad476",
-    "poc/components/services/seller-svc/Dockerfile": "2b7daa8525eb0702e9cac4f34e82c1bd96a181fedfea8dfa496dbc388c6fac86",
+    "poc/components/services/seller-svc/Cargo.toml": "ee55842f7ce5f68521488734529aab608a54dcdc5a2db33d5077ccbd807dc8cc",
+    "poc/components/services/seller-svc/Dockerfile": "e7d1d5d105575d9c4927da00e4975779f84580758bd61d360c06fbd791289447",
     "poc/components/services/seller-svc/src/main.rs": "abf675562e5e4424662f9f482966942be8b5b2128825e0f5baa203016d9d4d3e",
     "poc/config/localhost/components.yml": "1040172ca96c604adc236f497c831050c91154b22ac099e3fba4f5c3024b9b9a",
     "poc/config/localhost/resources.yml": "cc2fc062240f36154efa3c334aefe4337bed8d9c04098ab6c9d96e8c6abe59cb",
@@ -201,9 +201,9 @@
     "poc/test/database_secret_contracts.py": "734d77e82e1d88f5a0e74a2822a72a7af8f60e92b251216e5eb9a388de338fab",
     "poc/test/deep_find_contracts.cjs": "50efae8852b386baee6fda77e3e98cd1cd8319965265f93a6b4447fac255a56b",
     "poc/test/demo_script_contracts.cjs": "75ee352fcc0f99e3305e0dfe6ab3cedac91a6b8f643226d415a83a1dbfbb5b2f",
-    "poc/test/download_contracts.py": "5473c28c604a92fab1ad791f570cdfed3dc1043d7ada763147665c1a5dbf4cbb",
+    "poc/test/download_contracts.py": "1eb91e18fda1b696cd35bbdb6689b222d5ac6071a511ae09b66f8b722c95da6b",
     "poc/test/fixtures/http_lifecycle.rs": "291130c1deddf0d641ef15131c06f904c414bf007e552c8f2e86c2edb3124dee",
-    "poc/test/host_contracts.ps1": "9cd2ae0a5d40a2cfad64c1158190f1c0143bf4478187d61f9e26470b35bbfa7d",
+    "poc/test/host_contracts.ps1": "b65b41ad282efcb45669cfe5d614cdae4f4cdf19c658be540a7bd5f043b9c855",
     "poc/test/http_shutdown_contracts.py": "5a484a78089afe48ab70310c989791f8bc6068702e018c0fdbca494dc5d9e1d9",
     "poc/test/image_import_contracts.py": "61ba2211293a728f2582552d989e7a4628ee892b0fc70aca4d9b33a077cd2ca7",
     "poc/test/low_browser_contracts.cjs": "190989eb9bd3b599429e8a6892c90f8c125268925669e70928cd2345d3479f34",
@@ -212,7 +212,7 @@
     "poc/test/slice_runtime_http_contracts.py": "b7c28fd614db512217f28761faf498fe9181ce3d273cbd0b35d47f1d1b660826",
     "poc/test/slice_runtime_stop_contracts.py": "de14c7852d607564a49c9facbf6f92516941fe56f77b3fc88f052e9727a1e95d",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh": "1de07eaf61eba3c9f3e632651da4b4f9d56625cb80954b4d1022c171d7a02f84",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh": "dd1f286bdde43ff7b96371e6c0ab8a214ac1174eaaad5db8e63bd6251a7642bd",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh": "7529d3a36d9e6902a3a2cb7f67208d7b5eb9606aa99f35416d73fcf295f799a2",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh": "1e9d353954f7316b607b66bbcc173c0cd1b7454b910bcd014f3a0a38c4e360bd",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh": "0a5199b2af24e453318cf8e12c9a42da70b395959e9c5ae64ebcf9d3dc561f0c",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh": "3d6b18e395647ae84767278f2b455aa6815f659b54e1f10141afec3f153c17d5",
@@ -297,7 +297,7 @@
     "tools/sbom_provisioning.py": "7589dbef8e7997ff017739a23fea72718ee45e7071091f718ac053eafd7b47bf"
   },
   "counts": {
-    "repository": 182,
+    "repository": 188,
     "hosts": 0,
     "guests": 24
   },
@@ -321,7 +321,7 @@
         "notes": [
           "Bazel registry transitive dependencies are unresolved without a tracked module lock."
         ],
-        "version": "0.74.0"
+        "version": "0.75.0"
       },
       {
         "name": "rules_shell",
@@ -478,7 +478,7 @@
         "dependencies": [
           "cargo:proc-macro2@1.0.107",
           "cargo:quote@1.0.47",
-          "cargo:syn@3.0.7"
+          "cargo:syn@3.0.10"
         ],
         "completeness": "locked",
         "notes": [
@@ -610,7 +610,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
+            "content": "87a0cf66fd1eb2fb7b822cb78370d82303750809bc6ba855f3f58e517d3238db"
           }
         ],
         "dependencies": [],
@@ -618,8 +618,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "3.20.3",
-        "purl": "pkg:cargo/bumpalo@3.20.3"
+        "version": "3.20.4",
+        "purl": "pkg:cargo/bumpalo@3.20.4"
       },
       {
         "name": "buyer-client",
@@ -826,7 +826,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "a6ef517f0926dd24a1582492c791b6a4818a4d94e789a334894aa15b0d12f55c"
+            "content": "be95d4a884358a21a199689323c29e9256b4a1b315e22f183d155422041d3a9a"
           }
         ],
         "dependencies": [],
@@ -834,8 +834,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.10.2",
-        "purl": "pkg:cargo/const-oid@0.10.2"
+        "version": "0.10.3",
+        "purl": "pkg:cargo/const-oid@0.10.3"
       },
       {
         "name": "cpufeatures",
@@ -856,7 +856,7 @@
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.190"
+          "cargo:libc@0.2.191"
         ],
         "completeness": "locked",
         "notes": [
@@ -908,7 +908,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "03bb0e1cc970d482d121d9a1744999169b69a07470b3d644a7894e53fcaf4574"
+            "content": "261af4dc7a06ea8a527a8717d8cbba3417530d6ea14e1edb3de6b67806be474f"
           }
         ],
         "dependencies": [
@@ -918,8 +918,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.4.3",
-        "purl": "pkg:cargo/ctutils@0.4.3"
+        "version": "0.4.8",
+        "purl": "pkg:cargo/ctutils@0.4.8"
       },
       {
         "name": "digest",
@@ -941,9 +941,9 @@
         ],
         "dependencies": [
           "cargo:block-buffer@0.12.1",
-          "cargo:const-oid@0.10.2",
+          "cargo:const-oid@0.10.3",
           "cargo:crypto-common@0.2.2",
-          "cargo:ctutils@0.4.3"
+          "cargo:ctutils@0.4.8"
         ],
         "completeness": "locked",
         "notes": [
@@ -1165,7 +1165,7 @@
         ],
         "dependencies": [
           "cargo:cfg-if@1.0.5",
-          "cargo:libc@0.2.190",
+          "cargo:libc@0.2.191",
           "cargo:r-efi@6.0.0",
           "cargo:rand_core@0.10.1"
         ],
@@ -1303,20 +1303,20 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "7883d941dae510fb2d978fc3fe018c71c9e2892fd38854de3e8b92c2e5ad9cc5"
+            "content": "8dc09d2154098bbf4ef54eab6b117a3c24cbbffe94046b16ee6d6d4510584d3a"
           }
         ],
         "dependencies": [
           "cargo:cfg-if@1.0.5",
           "cargo:futures-util@0.3.34",
-          "cargo:wasm-bindgen@0.2.129"
+          "cargo:wasm-bindgen@0.2.130"
         ],
         "completeness": "locked",
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.3.106",
-        "purl": "pkg:cargo/js-sys@0.3.106"
+        "version": "0.3.107",
+        "purl": "pkg:cargo/js-sys@0.3.107"
       },
       {
         "name": "ledger-svc",
@@ -1362,7 +1362,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
+            "content": "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
           }
         ],
         "dependencies": [],
@@ -1370,8 +1370,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.2.190",
-        "purl": "pkg:cargo/libc@0.2.190"
+        "version": "0.2.191",
+        "purl": "pkg:cargo/libc@0.2.191"
       },
       {
         "name": "libredox",
@@ -1392,7 +1392,7 @@
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.190"
+          "cargo:libc@0.2.191"
         ],
         "completeness": "locked",
         "notes": [
@@ -1444,7 +1444,7 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
+            "content": "5d15f86d12da44cd8d4ec3c73984537eb7f4cadcb9776a575a0a8a05ca11005c"
           }
         ],
         "dependencies": [],
@@ -1452,8 +1452,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.4.34",
-        "purl": "pkg:cargo/log@0.4.34"
+        "version": "0.4.35",
+        "purl": "pkg:cargo/log@0.4.35"
       },
       {
         "name": "md-5",
@@ -1525,11 +1525,11 @@
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "1788edb87fdc09c7e26304471e2f5be8cdefb1b6930d6e3985fc02ff53bf86ee"
+            "content": "20521a903f02b0a573cd6840e9d0a5a0cc043d361fe924092cd70f8556cc9c4a"
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.190",
+          "cargo:libc@0.2.191",
           "cargo:wasi@0.11.1+wasi-snapshot-preview1",
           "cargo:windows-sys@0.61.2"
         ],
@@ -1537,8 +1537,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "1.2.4",
-        "purl": "pkg:cargo/mio@1.2.4"
+        "version": "1.2.5",
+        "purl": "pkg:cargo/mio@1.2.5"
       },
       {
         "name": "objc2-core-foundation",
@@ -1597,32 +1597,6 @@
         "purl": "pkg:cargo/objc2-system-configuration@0.3.2"
       },
       {
-        "name": "once_cell",
-        "kind": "library",
-        "ecosystem": "cargo",
-        "scope": "runtime",
-        "evidence": [
-          {
-            "path": "poc/Cargo.lock",
-            "line": 347,
-            "detail": "Declared dependency"
-          }
-        ],
-        "hashes": [
-          {
-            "alg": "SHA256",
-            "content": "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
-          }
-        ],
-        "dependencies": [],
-        "completeness": "locked",
-        "notes": [
-          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
-        ],
-        "version": "1.21.4",
-        "purl": "pkg:cargo/once_cell@1.21.4"
-      },
-      {
         "name": "parking_lot",
         "kind": "library",
         "ecosystem": "cargo",
@@ -1630,7 +1604,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 353,
+            "line": 347,
             "detail": "Declared dependency"
           }
         ],
@@ -1659,7 +1633,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 363,
+            "line": 357,
             "detail": "Declared dependency"
           }
         ],
@@ -1671,9 +1645,9 @@
         ],
         "dependencies": [
           "cargo:cfg-if@1.0.5",
-          "cargo:libc@0.2.190",
+          "cargo:libc@0.2.191",
           "cargo:redox_syscall@0.5.18",
-          "cargo:smallvec@1.16.3",
+          "cargo:smallvec@1.16.5",
           "cargo:windows-link@0.2.1"
         ],
         "completeness": "locked",
@@ -1691,7 +1665,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 376,
+            "line": 370,
             "detail": "Declared dependency"
           }
         ],
@@ -1717,7 +1691,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 382,
+            "line": 376,
             "detail": "Declared dependency"
           }
         ],
@@ -1746,7 +1720,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 392,
+            "line": 386,
             "detail": "Declared dependency"
           }
         ],
@@ -1774,7 +1748,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 401,
+            "line": 395,
             "detail": "Declared dependency"
           }
         ],
@@ -1805,7 +1779,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 407,
+            "line": 401,
             "detail": "Declared dependency"
           }
         ],
@@ -1828,7 +1802,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 428,
+            "line": 422,
             "detail": "Declared dependency"
           }
         ],
@@ -1846,8 +1820,8 @@
           "cargo:hmac@0.13.0",
           "cargo:md-5@0.11.0",
           "cargo:memchr@2.8.3",
-          "cargo:rand@0.10.3",
-          "cargo:sha2@0.11.0",
+          "cargo:rand@0.10.4",
+          "cargo:sha2@0.11.1",
           "cargo:stringprep@0.1.5"
         ],
         "completeness": "locked",
@@ -1865,7 +1839,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 446,
+            "line": 440,
             "detail": "Declared dependency"
           }
         ],
@@ -1910,7 +1884,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 414,
+            "line": 408,
             "detail": "Declared dependency"
           }
         ],
@@ -1924,9 +1898,9 @@
           "cargo:bytes@1.12.1",
           "cargo:fallible-iterator@0.2.0",
           "cargo:futures-util@0.3.34",
-          "cargo:log@0.4.34",
+          "cargo:log@0.4.35",
           "cargo:tokio-postgres@0.7.18",
-          "cargo:tokio@1.53.2"
+          "cargo:tokio@1.54.1"
         ],
         "completeness": "locked",
         "notes": [
@@ -1943,7 +1917,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 457,
+            "line": 451,
             "detail": "Declared dependency"
           }
         ],
@@ -1954,7 +1928,7 @@
           }
         ],
         "dependencies": [
-          "cargo:unicode-ident@1.0.26"
+          "cargo:unicode-ident@1.0.27"
         ],
         "completeness": "locked",
         "notes": [
@@ -1971,7 +1945,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 466,
+            "line": 460,
             "detail": "Declared dependency"
           }
         ],
@@ -1999,7 +1973,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 475,
+            "line": 469,
             "detail": "Declared dependency"
           }
         ],
@@ -2025,14 +1999,14 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 481,
+            "line": 475,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "65c9fb96cbc91e3478eaae79a69fcd3f1ae4ad052e471fe6732fff548984b4af"
+            "content": "8f6fa277c67e6ea590466f04c3fe82cb509f0864fe470643e5570de9514a9b11"
           }
         ],
         "dependencies": [
@@ -2044,8 +2018,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.10.3",
-        "purl": "pkg:cargo/rand@0.10.3"
+        "version": "0.10.4",
+        "purl": "pkg:cargo/rand@0.10.4"
       },
       {
         "name": "rand_core",
@@ -2055,7 +2029,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 492,
+            "line": 486,
             "detail": "Declared dependency"
           }
         ],
@@ -2081,7 +2055,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 498,
+            "line": 492,
             "detail": "Declared dependency"
           }
         ],
@@ -2114,7 +2088,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 507,
+            "line": 501,
             "detail": "Declared dependency"
           }
         ],
@@ -2138,7 +2112,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 515,
+            "line": 509,
             "detail": "Declared dependency"
           }
         ],
@@ -2164,7 +2138,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 521,
+            "line": 515,
             "detail": "Declared dependency"
           }
         ],
@@ -2195,7 +2169,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 527,
+            "line": 521,
             "detail": "Declared dependency"
           }
         ],
@@ -2219,7 +2193,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 535,
+            "line": 529,
             "detail": "Declared dependency"
           }
         ],
@@ -2247,7 +2221,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 544,
+            "line": 538,
             "detail": "Declared dependency"
           }
         ],
@@ -2275,7 +2249,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 553,
+            "line": 547,
             "detail": "Declared dependency"
           }
         ],
@@ -2288,7 +2262,7 @@
         "dependencies": [
           "cargo:proc-macro2@1.0.107",
           "cargo:quote@1.0.47",
-          "cargo:syn@3.0.7"
+          "cargo:syn@3.0.10"
         ],
         "completeness": "locked",
         "notes": [
@@ -2305,14 +2279,14 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 564,
+            "line": 558,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "446ba717509524cb3f22f17ecc096f10f4822d76ab5c0b9822c5f9c284e825f4"
+            "content": "47d7069beb7d6ac7b9acd1039986e73443f24234f41074da099d6f994ac9ad19"
           }
         ],
         "dependencies": [
@@ -2324,8 +2298,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.11.0",
-        "purl": "pkg:cargo/sha2@0.11.0"
+        "version": "0.11.1",
+        "purl": "pkg:cargo/sha2@0.11.1"
       },
       {
         "name": "siphasher",
@@ -2335,7 +2309,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 575,
+            "line": 569,
             "detail": "Declared dependency"
           }
         ],
@@ -2361,7 +2335,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 581,
+            "line": 575,
             "detail": "Declared dependency"
           }
         ],
@@ -2392,7 +2366,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 587,
+            "line": 581,
             "detail": "Declared dependency"
           }
         ],
@@ -2415,14 +2389,14 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 594,
+            "line": 588,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "5b3dc8af474f516a851ff4bd12db780f948b9250ad37211e4eec0bccea54e01b"
+            "content": "149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46"
           }
         ],
         "dependencies": [],
@@ -2430,8 +2404,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "1.16.3",
-        "purl": "pkg:cargo/smallvec@1.16.3"
+        "version": "1.16.5",
+        "purl": "pkg:cargo/smallvec@1.16.5"
       },
       {
         "name": "socket2",
@@ -2441,7 +2415,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 600,
+            "line": 594,
             "detail": "Declared dependency"
           }
         ],
@@ -2452,7 +2426,7 @@
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.190",
+          "cargo:libc@0.2.191",
           "cargo:windows-sys@0.61.2"
         ],
         "completeness": "locked",
@@ -2470,7 +2444,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 610,
+            "line": 604,
             "detail": "Declared dependency"
           }
         ],
@@ -2482,8 +2456,8 @@
         ],
         "dependencies": [
           "cargo:unicode-bidi@0.3.18",
-          "cargo:unicode-normalization@0.1.25",
-          "cargo:unicode-properties@0.1.4"
+          "cargo:unicode-normalization@0.1.26",
+          "cargo:unicode-properties@0.1.5"
         ],
         "completeness": "locked",
         "notes": [
@@ -2500,27 +2474,27 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 621,
+            "line": 615,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "d62a2e0561533f2ca2561d0cf27fd9fedb640a1bf2616ff5d5c80d99017faadc"
+            "content": "4ae9ccbea3a7b0b09443036490c8f34a8b1b760fd345e5c0dae0aac718faea79"
           }
         ],
         "dependencies": [
           "cargo:proc-macro2@1.0.107",
           "cargo:quote@1.0.47",
-          "cargo:unicode-ident@1.0.26"
+          "cargo:unicode-ident@1.0.27"
         ],
         "completeness": "locked",
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "3.0.7",
-        "purl": "pkg:cargo/syn@3.0.7"
+        "version": "3.0.10",
+        "purl": "pkg:cargo/syn@3.0.10"
       },
       {
         "name": "tinyvec",
@@ -2530,7 +2504,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 632,
+            "line": 626,
             "detail": "Declared dependency"
           }
         ],
@@ -2556,7 +2530,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 652,
+            "line": 646,
             "detail": "Declared dependency"
           }
         ],
@@ -2573,17 +2547,17 @@
           "cargo:fallible-iterator@0.2.0",
           "cargo:futures-channel@0.3.34",
           "cargo:futures-util@0.3.34",
-          "cargo:log@0.4.34",
+          "cargo:log@0.4.35",
           "cargo:parking_lot@0.12.5",
           "cargo:percent-encoding@2.3.2",
           "cargo:phf@0.13.1",
           "cargo:pin-project-lite@0.2.17",
           "cargo:postgres-protocol@0.6.12",
           "cargo:postgres-types@0.2.14",
-          "cargo:rand@0.10.3",
+          "cargo:rand@0.10.4",
           "cargo:socket2@0.6.5",
           "cargo:tokio-util@0.7.20",
-          "cargo:tokio@1.53.2",
+          "cargo:tokio@1.54.1",
           "cargo:whoami@2.1.3"
         ],
         "completeness": "locked",
@@ -2601,7 +2575,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 678,
+            "line": 672,
             "detail": "Declared dependency"
           }
         ],
@@ -2615,9 +2589,9 @@
           "cargo:bytes@1.12.1",
           "cargo:futures-core@0.3.34",
           "cargo:futures-sink@0.3.34",
-          "cargo:libc@0.2.190",
+          "cargo:libc@0.2.191",
           "cargo:pin-project-lite@0.2.17",
-          "cargo:tokio@1.53.2"
+          "cargo:tokio@1.54.1"
         ],
         "completeness": "locked",
         "notes": [
@@ -2634,20 +2608,20 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 638,
+            "line": 632,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
+            "content": "b52fd3255258d26fac7264ab5a76b53c13367136dc011d3d6ad4f8ed070396a3"
           }
         ],
         "dependencies": [
           "cargo:bytes@1.12.1",
-          "cargo:libc@0.2.190",
-          "cargo:mio@1.2.4",
+          "cargo:libc@0.2.191",
+          "cargo:mio@1.2.5",
           "cargo:pin-project-lite@0.2.17",
           "cargo:socket2@0.6.5",
           "cargo:windows-sys@0.61.2"
@@ -2656,8 +2630,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "1.53.2",
-        "purl": "pkg:cargo/tokio@1.53.2"
+        "version": "1.54.1",
+        "purl": "pkg:cargo/tokio@1.54.1"
       },
       {
         "name": "typenum",
@@ -2667,7 +2641,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 692,
+            "line": 686,
             "detail": "Declared dependency"
           }
         ],
@@ -2693,7 +2667,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 698,
+            "line": 692,
             "detail": "Declared dependency"
           }
         ],
@@ -2719,14 +2693,14 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 704,
+            "line": 698,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "d245f478577f809a851594d02313b640fb437e0bb33866753cff937863096954"
+            "content": "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
           }
         ],
         "dependencies": [],
@@ -2734,8 +2708,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "1.0.26",
-        "purl": "pkg:cargo/unicode-ident@1.0.26"
+        "version": "1.0.27",
+        "purl": "pkg:cargo/unicode-ident@1.0.27"
       },
       {
         "name": "unicode-normalization",
@@ -2745,14 +2719,14 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 710,
+            "line": 704,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
+            "content": "75cd3fb03d5288b3ba9a1ee103ac7e9cbb59f0b03d64f8ddfcc04dd42758a85d"
           }
         ],
         "dependencies": [
@@ -2762,8 +2736,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.1.25",
-        "purl": "pkg:cargo/unicode-normalization@0.1.25"
+        "version": "0.1.26",
+        "purl": "pkg:cargo/unicode-normalization@0.1.26"
       },
       {
         "name": "unicode-properties",
@@ -2773,14 +2747,14 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 719,
+            "line": 713,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "7df058c713841ad818f1dc5d3fd88063241cc61f49f5fbea4b951e8cf5a8d71d"
+            "content": "993ad287eb20e8ba755312801cfe1413e0f25d604075863acaddca10b04c1833"
           }
         ],
         "dependencies": [],
@@ -2788,8 +2762,8 @@
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.1.4",
-        "purl": "pkg:cargo/unicode-properties@0.1.4"
+        "version": "0.1.5",
+        "purl": "pkg:cargo/unicode-properties@0.1.5"
       },
       {
         "name": "wasi",
@@ -2799,7 +2773,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 725,
+            "line": 719,
             "detail": "Declared dependency"
           }
         ],
@@ -2825,7 +2799,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 731,
+            "line": 725,
             "detail": "Declared dependency"
           }
         ],
@@ -2853,7 +2827,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 740,
+            "line": 734,
             "detail": "Declared dependency"
           }
         ],
@@ -2881,7 +2855,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 749,
+            "line": 743,
             "detail": "Declared dependency"
           }
         ],
@@ -2909,29 +2883,29 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 781,
+            "line": 774,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "6f501a8bc3719dba86ef8ae4728879c08001bea749eb1333ac5b91e040e2a6b7"
+            "content": "2ca4b54280e455bd831e33a6b8e734baf432fe63fbc35c42ac14ce67a043a53a"
           }
         ],
         "dependencies": [
-          "cargo:bumpalo@3.20.3",
+          "cargo:bumpalo@3.20.4",
           "cargo:proc-macro2@1.0.107",
           "cargo:quote@1.0.47",
-          "cargo:syn@3.0.7",
-          "cargo:wasm-bindgen-shared@0.2.129"
+          "cargo:syn@3.0.10",
+          "cargo:wasm-bindgen-shared@0.2.130"
         ],
         "completeness": "locked",
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.2.129",
-        "purl": "pkg:cargo/wasm-bindgen-macro-support@0.2.129"
+        "version": "0.2.130",
+        "purl": "pkg:cargo/wasm-bindgen-macro-support@0.2.130"
       },
       {
         "name": "wasm-bindgen-macro",
@@ -2941,26 +2915,26 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 771,
+            "line": 764,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "2e29d0c35b16e224a7eeb5cd2d25e3e1968fbd65604117b44d3b789d00ee8535"
+            "content": "6e931a02a39abdbf66966fc35902b5ed58344750a70885bed4ebb3d8eaf28ed9"
           }
         ],
         "dependencies": [
           "cargo:quote@1.0.47",
-          "cargo:wasm-bindgen-macro-support@0.2.129"
+          "cargo:wasm-bindgen-macro-support@0.2.130"
         ],
         "completeness": "locked",
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.2.129",
-        "purl": "pkg:cargo/wasm-bindgen-macro@0.2.129"
+        "version": "0.2.130",
+        "purl": "pkg:cargo/wasm-bindgen-macro@0.2.130"
       },
       {
         "name": "wasm-bindgen-shared",
@@ -2970,25 +2944,25 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 794,
+            "line": 787,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "23f0c9c52aa7cd7d77769a4cfe2a9adb1b331f489a41d912ce14513d5ab995c6"
+            "content": "3b1f9c3798725016c6ee5f2f57869ec0831e8bbc0ab0310a86e787e97f41389e"
           }
         ],
         "dependencies": [
-          "cargo:unicode-ident@1.0.26"
+          "cargo:unicode-ident@1.0.27"
         ],
         "completeness": "locked",
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.2.129",
-        "purl": "pkg:cargo/wasm-bindgen-shared@0.2.129"
+        "version": "0.2.130",
+        "purl": "pkg:cargo/wasm-bindgen-shared@0.2.130"
       },
       {
         "name": "wasm-bindgen",
@@ -2998,29 +2972,28 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 758,
+            "line": 752,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "9bb54f33acc68fd454578d9820b0bde1a1a3d17aa17bb7b6595806d02886d409"
+            "content": "a0181c14ddd6c7b8b0b0132a5f1ea2f32be0d893cd3ea97b6e3b28886b8a3d1c"
           }
         ],
         "dependencies": [
           "cargo:cfg-if@1.0.5",
-          "cargo:once_cell@1.21.4",
           "cargo:rustversion@1.0.23",
-          "cargo:wasm-bindgen-macro@0.2.129",
-          "cargo:wasm-bindgen-shared@0.2.129"
+          "cargo:wasm-bindgen-macro@0.2.130",
+          "cargo:wasm-bindgen-shared@0.2.130"
         ],
         "completeness": "locked",
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.2.129",
-        "purl": "pkg:cargo/wasm-bindgen@0.2.129"
+        "version": "0.2.130",
+        "purl": "pkg:cargo/wasm-bindgen@0.2.130"
       },
       {
         "name": "web-sys",
@@ -3030,26 +3003,26 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 803,
+            "line": 796,
             "detail": "Declared dependency"
           }
         ],
         "hashes": [
           {
             "alg": "SHA256",
-            "content": "88261b9deccee56594c11a3460c462c41f58d148598fe70ad77070126a68aba4"
+            "content": "d7d179596ff5ec0f6de4db64d54011bde6289cc49603d3a6e4ce3f329207ab88"
           }
         ],
         "dependencies": [
-          "cargo:js-sys@0.3.106",
-          "cargo:wasm-bindgen@0.2.129"
+          "cargo:js-sys@0.3.107",
+          "cargo:wasm-bindgen@0.2.130"
         ],
         "completeness": "locked",
         "notes": [
           "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
         ],
-        "version": "0.3.106",
-        "purl": "pkg:cargo/web-sys@0.3.106"
+        "version": "0.3.107",
+        "purl": "pkg:cargo/web-sys@0.3.107"
       },
       {
         "name": "whoami",
@@ -3059,7 +3032,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 813,
+            "line": 806,
             "detail": "Declared dependency"
           }
         ],
@@ -3070,11 +3043,11 @@
           }
         ],
         "dependencies": [
-          "cargo:libc@0.2.190",
+          "cargo:libc@0.2.191",
           "cargo:libredox@0.1.25",
           "cargo:objc2-system-configuration@0.3.2",
           "cargo:wasite@1.0.2",
-          "cargo:web-sys@0.3.106"
+          "cargo:web-sys@0.3.107"
         ],
         "completeness": "locked",
         "notes": [
@@ -3091,7 +3064,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 826,
+            "line": 819,
             "detail": "Declared dependency"
           }
         ],
@@ -3117,7 +3090,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 832,
+            "line": 825,
             "detail": "Declared dependency"
           }
         ],
@@ -3145,7 +3118,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 841,
+            "line": 834,
             "detail": "Declared dependency"
           }
         ],
@@ -3301,7 +3274,7 @@
         "notes": [
           "Container OS/package contents were not scanned; tag-only images are mutable."
         ],
-        "versionConstraint": "1.98-slim-bookworm"
+        "versionConstraint": "1.99-slim-bookworm"
       },
       {
         "name": "flutter",
@@ -3361,10 +3334,10 @@
         ]
       },
       {
-        "name": "@oxc-project/types",
+        "name": "@emnapi/core",
         "kind": "library",
         "ecosystem": "npm",
-        "scope": "build",
+        "scope": "optional",
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
@@ -3375,7 +3348,126 @@
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "8d236b448caf3d52cbe44d73fed4b9ccb029ae8b06cff16e2353d6c043b3e7d8f71384d34f34a9a8a6ff4431aa261856d101d8212197c6ae7cdb01b1e93d754f"
+            "content": "333095a16b5c8383e6d81de37b998cbd832f8f732604ac3e7d4eef6ec25cf7f893f22a7afde6081e8fc3b26fe6afec2c1c1e92132243bb1074f58cbaafff3ee0"
+          }
+        ],
+        "dependencies": [
+          "npm:@emnapi/wasi-threads@2.2.0",
+          "npm:tslib@2.9.1"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "npm lock location: node_modules/@emnapi/core."
+        ],
+        "version": "2.0.0-beta.2",
+        "license": "MIT",
+        "purl": "pkg:npm/%40emnapi/core@2.0.0-beta.2"
+      },
+      {
+        "name": "@emnapi/runtime",
+        "kind": "library",
+        "ecosystem": "npm",
+        "scope": "optional",
+        "evidence": [
+          {
+            "path": "poc/components/apps/web-spa/package-lock.json",
+            "line": 38,
+            "detail": "npm lockfile package"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA512",
+            "content": "25cad23f33ef66e359bc9a8f4c5f45c36e4b6ce27c6afcc556569fda0ae61f80a4bb4a063f8eed460a8f65a75c7e3dd8a1930790556709815b40cf08fa2e5013"
+          }
+        ],
+        "dependencies": [
+          "npm:tslib@2.9.1"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "npm lock location: node_modules/@emnapi/runtime."
+        ],
+        "version": "2.0.0-beta.2",
+        "license": "MIT",
+        "purl": "pkg:npm/%40emnapi/runtime@2.0.0-beta.2"
+      },
+      {
+        "name": "@emnapi/wasi-threads",
+        "kind": "library",
+        "ecosystem": "npm",
+        "scope": "optional",
+        "evidence": [
+          {
+            "path": "poc/components/apps/web-spa/package-lock.json",
+            "line": 49,
+            "detail": "npm lockfile package"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA512",
+            "content": "24fece607dfc43bfa9c9301ed78ada6472d020aec10ca6ddc238be5e2de971dffa424258407dd25f8c2ee84a651ab1895917a9a0dcde75f9b41b707d6787bd47"
+          }
+        ],
+        "dependencies": [
+          "npm:tslib@2.9.1"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "npm lock location: node_modules/@emnapi/wasi-threads."
+        ],
+        "version": "2.2.0",
+        "license": "MIT",
+        "purl": "pkg:npm/%40emnapi/wasi-threads@2.2.0"
+      },
+      {
+        "name": "@napi-rs/wasm-runtime",
+        "kind": "library",
+        "ecosystem": "npm",
+        "scope": "optional",
+        "evidence": [
+          {
+            "path": "poc/components/apps/web-spa/package-lock.json",
+            "line": 60,
+            "detail": "npm lockfile package"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA512",
+            "content": "991c83984c3dfdf0835c219f2f5b1b808c3f1942b43d5c515b863080f37ad45dcb43e7d2ca80456ab255ce01b2845ea447311067415e8c3aa6e162d749ea909b"
+          }
+        ],
+        "dependencies": [
+          "npm:@emnapi/core@2.0.0-beta.2",
+          "npm:@emnapi/runtime@2.0.0-beta.2",
+          "npm:@tybys/wasm-util@0.10.4"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "npm lock location: node_modules/@napi-rs/wasm-runtime."
+        ],
+        "version": "1.2.6",
+        "license": "MIT",
+        "purl": "pkg:npm/%40napi-rs/wasm-runtime@1.2.6"
+      },
+      {
+        "name": "@oxc-project/types",
+        "kind": "library",
+        "ecosystem": "npm",
+        "scope": "build",
+        "evidence": [
+          {
+            "path": "poc/components/apps/web-spa/package-lock.json",
+            "line": 82,
+            "detail": "npm lockfile package"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA512",
+            "content": "d43bb2838f1374935dca1101f179f52f7e9b4fd3efe8652d94a8c7c4ecacf3191a17fad0ab75c913e6c0bab48afc0808cf998616c6fbedc9fd3dbdb4f9609273"
           }
         ],
         "dependencies": [],
@@ -3383,9 +3475,9 @@
         "notes": [
           "npm lock location: node_modules/@oxc-project/types."
         ],
-        "version": "0.153.0",
+        "version": "0.156.0",
         "license": "MIT",
-        "purl": "pkg:npm/%40oxc-project/types@0.153.0"
+        "purl": "pkg:npm/%40oxc-project/types@0.156.0"
       },
       {
         "name": "@rolldown/binding-android-arm-eabi",
@@ -3395,14 +3487,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 36,
+            "line": 92,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "56efcd202ae0751bd439e689648c81d853fadece9f3bfe2e77997c7579b10f1f720f29fe98dd32fa0b2fb15be24a58be4f7eb502aa34878e84b8ca286ebc1ac0"
+            "content": "7be11b7b4593fbdb5b5e634a3c8882f18ad6007630ba0de6ea2e29deb6461ae95f66b8b58ed2381ec953f8e66715ffce207a30585ef50d3947c1704fd92880ec"
           }
         ],
         "dependencies": [],
@@ -3410,9 +3502,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-android-arm-eabi."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-android-arm-eabi@1.2.19"
       },
       {
         "name": "@rolldown/binding-android-arm64",
@@ -3422,14 +3514,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 53,
+            "line": 109,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "e8b12822b1b2e6fbc27766e8367bf6b283d25198ff3d1be1a7c47fb7d2a55fe9886714e1204fd9ab1ac65f19ae357d05baf405bcb759afb4b81eb62960156111"
+            "content": "84ea266eb4c9faccedd9c884cd2ee8080efc94c3c1805e54310582248c8d7e7ac8ec62e5f0762816a0a7a4bda070f39a5ccaabc86094e44c5d40ac830dc0bec8"
           }
         ],
         "dependencies": [],
@@ -3437,9 +3529,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-android-arm64."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-android-arm64@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-android-arm64@1.2.19"
       },
       {
         "name": "@rolldown/binding-darwin-arm64",
@@ -3449,14 +3541,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 70,
+            "line": 126,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "09a252473950e90fb390331503d3a45710635683d1083104defd05489f64210060463140a40dd28b88a385b3555238bb649b7e3df3b47b8eaacb89cf2271d43c"
+            "content": "5e8300da9c022864d0cd48cf82d47091e747e1699785d20f293ea5ea83b17753d46cda1d188e837017a480dec40bfffec77a5f0585ffa8bd60366640aa2bf0e6"
           }
         ],
         "dependencies": [],
@@ -3464,9 +3556,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-darwin-arm64."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-darwin-arm64@1.2.19"
       },
       {
         "name": "@rolldown/binding-darwin-x64",
@@ -3476,14 +3568,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 87,
+            "line": 143,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "7b8af7e342398714b32640f7609071833abfac9df0c31c1d2cb6f614fb75669c9e9b6d27ad03d3d750c310491acf0c5a1ee987f30a6096ca7f3b3823ff04fa9b"
+            "content": "ce8f04b124b0319098fdef9f46719a5f4d981a0bc90f4caf84d8bff61a463c0d8c27d645f1d3c2c3be5419fa48e8ea50fe6c91fdd2189a8811bea8990f44eb5e"
           }
         ],
         "dependencies": [],
@@ -3491,9 +3583,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-darwin-x64."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-darwin-x64@1.2.19"
       },
       {
         "name": "@rolldown/binding-freebsd-x64",
@@ -3503,14 +3595,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 104,
+            "line": 160,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "8680560d9e3f2bf98929531bb2051dd637e90360e23ab279e26a5e80e6d4f53047041aed5f814b2172494110cf67fd839fdd46bcfa1bf99da1c0a2737f813949"
+            "content": "3bc21200e7c8d678fb02e04f777d05485e3bcfb7fb973964e69a105468228a4bd0b86101158bd6f248be5049d3f9824f9cd1a34339f7d38925b783bd15413b98"
           }
         ],
         "dependencies": [],
@@ -3518,9 +3610,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-freebsd-x64."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-freebsd-x64@1.2.19"
       },
       {
         "name": "@rolldown/binding-linux-arm-gnueabihf",
@@ -3530,14 +3622,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 121,
+            "line": 177,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "a05f5f66edef4d69d38950240c5c54f4f24bb759e1db42bd451a6e1ec47b6671362fb5e8a2405b0c154ba2309548b19bbed4a5c5e50d9e3023e836cdb0acb36e"
+            "content": "fe56026dae4d3b4caae12d2318c1fc41306d92f431a178e8416cc5e41716a7d32307d8f15510f51900cda1f9158dc3a3df40d6ca12c837fe0e7bad092b368e37"
           }
         ],
         "dependencies": [],
@@ -3545,9 +3637,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-arm-gnueabihf."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-linux-arm-gnueabihf@1.2.19"
       },
       {
         "name": "@rolldown/binding-linux-arm64-gnu",
@@ -3557,14 +3649,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 138,
+            "line": 194,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "0d3a5bffe8cc8aa58c3e0a619f892c5b5cd6f972c9e9d249f4532f9c893d236f752e109cb4c3e131826b3f9b7da7a0bda9adca5da7437541191c168f87790dc5"
+            "content": "a66fdaa453019d26c56f73ba9c6e691ced62a87859ae31831448d29bea2df49d7b5d73ef1fd2fdd32e61fa381f1c213e41d96cbf2f2a284714e152b18230febc"
           }
         ],
         "dependencies": [],
@@ -3572,9 +3664,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-arm64-gnu."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-linux-arm64-gnu@1.2.19"
       },
       {
         "name": "@rolldown/binding-linux-arm64-musl",
@@ -3584,14 +3676,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 158,
+            "line": 214,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "c54f8abeff4dd80dd2637e73161d45596363c5b69d13f04a7aa9e45deeef49c538199b30ef9ec19559832c84d912af033e993a9bbba80d890aecffb1fee5393b"
+            "content": "2b54a6429dc51627219fca2aacd230bc5a19e7072f8c2ee0a01ce968c36f2dff4565cf9007f42f2e69e92598000061e20fdf34b4ff056599d79362bde2bbe5c6"
           }
         ],
         "dependencies": [],
@@ -3599,9 +3691,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-arm64-musl."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-linux-arm64-musl@1.2.19"
       },
       {
         "name": "@rolldown/binding-linux-ppc64-gnu",
@@ -3611,14 +3703,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 178,
+            "line": 234,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "5cc93f867861db9a10ef9e8b7256f5435d61e25974c42d04b1ae70e15ce9fa6004d92dc018981e3344a89eb22063c7c78636ab6fa85ca13bb0a051b45553f68a"
+            "content": "234c700f9ee33ffdc0efee543d98a7db0f18ed71c4984339ceaa5864e710e39325356ead5095338b2995df246beeb2f8bf0c9f11c46c464b02e1aeca734f29e5"
           }
         ],
         "dependencies": [],
@@ -3626,9 +3718,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-ppc64-gnu."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-linux-ppc64-gnu@1.2.19"
       },
       {
         "name": "@rolldown/binding-linux-s390x-gnu",
@@ -3638,14 +3730,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 198,
+            "line": 254,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "5350684c7626972c04da7dc75168f367ef0442c2abf8ec29c58b8359ab9bc78dad50bf1048bee73aa473fcd5476a789b6c53f7335471ba9af3ff035c6cc2a3ab"
+            "content": "06bb441d3db848d5e3f47897ab2facfe45e24a2406b7a10a08f525462ac0a088a85712869db5c150491b6404807a2ee2649074fd89e6fb424fd34229c7b0274b"
           }
         ],
         "dependencies": [],
@@ -3653,9 +3745,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-s390x-gnu."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-linux-s390x-gnu@1.2.19"
       },
       {
         "name": "@rolldown/binding-linux-x64-gnu",
@@ -3665,14 +3757,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 218,
+            "line": 274,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "278726f343dceb0130579019e36a3adac21080393e63b476b3ae3a8c8c2ebcefb8578e90079f0de2f56e30f58205a360babb172e999458957ffd640090fbc705"
+            "content": "ae6ef9ffd0e41ca794d969c0f30e17f785866202e50c21427e4402fb86e0b952660bf8ef0d1bf607edb02ce621c84d1f56ebfbfff0a4937f4ea0eb9fc82bbbe9"
           }
         ],
         "dependencies": [],
@@ -3680,9 +3772,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-x64-gnu."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-linux-x64-gnu@1.2.19"
       },
       {
         "name": "@rolldown/binding-linux-x64-musl",
@@ -3692,14 +3784,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 238,
+            "line": 294,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "5b47ae652e3453857a2649849d50885fd99cb0be9c6d74385fc736c3e30c3888c583af135d45bebb7453fb67b5b75a6ff6683f10fde90ed2b73ce5dd43b471cb"
+            "content": "8ab87fe3e89814ce06033a65b8312b823cfcf5b8fa343b6aa8c006ffa3b52c6dfc11ddcda7279bcc2a5c54d9055bcba1cbeff7fc1a1c52f9d70d1df709759ef4"
           }
         ],
         "dependencies": [],
@@ -3707,9 +3799,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-linux-x64-musl."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-linux-x64-musl@1.2.19"
       },
       {
         "name": "@rolldown/binding-openharmony-arm64",
@@ -3719,14 +3811,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 258,
+            "line": 314,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "768fc017fe27f4c46c8626b76b9697a32f3133673a9a07d3e83ec7fdd63a9b2e73fa17c2211e1a6fb9a4e08463fbe9ec110a4acb7f647740d09c3abeafaf76b7"
+            "content": "f8a59358da0fb7e09f4aaf780a271e5aedf23c4f90ce4686fa984fcb3f46eb4b6664bc1f424700e007a4b1a7f3bc9030e29be0d6671de5ad53914a95bf4b3824"
           }
         ],
         "dependencies": [],
@@ -3734,9 +3826,40 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-openharmony-arm64."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-openharmony-arm64@1.2.19"
+      },
+      {
+        "name": "@rolldown/binding-wasm32-wasi",
+        "kind": "library",
+        "ecosystem": "npm",
+        "scope": "optional",
+        "evidence": [
+          {
+            "path": "poc/components/apps/web-spa/package-lock.json",
+            "line": 331,
+            "detail": "npm lockfile package"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA512",
+            "content": "ec41feb243ac979aa95a72b4bf36a68091613afd5cc31429b319bcb48f3cdcaf5fbabe5cdbba7cabcedfcc43ba05b04f69b036ffeb3fcd1eb7fe92dcd77ee23a"
+          }
+        ],
+        "dependencies": [
+          "npm:@emnapi/core@2.0.0-beta.2",
+          "npm:@emnapi/runtime@2.0.0-beta.2",
+          "npm:@napi-rs/wasm-runtime@1.2.6"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "npm lock location: node_modules/@rolldown/binding-wasm32-wasi."
+        ],
+        "version": "1.2.19",
+        "license": "MIT",
+        "purl": "pkg:npm/%40rolldown/binding-wasm32-wasi@1.2.19"
       },
       {
         "name": "@rolldown/binding-win32-arm64-msvc",
@@ -3746,14 +3869,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 275,
+            "line": 350,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "e85b547f67096686eeb497719c6617f33d2fb5b82a5346f6bfcbdf0619176fdc29d8ca69305b64ba713e21a3a7b728b4d6b9084283d6d861c006d7f3b02d0145"
+            "content": "dd0d5883543bb44bc15a865fe6b16f1bf18a6503e0c1faeefa9e3005a8c37c9141b344870a92fef9d7d38d6f60c8029dd53ed9a4862f75a51ac7b3dafc884555"
           }
         ],
         "dependencies": [],
@@ -3761,9 +3884,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-win32-arm64-msvc."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-win32-arm64-msvc@1.2.19"
       },
       {
         "name": "@rolldown/binding-win32-x64-msvc",
@@ -3773,14 +3896,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 292,
+            "line": 367,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "50a8456994de4dc6caadbde253cda6d7b8d570f100a2a0e408de4c06a80fc994b0a7f7109a26f6d5cad34b40dd1fb4f507bc19456108f3d61000e24c7ade7286"
+            "content": "cbfb2a45173a77b8440b33857399f72d27aa72d988a7d98c8d8d4aab8b35e2e2cf77f2d9e33ee2d73ad6e9f32da7698f7ae4080b87ba50b31cc10ccca26a906a"
           }
         ],
         "dependencies": [],
@@ -3788,9 +3911,9 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/binding-win32-x64-msvc."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.13"
+        "purl": "pkg:npm/%40rolldown/binding-win32-x64-msvc@1.2.19"
       },
       {
         "name": "@rolldown/pluginutils",
@@ -3800,14 +3923,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 309,
+            "line": 384,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "da3f5b1ade4987c863faf3ed8333ed97bda3d324711c0cae9a8a3a4cd7c08ec2c1d3852da52bcf6cf703701331cfb9fef42601d1cd46c501716118368e29aa1b"
+            "content": "825148243bcb343b49853f6aacc1562cf6ef4beb24c60b782f42bc122d98b6784fcac0099ec23b9f2c522712a3e000de297d0e2e30b89ed464c292cea12debc0"
           }
         ],
         "dependencies": [],
@@ -3815,9 +3938,38 @@
         "notes": [
           "npm lock location: node_modules/@rolldown/pluginutils."
         ],
-        "version": "1.0.1",
+        "version": "1.1.1",
         "license": "MIT",
-        "purl": "pkg:npm/%40rolldown/pluginutils@1.0.1"
+        "purl": "pkg:npm/%40rolldown/pluginutils@1.1.1"
+      },
+      {
+        "name": "@tybys/wasm-util",
+        "kind": "library",
+        "ecosystem": "npm",
+        "scope": "optional",
+        "evidence": [
+          {
+            "path": "poc/components/apps/web-spa/package-lock.json",
+            "line": 391,
+            "detail": "npm lockfile package"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA512",
+            "content": "5b77388118a0152d13fcc6b8a88605dc60c07390107476f5c8be739c94f566fd58683f4a8adc7ae7ac018efaf5f6a6e2a2c9994fc9560cce4110cca752a5fae4"
+          }
+        ],
+        "dependencies": [
+          "npm:tslib@2.9.1"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "npm lock location: node_modules/@tybys/wasm-util."
+        ],
+        "version": "0.10.4",
+        "license": "MIT",
+        "purl": "pkg:npm/%40tybys/wasm-util@0.10.4"
       },
       {
         "name": "@types/react-dom",
@@ -3832,7 +3984,7 @@
           },
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 326,
+            "line": 412,
             "detail": "npm lockfile package"
           }
         ],
@@ -3866,7 +4018,7 @@
           },
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 316,
+            "line": 402,
             "detail": "npm lockfile package"
           }
         ],
@@ -3895,7 +4047,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 336,
+            "line": 422,
             "detail": "npm lockfile package"
           }
         ],
@@ -3922,7 +4074,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 353,
+            "line": 439,
             "detail": "npm lockfile package"
           }
         ],
@@ -3949,7 +4101,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 370,
+            "line": 456,
             "detail": "npm lockfile package"
           }
         ],
@@ -3976,7 +4128,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 387,
+            "line": 473,
             "detail": "npm lockfile package"
           }
         ],
@@ -4003,7 +4155,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 404,
+            "line": 490,
             "detail": "npm lockfile package"
           }
         ],
@@ -4030,7 +4182,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 438,
+            "line": 524,
             "detail": "npm lockfile package"
           }
         ],
@@ -4057,7 +4209,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 421,
+            "line": 507,
             "detail": "npm lockfile package"
           }
         ],
@@ -4084,7 +4236,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 455,
+            "line": 541,
             "detail": "npm lockfile package"
           }
         ],
@@ -4111,7 +4263,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 472,
+            "line": 558,
             "detail": "npm lockfile package"
           }
         ],
@@ -4138,7 +4290,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 489,
+            "line": 575,
             "detail": "npm lockfile package"
           }
         ],
@@ -4165,7 +4317,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 506,
+            "line": 592,
             "detail": "npm lockfile package"
           }
         ],
@@ -4192,7 +4344,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 523,
+            "line": 609,
             "detail": "npm lockfile package"
           }
         ],
@@ -4219,7 +4371,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 540,
+            "line": 626,
             "detail": "npm lockfile package"
           }
         ],
@@ -4246,7 +4398,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 557,
+            "line": 643,
             "detail": "npm lockfile package"
           }
         ],
@@ -4273,7 +4425,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 574,
+            "line": 660,
             "detail": "npm lockfile package"
           }
         ],
@@ -4300,7 +4452,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 591,
+            "line": 677,
             "detail": "npm lockfile package"
           }
         ],
@@ -4327,7 +4479,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 608,
+            "line": 694,
             "detail": "npm lockfile package"
           }
         ],
@@ -4354,7 +4506,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 625,
+            "line": 711,
             "detail": "npm lockfile package"
           }
         ],
@@ -4381,7 +4533,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 642,
+            "line": 728,
             "detail": "npm lockfile package"
           }
         ],
@@ -4408,7 +4560,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 659,
+            "line": 745,
             "detail": "npm lockfile package"
           }
         ],
@@ -4440,30 +4592,30 @@
           },
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 676,
+            "line": 762,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "7e124d19476c7106b81e4234c45c70a275b28675517823c36d723b147ee39b3a67542ac5408ecf46b85679c3b6eb7eb5d2f3abb3db6bd98e3171ff2e01d1716f"
+            "content": "1fd13de79695bc3d85e333470b0e1e2196c87c5eb12a576587b30dbbe85253bc7043387ae6523f37e0895aa99f862d0f1230d722dfc7ed3ec9ff8c14eb72898b"
           }
         ],
         "dependencies": [
-          "npm:@rolldown/pluginutils@1.0.1",
-          "npm:vite@8.3.4"
+          "npm:@rolldown/pluginutils@1.1.1",
+          "npm:vite@8.3.8"
         ],
         "completeness": "locked",
         "notes": [
-          "Unresolved npm peerDependencies: @rolldown/plugin-babel (^0.1.7 || ^0.2.0).",
+          "Unresolved npm peerDependencies: @rolldown/plugin-babel (^0.1.7 || ^0.2.0 || ^0.3.0).",
           "Unresolved npm peerDependencies: babel-plugin-react-compiler (^1.0.0).",
-          "Unresolved npm peerDependencies: oxc-transform-react (^0.152.0).",
+          "Unresolved npm peerDependencies: oxc-transform-react (>=0.152.0 <0.157.0).",
           "npm lock location: node_modules/@vitejs/plugin-react."
         ],
-        "version": "6.1.2",
+        "version": "6.3.0",
         "license": "MIT",
-        "purl": "pkg:npm/%40vitejs/plugin-react@6.1.2"
+        "purl": "pkg:npm/%40vitejs/plugin-react@6.3.0"
       },
       {
         "name": "amisad-web-spa",
@@ -4481,12 +4633,12 @@
         "dependencies": [
           "npm:@types/react-dom@19.3.0",
           "npm:@types/react@19.3.0",
-          "npm:@vitejs/plugin-react@6.1.2",
-          "npm:react-dom@19.3.0",
-          "npm:react-router-dom@7.18.4",
-          "npm:react@19.3.0",
+          "npm:@vitejs/plugin-react@6.3.0",
+          "npm:react-dom@19.3.1",
+          "npm:react-router-dom@7.18.5",
+          "npm:react@19.3.1",
           "npm:typescript@7.0.2",
-          "npm:vite@8.3.4"
+          "npm:vite@8.3.8"
         ],
         "completeness": "declared",
         "notes": [],
@@ -4501,7 +4653,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 706,
+            "line": 792,
             "detail": "npm lockfile package"
           }
         ],
@@ -4528,7 +4680,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 719,
+            "line": 805,
             "detail": "npm lockfile package"
           }
         ],
@@ -4555,7 +4707,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 726,
+            "line": 812,
             "detail": "npm lockfile package"
           }
         ],
@@ -4582,7 +4734,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 736,
+            "line": 822,
             "detail": "npm lockfile package"
           }
         ],
@@ -4611,7 +4763,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 754,
+            "line": 840,
             "detail": "npm lockfile package"
           }
         ],
@@ -4638,7 +4790,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 799,
+            "line": 885,
             "detail": "npm lockfile package"
           }
         ],
@@ -4665,7 +4817,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 820,
+            "line": 906,
             "detail": "npm lockfile package"
           }
         ],
@@ -4692,7 +4844,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 841,
+            "line": 927,
             "detail": "npm lockfile package"
           }
         ],
@@ -4719,7 +4871,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 862,
+            "line": 948,
             "detail": "npm lockfile package"
           }
         ],
@@ -4746,7 +4898,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 883,
+            "line": 969,
             "detail": "npm lockfile package"
           }
         ],
@@ -4773,7 +4925,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 904,
+            "line": 990,
             "detail": "npm lockfile package"
           }
         ],
@@ -4800,7 +4952,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 928,
+            "line": 1014,
             "detail": "npm lockfile package"
           }
         ],
@@ -4827,7 +4979,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 952,
+            "line": 1038,
             "detail": "npm lockfile package"
           }
         ],
@@ -4854,7 +5006,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 976,
+            "line": 1062,
             "detail": "npm lockfile package"
           }
         ],
@@ -4881,7 +5033,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1000,
+            "line": 1086,
             "detail": "npm lockfile package"
           }
         ],
@@ -4908,7 +5060,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1021,
+            "line": 1107,
             "detail": "npm lockfile package"
           }
         ],
@@ -4935,7 +5087,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 769,
+            "line": 855,
             "detail": "npm lockfile package"
           }
         ],
@@ -4975,7 +5127,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1042,
+            "line": 1128,
             "detail": "npm lockfile package"
           }
         ],
@@ -5002,7 +5154,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1061,
+            "line": 1147,
             "detail": "npm lockfile package"
           }
         ],
@@ -5029,7 +5181,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1068,
+            "line": 1154,
             "detail": "npm lockfile package"
           }
         ],
@@ -5056,14 +5208,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1081,
+            "line": 1167,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "e3d7068546d78fc41e9efd224ccc40d5c141cf15e872da42f548ddefbb7559c6c922bea717f788ee0ffc320c6b62574546e017be36bbc504706afa16ee482bc5"
+            "content": "4551c453dfcfa751678ebfcca4026c668003ba408a85f222d793ae9c46221a4b489182e43d5bc2d6c8a85a89460d2ed7072313c7d9bf2066eba3426cd77ce19d"
           }
         ],
         "dependencies": [
@@ -5075,9 +5227,9 @@
         "notes": [
           "npm lock location: node_modules/postcss."
         ],
-        "version": "8.5.29",
+        "version": "8.5.33",
         "license": "MIT",
-        "purl": "pkg:npm/postcss@8.5.29"
+        "purl": "pkg:npm/postcss@8.5.33"
       },
       {
         "name": "react-dom",
@@ -5092,27 +5244,27 @@
           },
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1119,
+            "line": 1205,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "24393c76089fe753a31680c4ef4f8e4fd202c98afeebd1e59a284dc29d7e36c7db9dadede6c22209af59264b43990e3fd5bfeb9f6ea1200476b985c332be6bd1"
+            "content": "6346c0473e77961102d4d302012b34fe3f9f681ff3aaddd1f21a6f8357bcfbad59549e142f451d0b87016d77d931c22e86b7e07882d32def9978109abd03ed29"
           }
         ],
         "dependencies": [
-          "npm:react@19.3.0",
+          "npm:react@19.3.1",
           "npm:scheduler@0.28.0"
         ],
         "completeness": "locked",
         "notes": [
           "npm lock location: node_modules/react-dom."
         ],
-        "version": "19.3.0",
+        "version": "19.3.1",
         "license": "MIT",
-        "purl": "pkg:npm/react-dom@19.3.0"
+        "purl": "pkg:npm/react-dom@19.3.1"
       },
       {
         "name": "react-router-dom",
@@ -5127,28 +5279,28 @@
           },
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1153,
+            "line": 1239,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "cab7e62472290c6eed682a6a2a34f51b907aab73b62be44df3f7e035fd254e30b088f6d0d1e8babd75fd663411fbb95df13afb679c66c8c9d9f1826ba6159053"
+            "content": "f4771f0cc53a249fdfa7a8096581b0344e919275464b89018c7d4790dc3de7d982262ef44d5c1d8a9416bf6144a25f6e1a98be4994c5b55a493ed1107dac9e3b"
           }
         ],
         "dependencies": [
-          "npm:react-dom@19.3.0",
-          "npm:react-router@7.18.4",
-          "npm:react@19.3.0"
+          "npm:react-dom@19.3.1",
+          "npm:react-router@7.18.5",
+          "npm:react@19.3.1"
         ],
         "completeness": "locked",
         "notes": [
           "npm lock location: node_modules/react-router-dom."
         ],
-        "version": "7.18.4",
+        "version": "7.18.5",
         "license": "MIT",
-        "purl": "pkg:npm/react-router-dom@7.18.4"
+        "purl": "pkg:npm/react-router-dom@7.18.5"
       },
       {
         "name": "react-router",
@@ -5158,29 +5310,29 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1131,
+            "line": 1217,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "3d43d070c84c19102c94b72fb653f3fe49b304458f84b7602c5acbee92cd7a904be9d5f49568f8583d9c518560602b93de3c6f82160583cd5c0d38f8e0385eb5"
+            "content": "75382f7170ceacb3eb94b1eb71902a5af7a22b584c4aa37eac6009cde80ff07b663647d1c4ea2c846581357dd92747198ce1e445d95426d68885930b2f21b23f"
           }
         ],
         "dependencies": [
           "npm:cookie@1.1.1",
-          "npm:react-dom@19.3.0",
-          "npm:react@19.3.0",
-          "npm:set-cookie-parser@2.7.2"
+          "npm:react-dom@19.3.1",
+          "npm:react@19.3.1",
+          "npm:set-cookie-parser@2.7.3"
         ],
         "completeness": "locked",
         "notes": [
           "npm lock location: node_modules/react-router."
         ],
-        "version": "7.18.4",
+        "version": "7.18.5",
         "license": "MIT",
-        "purl": "pkg:npm/react-router@7.18.4"
+        "purl": "pkg:npm/react-router@7.18.5"
       },
       {
         "name": "react",
@@ -5195,14 +5347,14 @@
           },
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1110,
+            "line": 1196,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "13c2d471bb415addb46db9766281dfc7864305dc554df38ab42667f5c0d227897afe7ba8029729201723e3bb76c19a155fc836647b8c1db892860091d53e52a2"
+            "content": "40d85676dee7ae05565901b9f10b86b004778efdc76dee266f8bf3ef0d9cb271dabdc89926075ad423cd6a5745e9e571bfdd2e7778d45e92a51cbebd80edfccb"
           }
         ],
         "dependencies": [],
@@ -5210,9 +5362,9 @@
         "notes": [
           "npm lock location: node_modules/react."
         ],
-        "version": "19.3.0",
+        "version": "19.3.1",
         "license": "MIT",
-        "purl": "pkg:npm/react@19.3.0"
+        "purl": "pkg:npm/react@19.3.1"
       },
       {
         "name": "rolldown",
@@ -5222,42 +5374,43 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1169,
+            "line": 1255,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "ff96a93a4c16c6d002710b59e5696b02c292e09c175538503c967746a22bb9163d506f4cf1ed15957374ebcc6e9bf251280e1a214a09d778217bf9060af89d89"
+            "content": "408895d49f5dd29ccde2379e4c7e2c8cfcb4019e9c032d9c1b41317a8135f94f11be3fa1477818928931d186de50d1a566a890249daeb5c1137b4a0a5f0cecb8"
           }
         ],
         "dependencies": [
-          "npm:@oxc-project/types@0.153.0",
-          "npm:@rolldown/binding-android-arm-eabi@1.2.13",
-          "npm:@rolldown/binding-android-arm64@1.2.13",
-          "npm:@rolldown/binding-darwin-arm64@1.2.13",
-          "npm:@rolldown/binding-darwin-x64@1.2.13",
-          "npm:@rolldown/binding-freebsd-x64@1.2.13",
-          "npm:@rolldown/binding-linux-arm-gnueabihf@1.2.13",
-          "npm:@rolldown/binding-linux-arm64-gnu@1.2.13",
-          "npm:@rolldown/binding-linux-arm64-musl@1.2.13",
-          "npm:@rolldown/binding-linux-ppc64-gnu@1.2.13",
-          "npm:@rolldown/binding-linux-s390x-gnu@1.2.13",
-          "npm:@rolldown/binding-linux-x64-gnu@1.2.13",
-          "npm:@rolldown/binding-linux-x64-musl@1.2.13",
-          "npm:@rolldown/binding-openharmony-arm64@1.2.13",
-          "npm:@rolldown/binding-win32-arm64-msvc@1.2.13",
-          "npm:@rolldown/binding-win32-x64-msvc@1.2.13",
-          "npm:@rolldown/pluginutils@1.0.1"
+          "npm:@oxc-project/types@0.156.0",
+          "npm:@rolldown/binding-android-arm-eabi@1.2.19",
+          "npm:@rolldown/binding-android-arm64@1.2.19",
+          "npm:@rolldown/binding-darwin-arm64@1.2.19",
+          "npm:@rolldown/binding-darwin-x64@1.2.19",
+          "npm:@rolldown/binding-freebsd-x64@1.2.19",
+          "npm:@rolldown/binding-linux-arm-gnueabihf@1.2.19",
+          "npm:@rolldown/binding-linux-arm64-gnu@1.2.19",
+          "npm:@rolldown/binding-linux-arm64-musl@1.2.19",
+          "npm:@rolldown/binding-linux-ppc64-gnu@1.2.19",
+          "npm:@rolldown/binding-linux-s390x-gnu@1.2.19",
+          "npm:@rolldown/binding-linux-x64-gnu@1.2.19",
+          "npm:@rolldown/binding-linux-x64-musl@1.2.19",
+          "npm:@rolldown/binding-openharmony-arm64@1.2.19",
+          "npm:@rolldown/binding-wasm32-wasi@1.2.19",
+          "npm:@rolldown/binding-win32-arm64-msvc@1.2.19",
+          "npm:@rolldown/binding-win32-x64-msvc@1.2.19",
+          "npm:@rolldown/pluginutils@1.1.1"
         ],
         "completeness": "locked",
         "notes": [
           "npm lock location: node_modules/rolldown."
         ],
-        "version": "1.2.13",
+        "version": "1.2.19",
         "license": "MIT",
-        "purl": "pkg:npm/rolldown@1.2.13"
+        "purl": "pkg:npm/rolldown@1.2.19"
       },
       {
         "name": "scheduler",
@@ -5267,7 +5420,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1203,
+            "line": 1290,
             "detail": "npm lockfile package"
           }
         ],
@@ -5294,14 +5447,14 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1209,
+            "line": 1296,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "a1e33596953f52f853c70fa0ddc21fc571f225173fba275ddf22b53f6e368331ddb34b9d401633b37cbc8f8802096f9927b69dd3272d95df1160ef9b76eae5bf"
+            "content": "8ab647b53aaeacb9dae7b2901bfb3e7f33b0bff27a5d21f872cf0cfefb2b637b82690dd2ebe40982e007d1674de3b497964f36be8319e276963107fc7dd12822"
           }
         ],
         "dependencies": [],
@@ -5309,9 +5462,9 @@
         "notes": [
           "npm lock location: node_modules/set-cookie-parser."
         ],
-        "version": "2.7.2",
+        "version": "2.7.3",
         "license": "MIT",
-        "purl": "pkg:npm/set-cookie-parser@2.7.2"
+        "purl": "pkg:npm/set-cookie-parser@2.7.3"
       },
       {
         "name": "source-map-js",
@@ -5321,7 +5474,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1215,
+            "line": 1302,
             "detail": "npm lockfile package"
           }
         ],
@@ -5348,7 +5501,7 @@
         "evidence": [
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1225,
+            "line": 1312,
             "detail": "npm lockfile package"
           }
         ],
@@ -5371,6 +5524,33 @@
         "purl": "pkg:npm/tinyglobby@0.2.17"
       },
       {
+        "name": "tslib",
+        "kind": "library",
+        "ecosystem": "npm",
+        "scope": "optional",
+        "evidence": [
+          {
+            "path": "poc/components/apps/web-spa/package-lock.json",
+            "line": 1329,
+            "detail": "npm lockfile package"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA512",
+            "content": "6b8531f552ae20c1ec392ec435b12aea12b66466084f6ed1b65d04e1e0fd2aac3184a89078c644ffdc5bdc8758c166923b220140b1318508170d3628882c6758"
+          }
+        ],
+        "dependencies": [],
+        "completeness": "locked",
+        "notes": [
+          "npm lock location: node_modules/tslib."
+        ],
+        "version": "2.9.1",
+        "license": "0BSD",
+        "purl": "pkg:npm/tslib@2.9.1"
+      },
+      {
         "name": "typescript",
         "kind": "library",
         "ecosystem": "npm",
@@ -5383,7 +5563,7 @@
           },
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1242,
+            "line": 1337,
             "detail": "npm lockfile package"
           }
         ],
@@ -5436,28 +5616,28 @@
           },
           {
             "path": "poc/components/apps/web-spa/package-lock.json",
-            "line": 1277,
+            "line": 1372,
             "detail": "npm lockfile package"
           }
         ],
         "hashes": [
           {
             "alg": "SHA512",
-            "content": "21fb4b13ca6126174d44818d115e09082bdf35272865055f71768df1342ba2958626d38772efa2001f691dcb86be611bfe475dc342c17bf8d2f33b5d0bac5d89"
+            "content": "2f33a7de1f6b1bfd2f84b757ad5e3227840503d784a2a0a5f98c7e90625deda07dc3a9df3605472926302cf6541ebcf86466beb7e9178d5f62b6f7070cb428b8"
           }
         ],
         "dependencies": [
           "npm:fsevents@2.3.3",
           "npm:lightningcss@1.33.0",
           "npm:picomatch@4.0.7",
-          "npm:postcss@8.5.29",
-          "npm:rolldown@1.2.13",
+          "npm:postcss@8.5.33",
+          "npm:rolldown@1.2.19",
           "npm:tinyglobby@0.2.17"
         ],
         "completeness": "locked",
         "notes": [
           "Unresolved npm peerDependencies: @types/node (^20.19.0 || >=22.12.0).",
-          "Unresolved npm peerDependencies: @vitejs/devtools (^0.7.1).",
+          "Unresolved npm peerDependencies: @vitejs/devtools (^0.7.1 || ^0.8.0).",
           "Unresolved npm peerDependencies: esbuild (^0.27.0 || ^0.28.0).",
           "Unresolved npm peerDependencies: jiti (>=1.21.0).",
           "Unresolved npm peerDependencies: less (^4.0.0).",
@@ -5470,9 +5650,9 @@
           "Unresolved npm peerDependencies: yaml (^2.4.2).",
           "npm lock location: node_modules/vite."
         ],
-        "version": "8.3.4",
+        "version": "8.3.8",
         "license": "MIT",
-        "purl": "pkg:npm/vite@8.3.4"
+        "purl": "pkg:npm/vite@8.3.8"
       },
       {
         "name": "amisad_buyer",
@@ -5554,7 +5734,7 @@
         "dependencies": [],
         "completeness": "declared",
         "notes": [],
-        "version": "9.3.0"
+        "version": "9.3.2"
       },
       {
         "name": "Rust",
@@ -5572,7 +5752,7 @@
         "dependencies": [],
         "completeness": "declared",
         "notes": [],
-        "version": "1.98.0"
+        "version": "1.99.1"
       }
     ],
     "hosts": [],
@@ -5737,12 +5917,12 @@
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
             "line": 124,
-            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-amd64; installed payload dependencies unresolved"
+            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.30.0/bazelisk-linux-amd64; installed payload dependencies unresolved"
           },
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
             "line": 124,
-            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.29.0/bazelisk-linux-arm64; installed payload dependencies unresolved"
+            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.30.0/bazelisk-linux-arm64; installed payload dependencies unresolved"
           }
         ],
         "hashes": [],
@@ -5751,7 +5931,7 @@
         "notes": [
           "Conditional source declaration; installed state and transitive dependencies are not resolved."
         ],
-        "version": "1.29.0"
+        "version": "1.30.0"
       },
       {
         "name": "nats-io/nats-server",
@@ -5799,12 +5979,12 @@
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
             "line": 78,
-            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved"
+            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.3/aarch64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved"
           },
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
             "line": 78,
-            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved"
+            "detail": "target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved"
           }
         ],
         "hashes": [],
@@ -5813,7 +5993,7 @@
         "notes": [
           "Conditional source declaration; installed state and transitive dependencies are not resolved."
         ],
-        "version": "1.29.1"
+        "version": "1.29.3"
       },
       {
         "name": "debian",
@@ -6127,57 +6307,57 @@
           {
             "path": "poc/components/edge/slice-runtime/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/ads-svc/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/audit-svc/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/connect-svc/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/fabric-coordinator/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/identity-mock/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/insights-svc/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/ledger-svc/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/platform-svc/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/resource-svc/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           },
           {
             "path": "poc/components/services/seller-svc/Dockerfile",
             "line": 6,
-            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.98-slim-bookworm; tags may move; transitive image contents unresolved"
+            "detail": "target=container; action=Dockerfile FROM; reference=rust:1.99-slim-bookworm; tags may move; transitive image contents unresolved"
           }
         ],
         "hashes": [],
@@ -6186,7 +6366,7 @@
         "notes": [
           "Conditional source declaration; installed state and transitive dependencies are not resolved."
         ],
-        "versionConstraint": "1.98-slim-bookworm"
+        "versionConstraint": "1.99-slim-bookworm"
       },
       {
         "name": "rust",
@@ -6198,7 +6378,7 @@
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
             "line": 105,
-            "detail": "target=ubuntu-server-24; action=rustup toolchain install; requested=1.98.0; release channel may be floating"
+            "detail": "target=ubuntu-server-24; action=rustup toolchain install; requested=1.99.1; release channel may be floating"
           },
           {
             "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
@@ -6212,7 +6392,7 @@
         "notes": [
           "Conditional source declaration; installed state and transitive dependencies are not resolved."
         ],
-        "version": "1.98.0"
+        "version": "1.99.1"
       }
     ]
   },
@@ -6238,7 +6418,7 @@
     {
       "path": "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh",
       "line": 87,
-      "detail": "installer/action requires source or artifact resolution: \"$work/rustup-init\" -y --default-toolchain 1.98.0 || rc=$?",
+      "detail": "installer/action requires source or artifact resolution: \"$work/rustup-init\" -y --default-toolchain 1.99.1 || rc=$?",
       "status": "unresolved"
     },
     {

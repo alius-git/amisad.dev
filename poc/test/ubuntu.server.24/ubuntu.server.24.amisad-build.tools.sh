@@ -60,9 +60,9 @@ amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
 # is and carries no digest; the binary of a named release does, so that is what
 # runs. Bump the version and both digests together
 # (https://static.rust-lang.org/rustup/archive/<version>/<target>/rustup-init.sha256).
-RUSTUP_VERSION=1.29.1
-RUSTUP_SHA256_X86_64=dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71
-RUSTUP_SHA256_AARCH64=15f6e4ce9f583b929c996c91562bad6d4454f3281de858b02cdfdef615fac433
+RUSTUP_VERSION=1.29.3
+RUSTUP_SHA256_X86_64=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55
+RUSTUP_SHA256_AARCH64=9f608c142e0e38a78957d0661ba1dfaf0b6fb37184cfaa4b9a0aa57af6184282
 
 # A truncated transfer (curl 18, "transfer closed with N bytes remaining to
 # read") ends the install and, under `set -e`, the cycle, so download, check and
@@ -84,7 +84,7 @@ amisad_install_rustup() {
         chmod 0755 "$work/rustup-init"
         # Rust version in lockstep with poc/MODULE.bazel rust.toolchain (see the
         # comment there) and the rust:*-slim Dockerfiles; bump all together.
-        "$work/rustup-init" -y --default-toolchain 1.98.0 || rc=$?
+        "$work/rustup-init" -y --default-toolchain 1.99.1 || rc=$?
     fi
     rm -rf -- "$work"
     return "$rc"
@@ -101,9 +101,9 @@ fi
 amisad_select_rust_toolchain() {
     local current
     current=$(rustc --version 2>/dev/null || true)
-    if [[ "$current" != "rustc 1.98.0 "* ]]; then
-        amisad_retry rust_toolchain rustup toolchain install 1.98.0 --profile minimal || return $?
-        rustup default 1.98.0
+    if [[ "$current" != "rustc 1.99.1 "* ]]; then
+        amisad_retry rust_toolchain rustup toolchain install 1.99.1 --profile minimal || return $?
+        rustup default 1.99.1
     fi
 }
 amisad_select_rust_toolchain
@@ -111,9 +111,9 @@ cargo --version
 rustc --version
 
 # See https://yuruna.link/42010605-00cd
-BAZELISK_VERSION=v1.29.0
-BAZELISK_SHA256_AMD64=5a408715e932c0250d28bd84555f12edbf70117de42f9181691c736eacc4a992
-BAZELISK_SHA256_ARM64=e20e8b0f4f240091b7a55bf17b9398bd4f40ee70ae0208dff95dd4c445fb4010
+BAZELISK_VERSION=v1.30.0
+BAZELISK_SHA256_AMD64=a248ae2b2b62b5baebb748f6fba7203bff1a27e5d01b55399a8406744cb539e8
+BAZELISK_SHA256_ARM64=b2bcc040c213b44586b121bda6d983c35df121b917c3a7a66fb16f2fa0df1a4f
 # --- REGION: amisad_install_bazelisk
 amisad_install_bazelisk() {
     local sha rc=0

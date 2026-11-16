@@ -764,7 +764,7 @@ mod tests {
             assert!(sent.lock().unwrap().is_empty(), "{policy}: nothing may be attested");
             assert!(state.egress.is_empty(), "{policy}");
         }
-        // Without a policy the sealed need decides, as before: it closes.
+        // Without a policy the sealed need decides: it closes.
         let (mut state, _) = recording_state();
         let closed = dispatch(&mut state, None);
         assert_eq!(closed.status, 201);

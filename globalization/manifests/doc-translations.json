@@ -6,16 +6,14 @@
       "source": "poc/test.md",
       "locale": "pt-BR",
       "translated": "docs/pt-BR/poc/test.md",
-      "sourceHash": "d278bbc52e14147fc086c4ccdf203c18d483a2cd063d257a2bbddd4a7dd1e53c",
-      "origin": "machine"
+      "sourceHash": "d278bbc52e14147fc086c4ccdf203c18d483a2cd063d257a2bbddd4a7dd1e53c"
     },
     {
       "repo": "amisad.dev",
       "source": "poc/usernames.md",
       "locale": "pt-BR",
       "translated": "docs/pt-BR/poc/usernames.md",
-      "sourceHash": "d9ece1fcd1c5692a96d01444dcbb47146241481052e991677fb02f4bafa635f8",
-      "origin": "machine"
+      "sourceHash": "d9ece1fcd1c5692a96d01444dcbb47146241481052e991677fb02f4bafa635f8"
     }
   ]
 }

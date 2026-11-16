@@ -365,14 +365,14 @@ class PinnedUpstreamDownloads(Contract):
 
     def test_rustup_init_runs_only_when_it_is_the_pinned_release(self):
         digest = sha256(self.FAKE_RUSTUP)
-        setup = f'RUSTUP_VERSION=1.29.1; RUSTUP_SHA256_X86_64={digest}; RUSTUP_SHA256_AARCH64={digest}'
+        setup = f'RUSTUP_VERSION=1.29.3; RUSTUP_SHA256_X86_64={digest}; RUSTUP_SHA256_AARCH64={digest}'
         out, _, left, ran = self.install('amisad_install_rustup', setup, self.FAKE_RUSTUP)
         self.assertIn('rc=0', out)
-        self.assertEqual(ran, '-y --default-toolchain 1.98.0')
+        self.assertEqual(ran, '-y --default-toolchain 1.99.1')
         self.assertEqual(left, [], 'the private download directory was left behind')
 
         other = sha256(b'some other release')
-        setup = f'RUSTUP_VERSION=1.29.1; RUSTUP_SHA256_X86_64={other}; RUSTUP_SHA256_AARCH64={other}'
+        setup = f'RUSTUP_VERSION=1.29.3; RUSTUP_SHA256_X86_64={other}; RUSTUP_SHA256_AARCH64={other}'
         out, err, left, ran = self.install('amisad_install_rustup', setup, self.FAKE_RUSTUP)
         self.assertIn('rc=1', out)
         self.assertIsNone(ran, 'rustup-init ran although it did not verify')
@@ -384,7 +384,7 @@ class PinnedUpstreamDownloads(Contract):
         for pinned, expected_rc, expected_file in ((downloaded, 'rc=0', 'present'), (b'another release', 'rc=1', 'absent')):
             with self.subTest(expected=expected_rc):
                 digest = sha256(pinned)
-                setup = (f'BARCH=amd64; BAZELISK_VERSION=v1.29.0; BAZELISK_SHA256_AMD64={digest}; BAZELISK_SHA256_ARM64={digest}\n'
+                setup = (f'BARCH=amd64; BAZELISK_VERSION=v1.30.0; BAZELISK_SHA256_AMD64={digest}; BAZELISK_SHA256_ARM64={digest}\n'
                          'BAZELISK_DIR=$(mktemp -d ./tmp/bazelisk.XXXXXX)')
                 out, _, _, _ = self.install('amisad_install_bazelisk', setup, downloaded,
                                             after='[ -e "$BAZELISK_DIR/bazelisk" ] && echo present || echo absent\n')
@@ -406,17 +406,17 @@ class PinnedUpstreamDownloads(Contract):
     def test_existing_older_toolchain_is_installed_and_selected(self):
         out, calls = self.select_toolchain('1.96.1')
         self.assertIn('rc=0', out)
-        self.assertEqual(calls, ['toolchain install 1.98.0 --profile minimal', 'default 1.98.0'])
+        self.assertEqual(calls, ['toolchain install 1.99.1 --profile minimal', 'default 1.99.1'])
 
     def test_current_toolchain_needs_no_network_or_default_change(self):
-        out, calls = self.select_toolchain('1.98.0')
+        out, calls = self.select_toolchain('1.99.1')
         self.assertIn('rc=0', out)
         self.assertEqual(calls, [])
 
     def test_failed_toolchain_install_keeps_the_existing_default(self):
         out, calls = self.select_toolchain('1.96.1', install_exit=23)
         self.assertIn('rc=23', out)
-        self.assertEqual(calls, ['toolchain install 1.98.0 --profile minimal'])
+        self.assertEqual(calls, ['toolchain install 1.99.1 --profile minimal'])
 
 
 class ScriptsVerifyBeforeUse(Contract):

@@ -3,7 +3,7 @@
 # GUID: 4273c6ce-c097-4939-b9a9-f0bf40a50119
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/identity-mock/Dockerfile -t amisad/identity-mock .
-FROM rust:1.98-slim-bookworm AS build
+FROM rust:1.99-slim-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY components ./components

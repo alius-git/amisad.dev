@@ -92,8 +92,8 @@ foreach ($probe in @(
     @{Name='bazel';Candidates=@('fakeBad','fakeThrow','fakeGood');Version='tool 9.3.0';Fails=0},
     @{Name='bazel';Candidates=@('fakeBad');Version='tool 9.3.0';Fails=1},
     @{Name='bazel';Candidates=@('fakeGood');Version='tool 8.8.1';Fails=1},
-    @{Name='rust';Candidates=@('fakeGood');Version='cargo 1.97.1';Fails=1},
-    @{Name='rust';Candidates=@('fakeGood');Version='cargo 1.98.0';Fails=0},
+    @{Name='rust';Candidates=@('fakeGood');Version='cargo 1.98.1';Fails=1},
+    @{Name='rust';Candidates=@('fakeGood');Version='cargo 1.99.0';Fails=0},
     @{Name='node';Candidates=@('fakeGood');Version='v22.11.0';Fails=1},
     @{Name='node';Candidates=@('fakeGood');Version='v22.12.0';Fails=0},
     @{Name='node';Candidates=@('fakeGood');Version='v20.19.0';Fails=0}

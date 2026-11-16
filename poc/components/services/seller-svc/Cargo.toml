@@ -6,7 +6,7 @@ name = "seller-svc"
 version = "0.1.0"
 edition = "2021"
 # Lab toolchain pin (build VM + MODULE.bazel); keeps dependency resolution honest.
-rust-version = "1.98"
+rust-version = "1.99"
 description = "Seller catalog, inventory, order lifecycle, and settlement views (AmisAd POC skeleton)"
 
 [dependencies]

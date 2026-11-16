@@ -3,7 +3,7 @@
 # GUID: 42a1478f-eca9-4618-835b-7f20a9be4943
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/audit-svc/Dockerfile -t amisad/audit-svc .
-FROM rust:1.98-slim-bookworm AS build
+FROM rust:1.99-slim-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY components ./components

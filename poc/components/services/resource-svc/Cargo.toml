@@ -6,7 +6,7 @@ name = "resource-svc"
 version = "0.1.0"
 edition = "2021"
 # Lab toolchain pin (build VM + MODULE.bazel); keeps dependency resolution honest.
-rust-version = "1.98"
+rust-version = "1.99"
 description = "Carrier control plane: allocation policy, slice controller, telemetry, incidents (AmisAd POC skeleton)"
 
 [dependencies]

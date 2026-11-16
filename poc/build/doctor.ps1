@@ -42,7 +42,7 @@ function Test-Tool {
                     if ($v -notmatch '(\d+\.\d+\.\d+)') { continue }
                     $version = [version]$Matches[1]
                     if ($Name -eq 'bazel' -and $version -lt [version]'9.3.0') { continue }
-                    if ($Name -eq 'rust' -and $version -lt [version]'1.98.0') { continue }
+                    if ($Name -eq 'rust' -and $version -lt [version]'1.99.0') { continue }
                     if ($Name -eq 'node' -and -not (($version.Major -eq 20 -and $version -ge [version]'20.19.0') -or $version -ge [version]'22.12.0')) { continue }
                 }
             } catch { Write-Verbose "$c version probe failed: $_"; continue }

@@ -3,7 +3,7 @@
 # GUID: 4205ac82-f268-4339-b5db-8218809a5256
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/insights-svc/Dockerfile -t amisad/insights-svc .
-FROM rust:1.98-slim-bookworm AS build
+FROM rust:1.99-slim-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY components ./components

@@ -3,7 +3,7 @@
 # GUID: 422e8df4-73c5-4752-97c7-1db1c6ff82bf
 # Build from the poc/ workspace root (the Rust workspace lives there):
 #   docker build -f components/services/ledger-svc/Dockerfile -t amisad/ledger-svc .
-FROM rust:1.98-slim-bookworm AS build
+FROM rust:1.99-slim-bookworm AS build
 WORKDIR /src
 COPY Cargo.toml Cargo.lock ./
 COPY components ./components
