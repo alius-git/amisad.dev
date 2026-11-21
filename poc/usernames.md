@@ -81,7 +81,7 @@ here creates, copies or serves a private key under a directory the status servic
 serves (`test/status`, its `runtime/` and `log/` mounts, or the
 checkout it serves as `yuruna-repo/`), and the framework's listener also refuses
 private-key file names wherever they sit. The public key is not secret and travels over SSH. The edges' IP reports
-(`<hostname>.ip.txt` under the status server's `log/handoff/`, which is how vm-core
+(`<hostname>.ip.txt` under the status service's `log/handoff/`, which is how vm-core
 resolves them without DNS) are also not secret and travel by
 that route.
 

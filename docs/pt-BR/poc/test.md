@@ -91,7 +91,8 @@ os arquivos de execução do Bazel nem a cadeia de ferramentas das imagens de co
    - `repositories.projectUrl`: `https://github.com/alius-git/amisad.dev.git`
      (ou o caminho de um clone local) -- as sequências são descobertas em `poc/test/`.
    - `repositories.ghToken`: um PAT do GitHub com acesso de leitura (clone no hospedeiro).
-   - `guestSequence`: reduza a lista para `- guest.ubuntu.server.24`.
+   - O ciclo executa as sequências listadas em `test/test.runner.yml` deste repositório
+     (`amisad.end-to-end`); `guestSequence` só é lido quando esse arquivo não resolve nenhum plano.
 
 3. **Preencha o cofre.** Na pasta `yuruna`, em `pwsh`:
 
@@ -440,7 +441,7 @@ de outra arquitetura.
 2. Acrescente o nome da sequência ao registro `$Scenarios` em
    `poc/build/run-tests.ps1`.
 3. Os dois nós de borda são iniciados pelo orquestrador e permanecem em execução; resolva o endereço de qualquer um
-   pelo relatório de IP enviado ao status-server (veja o script s004).
+   pelo relatório de IP enviado ao serviço de status (veja o script s004).
 4. Atualize [usernames.md](usernames.md) e este arquivo se o padrão mudar.
 
 <a id="focused-recovery-and-packaging-checks"></a>

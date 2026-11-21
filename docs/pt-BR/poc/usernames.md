@@ -98,7 +98,7 @@ serviço de status (`test/status`, suas montagens `runtime/` e `log/`, ou o
 checkout servido como `yuruna-repo/`), e o listener do framework também
 recusa nomes de arquivos de chave privada, onde quer que estejam. A chave
 pública não é secreta e trafega por SSH. Os relatórios de IP das bordas
-(`<hostname>.ip.txt` em `log/handoff/` do servidor de status, usados
+(`<hostname>.ip.txt` em `log/handoff/` do serviço de status, usados
 por vm-core para localizar as bordas sem DNS) também não são secretos e
 trafegam por essa rota.
 

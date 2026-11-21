@@ -78,7 +78,8 @@ Bazel runfiles, or the pinned container image toolchain.
    - `repositories.projectUrl`: `https://github.com/alius-git/amisad.dev.git`
      (or a local clone path) -- sequences are discovered under `poc/test/`.
    - `repositories.ghToken`: a GitHub PAT with read access (host-side clone).
-   - `guestSequence`: trim to `- guest.ubuntu.server.24`.
+   - The cycle runs the sequences listed in this repository's `test/test.runner.yml`
+     (`amisad.end-to-end`); `guestSequence` is read only when that file resolves no plan.
 
 3. **Seed the vault.** From the `yuruna` folder in `pwsh`:
 
@@ -417,7 +418,7 @@ foreign build.
 2. Append the sequence name to the `$Scenarios` registry in
    `poc/build/run-tests.ps1`.
 3. Both edges are started by the driver and stay live; resolve either from
-   its status-server IP report (see the s004 script).
+   its status-service IP report (see the s004 script).
 4. Update [usernames.md](usernames.md) and this file if the pattern changes.
 
 ## Focused recovery and packaging checks
