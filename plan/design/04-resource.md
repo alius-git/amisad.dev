@@ -1,36 +1,25 @@
 # AmisAd/resource — POC design
 
-> One sentence: resource-svc is the carrier control plane -- the edge registry and declarative allocation policy that decide where a match may run, plus telemetry, incidents, and the carrier's settlement view.
+> One sentence: resource-svc is the carrier control plane -- the edge registry and declarative allocation policy that decide where a match may run, plus telemetry, incidents, and, once it is built, the carrier's settlement view.
 
-See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadresource). Dashed = designed, not built.
+See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadresource). Dashed = designed, not built. Every box except fabric-coordinator, slice-runtime and platform-svc is part of resource-svc (vm-core); telemetry and the incident queue share one box, and neither the SPA resource module (still a placeholder page) nor the unbuilt carrier settlement report is drawn.
 
 ```mermaid
 flowchart TD
-    subgraph svc["resource-svc (vm-core)"]
-        edges["Edge registry<br/>region - endpoint - capacity"]
-        policy["Allocation policy<br/>jurisdiction -> compliant regions"]
-        placement["Placement decision<br/>capacity-greedy within policy"]
-        telemetry["Telemetry ingest<br/>environment lifecycle events"]
-        incidents["Incident queue"]
-        settlement["Carrier settlement report"]
-    end
-    spa["SPA - resource module"]
+    edges["Edge registry<br/>region - endpoint - capacity"]
+    policy["Allocation policy<br/>jurisdiction -> compliant regions"]
+    placement["Placement decision<br/>capacity-greedy within policy"]
+    telemetry["Telemetry & incidents"]
     coordinator["fabric-coordinator"]
     edge["slice-runtime - regions A and B"]
     platform["platform-svc<br/>cross-party escalation"]
 
-    spa -.-> policy
     coordinator -->|"placement request per match"| placement
     edges --> placement
     policy --> placement
     placement -->|"compliant region + endpoint"| coordinator
     edge -->|"lifecycle events"| telemetry
-    telemetry -->|"every abort raises one"| incidents
-    incidents -.->|"systemic pattern, escalated by the operator"| platform
-    settlement -.->|"network-share entries from ledger-svc"| spa
-
-    classDef planned stroke-dasharray: 5 5
-    class settlement planned
+    telemetry -.->|"systemic pattern, escalated by the operator"| platform
 ```
 
 **POC notes**
@@ -40,8 +29,8 @@ flowchart TD
 - **Registrations can carry a lease.** An edge registered with `lease_secs` lapses unless it registers again within the lease, and a lapsed edge gets no placement; a registration without one stays until it is replaced, which is how the scenario scripts register. A `slice-runtime` started with `ADVERTISE_URL`, `REGION`, and `RESOURCE_URL` registers itself under a 30-second lease and renews it every 10 seconds; no scenario starts it that way yet.
 - **Policies outlive a restart.** A jurisdiction with no policy is placed on any region, so a policy lost in a restart would fail open once edges registered again. With `DATABASE_URL`, resource-svc writes each policy to PostgreSQL before it applies and reloads them on start; the edge registry, telemetry, and incidents stay in memory.
 - **Failure is handled by fail-safe plus retry, not by drift detection:** an isolation fault makes the environment self-terminate before it opens the envelope, its abort telemetry raises an incident here, and the coordinator retries into the same compliant placement (three attempts) -- so recovery is the fabric's job and safety is the environment's.
-- **Telemetry** is posted by the slice runtimes on every lifecycle event, which is also how incidents are derived: an `aborted` event *is* an operator incident, not just a log line.
-- **Carrier settlement** is designed as a read model over ledger-svc filtered to network-share entries. The network share is already a party in every recorded split -- hosting revenue exists only for completed matches, and s004.failover asserts that directly on the ledger -- but the report itself is not built here yet.
+- **Telemetry** is posted by the slice runtimes on every lifecycle event, which is also how incidents are derived: an `aborted` event *is* an operator incident, not just a log line. Escalating a systemic pattern is an operator step, not a resource-svc call: s004.failover reads `/v1/incidents` here and files the case with platform-svc itself.
+- **Carrier settlement** is designed as a read model over ledger-svc filtered to network-share entries. The network share is already a party in every recorded split -- hosting revenue exists only for completed matches, and s004.failover asserts that directly on the ledger -- but the report itself is not built here yet. Neither is the SPA resource module that would show it; the scenario scripts set policies through `/v1/policies` directly.
 
 **Scenario coverage:** s001.fulfillment, s004.failover -- and every scenario that dispatches an environment allocates through it.
 
@@ -50,3 +39,5 @@ flowchart TD
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

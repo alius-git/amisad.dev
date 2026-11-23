@@ -15,15 +15,15 @@ sequenceDiagram
     Note over Ingrid,Priya: Seeded - the scenario builds its own corpus, one instance of every kind of evidence s001 through s009 produce: a completed match plus an injected abort, consent granted and revoked, a mandate, a disclosure and its adjustment
     Ingrid->>AuditSvc: Start certification run
     AuditSvc->>LedgerSvc: Read every record on all three chains and all settlement instructions - read endpoints only
-    AuditSvc->>AuditSvc: Validate dump envelope, row types, hashes, and head; malformed evidence returns 502
+    AuditSvc->>AuditSvc: Validate dump envelope, row types, hashes, and head - malformed evidence returns 502
     AuditSvc->>AuditSvc: Recompute the chains from the raw records - trusting no ledger self-report
     AuditSvc->>AuditSvc: Verify attestation continuity - every environment created-attested-executed or aborted-destroyed
     AuditSvc->>AuditSvc: Verify residency - the attested region satisfies the jurisdiction
-    AuditSvc->>AuditSvc: Verify consent - the chain is intact across all four grant types
+    AuditSvc->>AuditSvc: Verify consent - chain intact across all four grant types, every use valid, every match backed by a use
     AuditSvc->>AuditSvc: Verify settlement chain integrity and adjustment case references
     Note over AuditSvc: Verify exact settlement amounts, complete unique refunds, and ordered complete lifecycles
     alt tamper check
-        Ingrid->>AuditSvc: Submit a copy of the attestation records with one row modified
+        Ingrid->>AuditSvc: Yuruna's copy of the attestation records with one row modified
         AuditSvc-->>Ingrid: Recomputation localizes the tamper to exactly that record
     end
     AuditSvc-->>Ingrid: Findings per dimension - violation counts and the overall verdict
@@ -38,3 +38,5 @@ sequenceDiagram
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

@@ -2,23 +2,23 @@
 
 > One sentence: a mandate grants Pat bounded authority that the fabric enforces at match time -- in-scope closes with dual attribution, over-cap routes to Maya, out-of-scope never reaches matching, and revocation is instant.
 
-See [../design.md](../design.md#9-diagrams) - [s006.mandate](../scenarios.md#s006mandate-delegated-procurement-under-a-scoped-mandate). Elena's standing offer is folded into the coordinator's offer fetch.
+See [../design.md](../design.md#9-diagrams) - [s006.mandate](../scenarios.md#s006mandate-delegated-procurement-under-a-scoped-mandate). Elena's standing offers are folded into the coordinator's offer fetch, and the seller order into each commit.
 
 ```mermaid
 sequenceDiagram
     actor Maya
     actor Pat
-    participant BuyerApp as Buyer app
+    participant BuyerApp as Buyer client
     participant IdentityMock as identity-mock
     participant LedgerSvc as ledger-svc
     participant Coordinator as fabric-coordinator
     participant SliceRT as slice-runtime
 
-    Note over Maya,SliceRT: Seeded - household-goods category, per-item closing limit, expiry
+    Note over Maya,SliceRT: Seeded - Elena's housewares offers, one under and one over the per-item cap
     Maya->>BuyerApp: Grant mandate to Pat
-    BuyerApp->>Coordinator: Mandate - delegate, category, per-item cap, expiry
+    BuyerApp->>Coordinator: Mandate - delegate, category, per-item cap (90-day expiry by default)
     Coordinator->>LedgerSvc: Mandate recorded as a consent grant type
-    Note over Coordinator: Scope lives here; the immutable grant history lives on the chain
+    Note over Coordinator: Scope lives here - the immutable grant history lives on the chain
     Pat->>BuyerApp: Open delegate workspace
     BuyerApp->>IdentityMock: Pat's actor token
     BuyerApp->>Coordinator: Workspace request
@@ -27,16 +27,16 @@ sequenceDiagram
     BuyerApp->>Coordinator: Delegated need - principal named, envelope sealed
     Coordinator->>Coordinator: Mandate scope checked BEFORE any dispatch
     Coordinator->>SliceRT: Environment dispatched manual - envelope and offers travel in
-    SliceRT-->>Coordinator: Shortlist - the coordinator takes the cheapest in-scope entry, within the cap
-    Coordinator->>LedgerSvc: Settlement instruction - closing on Pat's authority
+    SliceRT-->>Coordinator: Shortlist - the coordinator takes the cheapest entry, checks its category and the cap
+    Coordinator->>LedgerSvc: Mandate use, then settlement instruction - closing on Pat's authority
     Coordinator->>Coordinator: Dual attribution on Maya's activity trail (actor Pat, principal Maya, mandate)
     BuyerApp-->>Maya: Activity trail shows the delegated action
     Pat->>BuyerApp: State second need - best match exceeds the per-item limit
     alt closing beyond delegated authority
         Coordinator->>Coordinator: Match HELD - offer chosen, nothing committed
-        Coordinator-->>Maya: Approval handoff
+        Coordinator-->>Maya: Approval request on Maya's activity trail
         Maya->>BuyerApp: Approve
-        BuyerApp->>Coordinator: Closing completes - attributed via principal approval
+        BuyerApp->>Coordinator: Mandate re-checked, closing completes - attributed via principal approval
     end
     alt out-of-scope category
         Pat->>BuyerApp: Attempt need outside the mandated category
@@ -57,3 +57,5 @@ sequenceDiagram
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

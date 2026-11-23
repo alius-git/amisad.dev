@@ -2,17 +2,13 @@
 
 > One sentence: platform-svc is the stewardship console -- operations mode for Priya, zero-knowledge support desk for Sam -- where the registry, settlement oversight, and dispute machinery live without any path into match content.
 
-See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadplatform). Dashed = designed, not built.
+See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadplatform). Dashed = designed, not built. The incident cases, the support case desk and the planned registry box are part of platform-svc (vm-core); the support case desk includes the disclosure flow (request -> grant -> delivery -> expiry), and the planned participant registry box includes settlement oversight (reconciliation, anomaly detection). The identity-mock check on Sam's case writes is in the POC notes.
 
 ```mermaid
 flowchart TD
-    subgraph svc["platform-svc (vm-core)"]
-        incidents["Cross-party incident cases<br/>linked by environment id"]
-        cases["Support case desk<br/>operational metadata only"]
-        disclosure["Disclosure flow<br/>request -> grant -> delivery -> expiry"]
-        registry["Participant registry<br/>all actor classes"]
-        oversight["Settlement oversight<br/>reconciliation - anomaly detection"]
-    end
+    incidents["Cross-party incident cases<br/>linked by environment id"]
+    cases["Support case desk<br/>operational metadata only"]
+    registry["Participant registry<br/>+ settlement oversight"]
     escalations["Operator escalations<br/>resource-svc incidents - audit-svc findings"]
     spa["SPA - platform module<br/>operations mode / support mode"]
     coordinator["fabric-coordinator"]
@@ -21,14 +17,13 @@ flowchart TD
     spa -.-> registry
     spa -.-> cases
     escalations -->|"summary + the environment ids it links"| incidents
-    cases --> disclosure
-    coordinator -->|"granted artifact + expiry, after recording the consent"| disclosure
-    ledger -.->|"settlement entries - metadata"| oversight
+    coordinator -->|"granted artifact + expiry, after recording the consent"| cases
+    ledger -.->|"settlement entries - metadata"| registry
     cases -->|"refund on a case - compensating entries, with the write token"| ledger
     cases -.->|"adjustment proposals -> compensating entries"| ledger
 
     classDef planned stroke-dasharray: 5 5
-    class registry,oversight planned
+    class registry planned
 ```
 
 **POC notes**
@@ -47,3 +42,5 @@ flowchart TD
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

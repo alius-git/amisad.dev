@@ -2,7 +2,7 @@
 
 > One sentence: a delivery dispute resolves on metadata plus one minimal, time-boxed, consented disclosure, the refund lands as compensating entries referencing the case -- and the buyer stays anonymous throughout.
 
-See [../design.md](../design.md#9-diagrams) - [s008.mediation](../scenarios.md#s008mediation-zero-knowledge-dispute-mediation-and-settlement-adjustment).
+See [../design.md](../design.md#9-diagrams) - [s008.mediation](../scenarios.md#s008mediation-zero-knowledge-dispute-mediation-and-settlement-adjustment). The buyer's report is designed, not built (dashed) -- the scenario opens the case as Sam. Elena and seller-svc are left out: the POC refunds through platform-svc with no seller acceptance step (see [07-platform.md](07-platform.md)).
 
 ```mermaid
 sequenceDiagram
@@ -15,23 +15,25 @@ sequenceDiagram
     actor Priya
 
     Note over Maya,Priya: Seeded - a settled order (s001.fulfillment style) whose delivery confirmation conflicts with reality
-    Maya->>BuyerApp: Report non-delivery
-    BuyerApp->>Sam: Report reaches the support desk
-    Note over Sam,PlatformSvc: Every support case write carries Sam's identity-mock token; the platform verifies it, reads stay open
+    %% planned - buyer-client has no report command
+    Maya-->>BuyerApp: Report non-delivery
+    BuyerApp-->>Sam: Report reaches the support desk
+    Note over Sam,PlatformSvc: Every support case write carries Sam's identity-mock token - the platform verifies it, reads stay open
     Sam->>PlatformSvc: Case opens - order state and settlement metadata only, no identity
     Sam->>PlatformSvc: Review - carrier confirmation conflicts with the report
     alt metadata cannot resolve the case
-        Sam->>PlatformSvc: Request consented disclosure - minimal scope, time-boxed
+        Sam->>PlatformSvc: Request consented disclosure - recorded in the case lifecycle
         Maya->>BuyerApp: Grant
         BuyerApp->>Coordinator: Disclosure grant for this case, with its time box
         Coordinator->>LedgerSvc: Grant recorded under her pseudonymous subject
         Coordinator->>PlatformSvc: Exactly the granted artifact, carrying its expiry
+        Coordinator->>LedgerSvc: Disclosure use, scoped to the case
         PlatformSvc-->>Sam: Artifact read-only - identity still withheld
     end
     Sam->>PlatformSvc: Evidence supports the buyer - refund the case
     PlatformSvc->>LedgerSvc: Compensating entries for the case's match, referencing the case, with the ledger write token
-    Note over LedgerSvc: One full reversal per match; identical case replay returns its prior outcome, including after restart
-    Note over LedgerSvc: History is never edited; a conflicting case or inconsistent prior refund is rejected
+    Note over LedgerSvc: One full reversal per match - identical case replay returns its prior outcome, including after restart
+    Note over LedgerSvc: History is never edited - a conflicting case or inconsistent prior refund is rejected
     Sam->>PlatformSvc: Resolution recorded, case closed
     Sam->>PlatformSvc: Recurring pattern escalated to operations
     PlatformSvc->>Priya: Cross-party case in the operations queue
@@ -44,3 +46,5 @@ sequenceDiagram
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

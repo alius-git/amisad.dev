@@ -18,7 +18,7 @@ sequenceDiagram
     Maya->>BuyerApp: Pause participation
     BuyerApp->>Coordinator: Revoke participation
     Coordinator->>LedgerSvc: Revocation appended under her pseudonymous subject
-    Elena->>SellerSvc: Publish new offer that would perfectly fit an open need
+    SellerSvc->>SellerSvc: A second seeded seller publishes an offer that would perfectly fit an open need
     SellerSvc->>Coordinator: Offer-published event - re-run the open needs
     Coordinator->>LedgerSvc: Consent check for this matching cycle
     LedgerSvc-->>Coordinator: Revoked - no environment created for her needs
@@ -44,3 +44,5 @@ sequenceDiagram
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

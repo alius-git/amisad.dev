@@ -2,28 +2,22 @@
 
 > One sentence: seller-svc runs the multi-tenant catalog, inventory, and order state machine that matching consumes and settlement pays -- fed by hand through the `/v1` API, by the SPA module once it exists, or by connectors through AmisAd/connect.
 
-See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadseller). Dashed = designed, not built.
+See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadseller). Every box except fabric-coordinator, connect-svc, ledger-svc and insights-svc is part of seller-svc (vm-core); inventory is folded into the catalog box, and the SPA seller module is not drawn because it is still a placeholder page.
 
 ```mermaid
 flowchart TD
-    subgraph svc["seller-svc (vm-core)"]
-        catalog["Offer catalog<br/>matchable structured offers"]
-        inventory["Inventory & availability<br/>per-offer stock + monotonic version"]
-        orders["Order state machine<br/>committed->provisioning->settled"]
-        outlook["Demand-outlook view"]
-    end
-    spa["SPA - seller module"]
+    catalog["Catalog & inventory"]
+    orders["Order state machine<br/>committed->provisioning->settled"]
+    outlook["Demand-outlook view"]
     coordinator["fabric-coordinator"]
     connect["connect-svc"]
     ledger["ledger-svc"]
     insights["insights-svc"]
 
-    spa -.-> catalog
-    spa -.-> orders
-    coordinator -->|"fetch region catalog - create committed order"| catalog
+    coordinator -->|"fetch region catalog"| catalog
+    coordinator -->|"create order - read status"| orders
     catalog -->|"offer published -- a new offer may fit an open need"| coordinator
-    inventory -->|"zero stock leaves the matchable catalog"| catalog
-    connect -->|"connector catalog + inventory deltas"| inventory
+    connect -->|"connector catalog + inventory deltas"| catalog
     orders -->|"every state transition, mirrored to the ERP"| connect
     orders -->|"fulfilled confirms the split"| ledger
     insights -->|"published outlook version"| outlook
@@ -32,7 +26,7 @@ flowchart TD
 **POC notes**
 
 - **Multi-tenant from day one:** tenant ID on offers/orders and inventory ownership through the referenced offer, immutable offer ownership, and a required matching tenant on inventory updates; scenario seeds create Elena plus the deliberately out-of-range seller s002.fitting asserts is filtered.
-- **Matchability is the catalog's contract:** offers carry structured attributes (price, exclusion-relevant fields like color, reach, fitting slots, standing-deal terms) so environments evaluate them without interpretation.
+- **Matchability is the catalog's contract:** offers carry structured attributes (price, exclusion-relevant fields like color, reach, fitting slots, standing-deal terms) so environments evaluate them without interpretation. Inventory is per-offer stock with a monotonic version: an offer whose stock is zero is left out of the region catalog the coordinator fetches, and an offer with no stock entry stays matchable.
 - **The order state machine starts at `committed`:** a closed match creates the order already committed, the seller advances it through `provisioning` to `fulfilled`, and `settled` is reached only internally, when the ledger confirms the split -- never by request. Illegal transitions are refused. Fulfillment is a requested transition: failed ledger confirmation returns 503 and preserves the prior state; successful or previously confirmed settlement persists `settled`. A retry also repairs an older `fulfilled` row. Identical order creation returns the current order without another event.
 - **Both outbound events are detached, with a bounded resend** -- offer publication to the coordinator, order transitions to connect-svc. Detachment is load-bearing: the coordinator's matching cycle calls back into this catalog, so a synchronous notify would deadlock the pair. A transport error or a 5xx is resent after 1, 2, 4 and 8 seconds (five attempts, at most 15 seconds of waiting); any other refusal is logged once and not resent. Resending is safe because both consumers are idempotent: a matching cycle removes what it matched, and connect-svc drops a repeated delivery and never moves an order mirror backwards. They carry the `orders.*` / `inventory.*` payloads JetStream will carry later; the seller never blocks on either consumer.
 - **Match notifications contain need context only** -- the seller-side record has no buyer identity field at all, so s002.fitting's assertion is structural, not filtered.
@@ -47,3 +41,5 @@ flowchart TD
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

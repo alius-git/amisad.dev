@@ -17,17 +17,18 @@ sequenceDiagram
     Note over Alex,Coordinator: Seeded - Elena's ERP catalog with one item at a single unit of stock
     Alex->>ConnectSvc: Register as integration partner
     ConnectSvc-->>Alex: Registered - sandbox access only
-    Alex->>ConnectSvc: Certify the connector against the same contracts
+    Alex->>ConnectSvc: Certify the connector - conformance collapsed to a pass in the POC
     Note over ConnectSvc,Priya: Promotion beyond sandbox belongs to Priya's participant registry - not built in the POC, so sandbox and certification are tracked in connect-svc
     Elena->>ConnectSvc: Grant scoped access - catalog, inventory, orders
     ConnectSvc-->>ERP: Credential capped to exactly that scope
     ERP->>ConnectSvc: Sync catalog into Elena's tenant
-    ConnectSvc->>SellerSvc: Offers for the credential tenant; existing ownership must match
+    ConnectSvc->>SellerSvc: Offers for the credential tenant - existing ownership must match
     Note over ERP: Counter sale in the shop - last unit of the item sells externally
     ERP->>ConnectSvc: Inventory delta
-    ConnectSvc->>SellerSvc: Authorized tenant, stock zero, and delta_ts; seller checks ownership and version before durable mutation
+    ConnectSvc->>SellerSvc: Authorized tenant, stock zero, and delta_ts - seller checks ownership and version before durable mutation
     Coordinator->>SellerSvc: Fetch offers for the seeded buyer need
     SellerSvc-->>Coordinator: Only the in-stock alternative, though the zeroed item was cheaper
+    Coordinator->>SellerSvc: Committed order for the in-stock match
     SellerSvc->>ConnectSvc: Order state transitions, one detached notify each
     ConnectSvc-->>ERP: Mirrored under an idempotency key, advancing monotonically
     alt out-of-scope call
@@ -46,3 +47,5 @@ sequenceDiagram
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

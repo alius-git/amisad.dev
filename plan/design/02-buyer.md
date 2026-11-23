@@ -2,17 +2,15 @@
 
 > One sentence: the buyer client holds the only copy of personal data and reaches the ecosystem exclusively through need envelopes, consent records, and pseudonymous order channels -- never through a buyer backend.
 
-See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadbuyer). Dashed = designed, not built.
+See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadbuyer). Dashed = designed, not built. Every box except fabric-coordinator and ledger-svc is part of the buyer clients (the `buyer-client` CLI and the Flutter app).
 
 ```mermaid
 flowchart TD
-    subgraph client["Buyer clients -- buyer-client CLI - Flutter app"]
-        needs["Needs, shortlists, bookings"]
-        policy["Closing policy<br/>auto-close or manual"]
-        delegate["Delegate mode<br/>acts on a principal's mandate"]
-        consent["Consent & mandate controls"]
-        vault["On-device vault<br/>needs - history - preferences"]
-    end
+    needs["Needs, shortlists, bookings"]
+    policy["Closing policy<br/>auto-close or manual"]
+    delegate["Delegate mode<br/>acts on a principal's mandate"]
+    consent["Consent & mandate controls"]
+    vault["On-device vault<br/>needs - history - preferences"]
     coordinator["fabric-coordinator<br/>the buyer's only surface"]
     ledger["ledger-svc<br/>consent - mandates"]
 
@@ -45,3 +43,5 @@ flowchart TD
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

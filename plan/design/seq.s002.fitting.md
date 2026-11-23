@@ -26,9 +26,9 @@ sequenceDiagram
     Note over Coordinator,SellerSvc: Manual policy - zero commitments exist at this point
     Maya->>BuyerApp: Select one dress, book the Thursday fitting
     BuyerApp->>Coordinator: Accept offer and book slot
-    Coordinator->>LedgerSvc: Settlement instruction for the deterministic booked match; identical replay succeeds
+    Coordinator->>LedgerSvc: Settlement instruction for the deterministic booked match - identical replay succeeds
     Coordinator->>SellerSvc: Create or resume matching order - dress requirements and slot, no buyer identity
-    Note over Coordinator,SellerSvc: Retry after failure or lost response resumes durable writes; different payloads remain conflicts
+    Note over Coordinator,SellerSvc: Retry after failure or lost response resumes durable writes - different payloads remain conflicts
     Coordinator-->>BuyerApp: Booking confirmed (notification 2)
     Elena->>SellerSvc: Fitting appointment on the order board, fulfilled and closed
     SellerSvc->>LedgerSvc: Fulfillment confirmed - split recorded, order settles
@@ -40,3 +40,5 @@ sequenceDiagram
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

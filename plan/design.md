@@ -22,11 +22,12 @@
 
 ## 2. POC topology
 
-Four VMs plus the dev host, all provisioned and driven by Yuruna (see [design/01-overview.md](design/01-overview.md) for the diagrams):
+Four VMs plus the dev host, all provisioned and driven by Yuruna, and a stash service the lab uses (see [design/01-overview.md](design/01-overview.md) for the diagrams):
 
 | Node | Role |
 |------|------|
-| **Dev host** | Yuruna test runner, status service, binary stash service, VM provisioning (Hyper-V/KVM/UTM -- any supported host) |
+| **Dev host** | Yuruna test runner, status service, VM provisioning (Hyper-V/KVM/UTM -- any supported host) |
+| **Stash service** | A Yuruna stash service VM -- started on this host, shared by a pool, or at an address the operator states -- that carries the binaries tarball from vm-build to vm-core |
 | **vm-build** | Rust toolchain only: compiles the workspace once per run and uploads the binaries tarball to the stash service |
 | **vm-core** | Kubernetes cluster: the seven server-side application services, foundation services, PostgreSQL, NATS; no source build and no Rust toolchain |
 | **vm-edge-a**, **vm-edge-b** | Two "slice VMs" -- the telco-local edge, one per simulated region/jurisdiction |
@@ -125,7 +126,7 @@ Yuruna provisions the nodes, deploys the ten services onto vm-core, and executes
 
 ## 9. Diagrams
 
-The documents under [design/](design/) visualize this design; they do not restate it. Every application diagram holds at most seven boxes (the topology diagram maps one box per lab node); **dashed edges and boxes mark what is designed but not built** -- growth-path items, and surfaces this design fixes that the POC reaches by another route. Solid means the code does exactly that.
+The documents under [design/](design/README.md) visualize this design; they do not restate it. Every diagram holds at most seven boxes, counting subgraph frames and the boxes for other services (the topology diagram maps one box per lab node); parts beyond that share a named box or are left undrawn, and the page's See line says which; in the flowcharts, **dashed edges and boxes mark what is designed but not built** -- growth-path items, and surfaces this design fixes that the POC reaches by another route. Solid means the code does exactly that.
 
 | # | Document | Diagram type | Shows |
 |---|----------|--------------|-------|
@@ -139,7 +140,7 @@ The documents under [design/](design/) visualize this design; they do not restat
 | 8 | [AmisAd/audit](design/08-audit.md) | flowchart | audit-svc: chain verification, certification, reporting. |
 | 9 | [AmisAd/connect](design/09-connect.md) | flowchart | connect-svc: contracts, sandbox, credentials, webhooks. |
 
-One sequence diagram per verification scenario, faithful to the numbered steps in [scenarios.md](scenarios.md): participants are the POC components above, personas are actors, at most 8 lifelines each, and each diagram traces its scenario's steps to its Target Verification Point.
+One sequence diagram per verification scenario, faithful to the numbered steps in [scenarios.md](scenarios.md): participants are the POC components above, personas are actors, at most seven lifelines each, actors included (a persona or component that would exceed it is folded into another or left out, as that page's See line says; a dotted arrow is a reply, and a step that is designed but not built is named there too), and each diagram traces its scenario's steps to its Target Verification Point.
 
 | Document | Sequence for |
 |----------|--------------|
@@ -157,7 +158,7 @@ One sequence diagram per verification scenario, faithful to the numbered steps i
 How the documents relate:
 
 - Doc 1 names the blocks and places them on the lab network; docs 2-9 open one application each.
-- Foundation services (`fabric-coordinator`, `slice-runtime`, `identity-mock`, `ledger-svc`) appear as external boxes in every application diagram -- they are defined in section 4 above and drawn open in doc 1.
+- Each application diagram draws as external boxes only the foundation services (`fabric-coordinator`, `slice-runtime`, `identity-mock`, `ledger-svc`) and other services it exchanges data with, within its seven boxes -- the foundations are defined in section 4 above and grouped in doc 1.
 - Scenario coverage per application is listed at the bottom of each document, tracing back to [scenarios.md](scenarios.md).
 - The seq.\* documents show docs 2-9's components exchanging messages in scenario order: each opens with a Note stating seeded preconditions and closes with a Note stating the Target Verification Point Yuruna asserts.
 

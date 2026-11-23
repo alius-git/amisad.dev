@@ -2,28 +2,20 @@
 
 > One sentence: audit-svc independently verifies the hash chains, residency, consent, and settlement evidence of everything the other services produced -- holding read-only credentials and no personal-data scope, so its independence is architectural.
 
-See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadaudit). Dashed = designed, not built.
+See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadaudit). Dashed = designed, not built. The chain verifier, the dimension checks and the certification runner are part of audit-svc (vm-core); the dimension checks box groups the attestation lifecycle check (created -> attested -> executed or aborted -> destroyed), the residency checker, the consent auditor (participation, mandates, disclosures) and the settlement evidence check (exact amounts, unique parties, complete refunds).
 
 ```mermaid
 flowchart TD
-    subgraph svc["audit-svc (vm-core)"]
-        chains["Chain verifier<br/>attestation - consent - settlement"]
-        residency["Residency checker"]
-        consent["Consent auditor<br/>participation - mandates - disclosures"]
-        conservation["Settlement evidence<br/>exact amounts - unique parties - complete refunds"]
-        certify["Certification runner<br/>findings per dimension"]
-    end
+    chains["Chain verifier<br/>attestation - consent - settlement"]
+    checks["Dimension checks<br/>all four dimensions"]
+    certify["Certification runner<br/>findings per dimension"]
     spa["SPA - audit module"]
     ledger["ledger-svc<br/>raw chains + instructions, read-only"]
     platform["platform-svc<br/>receives findings"]
 
     ledger -->|"every record, every chain"| chains
-    chains --> residency
-    chains --> consent
-    chains --> conservation
-    residency --> certify
-    consent --> certify
-    conservation --> certify
+    chains --> checks
+    checks --> certify
     certify -.-> spa
     certify -.->|"findings record, delivered by the auditor"| platform
 ```
@@ -45,3 +37,5 @@ flowchart TD
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

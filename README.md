@@ -6,7 +6,7 @@ AmisAd development
 - [personas.md](plan/personas.md) -- Profiles of the eleven user roles the AmisAd ecosystem serves: motivations, responsibilities, and interaction points.
 - [applications.md](plan/applications.md) -- The application ecosystem: each application's business objective, core functionality, and architectural paradigms, plus the shared platform foundations.
 - [scenarios.md](plan/scenarios.md) -- Ten prioritized end-to-end verification sequences for the Yuruna framework, with full persona and component traceability.
-- [design.md](plan/design.md) -- Master POC design: stack decisions, lab VM topology, mock boundaries, and growth path, with Mermaid diagrams under [plan/design/](plan/design/) (indexed in [section 9](plan/design.md#9-diagrams)).
+- [design.md](plan/design.md) -- Master POC design: stack decisions, lab VM topology, mock boundaries, and growth path, with Mermaid diagrams indexed in [plan/design/README.md](plan/design/README.md).
 
 ## Proof of concept
 

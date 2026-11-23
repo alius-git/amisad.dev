@@ -2,11 +2,10 @@
 
 > One sentence: a private need auto-closes against a standing offer inside a sealed edge environment and settles across all four parties -- the golden path.
 
-See [../design.md](../design.md#9-diagrams) - [s001.fulfillment](../scenarios.md#s001fulfillment-intent-driven-edge-match-and-automated-fulfillment). Tom is folded into resource-svc (the carrier share he would read is a party in the recorded split).
+See [../design.md](../design.md#9-diagrams) - [s001.fulfillment](../scenarios.md#s001fulfillment-intent-driven-edge-match-and-automated-fulfillment). Tom is folded into resource-svc (the carrier share he would read is a party in the recorded split). Maya is folded into the buyer client (buyer-client plays her).
 
 ```mermaid
 sequenceDiagram
-    actor Maya
     participant BuyerApp as Buyer client
     participant Coordinator as fabric-coordinator
     participant ResourceSvc as resource-svc
@@ -15,8 +14,8 @@ sequenceDiagram
     participant LedgerSvc as ledger-svc
     actor Elena
 
-    Note over Maya,Elena: Seeded - Maya verified with active consent, Elena holds an auto-close standing deal
-    Maya->>BuyerApp: State need - gift, budget cap, city, deadline, auto-close policy
+    Note over BuyerApp,Elena: Seeded - Maya verified with active consent, Elena holds an auto-close standing deal
+    BuyerApp->>BuyerApp: Maya states need - gift, budget cap, city, deadline, auto-close policy
     BuyerApp->>Coordinator: Sealed need envelope
     Coordinator->>ResourceSvc: Placement request for buyer jurisdiction
     ResourceSvc-->>Coordinator: Compliant slice allocation
@@ -33,7 +32,7 @@ sequenceDiagram
     SellerSvc->>LedgerSvc: Fulfillment confirmed - four-way split recorded, order settles
     BuyerApp->>Coordinator: Poll order status on the handle
     Coordinator-->>BuyerApp: Delivered - read through from the seller order, pseudonymous
-    Note over Maya,Elena: Yuruna asserts - one settlement record summing to match value, Delivered/Settled states share one match ID, attestation chain complete, zero need or identity egress, and the ledger and order rows survive a pod restart
+    Note over BuyerApp,Elena: Yuruna asserts - one settlement record summing to match value, Delivered/Settled states share one match ID, attestation chain complete, zero need or identity egress, and the ledger and order rows survive a pod restart
 ```
 
 ---
@@ -41,3 +40,5 @@ sequenceDiagram
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)

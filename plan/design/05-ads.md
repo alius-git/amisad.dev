@@ -1,33 +1,25 @@
 # AmisAd/ads — POC design
 
-> One sentence: ads-svc runs campaigns and the creative studio as two role-scoped modes over one marketplace core, with creative rendered only inside sealed environments and credit arriving only from the attribution ledger.
+> One sentence: ads-svc runs campaigns and the creative studio as two role-scoped modes over one marketplace core, with creative rendered only inside sealed environments and credit arriving only from the fabric when a boosted match closes.
 
-See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadads). Dashed = designed, not built.
+See [../design.md](../design.md#9-diagrams) - [../applications.md](../applications.md#amisadads). Dashed = designed, not built. Every box except insights-svc, fabric-coordinator and ledger-svc is part of ads-svc (vm-core); the creative studio box merges the brief marketplace (Kai's demand queue) with the asset store, and the SPA ads module is not drawn because it is still a placeholder page.
 
 ```mermaid
 flowchart TD
-    subgraph svc["ads-svc (vm-core)"]
-        campaigns["Campaign workspace<br/>budget - pacing - aggregate targeting"]
-        briefs["Brief marketplace<br/>demand queue"]
-        assets["Asset store<br/>approved creative per campaign"]
-        attribution["Attribution reports<br/>agency + creator credit"]
-        demand["Demand view<br/>published outlook, read through"]
-    end
-    spa["SPA - ads module<br/>campaign mode / studio mode"]
+    campaigns["Campaign workspace<br/>budget - pacing - aggregate targeting"]
+    studio["Creative studio<br/>briefs - assets"]
+    attribution["Attribution reports<br/>agency + creator credit"]
+    demand["Demand view<br/>published outlook, read through"]
     insights["insights-svc"]
     coordinator["fabric-coordinator"]
     ledger["ledger-svc"]
 
-    spa -.-> campaigns
-    spa -.-> briefs
-    briefs --> assets
-    assets -->|"placing an approved asset activates the campaign"| campaigns
+    studio -->|"placing an approved asset activates the campaign"| campaigns
     insights -->|"published outlook version"| demand
     coordinator -->|"fetch active campaigns for the region"| campaigns
     coordinator -->|"credit assignment on close: campaign + asset"| attribution
     attribution -->|"budget decrements by the per-match commitment"| campaigns
     ledger -.->|"the same split, recorded independently"| attribution
-    attribution -.-> spa
 ```
 
 **POC notes**
@@ -45,3 +37,5 @@ flowchart TD
 LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2026 by Alisson Sol et al.
+
+[Design](../design.md) | [Design overview](README.md)
