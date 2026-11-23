@@ -166,6 +166,13 @@ select {
   font-weight: 700;
 }
 .hint { font-size: 0.75rem; color: var(--muted); margin: 4px 0 0 0; line-height: 1.45; }
+/* A link inside a hint (the cast's "data view") is as short as the small text
+   around it. On a touch screen it takes the 44px floor; inline-flex because an
+   inline box ignores min-height. any-pointer also reaches a touch screen beside
+   a mouse, and a fine pointer keeps the dense line. */
+@media (any-pointer: coarse) {
+  .hint a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; }
+}
 
 /* REGION: swimlane timeline (shared: full + mini) */
 .tl-wrap {

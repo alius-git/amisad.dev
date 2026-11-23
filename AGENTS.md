@@ -188,8 +188,15 @@ They must not depend on the conversation or process that produced the change.
 - When removing a procedural reference, retain the technical rationale. Delete
   the comment if nothing useful remains.
 
-Use American English consistently in prose, code comments and documentation.
-Avoid churn between regional spelling conventions.
+Use American English consistently in prose, code comments and documentation,
+and in names: variables, functions, types, test names, file and directory
+names, database tables and columns, JSON and YAML keys, enum and status values,
+and log event, metric and label names. Avoid churn between regional spelling
+conventions. A rename to American spelling updates every producer and consumer
+of the name in the same change. A name that an external standard or protocol
+fixes, such as the Model Context Protocol method `notifications/cancelled`,
+keeps its external spelling and is recorded as an exception beside the
+spelling check.
 
 ## Verify behavior and keep all Pester tests working
 

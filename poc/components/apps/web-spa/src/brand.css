@@ -50,6 +50,18 @@ body {
   min-height: 44px;
 }
 
+/* On a touch screen the 44px floor holds across as well: a short link label
+   is narrower than a finger. any-pointer also reaches a touch screen beside a
+   mouse, and a fine pointer keeps the links at their text width. */
+@media (any-pointer: coarse) {
+  .amisad-home nav a,
+  .amisad-module header a,
+  .amisad-module > a {
+    min-width: 44px;
+    justify-content: center;
+  }
+}
+
 .amisad-home nav a,
 .amisad-module header a,
 .amisad-module > a {

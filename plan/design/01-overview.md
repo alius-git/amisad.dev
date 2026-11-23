@@ -73,7 +73,7 @@ Each lab node is one box; the stash service runs on its own VM -- started on thi
 - vm-build: the Rust toolchain only, running `cargo build --release`.
 - vm-core: a kubeadm cluster with the 7 app services plus fabric-coordinator, identity-mock and ledger-svc; PostgreSQL and NATS JetStream (idle) run there as host services.
 - vm-edge-a and vm-edge-b: `slice-runtime` plus the attestation sim, one region each.
-- Test mobile device: the side-loaded Buyer app.
+- Test mobile device: the side-loaded buyer app.
 
 Services are reached on NodePorts 30080-30089 (there is no ingress in the POC), and PostgreSQL and NATS are host services on vm-core rather than in-cluster workloads; pods dial PostgreSQL over the node network, and no service dials NATS yet.
 

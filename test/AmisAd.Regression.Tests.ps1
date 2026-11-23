@@ -2037,3 +2037,48 @@ Export-ModuleMember -Function Get-ExtensionHostAddress, Get-ExtensionHostLastOut
         $env:AMISAD_TEST_STASH_PUBLISHED | Should -Be '10.0.0.10'
     }
 }
+
+Describe 'AmisAd touch targets' {
+    BeforeAll {
+        # The rules under (any-pointer: coarse) in one stylesheet, comments
+        # removed, as selector and declaration-body pairs. any-pointer, not
+        # pointer: a touch screen beside a mouse reports a fine primary pointer.
+        function Get-CoarsePointerRule {
+            param([string]$RelativePath)
+            $css = [regex]::Replace([IO.File]::ReadAllText((Join-Path $script:RepoRoot $RelativePath)), '(?s)/\*.*?\*/', '')
+            $rules = @()
+            foreach ($block in [regex]::Matches($css, '@media\s*\(any-pointer:\s*coarse\)\s*\{((?:[^{}]*\{[^{}]*\})*)\s*\}')) {
+                foreach ($rule in [regex]::Matches($block.Groups[1].Value, '([^{}]+)\{([^{}]*)\}')) {
+                    $rules += [pscustomobject]@{
+                        Selectors = @($rule.Groups[1].Value -split ',' | ForEach-Object { ($_ -replace '\s+', ' ').Trim() })
+                        Body      = $rule.Groups[2].Value
+                    }
+                }
+            }
+            return $rules
+        }
+        function Get-CoarseDeclaration {
+            param([object[]]$Rules, [string]$Selector, [string]$Property)
+            return @($Rules | Where-Object { $_.Selectors -contains $Selector } | ForEach-Object {
+                    $m = [regex]::Match($_.Body, '(?:^|;)\s*' + [regex]::Escape($Property) + '\s*:\s*([^;]+)')
+                    if ($m.Success) { $m.Groups[1].Value.Trim() }
+                })
+        }
+    }
+
+    It 'gives the web SPA links the 44px floor across as well as up under a coarse pointer' {
+        $rules = Get-CoarsePointerRule -RelativePath 'poc/components/apps/web-spa/src/brand.css'
+        foreach ($selector in '.amisad-home nav a', '.amisad-module header a', '.amisad-module > a') {
+            Get-CoarseDeclaration -Rules $rules -Selector $selector -Property 'min-width' | Should -Contain '44px' -Because "$selector can be narrower than a finger"
+        }
+    }
+
+    It 'gives the data-view hint link the 44px floor under a coarse pointer' {
+        $actions = [IO.File]::ReadAllText((Join-Path $script:RepoRoot 'poc/demo/data-view/ui/actions.js'))
+        $actions | Should -Match '<p class=\\"hint\\">[^<]*<a href' -Because 'the cast hint carries the inline data view link'
+        $rules = Get-CoarsePointerRule -RelativePath 'poc/demo/data-view/ui/shared.css'
+        Get-CoarseDeclaration -Rules $rules -Selector '.hint a' -Property 'min-height' | Should -Contain '44px'
+        Get-CoarseDeclaration -Rules $rules -Selector '.hint a' -Property 'min-width' | Should -Contain '44px'
+        Get-CoarseDeclaration -Rules $rules -Selector '.hint a' -Property 'display' | Should -Contain 'inline-flex' -Because 'an inline box ignores min-height'
+    }
+}
