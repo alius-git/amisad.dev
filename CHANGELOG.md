@@ -9,17 +9,12 @@ Versions track the framework release the material was last exercised against,
 not an independent release line -- the POC is only meaningful paired with a
 framework that can deploy it.
 
-## 2026.11.23
+## 2026.11.26
 
-- Align script versions and generated inventories with Yuruna `2026.11.23`.
-
-## 2026.11.16
-
-- Align script versions and generated inventories with Yuruna `2026.11.16`.
+- Align script versions and generated inventories with Yuruna `2026.11.26`.
 
 ## 2026.11.08
 
-- Align script versions and generated inventories with Yuruna `2026.11.08`.
 - The k8s workload script runs its local registry as `registry:2.8.3`,
   published on `127.0.0.1` only, and the k8s, NATS and build-tool steps wait
   out a GitHub release outage of about half an hour.
@@ -28,7 +23,6 @@ framework that can deploy it.
 
 ## 2026.11.05
 
-- Align script versions and generated inventories with Yuruna `2026.11.05`.
 - Licensed under the Yuruna License (LICENSE.md), which every file's license
   pointer already named, in place of the MIT License text.
 
@@ -84,6 +78,6 @@ LICENSEURI https://yuruna.link/license
 
 Copyright (c) 2019-2026 by Alisson Sol et al.
 
-Last review: 2026.11.23
+Last review: 2026.11.26
 
 Back to [Yuruna](https://yuruna.com)
