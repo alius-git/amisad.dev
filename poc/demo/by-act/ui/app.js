@@ -258,9 +258,9 @@ function renderSteps() {
     if (!steps.some((s) => s.persona === currentPersona)) continue;
     const panel = document.createElement("div");
     panel.className = "panel scenario";
-    const actLabel = sc.act !== lastAct ? ACTS[sc.act] + " - " : "";
+    const actLabel = sc.act !== lastAct ? ACTS[sc.act] + " - scenario" : "Scenario";
     lastAct = sc.act;
-    panel.innerHTML = '<div class="act">' + actLabel + "scenario</div><h2>" + sc.name +
+    panel.innerHTML = '<div class="act">' + actLabel + "</div><h2>" + sc.name +
       '</h2><p class="tagline">' + sc.tagline + "</p>";
     steps.forEach((s, i) => panel.appendChild(renderStep(s, i + 1)));
     host.appendChild(panel);

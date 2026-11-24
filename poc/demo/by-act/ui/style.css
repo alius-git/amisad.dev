@@ -130,7 +130,7 @@ main {
 /* Scenario panels */
 .scenario { border-left: 4px solid var(--amisad-navy); }
 .scenario > h2 { font-size: 1rem; }
-.scenario .act { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amisad-terracotta); }
+.scenario .act { font-size: 0.7rem; color: var(--amisad-terracotta); }
 .scenario .tagline { font-size: 0.8rem; color: #666; margin: 0.1rem 0 0.6rem; }
 .step {
   display: grid;

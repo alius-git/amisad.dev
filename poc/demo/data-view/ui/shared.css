@@ -160,8 +160,6 @@ select {
 .panel h2 {
   margin: 0 0 8px 0;
   font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.13em;
   color: var(--muted);
   font-weight: 700;
 }
@@ -185,8 +183,6 @@ select {
 .tl--mini .tl-acts, .tl--mini .tl-scen { margin-left: var(--label-w-mini); }
 .tl-act, .tl-sc {
   font-size: 0.62rem;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
   padding: 3px 4px;
   overflow: hidden;
   white-space: nowrap;
@@ -194,7 +190,7 @@ select {
   color: var(--amisad-white);
   font-weight: 700;
 }
-.tl-sc { background: transparent; color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
+.tl-sc { background: transparent; color: var(--muted); font-weight: 600; }
 .tl-lane { height: var(--lane-h); align-items: center; }
 .tl--mini .tl-lane { height: var(--lane-h-mini); }
 .tl-lane + .tl-lane { border-top: 1px dotted rgba(120, 128, 160, 0.28); }
