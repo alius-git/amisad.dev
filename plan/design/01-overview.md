@@ -70,7 +70,7 @@ Two edge VMs are the minimum honest topology (see [../design.md](../design.md) s
 Each lab node is one box; the stash service runs on its own VM -- started on this host, shared by a pool, or at an address the operator states -- so it is drawn as a seventh box. What runs on each node:
 
 - Dev host: the Yuruna runner and the status service.
-- vm-build: the Rust toolchain only, running `cargo build --release`.
+- vm-build: the Rust toolchain and Bazel, running the Bazel gate, `cargo test` and `cargo build --release`.
 - vm-core: a kubeadm cluster with the 7 app services plus fabric-coordinator, identity-mock and ledger-svc; PostgreSQL and NATS JetStream (idle) run there as host services.
 - vm-edge-a and vm-edge-b: `slice-runtime` plus the attestation sim, one region each.
 - Test mobile device: the side-loaded buyer app.

@@ -28,7 +28,7 @@ Four VMs plus the dev host, all provisioned and driven by Yuruna, and a stash se
 |------|------|
 | **Dev host** | Yuruna test runner, status service, VM provisioning (Hyper-V/KVM/UTM -- any supported host) |
 | **Stash service** | A Yuruna stash service VM -- started on this host, shared by a pool, or at an address the operator states -- that carries the binaries tarball from vm-build to vm-core |
-| **vm-build** | Rust toolchain only: compiles the workspace once per run and uploads the binaries tarball to the stash service |
+| **vm-build** | Rust toolchain and Bazel: runs the Bazel gate and the tests, compiles the workspace once per run and uploads the binaries tarball to the stash service |
 | **vm-core** | Kubernetes cluster: the seven server-side application services, foundation services, PostgreSQL, NATS; no source build and no Rust toolchain |
 | **vm-edge-a**, **vm-edge-b** | Two "slice VMs" -- the telco-local edge, one per simulated region/jurisdiction |
 | **Test mobile device** | Flutter buyer app, side-loaded, reaching vm-core over the lab LAN -- a by-hand demo path, outside the automated run |

@@ -30,7 +30,7 @@ flowchart TD
 - **Unmet demand** compares aggregate need counts against supply per category/region -- the growth signal, carrying category and region only.
 - **The threshold is one constant in the service** (deliberately low so lab-scale seeds can cross it), applied on every read path that shows a category/region cell -- the workbench, every outlook, and the unmet-demand flags. Making it configurable and tuning it are growth-path concerns; the gate's position in the pipeline is not.
 
-**Scenario coverage:** s005.attribution (demand views), s009.suppression.
+**Scenario coverage:** s009.suppression (s005.attribution's demand view is designed; its driver publishes no outlook).
 
 ---
 
