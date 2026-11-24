@@ -21,7 +21,7 @@ Set-Password -Username <name> -NewPassword '<alphanumeric>'
 
 | VM / hostname | Design node | Administrator | Function |
 |---------------|-------------|---------------|----------|
-| `amisad-build` | build box (lab infra) | `amisad-build-admin` | Rust toolchain only; compiles the workspace and uploads the binaries tarball to the stash service. Stopped after the build stage. |
+| `amisad-build` | build box (lab infra) | `amisad-build-admin` | Rust toolchain and Bazel: runs the Bazel gate and the tests, compiles the workspace and uploads the binaries tarball to the stash service. Stopped after the build stage. |
 | `amisad-core` | **vm-core** | `amisad-core-admin` | Kubernetes + PostgreSQL + NATS + the ten deployed services. Scenarios run here over SSH; each restores the `amisad-core` snapshot as its state reset. |
 | `amisad-edge-a` | **vm-edge-a** (region A) | `amisad-edge-a-admin` | Stateless slice VM; `slice-runtime` is delivered per scenario run over SSH from vm-core. Live during scenarios/demos. |
 | `amisad-edge-b` | **vm-edge-b** (region B) | `amisad-edge-b-admin` | Same, region B; live during scenarios/demos since `s004.failover` (the sovereignty scenario needs a roomier non-compliant region to exclude). |

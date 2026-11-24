@@ -13,7 +13,8 @@
       "source": "poc/usernames.md",
       "locale": "pt-BR",
       "translated": "docs/pt-BR/poc/usernames.md",
-      "sourceHash": "a2519b89b87a1bf4f0a4d918a0d83b16c0537b4c1c516f4f9d329525cf5c40fc"
+      "sourceHash": "61189a90e396a116c179f5462f9ec0067f70f54e74fdfa2523f42590d429bfdc",
+      "origin": "machine"
     }
   ]
 }

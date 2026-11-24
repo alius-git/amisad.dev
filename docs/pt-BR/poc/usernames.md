@@ -27,7 +27,7 @@ Set-Password -Username <name> -NewPassword '<alphanumeric>'
 
 | VM / nome de hospedeiro | Nó do projeto | Administrador | Função |
 |---------------|-------------|---------------|----------|
-| `amisad-build` | máquina de compilação (infraestrutura do laboratório) | `amisad-build-admin` | Apenas a cadeia de ferramentas do Rust; compila o workspace e envia o arquivo tarball dos binários ao serviço stash. É parada após a etapa de compilação. |
+| `amisad-build` | máquina de compilação (infraestrutura do laboratório) | `amisad-build-admin` | Cadeia de ferramentas do Rust e Bazel: executa a verificação do Bazel e os testes, compila o workspace e envia o arquivo tarball dos binários ao serviço stash. É parada após a etapa de compilação. |
 | `amisad-core` | **vm-core** | `amisad-core-admin` | Kubernetes + PostgreSQL + NATS + os dez serviços implantados. Os cenários são executados aqui por SSH; cada um restaura o snapshot `amisad-core` para redefinir seu estado. |
 | `amisad-edge-a` | **vm-edge-a** (região A) | `amisad-edge-a-admin` | VM slice sem estado; `slice-runtime` é entregue a cada execução de cenário por SSH a partir de vm-core. Permanece em execução durante os cenários e as demonstrações. |
 | `amisad-edge-b` | **vm-edge-b** (região B) | `amisad-edge-b-admin` | Igual, na região B; permanece em execução durante os cenários e as demonstrações desde `s004.failover` (o cenário de soberania precisa de uma região mais espaçosa e não conforme para excluir). |
