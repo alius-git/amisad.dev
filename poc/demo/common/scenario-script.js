@@ -128,18 +128,8 @@ var AmisAdScript = (function () {
   }
 
   // --- REGION: the script
-  // Array order is presentation order. `persona` is who acts; `needs` lists
-  // the notebook ids a step consumes, so a console holds the step until they
-  // are captured; `refusal` marks a step whose pass is a 4xx from the platform.
-  // `touches` names the data-view boxes a step can actually change: the data
-  // window fast-polls exactly those and stamps them with who caused the
-  // change. Steps that only read touch nothing. The list is deliberately
-  // conservative - a box that changes without a hint is still caught by the
-  // regular sweep within a few seconds.
-  //
-  // api is the console's own side of a run: its notebook state, its topology
-  // and its transport (post, get, token). Each console calls this once and
-  // runs the steps through its own proxy and storage.
+  // Array order is presentation order; api is the calling console's state,
+  // topology and transport. See poc/demo/README.md, "The scenario script".
   function steps(api) {
     var state = api.state, post = api.post, get = api.get, token = api.token, topo = api.topo;
     var STEPS = [

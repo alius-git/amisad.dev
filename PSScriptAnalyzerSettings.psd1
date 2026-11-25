@@ -15,21 +15,16 @@
 #>
 
 @{
-    # PSScriptAnalyzer settings for amisad.dev.
-    #
-    # Deliberately the SAME rule set as the framework repo rather than a
-    # relaxed one: this repo's PowerShell is demo and lab-support code that an
-    # operator runs on the same machines, so a finding that matters there
-    # matters here. Copied rather than referenced because a settings file is
-    # discovered by path and cannot include another across repositories.
-    #
-    # Auto-discovered by `Invoke-ScriptAnalyzer -Path . -Recurse`
-    # (see https://github.com/alissonsol/yuruna/blob/main/CONTRIBUTING.md). Findings of every severity are reported:
-    # Information-severity results (missing comment help, undeclared
-    # output types, positional-parameter calls) are NOT filtered out, so
-    # they surface alongside Errors and Warnings.
+    # The framework repo's rule set, not a relaxed one: this repository's
+    # PowerShell runs on the same machines. It is copied because a settings
+    # file cannot include another across repositories. Every severity is
+    # reported, and tools/Analyzer.SilentCatch.psm1 is a byte-identical copy of
+    # the framework's rule for catch blocks that discard the error. The
+    # analyzer resolves CustomRulePath against the current location, so run it
+    # from the repository root: Invoke-ScriptAnalyzer -Path . -Recurse.
 
     IncludeDefaultRules = $true
+    CustomRulePath = @('tools/Analyzer.SilentCatch.psm1')
 
     Rules = @{
         PSUseBOMForUnicodeEncodedFile = @{ Enable = $true }

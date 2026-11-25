@@ -1085,15 +1085,9 @@ fn handle(state: &mut State, req: &Request) -> Response {
                 Some(h) => h.clone(),
                 None => return Response::problem(404, "held_match_not_found"),
             };
-            // The approval executes under the mandate, so the mandate must
-            // cover the held match when it is approved, not only when the
-            // match was held: an approval after expiry, or after a re-grant
-            // for another category, would record a mandate use the auditor
-            // counts as a violation. The scope is re-checked as on the
-            // under-cap resume; the cap is not, since approving an over-cap
-            // match is what the approval is for. The hold stays, so a repeat
-            // answers the same refusal; revocation already dropped the holds
-            // it covers.
+            // The mandate must still cover the held match when it is approved:
+            // expiry and category are re-checked, the cap is not.
+            // See poc/contracts/service-behavior.md, "Ownership and retries".
             if valid_mandate(&state.mandates, &held.principal, &held.delegate, now_secs())
                 .filter(|m| m.category == held.category)
                 .is_none()

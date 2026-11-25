@@ -147,16 +147,8 @@ function Read-RequestBody($Request) {
 }
 
 # Forward one browser request to a lab endpoint, body and method intact, and
-# relay the upstream status + body verbatim (non-2xx included: refusal statuses
-# like 403/410 are demo evidence, not proxy errors). Each request has its own
-# deadline, 8 s for a read and 30 s otherwise: the data view polls
-# continuously, and this loop answers one request at a time. A VM whose
-# address could not be reached, or that left a connection unanswered for the
-# 3 s connect timeout, is not dialed again for 30 s: its requests get 502 at
-# once, so the polls of a stopped VM do not hold every other request behind
-# them, and a VM that comes back shows within 30 s. A refused connection or a
-# slow reply does not count, since the VM is up and a slow service (the
-# coordinator during a failover) must not hide the others.
+# relay the upstream status and body verbatim, non-2xx included.
+# See poc/demo/data-view/README.md, "How it works".
 # --- REGION: Invoke-Proxy
 function Invoke-Proxy($Request, $Response, [string]$TargetBase, [string]$Rest) {
     $uri = $TargetBase + $Rest + $Request.Url.Query

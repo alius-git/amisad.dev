@@ -163,26 +163,17 @@ amisad_fetch_stash_binaries() {
     return 7
 }
 
-# Gives the app role 'amisad' a password made for this build and publishes it
-# only as the Kubernetes Secret amisad-database (key 'password'), which the
-# ledger, seller and resource charts read. The password never lands in a file,
-# an argument list, the profile trace or the database's statement log: psql
-# reads the ALTER on standard input after the session turns statement logging
-# off, kubectl reads the Secret on standard input, and create (unlike apply)
-# keeps it out of a last-applied-configuration annotation. 48 hex characters
-# fit in DATABASE_URL without escaping. Every run, a transport retry included,
-# sets a new password; pods read the Secret when they start, and the readiness
-# step restarts them before each scenario. The body is a subshell, so its
-# 'set +x' ends with it and the caller's trace resumes on every path.
-#
-# This is the deploy step's first contact with the cluster and the database,
-# and kubectl does not retry a refused TCP dial, so it first waits (up to
-# $1 seconds, default 300) for the apiserver's /readyz and for pg_isready, and
-# ensures the namespace, all before the ALTER: a cluster or database that is
-# still starting changes nothing. Only the Secret's delete and create follow the
-# ALTER. If either fails, the role is left on a password no Secret carries and
-# the step exits before helm; its next run sets a new password and creates the
-# Secret again unconditionally, so a re-run converges.
+# Gives the app role 'amisad' a new password for this build and publishes it
+# only as the Kubernetes Secret amisad-database (key 'password').
+# The password never lands in a file, an argument list, the profile trace or
+# the database's statement log: psql reads the ALTER on standard input after
+# the session turns statement logging off, kubectl reads the Secret on standard
+# input, and create (unlike apply) keeps it out of a last-applied-configuration
+# annotation. The body is a subshell, so its 'set +x' ends with it.
+# Keep the order: the /readyz and pg_isready waits (up to $1 seconds, default
+# 300) and the namespace come before the ALTER, and only the Secret's delete
+# and create follow it.
+# See poc/contracts/service-behavior.md, "Lab deployment secrets".
 # --- REGION: amisad_publish_database_password
 amisad_publish_database_password() (
     set +x
@@ -246,19 +237,14 @@ amisad_publish_database_password() (
 )
 
 # Makes the ledger write token for this build and publishes it only as the
-# Kubernetes Secret amisad-ledger-write (key 'token'). The ledger-svc,
-# fabric-coordinator, seller-svc and platform-svc charts read it into
-# LEDGER_WRITE_TOKEN, and the scenario scripts read it from the Secret for the
-# edges' slice-runtime; ledger-svc refuses an append without it. Like the role
-# password, it never lands in a file, an argument list or the profile trace:
+# Kubernetes Secret amisad-ledger-write (key 'token').
+# The token never lands in a file, an argument list or the profile trace:
 # kubectl reads the Secret on standard input, and create (unlike apply) keeps
-# it out of a last-applied-configuration annotation. It runs right after
-# amisad_publish_database_password, whose wait for the apiserver and the
-# namespace it relies on. Every run makes a new token. Pods read it when they
-# start, and a re-run leaves running pods on the previous one until the
-# readiness step restarts them before each scenario. A run that fails exits
-# before helm, and the next one makes a new token and creates the Secret again.
-# The body is a subshell, so its 'set +x' ends with it.
+# it out of a last-applied-configuration annotation. The body is a subshell,
+# so its 'set +x' ends with it.
+# Run it after amisad_publish_database_password, whose wait for the apiserver
+# and the namespace it relies on.
+# See poc/contracts/service-behavior.md, "Lab deployment secrets".
 # --- REGION: amisad_publish_ledger_write_token
 amisad_publish_ledger_write_token() (
     set +x

@@ -114,14 +114,9 @@ struct State {
     write_token: Option<String>,
 }
 
-// participation/contribution are the buyer's own consents (s003.silence);
-// mandate is a delegated-authority grant (s006.mandate); disclosure is a
-// scoped, time-boxed support-case grant (s008.mediation). All fold the same
-// grant/revoke way and share the immutable consent chain. A "use" entry is the
-// coordinator's execution-time record that a consent was relied on (a match
-// or a disclosure delivery); it never changes the folded state, and its chain
-// position is what the auditor checks against the grants and revokes before
-// it (s010.certification).
+// The grant types that share the consent chain and fold the same grant/revoke
+// way; a "use" entry never changes the folded state.
+// See poc/contracts/service-behavior.md, "Consent chain".
 const GRANT_TYPES: [&str; 4] = ["participation", "contribution", "mandate", "disclosure"];
 
 /// Newest-wins fold of one subject's consent entries for one grant type:

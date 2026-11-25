@@ -69,7 +69,10 @@ one busy with a slow database statement. The charts' liveness probe reads
   mandate expired, or was re-granted for another category -- answers 403
   `mandate_not_valid` with no mandate use, instruction or order recorded, and
   the match stays held; the cap is not re-checked, since approving an over-cap
-  match is the approval's purpose. An under-cap delegated commit that fails
+  match is the approval's purpose. The approval executes under the mandate, so
+  one the mandate no longer covers would record a mandate use the auditor
+  counts as a violation; the scope is checked as on the under-cap resume, and
+  a repeat answers the same refusal. An under-cap delegated commit that fails
   part-way answers 502 or 503 and stays pending for the same need: the same
   opaque envelope for the same jurisdiction, stated by the same delegate for
   the same principal. The delegate's retry of that need resumes it with the
@@ -129,6 +132,20 @@ one busy with a slow database statement. The charts' liveness probe reads
   must negate every original party exactly once under one unique case. Orphan,
   duplicate, partial, excessive, or contradictory monetary evidence fails certification.
   Lifecycle rows are grouped in one pass.
+
+## Consent chain
+
+ledger-svc keeps one immutable consent chain for four grant types:
+`participation` and `contribution` are the buyer's own consents (s003.silence),
+`mandate` is a delegated-authority grant (s006.mandate), and `disclosure` is a
+scoped, time-boxed support-case grant (s008.mediation). All four fold the same
+way: the newest `grant` or `revoke` entry for a subject and grant type makes it
+`granted` or `revoked`, and a subject with no entry reads `none`, which leaves
+the default policy to the coordinator; the ledger only reports facts. A `use`
+entry is the coordinator's execution-time record that a consent was relied on,
+for a match or a disclosure delivery. It never changes the folded state, and
+its chain position is what the auditor checks against the grants and revokes
+before it (s010.certification).
 
 ## Localized problem messages
 
@@ -204,6 +221,75 @@ version before reporting success. Repeating an unchanged install does not restar
 an active matching service. Demo firewall helpers check native exit codes and
 elevation results; an existing Windows firewall rule does not skip the separate
 HTTP URL reservation. A failed operation returns false and logs a warning.
+
+## Lab deployment secrets
+
+The amisad-core deploy step
+(`test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh`) makes two
+secrets for each build and publishes each only as a Kubernetes Secret in the
+`amisad` namespace.
+
+`amisad_publish_database_password` gives the app role `amisad` a new password
+and publishes it as Secret `amisad-database` (key `password`), which the ledger,
+seller and resource charts read. 48 hex characters fit in `DATABASE_URL`
+without escaping. It is the deploy step's first contact with the cluster and
+the database, and kubectl does not retry a refused TCP dial, so it first waits,
+up to its budget (300 seconds by default), for the apiserver's `/readyz` and
+for `pg_isready`, and ensures the namespace, all before the ALTER: a cluster or
+database that is still starting changes nothing. Only the Secret's delete and
+create follow the ALTER. If either fails, the role is left on a password no
+Secret carries and the step exits before helm; the next run sets a new password
+and creates the Secret again unconditionally, so a re-run converges.
+
+`amisad_publish_ledger_write_token` runs right after it and relies on its wait
+for the apiserver and on the namespace. It makes a new token and publishes it
+as Secret `amisad-ledger-write` (key `token`). The ledger-svc,
+fabric-coordinator, seller-svc and platform-svc charts read it into
+`LEDGER_WRITE_TOKEN`, and the scenario scripts read it from the Secret for the
+edges' slice-runtime; ledger-svc refuses an append without it. A run that fails
+exits before helm, and the next one makes a new token and creates the Secret
+again.
+
+Every run, a transport retry included, makes a new password and a new token.
+Pods read both Secrets when they start, so a re-run leaves running pods on the
+previous values until the readiness step restarts them before each scenario.
+
+## Lab edge delivery
+
+The helpers in `test/amisad-scenario.sh` deliver each build's slice-runtime to
+the edge VMs.
+
+- `amisad_edge_addr` prints an edge's address, or nothing, and returns 0
+  either way: the caller decides what an unresolved edge means. `getent`
+  answers first, because vm-core resolves the edge without the host when it
+  can. Otherwise the address comes from the handoff file the host's status
+  service serves. The host can take a new address while a scenario runs, when
+  its DHCP lease expires and the server hands it another, and the coordinates
+  in the environment are the ones the host had when the script started, so a
+  fetch that fails is retried once after the guest's own locator has refreshed
+  them.
+- The edge VMs are never restored between scenarios, so the previous
+  scenario's slice-runtime is still running when the next one delivers its
+  binary. pkill returns as soon as SIGTERM is sent, not when the process is
+  gone; until then, overwriting `/tmp/slice-runtime` fails with ETXTBSY (scp
+  reports it as "dest open: Failure") and a fresh instance cannot bind the
+  port. `amisad_stop_slice_runtime` therefore waits for the exit, and sends
+  SIGKILL to an instance that outlives the SIGTERM allowance.
+- `amisad_deliver_slice_runtime` copies the binary to an edge and starts it
+  once the previous instance has exited. vm-core logs in as the edge admin with
+  the demo keypair the users step generated in the admin home. Each step names
+  the edge when it fails and returns that step's status, so the function
+  behaves the same called plainly under errexit and inside `$( )`, where
+  errexit does not reach. An empty region starts the runtime without a region
+  identity, as an unset one does. Given an address variable, it also stores
+  there the address the edge reports for itself, which can differ from the one
+  it was reached at.
+- The ledger write token reaches the edge on the start session's standard
+  input, where the edge shell reads it into the runtime's environment.
+  `amisad_ledger_write_token` writes it, then a newline, for that pipe;
+  ledger-svc refuses appends without it. Without the Secret, as on a lab
+  deployed by hand, the line is empty and a warning says so: the runtime then
+  sends no token, which only a ledger started without one accepts.
 
 ---
 

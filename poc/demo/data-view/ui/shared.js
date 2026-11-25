@@ -380,18 +380,9 @@ var AD = (function () {
   }
 
   // --- REGION: privacy scanner
-  // Two different questions, deliberately kept apart.
-  //
-  // Identity: the buyer-side logins and PII field names must appear in NO lab
-  // response, ever. Whole-word matching keeps 'pat' out of 'participation';
-  // supply-side names are excluded on purpose - 'elena-atelier' is a public
-  // tenant id and 'kai' a public creator credit, both catalog data rather than
-  // anything about a buyer.
-  //
-  // Shared context: the one-line summary she wrote DOES travel, to the
-  // seller's order board and the egress log, because it is the half of the
-  // envelope she chose to share. Counting where it appears next to a zero
-  // identity count is the whole thesis.
+  // Two different questions, deliberately kept apart: buyer identity must
+  // appear in no lab response, while her shared context does travel.
+  // See poc/demo/data-view/README.md, "The privacy strip".
   var IDENTITY_MARKERS = ["maya", "pat"];
   var PII_KEYS = /"(full_?name|given_?name|surname|address|email|phone|postcode|zip)"\s*:/i;
   var CONTEXT_MARKERS = ["wedding", "anniversary", "warm-weather", "office"];
@@ -419,13 +410,8 @@ var AD = (function () {
   }
 
   // --- REGION: journal client
-  // One writer (the action window), any number of readers. A 'latest' below
-  // our cursor means this server process restarted and its in-memory journal
-  // is gone, so every derived view must be rebuilt rather than left frozen.
-  // One poll at a time: the interval keeps ticking while the server is slow
-  // to answer, and a second request from the same cursor would hand the same
-  // events over twice. Anything at or below the cursor has been handed over
-  // already, so a late or overlapping answer delivers nothing twice.
+  // One writer (the action window), any number of readers, one poll at a
+  // time. See poc/demo/data-view/README.md, "How it works".
 
   var journal = {
     cursor: 0,

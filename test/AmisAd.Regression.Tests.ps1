@@ -145,6 +145,24 @@ Describe 'AmisAd build wrappers' {
     }
 }
 
+Describe 'AmisAd analyzer settings' {
+    It 'report a catch block that discards the error through the repository''s own rule' {
+        if (-not (Get-Module -ListAvailable -Name PSScriptAnalyzer)) {
+            Set-ItResult -Skipped -Because 'PSScriptAnalyzer is not installed on this host'
+            return
+        }
+        # The analyzer resolves CustomRulePath against the current location.
+        Push-Location -LiteralPath $script:RepoRoot
+        try {
+            $found = @(Invoke-ScriptAnalyzer -ScriptDefinition "try { Get-Item -LiteralPath x } catch { `$null = `$_ }`n" `
+                    -Settings (Join-Path $script:RepoRoot 'PSScriptAnalyzerSettings.psd1') -ErrorAction Stop)
+        } finally {
+            Pop-Location
+        }
+        @($found | ForEach-Object RuleName) | Should -Contain 'Measure-SilentCatch'
+    }
+}
+
 Describe 'AmisAd child process boundaries' {
     BeforeAll {
         $script:Sweep = Join-Path $script:FixtureRoot 'sweep.ps1'

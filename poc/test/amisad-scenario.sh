@@ -36,14 +36,9 @@ amisad_curl() { # <same args as curl -sf>
 }
 
 # --- REGION: amisad_edge_addr
-# The handoff file is served by the host's status service, and the host can
-# take a new address while a scenario runs: its DHCP lease expires and the
-# server hands it another. The coordinates in the environment are the ones the
-# host had when this script started, so a fetch that fails is retried once
-# after the guest's own locator has refreshed them. Output stays the address or
-# nothing, and the return code stays 0 either way: the caller decides what an
-# unresolved edge means. getent answers first because vm-core resolves the edge
-# without the host when it can.
+# Prints the edge's address or nothing and returns 0 either way: the caller
+# decides what an unresolved edge means.
+# See poc/contracts/service-behavior.md, "Lab edge delivery".
 amisad_edge_addr() { # <edge-vm-name>
     local edge="$1" ip attempt
     ip=$(getent hosts "$edge" 2>/dev/null | awk '{print $1}' | grep -m1 '^192\.168\.122\.' || true)
@@ -68,16 +63,12 @@ amisad_edge_addr() { # <edge-vm-name>
 }
 
 # --- REGION: amisad_stop_slice_runtime
-# The edge VMs are never restored between scenarios, so the previous scenario's
-# slice-runtime is still executing when the next one delivers its binary.
-# pkill returns as soon as SIGTERM is sent, not when the process is gone; until
-# then, overwriting /tmp/slice-runtime fails with ETXTBSY (scp reports it as
-# "dest open: Failure") and a fresh instance cannot bind the port. Wait for the
-# exit before returning, and escalate to SIGKILL for an instance that outlives
-# the SIGTERM allowance.
+# Stops slice-runtime and waits for it to exit, escalating to SIGKILL, so the
+# next binary can overwrite /tmp/slice-runtime and bind the port.
 # Matching is by process NAME (-x), never -f: fetch-and-execute runs the caller
 # via `bash -c "<script text>"`, and that text contains "slice-runtime", so a
 # `pkill -f` would SIGTERM the scenario itself (exit 143).
+# See poc/contracts/service-behavior.md, "Lab edge delivery".
 amisad_stop_slice_runtime() { # <ssh-target|''> [ssh-option...]   ('' stops it on this VM)
     local target="$1" script
     shift
@@ -111,14 +102,12 @@ STOP
 }
 
 # --- REGION: amisad_ledger_write_token
-# Writes the ledger write token the deploy step published for this build, then
-# a newline, to standard output, for a pipe into the runtime's start; ledger-svc
-# refuses appends without it. The token stays out of the caller's variables,
-# every argument list and every file, so neither the caller's xtrace nor ps
-# shows it, and the runtime receives it only in its environment. Without the
-# Secret, as on a lab deployed by hand, the line is empty and a warning says so:
-# the runtime then sends no token, which only a ledger started without one
-# accepts.
+# Writes this build's ledger write token, then a newline, to standard output
+# for a pipe into the runtime's start.
+# The token stays out of the caller's variables, every argument list and every
+# file, so neither the caller's xtrace nor ps shows it, and the runtime
+# receives it only in its environment.
+# See poc/contracts/service-behavior.md, "Lab edge delivery".
 amisad_ledger_write_token() (
     set +x
     set -o pipefail
@@ -130,15 +119,9 @@ amisad_ledger_write_token() (
 
 # --- REGION: amisad_deliver_slice_runtime
 # Copies this build's slice-runtime to an edge and starts it there once the
-# previous instance has exited. vm-core logs in as the edge admin with the demo
-# keypair the users step generated in the admin home. Each step names the edge
-# when it fails and returns that step's status, so the function behaves the same
-# called plainly under errexit and inside $( ), where errexit does not reach.
-# An empty region starts the runtime without a region identity, as an unset one
-# does. Given an address variable, it also stores there the address the edge
-# reports for itself, which can differ from the one it was reached at. The
-# ledger write token reaches the edge on the start session's standard input,
-# where the edge shell reads it into the runtime's environment.
+# previous instance has exited; the ledger write token travels only on the
+# start session's standard input.
+# See poc/contracts/service-behavior.md, "Lab edge delivery".
 amisad_deliver_slice_runtime() { # <ssh-target> <ledger-url> <resource-url> <region|''> [address-variable]
     local target="$1" ledger="$2" resource="$3" region="$4" rc reported
     local ssh_opts=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)

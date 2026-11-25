@@ -47,17 +47,11 @@ async function token(actor) {
   return r.data.token;
 }
 
-// The buyer's signup grants are a PRECONDITION of every need she submits: the
-// coordinator's consent gate refuses POST /v1/needs with 403 "participation
-// revoked" whenever the newest consent entry for her pseudonymous subject is a
-// revoke. The consent ledger is durable PostgreSQL, so a revoke left behind by
-// an earlier run (s003.silence's pause, s010.certification's corpus seeding)
-// survives into the console and would 403 Maya's very first step. Each
-// scenario script seeds the same grants with `buyer-client resume` before it
-// asserts anything; this is the console's equivalent.
-//
+// Re-grants the buyer's signup consents that an earlier run left revoked, so
+// her first need is not refused with 403.
 // Repair only what actually reads "revoked": an unconditional grant would
 // prepend noise to the grant -> revoke -> re-grant history s003 puts on screen.
+// See poc/demo/by-act/README.md, "How it works".
 async function ensureBuyerConsents() {
   const st = await post("core/30080/v1/consents/state", { token: await token("maya") });
   if (st.status !== 200) return { ok: false, note: "consent state unavailable (" + st.status + ")" };

@@ -73,11 +73,18 @@ port then gets them.
   through the proxy. `<nodeport>` is one of the ten service NodePorts
   (30080-30089); any other port answers 404. It changes nothing on the VMs
   beyond the API calls the action window makes.
+- The proxy relays the upstream status and body verbatim, non-2xx included:
+  refusal statuses such as 403 and 410 are demo evidence, not proxy errors.
+  Each request has its own deadline, 8 seconds for a GET and 30 seconds
+  otherwise, because the data view polls continuously and the server answers
+  one request at a time.
 - A VM whose address cannot be reached, or that leaves a connection
   unanswered for 3 seconds, is not dialed again for 30 seconds: the proxy
   answers 502 for it at once, so a stopped VM does not hold up the ticker and
   the action window, and a VM that comes back shows within 30 seconds. A
-  refused connection or a slow reply still goes to the VM every time.
+  refused connection or a slow reply still goes to the VM every time, since
+  the VM is up and a slow service (the coordinator during a failover) must not
+  hide the others.
 - The step script is shared with the by-act demo:
   [`../common/scenario-script.js`](../common/scenario-script.js) holds the cast
   and every step, and `ui/shared.js` adds what only this demo has -- the box
@@ -85,9 +92,12 @@ port then gets them.
 - `/api/journal` is the synchronization bus: the action window appends step
   events, every window polls them, so any number of viewers on any machine
   reconstruct the same timeline. Each window keeps one poll in flight at a
-  time and takes each event once, however late an answer arrives. It is
+  time, because the poll interval keeps ticking while the server is slow and a
+  second request from the same cursor would hand the same events over twice,
+  and it takes each event once, however late an answer arrives. The journal is
   in-memory only -- a restart clears it, and clients detect that from a
-  sequence number going backwards.
+  `latest` sequence number below their cursor and rebuild every derived view
+  rather than leave it frozen.
 
 ## Stage setup
 

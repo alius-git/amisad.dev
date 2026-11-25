@@ -324,16 +324,13 @@ fn handle(state: &mut State, req: &Request) -> Response {
             };
 
             if manual || need.bool_of("auto_close") != Some(true) {
-                // Manual policy (s002.fitting), or a manual dispatch such as a
-                // delegated need: the environment returns a shortlist of every
-                // fully-fitting offer and commits NOTHING - no match id, no
-                // settlement instruction, no order. The buyer's explicit booking
-                // (for a delegated need, the coordinator's decision against the
-                // mandate cap) is the only path to a commitment.
+                // Manual policy or a manual dispatch: return a shortlist of every
+                // fully-fitting offer and commit NOTHING (no match id, no
+                // settlement instruction, no order).
                 // Only slots the need's fitting constraint allows may leave
-                // the environment - the shortlist must honor EVERY constraint,
-                // and the coordinator cannot re-check (it never parses the
-                // sealed need).
+                // the environment: the coordinator never parses the sealed
+                // need, so it cannot re-check them.
+                // See plan/design/02-buyer.md, "Closing policy travels with the need".
                 let before = need.i64_of("fitting_before_ordinal");
                 // A campaign for this need's category boosts its offers with
                 // Kai's creative (region already filtered by the coordinator).

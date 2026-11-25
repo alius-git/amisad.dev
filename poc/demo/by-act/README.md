@@ -90,6 +90,16 @@ captured ids -- driving one demo from two browsers splits the state.
   (s008 disputes the s001 order; s010 certifies the whole session).
 - Buyer steps replicate `buyer-client`'s HTTP calls (token from
   identity-mock, needs as opaque envelopes) -- no SSH, no binaries.
+- At load, the console re-grants Maya's signup consents that read `revoked`.
+  They are a precondition of every need she submits: the coordinator refuses
+  `POST /v1/needs` with 403 `participation revoked` whenever the newest consent
+  entry for her pseudonymous subject is a revoke. The consent ledger is durable
+  PostgreSQL, so a revoke left behind by an earlier run (s003.silence's pause,
+  s010.certification's corpus seeding) would refuse her very first step. Each
+  scenario script seeds the same grants with `buyer-client resume` before it
+  asserts anything; this is the console's equivalent. Only revoked grants are
+  repaired, so the grant -> revoke -> re-grant history s003 puts on screen
+  stays clean.
 - All demo writes use `demo-` prefixed ids and demo-only categories
   (giftware, glassware, tableware, homegoods, lighting, ceramics,
   picnicware), so the walkthrough is deterministic on top of whatever durable

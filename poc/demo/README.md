@@ -27,6 +27,21 @@ the cast, the acts and every step with the API calls it makes. Each console
 renders it its own way and runs its steps through its own proxy and browser
 notebook; both servers serve the file at `/common/scenario-script.js`.
 
+## The scenario script
+
+The `STEPS` array is in presentation order. On each step, `persona` names who
+acts; `needs` lists the notebook ids the step consumes, so a console holds the
+step until they are captured; and `refusal` marks a step whose pass is a 4xx
+from the platform. `touches` names the data-view boxes the step can actually
+change: the data window fast-polls exactly those and stamps them with who
+caused the change, and a step that only reads touches nothing. The lists are
+deliberately conservative, since a box that changes without a hint is still
+caught by the regular sweep within a few seconds.
+
+`AmisAdScript.steps(api)` takes the console's own side of a run: its notebook
+state, its topology and its transport (`post`, `get`, `token`). Each console
+calls it once and runs the steps through its own proxy and storage.
+
 ## Both servers, same host behavior
 
 `AmisAd.DemoHost.psm1` holds the parts that are about the host rather than
