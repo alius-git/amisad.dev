@@ -188,8 +188,7 @@ fn consents() {
     }
 }
 
-// --- s006.mandate: delegate mode ---------------------------------------
-
+// --- REGION: Delegate mode
 fn post_as(path: &str, body: &json::Json, ok: u16) {
     match request("POST", &format!("{}{path}", coordinator_url()), Some(&body.dump())) {
         Ok((s, text)) if s == ok => println!("{}", text.trim()),

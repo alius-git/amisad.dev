@@ -2,7 +2,7 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "aab097f8af3b88197b16acc29e057a667c7f93ad15a164d3391d22ed02d67df8",
+  "sourceInputsSha256": "71fd326d26199199dbf9c092450b597e85eaa59fdbf5920d76cae56eb1500779",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
@@ -60,7 +60,7 @@
     "poc/build/serve-local.ps1": "30a29d392b25f1ee1d27b189a4f5e41513cdee1233398c0e99a2793e7971ad43",
     "poc/components/apps/buyer-client/BUILD.bazel": "13b5b9a7c744872befc17c393612f645513ee21fc53028001880a01b0e805bc2",
     "poc/components/apps/buyer-client/Cargo.toml": "f65cee7e30ca36915216b87afd9d99c14755fa37a220a3445e3723438bbbd837",
-    "poc/components/apps/buyer-client/src/main.rs": "8c43da3e2899d7f98e951d584a63e549719aa394b8c1e137eff2156a57419bd5",
+    "poc/components/apps/buyer-client/src/main.rs": "b7eae0887623f8d3c98654229d53e7549da8b5f56dacc817734bf6da671ba6a8",
     "poc/components/apps/buyer-flutter/BUILD.bazel": "b45e70085bdfb6cd06fa3deeafb37a75d03eb41567cbc2f7cda2e3d65a479365",
     "poc/components/apps/buyer-flutter/README.md": "0687736032bcda4ef8bb9ea5f4034daed09e30964c61ad33d7e3ddc9c8dde0cb",
     "poc/components/apps/buyer-flutter/analysis_options.yaml": "f418daab5f891fc3a4420b1277b469c3d2ec83621fb728ad8245c7095f04ae61",
