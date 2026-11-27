@@ -2,7 +2,7 @@
   "schema": "yuruna.sbom-inventory/v1",
   "generator": "tools/Sync-Sbom.py",
   "name": "amisad.dev",
-  "sourceInputsSha256": "71fd326d26199199dbf9c092450b597e85eaa59fdbf5920d76cae56eb1500779",
+  "sourceInputsSha256": "ff4556419fe20675fe5b0c0aacb8b52e35d2a7d79a680b7de7d5fc7201f238f0",
   "sourceFiles": {
     ".gitattributes": "35e0569ee4c3522d2b8d5a604a0bc3d86fb63abb7a7b4e6c2dda56624e4fc1db",
     ".gitignore": "06fed03f8ea5580fe49ec391fa6ef43935090193a347207acd856816b2d2c1e1",
@@ -47,9 +47,9 @@
     "poc/.dockerignore": "6c3aa38c25893c8008c339a577cd8dff854769fffb1e183ccc044e8d05bdfe05",
     "poc/.gitignore": "96be5462d0193b7f7550fd82821252288b03c40e37fc7efb9f4ee4024a973b9f",
     "poc/BUILD.bazel": "e07d948b2b811798f05c5081ba1169b14fc7bfbb04ca1308997cdebe7a297b2e",
-    "poc/Cargo.lock": "d3ec902def739fed7c0eb3767723d71bb0616bb985d22901f8734cab92e54103",
-    "poc/Cargo.toml": "aaa5f34c499592e78b37669d4ddbec2ffa34efc2f136ed9c43bc00c0e954f67f",
-    "poc/MODULE.bazel": "6cf8b0cc754ac3835569155d01a4f9fdaffa61a3016d994d3905643635016375",
+    "poc/Cargo.lock": "0034deaa775be70eb33a51ed35df9af45f30a58bb72396aacc8505e0ca91a95b",
+    "poc/Cargo.toml": "2f048b902461df33fd3bc572d91eea7f6806b51fd99864f0f9a117f7b5ecde70",
+    "poc/MODULE.bazel": "876a7e36a3aa49fdc5963792be49ed2046f5a59211e547eb4341b3548b939ecb",
     "poc/README.md": "1174ec79b1d637370cf6bb503ec0820123bade713bfea6c720fdc22e9d47fc39",
     "poc/STATUS.s001.fulfillment.md": "ccb534288ad77c76896b343614db0846d8ed08a34184c05bf924a1c65cc3ab8c",
     "poc/build/Publish-ProjectArchive.ps1": "23aa839b781fce166bf0aa689c9418306025826dbcb3014a30399bafa27ceb9d",
@@ -70,6 +70,14 @@
     "poc/components/apps/buyer-flutter/pubspec.yaml": "c0a50b0b195ae2e173c04911d685ebcbd5bf541c4d822ce714574cead60e961a",
     "poc/components/apps/buyer-flutter/test/http_deadline_test.dart": "52755d712a2798f4090c14618ff2a1015787e286500ed46a740c8e8ca7b2463f",
     "poc/components/apps/buyer-flutter/test/request_lifecycle_test.dart": "cf913e6bbeca4462abb3e0eeb1bc9ca05a97bc1144e8a21ee8de66dfba702d42",
+    "poc/components/apps/demo-host/BUILD.bazel": "02b103c20bb19a8913712fa8d2293aba10307d18b36a8ab05b2c4c442197b74e",
+    "poc/components/apps/demo-host/Cargo.toml": "a8c39e1b81f380af33b921dc7e8d6b1beed79b0f5515d5076bae42b87a304074",
+    "poc/components/apps/demo-host/src/bridge.rs": "5756d0e593d1baa440b61b404ac4f7e3f9b9e10c08672c2c966b1c0cb1d83bd6",
+    "poc/components/apps/demo-host/src/main.rs": "65a6de3db34d91132031f9224f8cb1969f57cc7bf985fd70998d95aa8599b2c2",
+    "poc/components/apps/guest-provision/BUILD.bazel": "79ff434011dd44d16af02fe7eb491c7c1726284cfb742a172dece47112e911ae",
+    "poc/components/apps/guest-provision/Cargo.toml": "9dbdb910fac9eefddd3e2b0e51681285eebf72e48db77df950c52e0136d9f91b",
+    "poc/components/apps/guest-provision/src/edge_report.rs": "db23451f71205239c19e6bd5a34928da3e86179d7930da0b30f9fd2b96fa98b5",
+    "poc/components/apps/guest-provision/src/main.rs": "fa2b97ea46a369cd7ea2b7a660d8412d33e44545448d4abe686e643327ddab84",
     "poc/components/apps/web-spa/BUILD.bazel": "2cb03dd6245b343c7f8ad693de8d5ce0c7f7de2657f5a0debc8b703e2a46511e",
     "poc/components/apps/web-spa/build.sh": "81fa8c414540a2c2e927b230e72dbefa99fa57bc49f668535d2a4169f052154b",
     "poc/components/apps/web-spa/index.html": "6de5c5c55ecf8b112ae2b8270dbedfed1904f2b3d90c0c9ab8ec251324205238",
@@ -172,10 +180,10 @@
     "poc/db/seed/s009.suppression.sql": "92ec83a01eac04e6083ba84bd68fafd23b1d635eb5d51515e234658b760831b1",
     "poc/db/seed/s010.certification.sql": "8f6582565d162df759b13b9da23ad4f6649e8bd81f42f3f64ceef7f88facc02b",
     "poc/demo.md": "73da3dd6e2f31776816d0be6076d05fe35c14148af096e775328557de1fde855",
-    "poc/demo/AmisAd.DemoHost.psm1": "e3db2d0cb5bbe6b5d15d6127df0ebc2d59abfac170d16df38bfeae07d59f8455",
+    "poc/demo/AmisAd.DemoHost.psm1": "d71058318bef3c2b6d3789d4db91357a8f94196ffc76f81f69e180dd44b91ee6",
     "poc/demo/README.md": "5ce83b33e682bb28ed515eba7412c81feafc75a23cf84932333f5887fdd6432e",
     "poc/demo/by-act/README.md": "7445fe12d9a4d2fa18fd3411f44e43d8685631f7c9dbe49116abe5ab33b5fbf0",
-    "poc/demo/by-act/serve-by-act.ps1": "891f7fa8971bf80d1768f9c41b84f02361e6afee64c790e38c8aa8dd951ae4e6",
+    "poc/demo/by-act/serve-by-act.ps1": "21c83fb4912045e42cc7122d9e63cc05bbae4935bd0b241f56fb69e8677fae4d",
     "poc/demo/by-act/slides.html": "4129634db2a9735464fdfa9573cbb711d409a90f80be758bb4c4e80d1b4382b9",
     "poc/demo/by-act/ui/app.js": "dfc35ca670c2552afde762e03bbe308a780b34236ef067a7036200e8b3b2aac1",
     "poc/demo/by-act/ui/index.html": "c39847a5e19b3fb36e6ffbc0aed7425338f1951080763aedaaa7039822b39694",
@@ -183,7 +191,7 @@
     "poc/demo/common/scenario-script.js": "23d96706090b828451899817d9248c2cd7097fda657f32542daa53a1210584ac",
     "poc/demo/data-view/PLAN.md": "ae3a64711438a2ac73d397fdff1148756969cfeb801194e1f81cad5845bf7592",
     "poc/demo/data-view/README.md": "fe07280e152dc33993fb42ccb6c63e300de48f5a4f94d5f808a4aa8d25841e2a",
-    "poc/demo/data-view/serve-data-view.ps1": "67fddaa71f58db629442946eade62b324a636b6e3a3704201561b76eb764064a",
+    "poc/demo/data-view/serve-data-view.ps1": "c8e12658961e3b37f632d6072e8b0399855089b5ed6a35844f3f6c00f1254acc",
     "poc/demo/data-view/slides.html": "16a4571e6318d4031c1d866382a633cfcf32786c34f18082ca997ab4f06cd5e9",
     "poc/demo/data-view/ui/actions.html": "01c283db523846ea62991b04bd1815748e154c7a8ff8ae7282dce4a1eb658a91",
     "poc/demo/data-view/ui/actions.js": "716ecdfc49b183213d5d776ea6cd4317ba9bb966c13699be0941ae3124449e63",
@@ -191,16 +199,18 @@
     "poc/demo/data-view/ui/data.js": "b7ca248f27500ed9dee8f75163d55401379a277b69450dd198547ad68e808dbf",
     "poc/demo/data-view/ui/shared.css": "8217f3010e8805ebabfd49b7aaebc56606c8981353fa2542bc374d6526f8616e",
     "poc/demo/data-view/ui/shared.js": "266a08584ca995a307989d44445f7a7d2e2ce8456a96936086fbb7dc6452bdde",
+    "poc/rust-toolchain.toml": "272c3eb038120e3a5e90ac736045046c5bfd62c40333e1e1d92067ee2ac56250",
     "poc/test.md": "16f72e31ece08de85cfbfe96954907616d92e144370976020aef4453cdf92fbd",
     "poc/test/amisad-scenario.sh": "917c94ece96b414393ea86f176fdcdc209cd9f969f0189e67c92eef2fa48e45e",
     "poc/test/bash_contract_support.py": "de822cdd9b6f1bc90b5556f991daad1a8cf98e47b482f749b1e9d7018dd99eb9",
     "poc/test/bash_contracts.py": "7ddfea8886e6fd049e575eecc11d287b2abff462027e9d14519fda737afd6138",
     "poc/test/build_contracts.py": "ad2885a20e4817ed8fb29360e0387a42e3727a0683f8e77d6ca4b73a27633f95",
     "poc/test/check_messages.py": "91a2ad5340f716d6538f67f9afcfcf3be898b05b0632ce1998667de83865999a",
-    "poc/test/cluster_ready_contracts.py": "dcbbad63addb55d8f53e1c35cc278604f7e44632a2c6a1cd17e025214425e31c",
+    "poc/test/cluster_ready_contracts.py": "022fb3e5bb13a7d5dc27b1484ee7c9c00f0687abf1e7327b5bfe761cd74f740a",
     "poc/test/database_policy_contracts.py": "ffc656dcd888fa8a1d5de12390e79c27cf5603ce54bb29861eeb6e5617c61b05",
     "poc/test/database_secret_contracts.py": "734d77e82e1d88f5a0e74a2822a72a7af8f60e92b251216e5eb9a388de338fab",
     "poc/test/deep_find_contracts.cjs": "50efae8852b386baee6fda77e3e98cd1cd8319965265f93a6b4447fac255a56b",
+    "poc/test/demo_host_http_contracts.py": "e98d77f9203de118603758e06ef5d73d40a03dd34a4a5eab969e9b71f827d85f",
     "poc/test/demo_script_contracts.cjs": "75ee352fcc0f99e3305e0dfe6ab3cedac91a6b8f643226d415a83a1dbfbb5b2f",
     "poc/test/download_contracts.py": "1eb91e18fda1b696cd35bbdb6689b222d5ac6071a511ae09b66f8b722c95da6b",
     "poc/test/fixtures/http_lifecycle.rs": "291130c1deddf0d641ef15131c06f904c414bf007e552c8f2e86c2edb3124dee",
@@ -212,12 +222,12 @@
     "poc/test/service_contracts.py": "7f71f5f641f755ff127df76e3fa9d5f7b781594f0b9dc64e65ee863fca72df89",
     "poc/test/slice_runtime_http_contracts.py": "b7c28fd614db512217f28761faf498fe9181ce3d273cbd0b35d47f1d1b660826",
     "poc/test/slice_runtime_stop_contracts.py": "de14c7852d607564a49c9facbf6f92516941fe56f77b3fc88f052e9727a1e95d",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh": "1de07eaf61eba3c9f3e632651da4b4f9d56625cb80954b4d1022c171d7a02f84",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh": "25e333ce8990ec4c4f5e59b3f8dc88d78066d19b5a873e7558d193caef8990b1",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh": "7529d3a36d9e6902a3a2cb7f67208d7b5eb9606aa99f35416d73fcf295f799a2",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh": "1e9d353954f7316b607b66bbcc173c0cd1b7454b910bcd014f3a0a38c4e360bd",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh": "6c27ece335bf0868fa297abac4315bc8ff986573e307759994df9ba2d65e933e",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh": "3d6b18e395647ae84767278f2b455aa6815f659b54e1f10141afec3f153c17d5",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh": "0e00b555eefacb8ba9ff261ba6e1da5b3d0371c6ca6a43f9fa8cf0359a7b9576",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh": "823979c08c5c564ad1a497ab0fdab8b11ae74de20d723fa583b46f392bb1c1fd",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s001.fulfillment.sh": "0f1d0806f66c1ecca7bf57516eff8beba13db864820129f5eedf91426d0c2b41",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s002.fitting.sh": "6de7548d5edf3f0759b5a168466b6e2e1f4cabbb5f87b18336aeb91af86766fe",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s003.silence.sh": "0ea609a68bf762770e29964b4a5bdd5cad35baf8457f7c14d9165ecac1fe4148",
@@ -229,7 +239,7 @@
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s009.suppression.sh": "93b0bba5b2789da173b568257c683a1f2f8da3b99ab1a93c15827f8a00b9adf0",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.s010.certification.sh": "da62634ae761a89484119ddd8c40a6e7fe0e174da14cf7e42b73af830daf0d02",
     "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.users.sh": "091a3672f850acb4cd65e4911f85348fc24849989eeab16db7dac764c133ca68",
-    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-edge.setup.sh": "12331520662233c28a7cc277c18fa161bcbc90198fb92cd579f9ea23d3e2fb21",
+    "poc/test/ubuntu.server.24/ubuntu.server.24.amisad-edge.setup.sh": "f638857b9676fab48b357dc18f3ddbf5879baf20de7855c74132839bd20ac5e9",
     "poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh": "837afe05dabd214f9bf6d959499fded414bdf68cd5de7fff854a7acac5c4fe65",
     "poc/test/workload.guest.ubuntu.server.24.amisad-build.baseline.yml": "3fa50ce9bd9f278e8c3b0e46534131fd2ae566bd4ea4813618a712e53b2f0b35",
     "poc/test/workload.guest.ubuntu.server.24.amisad-build.compile.yml": "70965df550ad471ad25f33d3349b3b0d98835f6c13c3906dd395561269238477",
@@ -281,7 +291,7 @@
     "poc/workloads/services/seller-svc/values.yaml": "7dc7ca7c30c40121a51b567be1b25bf80c5f482d8007622f9ae641163b234ac1",
     "test/AmisAd.HostCommon.ps1": "b85760a2597a780c2270b1beb960bd298d6418d3c3d54b94cec892a7e2ae8ae2",
     "test/AmisAd.Lab.psm1": "c9e5b111285aab2bf7052b31da64e76e9289bb9ad368984590886f9af72c4ac4",
-    "test/AmisAd.Regression.Tests.ps1": "d8560c4d851e4e11ae5e02c2b2fb33ce338c8988f32141daf2dc525437d090f8",
+    "test/AmisAd.Regression.Tests.ps1": "3fb44a7eea235c2f0d776b019a2a66d21dc32172e1ed4b66c5fd9eb9999c5e42",
     "test/AmisAd.StashService.psm1": "7188c44918b1841b8bc7b37ae72f5fa7cf19d5f903ab2813e57141504f427d33",
     "test/Clear-Lab.ps1": "bb7e4111c93fd347b4f141a0d2827d72e0a4e546fa4968a45191078c3ff79254",
     "test/Initialize-Lab.ps1": "fdcaa50d28a912c1f4f2c5e8e5f11507c5df16cc9521140dc7847fafd3fbec06",
@@ -299,7 +309,7 @@
     "tools/sbom_provisioning.py": "7589dbef8e7997ff017739a23fea72718ee45e7071091f718ac053eafd7b47bf"
   },
   "counts": {
-    "repository": 188,
+    "repository": 207,
     "hosts": 0,
     "guests": 24
   },
@@ -425,6 +435,11 @@
             "detail": "Cargo dependency declaration"
           },
           {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 12,
+            "detail": "Cargo dependency declaration"
+          },
+          {
             "path": "poc/components/services/ledger-svc/Cargo.toml",
             "line": 13,
             "detail": "Cargo dependency declaration"
@@ -460,6 +475,74 @@
         "purl": "pkg:cargo/amisad-common@0.1.0"
       },
       {
+        "name": "amisad-demo-host",
+        "kind": "application",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 6,
+            "detail": "Cargo package manifest"
+          },
+          {
+            "path": "poc/Cargo.lock",
+            "line": 16,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [],
+        "dependencies": [
+          "cargo:amisad-common@0.1.0",
+          "cargo:bytes@1.12.1",
+          "cargo:http-body-util@0.1.5",
+          "cargo:hyper-util@0.1.21",
+          "cargo:hyper@1.13.0",
+          "cargo:if-addrs@0.15.0",
+          "cargo:percent-encoding@2.3.2",
+          "cargo:serde_json@1.0.154",
+          "cargo:tokio@1.54.1"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Internal Cargo workspace package."
+        ],
+        "version": "0.1.0",
+        "purl": "pkg:cargo/amisad-demo-host@0.1.0"
+      },
+      {
+        "name": "amisad-provision",
+        "kind": "application",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/components/apps/guest-provision/Cargo.toml",
+            "line": 6,
+            "detail": "Cargo package manifest"
+          },
+          {
+            "path": "poc/Cargo.lock",
+            "line": 31,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [],
+        "dependencies": [
+          "cargo:bytes@1.12.1",
+          "cargo:http-body-util@0.1.5",
+          "cargo:hyper-util@0.1.21",
+          "cargo:hyper@1.13.0",
+          "cargo:tokio@1.54.1"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Internal Cargo workspace package."
+        ],
+        "version": "0.1.0",
+        "purl": "pkg:cargo/amisad-provision@0.1.0"
+      },
+      {
         "name": "async-trait",
         "kind": "library",
         "ecosystem": "cargo",
@@ -467,7 +550,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 16,
+            "line": 42,
             "detail": "Declared dependency"
           }
         ],
@@ -490,6 +573,32 @@
         "purl": "pkg:cargo/async-trait@0.1.92"
       },
       {
+        "name": "atomic-waker",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 53,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
+          }
+        ],
+        "dependencies": [],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.1.2",
+        "purl": "pkg:cargo/atomic-waker@1.1.2"
+      },
+      {
         "name": "audit-svc",
         "kind": "application",
         "ecosystem": "cargo",
@@ -502,7 +611,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 27,
+            "line": 59,
             "detail": "Declared dependency"
           }
         ],
@@ -525,7 +634,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 34,
+            "line": 66,
             "detail": "Declared dependency"
           }
         ],
@@ -551,7 +660,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 40,
+            "line": 72,
             "detail": "Declared dependency"
           }
         ],
@@ -577,7 +686,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 46,
+            "line": 78,
             "detail": "Declared dependency"
           }
         ],
@@ -605,7 +714,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 55,
+            "line": 87,
             "detail": "Declared dependency"
           }
         ],
@@ -636,7 +745,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 61,
+            "line": 93,
             "detail": "Declared dependency"
           }
         ],
@@ -659,7 +768,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 68,
+            "line": 100,
             "detail": "Declared dependency"
           }
         ],
@@ -684,8 +793,18 @@
         "scope": "runtime",
         "evidence": [
           {
+            "path": "poc/components/apps/guest-provision/Cargo.toml",
+            "line": 12,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 13,
+            "detail": "Cargo dependency declaration"
+          },
+          {
             "path": "poc/Cargo.lock",
-            "line": 74,
+            "line": 106,
             "detail": "Declared dependency"
           }
         ],
@@ -711,7 +830,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 80,
+            "line": 112,
             "detail": "Declared dependency"
           }
         ],
@@ -737,7 +856,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 86,
+            "line": 118,
             "detail": "Declared dependency"
           }
         ],
@@ -767,7 +886,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 97,
+            "line": 129,
             "detail": "Declared dependency"
           }
         ],
@@ -798,7 +917,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 103,
+            "line": 135,
             "detail": "Declared dependency"
           }
         ],
@@ -821,7 +940,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 110,
+            "line": 142,
             "detail": "Declared dependency"
           }
         ],
@@ -847,7 +966,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 116,
+            "line": 148,
             "detail": "Declared dependency"
           }
         ],
@@ -875,7 +994,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 125,
+            "line": 157,
             "detail": "Declared dependency"
           }
         ],
@@ -903,7 +1022,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 134,
+            "line": 166,
             "detail": "Declared dependency"
           }
         ],
@@ -931,7 +1050,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 143,
+            "line": 175,
             "detail": "Declared dependency"
           }
         ],
@@ -955,6 +1074,35 @@
         "purl": "pkg:cargo/digest@0.11.3"
       },
       {
+        "name": "errno",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 187,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "e35d6e78f4cebb90e51d543db8fe41528851d6deeef6ef21ebd4bfdc1e784776"
+          }
+        ],
+        "dependencies": [
+          "cargo:libc@0.2.191",
+          "cargo:windows-sys@0.61.2"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "0.3.15",
+        "purl": "pkg:cargo/errno@0.3.15"
+      },
+      {
         "name": "fabric-coordinator",
         "kind": "application",
         "ecosystem": "cargo",
@@ -967,7 +1115,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 155,
+            "line": 197,
             "detail": "Declared dependency"
           }
         ],
@@ -990,7 +1138,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 162,
+            "line": 204,
             "detail": "Declared dependency"
           }
         ],
@@ -1016,7 +1164,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 168,
+            "line": 210,
             "detail": "Declared dependency"
           }
         ],
@@ -1045,7 +1193,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 178,
+            "line": 220,
             "detail": "Declared dependency"
           }
         ],
@@ -1071,7 +1219,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 184,
+            "line": 226,
             "detail": "Declared dependency"
           }
         ],
@@ -1097,7 +1245,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 190,
+            "line": 232,
             "detail": "Declared dependency"
           }
         ],
@@ -1123,7 +1271,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 196,
+            "line": 238,
             "detail": "Declared dependency"
           }
         ],
@@ -1155,7 +1303,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 209,
+            "line": 251,
             "detail": "Declared dependency"
           }
         ],
@@ -1186,7 +1334,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 221,
+            "line": 263,
             "detail": "Declared dependency"
           }
         ],
@@ -1207,6 +1355,158 @@
         "purl": "pkg:cargo/hmac@0.13.0"
       },
       {
+        "name": "http-body-util",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/components/apps/guest-provision/Cargo.toml",
+            "line": 13,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 14,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/Cargo.lock",
+            "line": 292,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "23169fe34a5fbcdd3f3862e78fb9b6fccd5f02a6dc6f732547005d45631ce71c"
+          }
+        ],
+        "dependencies": [
+          "cargo:bytes@1.12.1",
+          "cargo:futures-core@0.3.34",
+          "cargo:http-body@1.1.0",
+          "cargo:http@1.5.0",
+          "cargo:pin-project-lite@0.2.17"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "0.1.5",
+        "purl": "pkg:cargo/http-body-util@0.1.5"
+      },
+      {
+        "name": "http-body",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 282,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "ca2a8f2913ee65f60facd6a5905613afaa448497a0230cc41ce022d93290bc2c"
+          }
+        ],
+        "dependencies": [
+          "cargo:bytes@1.12.1",
+          "cargo:http@1.5.0"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.1.0",
+        "purl": "pkg:cargo/http-body@1.1.0"
+      },
+      {
+        "name": "http",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 272,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "918d3568bebf352712bc2ef3d46a8bcf1a75b373be6539de198e9105cbbf9ce0"
+          }
+        ],
+        "dependencies": [
+          "cargo:bytes@1.12.1",
+          "cargo:itoa@1.0.19"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.5.0",
+        "purl": "pkg:cargo/http@1.5.0"
+      },
+      {
+        "name": "httparse",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 305,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
+          }
+        ],
+        "dependencies": [],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.10.1",
+        "purl": "pkg:cargo/httparse@1.10.1"
+      },
+      {
+        "name": "httpdate",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 311,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
+          }
+        ],
+        "dependencies": [],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.0.3",
+        "purl": "pkg:cargo/httpdate@1.0.3"
+      },
+      {
         "name": "hybrid-array",
         "kind": "library",
         "ecosystem": "cargo",
@@ -1214,7 +1514,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 230,
+            "line": 317,
             "detail": "Declared dependency"
           }
         ],
@@ -1235,6 +1535,98 @@
         "purl": "pkg:cargo/hybrid-array@0.4.15"
       },
       {
+        "name": "hyper-util",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/components/apps/guest-provision/Cargo.toml",
+            "line": 15,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 16,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/Cargo.lock",
+            "line": 346,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "ddc03d96684f9226b8a787cdb71488417b53ab5ea8fdb1dac946cb9431cc8bff"
+          }
+        ],
+        "dependencies": [
+          "cargo:bytes@1.12.1",
+          "cargo:http-body@1.1.0",
+          "cargo:http@1.5.0",
+          "cargo:hyper@1.13.0",
+          "cargo:pin-project-lite@0.2.17",
+          "cargo:tokio@1.54.1"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "0.1.21",
+        "purl": "pkg:cargo/hyper-util@0.1.21"
+      },
+      {
+        "name": "hyper",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/components/apps/guest-provision/Cargo.toml",
+            "line": 14,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 15,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/Cargo.lock",
+            "line": 326,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "229c6ff5584df4c6becbfe00567128bac768c8cd32ebc8a8366bd81ed072e8f3"
+          }
+        ],
+        "dependencies": [
+          "cargo:atomic-waker@1.1.2",
+          "cargo:bytes@1.12.1",
+          "cargo:futures-core@0.3.34",
+          "cargo:http-body@1.1.0",
+          "cargo:http@1.5.0",
+          "cargo:httparse@1.10.1",
+          "cargo:httpdate@1.0.3",
+          "cargo:itoa@1.0.19",
+          "cargo:pin-project-lite@0.2.17",
+          "cargo:smallvec@1.16.5",
+          "cargo:tokio@1.54.1",
+          "cargo:want@0.3.2"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.13.0",
+        "purl": "pkg:cargo/hyper@1.13.0"
+      },
+      {
         "name": "identity-mock",
         "kind": "application",
         "ecosystem": "cargo",
@@ -1247,7 +1639,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 239,
+            "line": 360,
             "detail": "Declared dependency"
           }
         ],
@@ -1263,6 +1655,40 @@
         "purl": "pkg:cargo/identity-mock@0.1.0"
       },
       {
+        "name": "if-addrs",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 17,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/Cargo.lock",
+            "line": 367,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "c0a05c691e1fae256cf7013d99dad472dc52d5543322761f83ec8d47eab40d2b"
+          }
+        ],
+        "dependencies": [
+          "cargo:libc@0.2.191",
+          "cargo:windows-sys@0.61.2"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "0.15.0",
+        "purl": "pkg:cargo/if-addrs@0.15.0"
+      },
+      {
         "name": "insights-svc",
         "kind": "application",
         "ecosystem": "cargo",
@@ -1275,7 +1701,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 246,
+            "line": 377,
             "detail": "Declared dependency"
           }
         ],
@@ -1291,6 +1717,32 @@
         "purl": "pkg:cargo/insights-svc@0.1.0"
       },
       {
+        "name": "itoa",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 384,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "3bd1574e617a9a6c1f8f8181bd7e841e1f20e4277607ef28945765188d6284d4"
+          }
+        ],
+        "dependencies": [],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.0.19",
+        "purl": "pkg:cargo/itoa@1.0.19"
+      },
+      {
         "name": "js-sys",
         "kind": "library",
         "ecosystem": "cargo",
@@ -1298,7 +1750,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 253,
+            "line": 390,
             "detail": "Declared dependency"
           }
         ],
@@ -1333,7 +1785,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 264,
+            "line": 401,
             "detail": "Declared dependency"
           }
         ],
@@ -1357,7 +1809,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 272,
+            "line": 409,
             "detail": "Declared dependency"
           }
         ],
@@ -1383,7 +1835,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 278,
+            "line": 415,
             "detail": "Declared dependency"
           }
         ],
@@ -1411,7 +1863,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 287,
+            "line": 424,
             "detail": "Declared dependency"
           }
         ],
@@ -1439,7 +1891,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 296,
+            "line": 433,
             "detail": "Declared dependency"
           }
         ],
@@ -1465,7 +1917,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 302,
+            "line": 439,
             "detail": "Declared dependency"
           }
         ],
@@ -1494,7 +1946,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 312,
+            "line": 449,
             "detail": "Declared dependency"
           }
         ],
@@ -1520,7 +1972,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 318,
+            "line": 455,
             "detail": "Declared dependency"
           }
         ],
@@ -1550,7 +2002,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 329,
+            "line": 466,
             "detail": "Declared dependency"
           }
         ],
@@ -1578,7 +2030,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 338,
+            "line": 475,
             "detail": "Declared dependency"
           }
         ],
@@ -1606,7 +2058,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 347,
+            "line": 484,
             "detail": "Declared dependency"
           }
         ],
@@ -1635,7 +2087,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 357,
+            "line": 494,
             "detail": "Declared dependency"
           }
         ],
@@ -1666,8 +2118,13 @@
         "scope": "runtime",
         "evidence": [
           {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 18,
+            "detail": "Cargo dependency declaration"
+          },
+          {
             "path": "poc/Cargo.lock",
-            "line": 370,
+            "line": 507,
             "detail": "Declared dependency"
           }
         ],
@@ -1693,7 +2150,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 376,
+            "line": 513,
             "detail": "Declared dependency"
           }
         ],
@@ -1722,7 +2179,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 386,
+            "line": 523,
             "detail": "Declared dependency"
           }
         ],
@@ -1750,7 +2207,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 395,
+            "line": 532,
             "detail": "Declared dependency"
           }
         ],
@@ -1781,7 +2238,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 401,
+            "line": 538,
             "detail": "Declared dependency"
           }
         ],
@@ -1804,7 +2261,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 422,
+            "line": 559,
             "detail": "Declared dependency"
           }
         ],
@@ -1841,7 +2298,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 440,
+            "line": 577,
             "detail": "Declared dependency"
           }
         ],
@@ -1886,7 +2343,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 408,
+            "line": 545,
             "detail": "Declared dependency"
           }
         ],
@@ -1919,7 +2376,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 451,
+            "line": 588,
             "detail": "Declared dependency"
           }
         ],
@@ -1947,7 +2404,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 460,
+            "line": 597,
             "detail": "Declared dependency"
           }
         ],
@@ -1975,7 +2432,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 469,
+            "line": 606,
             "detail": "Declared dependency"
           }
         ],
@@ -2001,7 +2458,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 475,
+            "line": 612,
             "detail": "Declared dependency"
           }
         ],
@@ -2031,7 +2488,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 486,
+            "line": 623,
             "detail": "Declared dependency"
           }
         ],
@@ -2057,7 +2514,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 492,
+            "line": 629,
             "detail": "Declared dependency"
           }
         ],
@@ -2090,7 +2547,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 501,
+            "line": 638,
             "detail": "Declared dependency"
           }
         ],
@@ -2114,7 +2571,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 509,
+            "line": 646,
             "detail": "Declared dependency"
           }
         ],
@@ -2140,7 +2597,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 515,
+            "line": 652,
             "detail": "Declared dependency"
           }
         ],
@@ -2171,7 +2628,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 521,
+            "line": 658,
             "detail": "Declared dependency"
           }
         ],
@@ -2195,7 +2652,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 529,
+            "line": 666,
             "detail": "Declared dependency"
           }
         ],
@@ -2223,7 +2680,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 538,
+            "line": 675,
             "detail": "Declared dependency"
           }
         ],
@@ -2251,7 +2708,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 547,
+            "line": 684,
             "detail": "Declared dependency"
           }
         ],
@@ -2274,6 +2731,43 @@
         "purl": "pkg:cargo/serde_derive@1.0.229"
       },
       {
+        "name": "serde_json",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 19,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/Cargo.lock",
+            "line": 695,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6"
+          }
+        ],
+        "dependencies": [
+          "cargo:itoa@1.0.19",
+          "cargo:memchr@2.8.3",
+          "cargo:serde@1.0.229",
+          "cargo:serde_core@1.0.229",
+          "cargo:zmij@1.0.23"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.0.154",
+        "purl": "pkg:cargo/serde_json@1.0.154"
+      },
+      {
         "name": "sha2",
         "kind": "library",
         "ecosystem": "cargo",
@@ -2281,7 +2775,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 558,
+            "line": 708,
             "detail": "Declared dependency"
           }
         ],
@@ -2304,6 +2798,35 @@
         "purl": "pkg:cargo/sha2@0.11.1"
       },
       {
+        "name": "signal-hook-registry",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 719,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "c4db69cba1110affc0e9f7bcd48bbf87b3f4fc7c61fc9155afd4c469eb3d6c1b"
+          }
+        ],
+        "dependencies": [
+          "cargo:errno@0.3.15",
+          "cargo:libc@0.2.191"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.4.8",
+        "purl": "pkg:cargo/signal-hook-registry@1.4.8"
+      },
+      {
         "name": "siphasher",
         "kind": "library",
         "ecosystem": "cargo",
@@ -2311,7 +2834,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 569,
+            "line": 729,
             "detail": "Declared dependency"
           }
         ],
@@ -2337,7 +2860,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 575,
+            "line": 735,
             "detail": "Declared dependency"
           }
         ],
@@ -2368,7 +2891,7 @@
           },
           {
             "path": "poc/Cargo.lock",
-            "line": 581,
+            "line": 741,
             "detail": "Declared dependency"
           }
         ],
@@ -2391,7 +2914,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 588,
+            "line": 748,
             "detail": "Declared dependency"
           }
         ],
@@ -2417,7 +2940,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 594,
+            "line": 754,
             "detail": "Declared dependency"
           }
         ],
@@ -2446,7 +2969,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 604,
+            "line": 764,
             "detail": "Declared dependency"
           }
         ],
@@ -2476,7 +2999,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 615,
+            "line": 775,
             "detail": "Declared dependency"
           }
         ],
@@ -2506,7 +3029,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 626,
+            "line": 786,
             "detail": "Declared dependency"
           }
         ],
@@ -2525,6 +3048,36 @@
         "purl": "pkg:cargo/tinyvec@1.13.3"
       },
       {
+        "name": "tokio-macros",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 808,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "78773a2a397f451582ce068015985c33193cf6dea8b74d2a639fe457b2f07b0e"
+          }
+        ],
+        "dependencies": [
+          "cargo:proc-macro2@1.0.107",
+          "cargo:quote@1.0.47",
+          "cargo:syn@3.0.10"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "2.7.2",
+        "purl": "pkg:cargo/tokio-macros@2.7.2"
+      },
+      {
         "name": "tokio-postgres",
         "kind": "library",
         "ecosystem": "cargo",
@@ -2532,7 +3085,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 646,
+            "line": 819,
             "detail": "Declared dependency"
           }
         ],
@@ -2577,7 +3130,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 672,
+            "line": 845,
             "detail": "Declared dependency"
           }
         ],
@@ -2609,8 +3162,18 @@
         "scope": "runtime",
         "evidence": [
           {
+            "path": "poc/components/apps/guest-provision/Cargo.toml",
+            "line": 15,
+            "detail": "Cargo dependency declaration"
+          },
+          {
+            "path": "poc/components/apps/demo-host/Cargo.toml",
+            "line": 16,
+            "detail": "Cargo dependency declaration"
+          },
+          {
             "path": "poc/Cargo.lock",
-            "line": 632,
+            "line": 792,
             "detail": "Declared dependency"
           }
         ],
@@ -2625,7 +3188,9 @@
           "cargo:libc@0.2.191",
           "cargo:mio@1.2.5",
           "cargo:pin-project-lite@0.2.17",
+          "cargo:signal-hook-registry@1.4.8",
           "cargo:socket2@0.6.5",
+          "cargo:tokio-macros@2.7.2",
           "cargo:windows-sys@0.61.2"
         ],
         "completeness": "locked",
@@ -2636,6 +3201,32 @@
         "purl": "pkg:cargo/tokio@1.54.1"
       },
       {
+        "name": "try-lock",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 859,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+          }
+        ],
+        "dependencies": [],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "0.2.5",
+        "purl": "pkg:cargo/try-lock@0.2.5"
+      },
+      {
         "name": "typenum",
         "kind": "library",
         "ecosystem": "cargo",
@@ -2643,7 +3234,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 686,
+            "line": 865,
             "detail": "Declared dependency"
           }
         ],
@@ -2669,7 +3260,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 692,
+            "line": 871,
             "detail": "Declared dependency"
           }
         ],
@@ -2695,7 +3286,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 698,
+            "line": 877,
             "detail": "Declared dependency"
           }
         ],
@@ -2721,7 +3312,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 704,
+            "line": 883,
             "detail": "Declared dependency"
           }
         ],
@@ -2749,7 +3340,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 713,
+            "line": 892,
             "detail": "Declared dependency"
           }
         ],
@@ -2768,6 +3359,34 @@
         "purl": "pkg:cargo/unicode-properties@0.1.5"
       },
       {
+        "name": "want",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 898,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "ec4cdd0dd910afe868b7ef477227d8d538b46b3075031afee8a9f2acb0a2ed0b"
+          }
+        ],
+        "dependencies": [
+          "cargo:try-lock@0.2.5"
+        ],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "0.3.2",
+        "purl": "pkg:cargo/want@0.3.2"
+      },
+      {
         "name": "wasi",
         "kind": "library",
         "ecosystem": "cargo",
@@ -2775,7 +3394,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 719,
+            "line": 907,
             "detail": "Declared dependency"
           }
         ],
@@ -2801,7 +3420,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 725,
+            "line": 913,
             "detail": "Declared dependency"
           }
         ],
@@ -2829,7 +3448,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 734,
+            "line": 922,
             "detail": "Declared dependency"
           }
         ],
@@ -2857,7 +3476,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 743,
+            "line": 931,
             "detail": "Declared dependency"
           }
         ],
@@ -2885,7 +3504,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 774,
+            "line": 962,
             "detail": "Declared dependency"
           }
         ],
@@ -2917,7 +3536,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 764,
+            "line": 952,
             "detail": "Declared dependency"
           }
         ],
@@ -2946,7 +3565,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 787,
+            "line": 975,
             "detail": "Declared dependency"
           }
         ],
@@ -2974,7 +3593,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 752,
+            "line": 940,
             "detail": "Declared dependency"
           }
         ],
@@ -3005,7 +3624,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 796,
+            "line": 984,
             "detail": "Declared dependency"
           }
         ],
@@ -3034,7 +3653,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 806,
+            "line": 994,
             "detail": "Declared dependency"
           }
         ],
@@ -3066,7 +3685,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 819,
+            "line": 1007,
             "detail": "Declared dependency"
           }
         ],
@@ -3092,7 +3711,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 825,
+            "line": 1013,
             "detail": "Declared dependency"
           }
         ],
@@ -3120,7 +3739,7 @@
         "evidence": [
           {
             "path": "poc/Cargo.lock",
-            "line": 834,
+            "line": 1022,
             "detail": "Declared dependency"
           }
         ],
@@ -3137,6 +3756,32 @@
         ],
         "version": "0.57.1",
         "purl": "pkg:cargo/wit-bindgen@0.57.1"
+      },
+      {
+        "name": "zmij",
+        "kind": "library",
+        "ecosystem": "cargo",
+        "scope": "runtime",
+        "evidence": [
+          {
+            "path": "poc/Cargo.lock",
+            "line": 1028,
+            "detail": "Declared dependency"
+          }
+        ],
+        "hashes": [
+          {
+            "alg": "SHA256",
+            "content": "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
+          }
+        ],
+        "dependencies": [],
+        "completeness": "locked",
+        "notes": [
+          "Cargo source: registry+https://github.com/rust-lang/crates.io-index"
+        ],
+        "version": "1.0.23",
+        "purl": "pkg:cargo/zmij@1.0.23"
       },
       {
         "name": "debian",

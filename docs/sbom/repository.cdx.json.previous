@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.7",
-  "serialNumber": "urn:uuid:a4266375-34a3-52fb-8987-f57e1845c795",
+  "serialNumber": "urn:uuid:441e8885-8d14-5459-9acb-68b57f13fba2",
   "version": 1,
   "metadata": {
     "component": {
@@ -11,7 +11,7 @@
       "properties": [
         {
           "name": "yuruna:source-inputs-sha256",
-          "value": "71fd326d26199199dbf9c092450b597e85eaa59fdbf5920d76cae56eb1500779"
+          "value": "ff4556419fe20675fe5b0c0aacb8b52e35d2a7d79a680b7de7d5fc7201f238f0"
         },
         {
           "name": "yuruna:inventory-kind",
@@ -66,11 +66,37 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 12, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
       "purl": "pkg:cargo/amisad-common@0.1.0"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-1724928dc347705509ab",
+      "name": "amisad-demo-host",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 6, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/amisad-demo-host@0.1.0"
+    },
+    {
+      "type": "application",
+      "bom-ref": "component-169131ecface4dcee9c9",
+      "name": "amisad-provision",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 6, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 31, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.0",
+      "purl": "pkg:cargo/amisad-provision@0.1.0"
     },
     {
       "type": "library",
@@ -79,7 +105,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 42, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.92",
@@ -92,13 +118,32 @@
       ]
     },
     {
+      "type": "library",
+      "bom-ref": "component-6fb684a5c1ec172bdbf2",
+      "name": "atomic-waker",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 53, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.1.2",
+      "purl": "pkg:cargo/atomic-waker@1.1.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
+        }
+      ]
+    },
+    {
       "type": "application",
       "bom-ref": "component-0c13b8454d7be5b5c3d3",
       "name": "audit-svc",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 27, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 59, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -111,7 +156,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 34, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 66, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.22.1",
@@ -130,7 +175,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 40, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 72, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "2.13.2",
@@ -149,7 +194,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 46, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 78, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.12.1",
@@ -168,7 +213,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 55, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 87, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "3.20.4",
@@ -187,7 +232,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 61, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 93, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -200,7 +245,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 68, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 100, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.5.0",
@@ -219,7 +264,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 74, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 12, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 106, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.12.1",
@@ -238,7 +283,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 80, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 112, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.5",
@@ -257,7 +302,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 86, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 118, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.10.2",
@@ -276,7 +321,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 97, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 129, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.5.4",
@@ -295,7 +340,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 103, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 135, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -308,7 +353,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 110, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 142, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.10.3",
@@ -327,7 +372,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 116, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 148, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.1",
@@ -346,7 +391,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 125, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 157, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.2",
@@ -365,7 +410,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 134, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 166, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.4.8",
@@ -384,7 +429,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 143, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 175, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.11.3",
@@ -397,13 +442,32 @@
       ]
     },
     {
+      "type": "library",
+      "bom-ref": "component-d824604a95ff79ad7a2c",
+      "name": "errno",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 187, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.15",
+      "purl": "pkg:cargo/errno@0.3.15",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e35d6e78f4cebb90e51d543db8fe41528851d6deeef6ef21ebd4bfdc1e784776"
+        }
+      ]
+    },
+    {
       "type": "application",
       "bom-ref": "component-334ab6a1343ff5cf1aaf",
       "name": "fabric-coordinator",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 155, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 197, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -416,7 +480,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 162, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 204, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.0",
@@ -435,7 +499,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 168, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 210, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.34",
@@ -454,7 +518,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 178, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 220, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.34",
@@ -473,7 +537,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 184, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 226, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.34",
@@ -492,7 +556,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 190, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 232, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.34",
@@ -511,7 +575,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 196, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 238, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.34",
@@ -530,7 +594,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 209, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 251, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.4.3",
@@ -549,7 +613,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 221, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 263, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.13.0",
@@ -563,12 +627,107 @@
     },
     {
       "type": "library",
+      "bom-ref": "component-12ef3684638b8a5c808e",
+      "name": "http-body-util",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 14, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 292, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.5",
+      "purl": "pkg:cargo/http-body-util@0.1.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "23169fe34a5fbcdd3f3862e78fb9b6fccd5f02a6dc6f732547005d45631ce71c"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-c9f80b15c4e9a074fb22",
+      "name": "http-body",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 282, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.1.0",
+      "purl": "pkg:cargo/http-body@1.1.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ca2a8f2913ee65f60facd6a5905613afaa448497a0230cc41ce022d93290bc2c"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-be3116b4eb397a3d45a1",
+      "name": "http",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 272, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.5.0",
+      "purl": "pkg:cargo/http@1.5.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "918d3568bebf352712bc2ef3d46a8bcf1a75b373be6539de198e9105cbbf9ce0"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-4f592ccaf584241517f2",
+      "name": "httparse",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 305, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.10.1",
+      "purl": "pkg:cargo/httparse@1.10.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-f007e5f5da828c5a82c9",
+      "name": "httpdate",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 311, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.3",
+      "purl": "pkg:cargo/httpdate@1.0.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "component-7b09dbf00f2621afb99e",
       "name": "hybrid-array",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 230, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 317, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.4.15",
@@ -581,17 +740,74 @@
       ]
     },
     {
+      "type": "library",
+      "bom-ref": "component-6482374db8bf03fa5335",
+      "name": "hyper-util",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 346, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.1.21",
+      "purl": "pkg:cargo/hyper-util@0.1.21",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ddc03d96684f9226b8a787cdb71488417b53ab5ea8fdb1dac946cb9431cc8bff"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-5710c277853dffdc3366",
+      "name": "hyper",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 14, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 326, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.13.0",
+      "purl": "pkg:cargo/hyper@1.13.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "229c6ff5584df4c6becbfe00567128bac768c8cd32ebc8a8366bd81ed072e8f3"
+        }
+      ]
+    },
+    {
       "type": "application",
       "bom-ref": "component-0d2f85a06d20107be8e5",
       "name": "identity-mock",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 239, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 360, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
       "purl": "pkg:cargo/identity-mock@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-cea61d63f57e9d2fd52c",
+      "name": "if-addrs",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 17, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 367, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.15.0",
+      "purl": "pkg:cargo/if-addrs@0.15.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c0a05c691e1fae256cf7013d99dad472dc52d5543322761f83ec8d47eab40d2b"
+        }
+      ]
     },
     {
       "type": "application",
@@ -600,11 +816,30 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 246, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 377, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
       "purl": "pkg:cargo/insights-svc@0.1.0"
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-ecf84d3b27863cbafc01",
+      "name": "itoa",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 384, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.19",
+      "purl": "pkg:cargo/itoa@1.0.19",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3bd1574e617a9a6c1f8f8181bd7e841e1f20e4277607ef28945765188d6284d4"
+        }
+      ]
     },
     {
       "type": "library",
@@ -613,7 +848,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 253, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 390, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.107",
@@ -632,7 +867,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 264, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 401, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -645,7 +880,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 272, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 409, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.191",
@@ -664,7 +899,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 278, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 415, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.25",
@@ -683,7 +918,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 287, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 424, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.4.14",
@@ -702,7 +937,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 296, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 433, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.4.35",
@@ -721,7 +956,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 302, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 439, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.11.0",
@@ -740,7 +975,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 312, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 449, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "2.8.3",
@@ -759,7 +994,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 318, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 455, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.2.5",
@@ -778,7 +1013,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 329, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 466, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.2",
@@ -797,7 +1032,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 338, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 475, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.2",
@@ -816,7 +1051,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 347, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 484, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.12.5",
@@ -835,7 +1070,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 357, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 494, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.9.12",
@@ -854,7 +1089,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 370, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 18, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 507, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "2.3.2",
@@ -873,7 +1108,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 376, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 513, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.13.1",
@@ -892,7 +1127,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 386, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 523, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.13.1",
@@ -911,7 +1146,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 395, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 532, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.17",
@@ -930,7 +1165,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 401, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 538, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -943,7 +1178,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 422, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 559, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.6.12",
@@ -962,7 +1197,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 440, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 577, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.14",
@@ -981,7 +1216,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 408, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 545, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.19.14",
@@ -1000,7 +1235,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 451, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 588, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.107",
@@ -1019,7 +1254,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 460, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 597, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.47",
@@ -1038,7 +1273,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 469, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 606, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "6.0.0",
@@ -1057,7 +1292,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 475, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 612, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.10.4",
@@ -1076,7 +1311,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 486, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 623, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.10.1",
@@ -1095,7 +1330,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 492, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 629, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.5.18",
@@ -1114,7 +1349,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 501, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 638, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -1127,7 +1362,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 509, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 646, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.23",
@@ -1146,7 +1381,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 515, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 652, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.2.0",
@@ -1165,7 +1400,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 521, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 658, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -1178,7 +1413,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 529, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 666, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.229",
@@ -1197,7 +1432,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 538, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 675, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.229",
@@ -1216,7 +1451,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 547, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 684, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.229",
@@ -1230,12 +1465,31 @@
     },
     {
       "type": "library",
+      "bom-ref": "component-3f8bbf90c5c2cd6ec098",
+      "name": "serde_json",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 19, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 695, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.154",
+      "purl": "pkg:cargo/serde_json@1.0.154",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6"
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "component-25d2c2ab690c22ecf2c6",
       "name": "sha2",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 558, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 708, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.11.1",
@@ -1249,12 +1503,31 @@
     },
     {
       "type": "library",
+      "bom-ref": "component-8a7c2b941fa8a4f1520f",
+      "name": "signal-hook-registry",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 719, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.4.8",
+      "purl": "pkg:cargo/signal-hook-registry@1.4.8",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c4db69cba1110affc0e9f7bcd48bbf87b3f4fc7c61fc9155afd4c469eb3d6c1b"
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "component-a68ac7c18b30cb6e67fe",
       "name": "siphasher",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 569, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 729, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.4",
@@ -1273,7 +1546,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 575, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 735, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.4.12",
@@ -1292,7 +1565,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 581, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 741, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.0",
@@ -1305,7 +1578,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 588, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 748, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.16.5",
@@ -1324,7 +1597,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 594, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 754, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.6.5",
@@ -1343,7 +1616,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 604, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 764, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.5",
@@ -1362,7 +1635,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 615, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 775, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "3.0.10",
@@ -1381,7 +1654,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 626, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 786, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.13.3",
@@ -1395,12 +1668,31 @@
     },
     {
       "type": "library",
+      "bom-ref": "component-9b902e98485fb8ce99a9",
+      "name": "tokio-macros",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 808, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "2.7.2",
+      "purl": "pkg:cargo/tokio-macros@2.7.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "78773a2a397f451582ce068015985c33193cf6dea8b74d2a639fe457b2f07b0e"
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "component-f8ba62d5d5b8122e41cd",
       "name": "tokio-postgres",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 646, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 819, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.7.18",
@@ -1419,7 +1711,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 672, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 845, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.7.20",
@@ -1438,7 +1730,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 632, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 792, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.54.1",
@@ -1452,12 +1744,31 @@
     },
     {
       "type": "library",
+      "bom-ref": "component-6410adb8f074ff621126",
+      "name": "try-lock",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 859, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.2.5",
+      "purl": "pkg:cargo/try-lock@0.2.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "component-6fa243660745bdcda93b",
       "name": "typenum",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 686, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 865, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.20.1",
@@ -1476,7 +1787,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 692, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 871, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.18",
@@ -1495,7 +1806,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 698, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 877, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.27",
@@ -1514,7 +1825,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 704, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 883, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.26",
@@ -1533,7 +1844,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 713, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 892, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.1.5",
@@ -1547,12 +1858,31 @@
     },
     {
       "type": "library",
+      "bom-ref": "component-c48218e92e0114b7b817",
+      "name": "want",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 898, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "0.3.2",
+      "purl": "pkg:cargo/want@0.3.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ec4cdd0dd910afe868b7ef477227d8d538b46b3075031afee8a9f2acb0a2ed0b"
+        }
+      ]
+    },
+    {
+      "type": "library",
       "bom-ref": "component-4b50e029cf9ac29b6959",
       "name": "wasi",
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 719, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 907, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.11.1+wasi-snapshot-preview1",
@@ -1571,7 +1901,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 725, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 913, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.14.7+wasi-0.2.4",
@@ -1590,7 +1920,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 734, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 922, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.4+wasi-0.2.12",
@@ -1609,7 +1939,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 743, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 931, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "1.0.2",
@@ -1628,7 +1958,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 774, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 962, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.130",
@@ -1647,7 +1977,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 764, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 952, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.130",
@@ -1666,7 +1996,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 787, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 975, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.130",
@@ -1685,7 +2015,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 752, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 940, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.130",
@@ -1704,7 +2034,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 796, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 984, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.3.107",
@@ -1723,7 +2053,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 806, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 994, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "2.1.3",
@@ -1742,7 +2072,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 819, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 1007, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.2.1",
@@ -1761,7 +2091,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 825, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 1013, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.61.2",
@@ -1780,7 +2110,7 @@
       "properties": [
         {
           "name": "yuruna:declaration",
-          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 834, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 1022, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
         }
       ],
       "version": "0.57.1",
@@ -1789,6 +2119,25 @@
         {
           "alg": "SHA-256",
           "content": "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "bom-ref": "component-5c3ed677d20c735480ec",
+      "name": "zmij",
+      "properties": [
+        {
+          "name": "yuruna:declaration",
+          "value": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 1028, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}"
+        }
+      ],
+      "version": "1.0.23",
+      "purl": "pkg:cargo/zmij@1.0.23",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
         }
       ]
     },
@@ -3891,9 +4240,12 @@
         "component-108ce2cc57feb757cd3e",
         "component-10c72c20b80ada8f1628",
         "component-123ab2531b17270eb8a5",
+        "component-12ef3684638b8a5c808e",
         "component-13cefd51066630a2dde2",
         "component-14c99faa3392a053c81a",
         "component-162a0de9cdcc0b6ac738",
+        "component-169131ecface4dcee9c9",
+        "component-1724928dc347705509ab",
         "component-18d53a31f9d7299c26ca",
         "component-1b6b99d7283726506010",
         "component-1bdf513f7d8bdbb85e6b",
@@ -3922,6 +4274,7 @@
         "component-3c8b53184abeca3b5018",
         "component-3d65318a95b4a8edd830",
         "component-3dda11d34a17e9281a03",
+        "component-3f8bbf90c5c2cd6ec098",
         "component-40619a6e4bd1eb1dca74",
         "component-441e0d003b3a771a35d8",
         "component-458df5501015d24b2d63",
@@ -3931,13 +4284,18 @@
         "component-48ac61ee77c7fccb1921",
         "component-4aa0148988e62487a2bb",
         "component-4b50e029cf9ac29b6959",
+        "component-4f592ccaf584241517f2",
         "component-5363bcd991f78e3056b1",
         "component-56afa9bf2b7656f9c7ce",
+        "component-5710c277853dffdc3366",
         "component-577a3ed0e24a827a634b",
         "component-57a55c0786f9411d15c7",
         "component-5b87d470155010b330ab",
+        "component-5c3ed677d20c735480ec",
         "component-5feb07e3d303378e57b8",
         "component-6066aed6f7afc0b9c3f6",
+        "component-6410adb8f074ff621126",
+        "component-6482374db8bf03fa5335",
         "component-6766f3030ce963b2ffed",
         "component-6984feeb7837b9b91a91",
         "component-698d35e715c4ceb5f2db",
@@ -3950,6 +4308,7 @@
         "component-6e63dd3e4d4ed470be7f",
         "component-6ef720777fa2691cb03c",
         "component-6fa243660745bdcda93b",
+        "component-6fb684a5c1ec172bdbf2",
         "component-70d83d4fd89672101722",
         "component-725d960583c23c172e4f",
         "component-73b7a6d206925bb3eabb",
@@ -3971,6 +4330,7 @@
         "component-8206a4cadd2a699c82b7",
         "component-8750633f6a33a20a81ae",
         "component-8a2d435b43323d53377d",
+        "component-8a7c2b941fa8a4f1520f",
         "component-8a899ebd85976325c9aa",
         "component-8b4f13c0d092978d2d1f",
         "component-8b842607de66b9d3e849",
@@ -3985,6 +4345,7 @@
         "component-97041d09cf5f0ef0d825",
         "component-97c0013c7f80dd934325",
         "component-9a80b5573e82d7ca0b45",
+        "component-9b902e98485fb8ce99a9",
         "component-9e01adac92e1d6f47da8",
         "component-a079f6bcf24ee4687846",
         "component-a68ac7c18b30cb6e67fe",
@@ -4006,18 +4367,22 @@
         "component-b89c5a7162f48e913ca0",
         "component-b8f6b0fb171a46993ae9",
         "component-ba46c8f92f85702f810e",
+        "component-be3116b4eb397a3d45a1",
         "component-bfa23ed9dd1e539460bf",
         "component-c1b4340101b85797bddb",
         "component-c2fb15e1e883256cbaa0",
         "component-c4178888342f61dacd5d",
+        "component-c48218e92e0114b7b817",
         "component-c4957a783c1a36fb78e5",
         "component-c7917f804d963de4d81d",
         "component-c8e4f1b7e84c3b6b9bae",
         "component-c95db9af64211017f8fc",
         "component-c9662b5a10cefd684848",
+        "component-c9f80b15c4e9a074fb22",
         "component-ca671449c7f6168ed197",
         "component-cac5a3c47f0a55c0772b",
         "component-cd5261d2ddd1da691fd8",
+        "component-cea61d63f57e9d2fd52c",
         "component-cf9e44e8e2fff4bce3e7",
         "component-d0cdcd40646345021d5c",
         "component-d29b79108876479c3f73",
@@ -4028,6 +4393,7 @@
         "component-d5ad57211a3879f5640c",
         "component-d684962aa9932d8abeb7",
         "component-d820bc5580bd3aa1477f",
+        "component-d824604a95ff79ad7a2c",
         "component-d8e235b766f530158dd1",
         "component-da9cc9eee808cce14fa1",
         "component-db4e5adc66bf5c0128ce",
@@ -4045,8 +4411,10 @@
         "component-e96acd1ba31f99c2eb8f",
         "component-ebb7316bec0fea360b5f",
         "component-ec838a8b0849d7ea3af1",
+        "component-ecf84d3b27863cbafc01",
         "component-ee8228e1e7eb77b911f3",
         "component-ee8941cfc00e9dd51488",
+        "component-f007e5f5da828c5a82c9",
         "component-f0b440c59e1f0497c5db",
         "component-f149956167f66539819f",
         "component-f19a9659c481a09a3447",
@@ -4075,12 +4443,40 @@
       "dependsOn": []
     },
     {
+      "ref": "component-1724928dc347705509ab",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-12ef3684638b8a5c808e",
+        "component-3f8bbf90c5c2cd6ec098",
+        "component-45a043b2b595c7074fe4",
+        "component-5710c277853dffdc3366",
+        "component-6482374db8bf03fa5335",
+        "component-6c26c9a00ec6c7eefd3f",
+        "component-81da6ac3475bd2365bd4",
+        "component-cea61d63f57e9d2fd52c"
+      ]
+    },
+    {
+      "ref": "component-169131ecface4dcee9c9",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-12ef3684638b8a5c808e",
+        "component-45a043b2b595c7074fe4",
+        "component-5710c277853dffdc3366",
+        "component-6482374db8bf03fa5335"
+      ]
+    },
+    {
       "ref": "component-97041d09cf5f0ef0d825",
       "dependsOn": [
         "component-48ac61ee77c7fccb1921",
         "component-ab9b38194fc42641bd6d",
         "component-d820bc5580bd3aa1477f"
       ]
+    },
+    {
+      "ref": "component-6fb684a5c1ec172bdbf2",
+      "dependsOn": []
     },
     {
       "ref": "component-0c13b8454d7be5b5c3d3",
@@ -4174,6 +4570,13 @@
       ]
     },
     {
+      "ref": "component-d824604a95ff79ad7a2c",
+      "dependsOn": [
+        "component-7b39f8292cbba829d69b",
+        "component-933f836951dbd7caa0b7"
+      ]
+    },
+    {
       "ref": "component-334ab6a1343ff5cf1aaf",
       "dependsOn": [
         "component-81da6ac3475bd2365bd4"
@@ -4228,9 +4631,69 @@
       ]
     },
     {
+      "ref": "component-12ef3684638b8a5c808e",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-2a77cfce14bb4554fc93",
+        "component-a8031210b162f8c70f5e",
+        "component-be3116b4eb397a3d45a1",
+        "component-c9f80b15c4e9a074fb22"
+      ]
+    },
+    {
+      "ref": "component-c9f80b15c4e9a074fb22",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-be3116b4eb397a3d45a1"
+      ]
+    },
+    {
+      "ref": "component-be3116b4eb397a3d45a1",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-ecf84d3b27863cbafc01"
+      ]
+    },
+    {
+      "ref": "component-4f592ccaf584241517f2",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-f007e5f5da828c5a82c9",
+      "dependsOn": []
+    },
+    {
       "ref": "component-7b09dbf00f2621afb99e",
       "dependsOn": [
         "component-6fa243660745bdcda93b"
+      ]
+    },
+    {
+      "ref": "component-6482374db8bf03fa5335",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-45a043b2b595c7074fe4",
+        "component-5710c277853dffdc3366",
+        "component-a8031210b162f8c70f5e",
+        "component-be3116b4eb397a3d45a1",
+        "component-c9f80b15c4e9a074fb22"
+      ]
+    },
+    {
+      "ref": "component-5710c277853dffdc3366",
+      "dependsOn": [
+        "component-08faf646b9b39c46b560",
+        "component-2a77cfce14bb4554fc93",
+        "component-2d53c037d426adc690fb",
+        "component-45a043b2b595c7074fe4",
+        "component-4f592ccaf584241517f2",
+        "component-6fb684a5c1ec172bdbf2",
+        "component-a8031210b162f8c70f5e",
+        "component-be3116b4eb397a3d45a1",
+        "component-c48218e92e0114b7b817",
+        "component-c9f80b15c4e9a074fb22",
+        "component-ecf84d3b27863cbafc01",
+        "component-f007e5f5da828c5a82c9"
       ]
     },
     {
@@ -4240,10 +4703,21 @@
       ]
     },
     {
+      "ref": "component-cea61d63f57e9d2fd52c",
+      "dependsOn": [
+        "component-7b39f8292cbba829d69b",
+        "component-933f836951dbd7caa0b7"
+      ]
+    },
+    {
       "ref": "component-10c72c20b80ada8f1628",
       "dependsOn": [
         "component-81da6ac3475bd2365bd4"
       ]
+    },
+    {
+      "ref": "component-ecf84d3b27863cbafc01",
+      "dependsOn": []
     },
     {
       "ref": "component-1bdf513f7d8bdbb85e6b",
@@ -4466,11 +4940,28 @@
       ]
     },
     {
+      "ref": "component-3f8bbf90c5c2cd6ec098",
+      "dependsOn": [
+        "component-108ce2cc57feb757cd3e",
+        "component-5c3ed677d20c735480ec",
+        "component-6c517d3022b0b71b43f5",
+        "component-bfa23ed9dd1e539460bf",
+        "component-ecf84d3b27863cbafc01"
+      ]
+    },
+    {
       "ref": "component-25d2c2ab690c22ecf2c6",
       "dependsOn": [
         "component-053b555cf9191d41a62e",
         "component-af8eee1897fb3c912fae",
         "component-da9cc9eee808cce14fa1"
+      ]
+    },
+    {
+      "ref": "component-8a7c2b941fa8a4f1520f",
+      "dependsOn": [
+        "component-933f836951dbd7caa0b7",
+        "component-d824604a95ff79ad7a2c"
       ]
     },
     {
@@ -4519,6 +5010,14 @@
       "dependsOn": []
     },
     {
+      "ref": "component-9b902e98485fb8ce99a9",
+      "dependsOn": [
+        "component-48ac61ee77c7fccb1921",
+        "component-ab9b38194fc42641bd6d",
+        "component-d820bc5580bd3aa1477f"
+      ]
+    },
+    {
       "ref": "component-f8ba62d5d5b8122e41cd",
       "dependsOn": [
         "component-08faf646b9b39c46b560",
@@ -4558,10 +5057,16 @@
         "component-06645e327f1c9e6926f5",
         "component-08faf646b9b39c46b560",
         "component-7b39f8292cbba829d69b",
+        "component-8a7c2b941fa8a4f1520f",
         "component-933f836951dbd7caa0b7",
+        "component-9b902e98485fb8ce99a9",
         "component-a8031210b162f8c70f5e",
         "component-d549b9fe5fbd05f23f0b"
       ]
+    },
+    {
+      "ref": "component-6410adb8f074ff621126",
+      "dependsOn": []
     },
     {
       "ref": "component-6fa243660745bdcda93b",
@@ -4584,6 +5089,12 @@
     {
       "ref": "component-e96acd1ba31f99c2eb8f",
       "dependsOn": []
+    },
+    {
+      "ref": "component-c48218e92e0114b7b817",
+      "dependsOn": [
+        "component-6410adb8f074ff621126"
+      ]
     },
     {
       "ref": "component-4b50e029cf9ac29b6959",
@@ -4668,6 +5179,10 @@
     },
     {
       "ref": "component-f69e3b7bb26f74efcb06",
+      "dependsOn": []
+    },
+    {
+      "ref": "component-5c3ed677d20c735480ec",
       "dependsOn": []
     },
     {

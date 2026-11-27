@@ -56,10 +56,14 @@ review unless the operator explicitly and unambiguously authorizes the action
 for the work at hand. Authorization for one change does not authorize later,
 unrelated changes.
 
-Work on the current branch, including when it is the default branch. Do not
-create or switch branches, or move the work to another branch, unless the
-operator explicitly requests it. Synchronization does not authorize commits,
-pushes or branch changes.
+Work on the current branch, including when it is the default branch.
+Assistants and tools acting on their behalf may create a local or remote
+branch only when the operator explicitly requests branch creation. This
+applies to commands, APIs, worktrees, pull request workflows and pushes to
+new branch refs. A request to commit or push alone applies to the existing
+branch. Switch branches or move work to another branch only when the
+operator explicitly requests it.
+Synchronization does not authorize commits, pushes or branch changes.
 
 Stage only files belonging to the authorized change. Preserve unrelated work.
 Never bypass required checks to make a commit or push succeed.

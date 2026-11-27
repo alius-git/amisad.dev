@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-repository",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/repository/71fd326d26199199dbf9c092450b597e85eaa59fdbf5920d76cae56eb1500779",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/repository/ff4556419fe20675fe5b0c0aacb8b52e35d2a7d79a680b7de7d5fc7201f238f0",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,7 +25,7 @@
       "licenseDeclared": "LicenseRef-Yuruna",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared repository inventory; source-inputs SHA256 71fd326d26199199dbf9c092450b597e85eaa59fdbf5920d76cae56eb1500779. Not an installed-system scan.",
+      "comment": "Declared repository inventory; source-inputs SHA256 ff4556419fe20675fe5b0c0aacb8b52e35d2a7d79a680b7de7d5fc7201f238f0. Not an installed-system scan.",
       "versionInfo": "2026.11.26"
     },
     {
@@ -76,13 +76,49 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/ads-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 11, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 12, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/lib/amisad-common/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 12, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
           "referenceLocator": "pkg:cargo/amisad-common@0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "amisad-demo-host",
+      "SPDXID": "SPDXRef-1724928dc347705509ab",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 6, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "versionInfo": "0.1.0",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/amisad-demo-host@0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "amisad-provision",
+      "SPDXID": "SPDXRef-169131ecface4dcee9c9",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 6, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 31, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "versionInfo": "0.1.0",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/amisad-provision@0.1.0"
         }
       ]
     },
@@ -94,7 +130,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 16, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 42, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.92",
       "checksums": [
         {
@@ -111,6 +147,30 @@
       ]
     },
     {
+      "name": "atomic-waker",
+      "SPDXID": "SPDXRef-6fb684a5c1ec172bdbf2",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 53, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.1.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/atomic-waker@1.1.2"
+        }
+      ]
+    },
+    {
       "name": "audit-svc",
       "SPDXID": "SPDXRef-0c13b8454d7be5b5c3d3",
       "downloadLocation": "NOASSERTION",
@@ -118,7 +178,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 27, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/audit-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 59, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -136,7 +196,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 34, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 66, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.22.1",
       "checksums": [
         {
@@ -160,7 +220,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 40, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 72, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "2.13.2",
       "checksums": [
         {
@@ -184,7 +244,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 46, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 78, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.12.1",
       "checksums": [
         {
@@ -208,7 +268,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 55, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 87, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "3.20.4",
       "checksums": [
         {
@@ -232,7 +292,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 61, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/apps/buyer-client/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 93, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -250,7 +310,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 68, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 100, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.5.0",
       "checksums": [
         {
@@ -274,7 +334,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 74, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 12, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 106, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.12.1",
       "checksums": [
         {
@@ -298,7 +358,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 80, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 112, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.5",
       "checksums": [
         {
@@ -322,7 +382,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 86, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 118, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.10.2",
       "checksums": [
         {
@@ -346,7 +406,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 97, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 129, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.5.4",
       "checksums": [
         {
@@ -370,7 +430,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 103, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/connect-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 135, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -388,7 +448,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 110, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 142, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.10.3",
       "checksums": [
         {
@@ -412,7 +472,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 116, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 148, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.1",
       "checksums": [
         {
@@ -436,7 +496,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 125, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 157, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.2",
       "checksums": [
         {
@@ -460,7 +520,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 134, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 166, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.4.8",
       "checksums": [
         {
@@ -484,7 +544,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 143, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 175, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.11.3",
       "checksums": [
         {
@@ -501,6 +561,30 @@
       ]
     },
     {
+      "name": "errno",
+      "SPDXID": "SPDXRef-d824604a95ff79ad7a2c",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 187, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "0.3.15",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e35d6e78f4cebb90e51d543db8fe41528851d6deeef6ef21ebd4bfdc1e784776"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/errno@0.3.15"
+        }
+      ]
+    },
+    {
       "name": "fabric-coordinator",
       "SPDXID": "SPDXRef-334ab6a1343ff5cf1aaf",
       "downloadLocation": "NOASSERTION",
@@ -508,7 +592,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 155, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/fabric-coordinator/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 197, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -526,7 +610,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 162, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 204, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.0",
       "checksums": [
         {
@@ -550,7 +634,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 168, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 210, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.34",
       "checksums": [
         {
@@ -574,7 +658,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 178, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 220, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.34",
       "checksums": [
         {
@@ -598,7 +682,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 184, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 226, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.34",
       "checksums": [
         {
@@ -622,7 +706,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 190, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 232, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.34",
       "checksums": [
         {
@@ -646,7 +730,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 196, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 238, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.34",
       "checksums": [
         {
@@ -670,7 +754,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 209, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 251, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.4.3",
       "checksums": [
         {
@@ -694,7 +778,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 221, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 263, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.13.0",
       "checksums": [
         {
@@ -711,6 +795,126 @@
       ]
     },
     {
+      "name": "http-body-util",
+      "SPDXID": "SPDXRef-12ef3684638b8a5c808e",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 13, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 14, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 292, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "0.1.5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "23169fe34a5fbcdd3f3862e78fb9b6fccd5f02a6dc6f732547005d45631ce71c"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/http-body-util@0.1.5"
+        }
+      ]
+    },
+    {
+      "name": "http-body",
+      "SPDXID": "SPDXRef-c9f80b15c4e9a074fb22",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 282, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.1.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ca2a8f2913ee65f60facd6a5905613afaa448497a0230cc41ce022d93290bc2c"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/http-body@1.1.0"
+        }
+      ]
+    },
+    {
+      "name": "http",
+      "SPDXID": "SPDXRef-be3116b4eb397a3d45a1",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 272, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.5.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "918d3568bebf352712bc2ef3d46a8bcf1a75b373be6539de198e9105cbbf9ce0"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/http@1.5.0"
+        }
+      ]
+    },
+    {
+      "name": "httparse",
+      "SPDXID": "SPDXRef-4f592ccaf584241517f2",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 305, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.10.1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6dbf3de79e51f3d586ab4cb9d5c3e2c14aa28ed23d180cf89b4df0454a69cc87"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/httparse@1.10.1"
+        }
+      ]
+    },
+    {
+      "name": "httpdate",
+      "SPDXID": "SPDXRef-f007e5f5da828c5a82c9",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 311, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.0.3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/httpdate@1.0.3"
+        }
+      ]
+    },
+    {
       "name": "hybrid-array",
       "SPDXID": "SPDXRef-7b09dbf00f2621afb99e",
       "downloadLocation": "NOASSERTION",
@@ -718,7 +922,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 230, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 317, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.4.15",
       "checksums": [
         {
@@ -735,6 +939,54 @@
       ]
     },
     {
+      "name": "hyper-util",
+      "SPDXID": "SPDXRef-6482374db8bf03fa5335",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 346, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "0.1.21",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ddc03d96684f9226b8a787cdb71488417b53ab5ea8fdb1dac946cb9431cc8bff"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/hyper-util@0.1.21"
+        }
+      ]
+    },
+    {
+      "name": "hyper",
+      "SPDXID": "SPDXRef-5710c277853dffdc3366",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 14, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 326, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.13.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "229c6ff5584df4c6becbfe00567128bac768c8cd32ebc8a8366bd81ed072e8f3"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/hyper@1.13.0"
+        }
+      ]
+    },
+    {
       "name": "identity-mock",
       "SPDXID": "SPDXRef-0d2f85a06d20107be8e5",
       "downloadLocation": "NOASSERTION",
@@ -742,13 +994,37 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 239, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/identity-mock/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 360, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
           "referenceLocator": "pkg:cargo/identity-mock@0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "if-addrs",
+      "SPDXID": "SPDXRef-cea61d63f57e9d2fd52c",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 17, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 367, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "0.15.0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c0a05c691e1fae256cf7013d99dad472dc52d5543322761f83ec8d47eab40d2b"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/if-addrs@0.15.0"
         }
       ]
     },
@@ -760,13 +1036,37 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 246, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/insights-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 377, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
           "referenceLocator": "pkg:cargo/insights-svc@0.1.0"
+        }
+      ]
+    },
+    {
+      "name": "itoa",
+      "SPDXID": "SPDXRef-ecf84d3b27863cbafc01",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 384, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.0.19",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3bd1574e617a9a6c1f8f8181bd7e841e1f20e4277607ef28945765188d6284d4"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/itoa@1.0.19"
         }
       ]
     },
@@ -778,7 +1078,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 253, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 390, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.107",
       "checksums": [
         {
@@ -802,7 +1102,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 264, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 401, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -820,7 +1120,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 272, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 409, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.191",
       "checksums": [
         {
@@ -844,7 +1144,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 278, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 415, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.25",
       "checksums": [
         {
@@ -868,7 +1168,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 287, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 424, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.4.14",
       "checksums": [
         {
@@ -892,7 +1192,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 296, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 433, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.4.35",
       "checksums": [
         {
@@ -916,7 +1216,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 302, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 439, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.11.0",
       "checksums": [
         {
@@ -940,7 +1240,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 312, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 449, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "2.8.3",
       "checksums": [
         {
@@ -964,7 +1264,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 318, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 455, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.2.5",
       "checksums": [
         {
@@ -988,7 +1288,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 329, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 466, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.2",
       "checksums": [
         {
@@ -1012,7 +1312,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 338, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 475, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.2",
       "checksums": [
         {
@@ -1036,7 +1336,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 347, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 484, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.12.5",
       "checksums": [
         {
@@ -1060,7 +1360,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 357, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 494, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.9.12",
       "checksums": [
         {
@@ -1084,7 +1384,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 370, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 18, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 507, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "2.3.2",
       "checksums": [
         {
@@ -1108,7 +1408,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 376, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 513, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.13.1",
       "checksums": [
         {
@@ -1132,7 +1432,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 386, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 523, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.13.1",
       "checksums": [
         {
@@ -1156,7 +1456,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 395, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 532, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.17",
       "checksums": [
         {
@@ -1180,7 +1480,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 401, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/platform-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 538, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -1198,7 +1498,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 422, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 559, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.6.12",
       "checksums": [
         {
@@ -1222,7 +1522,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 440, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 577, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.14",
       "checksums": [
         {
@@ -1246,7 +1546,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 408, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/ledger-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 545, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.19.14",
       "checksums": [
         {
@@ -1270,7 +1570,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 451, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 588, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.107",
       "checksums": [
         {
@@ -1294,7 +1594,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 460, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 597, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.47",
       "checksums": [
         {
@@ -1318,7 +1618,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 469, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 606, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "6.0.0",
       "checksums": [
         {
@@ -1342,7 +1642,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 475, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 612, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.10.4",
       "checksums": [
         {
@@ -1366,7 +1666,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 486, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 623, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.10.1",
       "checksums": [
         {
@@ -1390,7 +1690,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 492, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 629, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.5.18",
       "checksums": [
         {
@@ -1414,7 +1714,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 501, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/resource-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 638, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -1432,7 +1732,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 509, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 646, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.23",
       "checksums": [
         {
@@ -1456,7 +1756,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 515, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 652, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.2.0",
       "checksums": [
         {
@@ -1480,7 +1780,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 521, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/services/seller-svc/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 658, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -1498,7 +1798,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 529, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 666, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.229",
       "checksums": [
         {
@@ -1522,7 +1822,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 538, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 675, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.229",
       "checksums": [
         {
@@ -1546,7 +1846,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 547, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 684, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.229",
       "checksums": [
         {
@@ -1563,6 +1863,30 @@
       ]
     },
     {
+      "name": "serde_json",
+      "SPDXID": "SPDXRef-3f8bbf90c5c2cd6ec098",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 19, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 695, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.0.154",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/serde_json@1.0.154"
+        }
+      ]
+    },
+    {
       "name": "sha2",
       "SPDXID": "SPDXRef-25d2c2ab690c22ecf2c6",
       "downloadLocation": "NOASSERTION",
@@ -1570,7 +1894,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 558, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 708, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.11.1",
       "checksums": [
         {
@@ -1587,6 +1911,30 @@
       ]
     },
     {
+      "name": "signal-hook-registry",
+      "SPDXID": "SPDXRef-8a7c2b941fa8a4f1520f",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 719, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.4.8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c4db69cba1110affc0e9f7bcd48bbf87b3f4fc7c61fc9155afd4c469eb3d6c1b"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/signal-hook-registry@1.4.8"
+        }
+      ]
+    },
+    {
       "name": "siphasher",
       "SPDXID": "SPDXRef-a68ac7c18b30cb6e67fe",
       "downloadLocation": "NOASSERTION",
@@ -1594,7 +1942,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 569, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 729, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.4",
       "checksums": [
         {
@@ -1618,7 +1966,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 575, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 735, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.4.12",
       "checksums": [
         {
@@ -1642,7 +1990,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 581, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo package manifest\", \"line\": 5, \"path\": \"poc/components/edge/slice-runtime/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 741, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Internal Cargo workspace package.\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.0",
       "externalRefs": [
         {
@@ -1660,7 +2008,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 588, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 748, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.16.5",
       "checksums": [
         {
@@ -1684,7 +2032,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 594, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 754, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.6.5",
       "checksums": [
         {
@@ -1708,7 +2056,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 604, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 764, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.5",
       "checksums": [
         {
@@ -1732,7 +2080,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 615, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 775, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "3.0.10",
       "checksums": [
         {
@@ -1756,7 +2104,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 626, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 786, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.13.3",
       "checksums": [
         {
@@ -1773,6 +2121,30 @@
       ]
     },
     {
+      "name": "tokio-macros",
+      "SPDXID": "SPDXRef-9b902e98485fb8ce99a9",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 808, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "2.7.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "78773a2a397f451582ce068015985c33193cf6dea8b74d2a639fe457b2f07b0e"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/tokio-macros@2.7.2"
+        }
+      ]
+    },
+    {
       "name": "tokio-postgres",
       "SPDXID": "SPDXRef-f8ba62d5d5b8122e41cd",
       "downloadLocation": "NOASSERTION",
@@ -1780,7 +2152,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 646, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 819, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.7.18",
       "checksums": [
         {
@@ -1804,7 +2176,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 672, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 845, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.7.20",
       "checksums": [
         {
@@ -1828,7 +2200,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 632, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Cargo dependency declaration\", \"line\": 15, \"path\": \"poc/components/apps/guest-provision/Cargo.toml\"}, {\"detail\": \"Cargo dependency declaration\", \"line\": 16, \"path\": \"poc/components/apps/demo-host/Cargo.toml\"}, {\"detail\": \"Declared dependency\", \"line\": 792, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.54.1",
       "checksums": [
         {
@@ -1845,6 +2217,30 @@
       ]
     },
     {
+      "name": "try-lock",
+      "SPDXID": "SPDXRef-6410adb8f074ff621126",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 859, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "0.2.5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/try-lock@0.2.5"
+        }
+      ]
+    },
+    {
       "name": "typenum",
       "SPDXID": "SPDXRef-6fa243660745bdcda93b",
       "downloadLocation": "NOASSERTION",
@@ -1852,7 +2248,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 686, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 865, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.20.1",
       "checksums": [
         {
@@ -1876,7 +2272,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 692, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 871, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.18",
       "checksums": [
         {
@@ -1900,7 +2296,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 698, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 877, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.27",
       "checksums": [
         {
@@ -1924,7 +2320,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 704, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 883, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.26",
       "checksums": [
         {
@@ -1948,7 +2344,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 713, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 892, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.1.5",
       "checksums": [
         {
@@ -1965,6 +2361,30 @@
       ]
     },
     {
+      "name": "want",
+      "SPDXID": "SPDXRef-c48218e92e0114b7b817",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 898, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "0.3.2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ec4cdd0dd910afe868b7ef477227d8d538b46b3075031afee8a9f2acb0a2ed0b"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/want@0.3.2"
+        }
+      ]
+    },
+    {
       "name": "wasi",
       "SPDXID": "SPDXRef-4b50e029cf9ac29b6959",
       "downloadLocation": "NOASSERTION",
@@ -1972,7 +2392,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 719, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 907, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.11.1+wasi-snapshot-preview1",
       "checksums": [
         {
@@ -1996,7 +2416,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 725, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 913, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.14.7+wasi-0.2.4",
       "checksums": [
         {
@@ -2020,7 +2440,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 734, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 922, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.4+wasi-0.2.12",
       "checksums": [
         {
@@ -2044,7 +2464,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 743, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 931, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.0.2",
       "checksums": [
         {
@@ -2068,7 +2488,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 774, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 962, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.130",
       "checksums": [
         {
@@ -2092,7 +2512,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 764, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 952, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.130",
       "checksums": [
         {
@@ -2116,7 +2536,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 787, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 975, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.130",
       "checksums": [
         {
@@ -2140,7 +2560,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 752, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 940, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.130",
       "checksums": [
         {
@@ -2164,7 +2584,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 796, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 984, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.3.107",
       "checksums": [
         {
@@ -2188,7 +2608,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 806, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 994, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "2.1.3",
       "checksums": [
         {
@@ -2212,7 +2632,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 819, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 1007, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.2.1",
       "checksums": [
         {
@@ -2236,7 +2656,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 825, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 1013, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.61.2",
       "checksums": [
         {
@@ -2260,7 +2680,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 834, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 1022, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
       "versionInfo": "0.57.1",
       "checksums": [
         {
@@ -2273,6 +2693,30 @@
           "referenceCategory": "PACKAGE_MANAGER",
           "referenceType": "purl",
           "referenceLocator": "pkg:cargo/wit-bindgen@0.57.1"
+        }
+      ]
+    },
+    {
+      "name": "zmij",
+      "SPDXID": "SPDXRef-5c3ed677d20c735480ec",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "comment": "{\"completeness\": \"locked\", \"ecosystem\": \"cargo\", \"evidence\": [{\"detail\": \"Declared dependency\", \"line\": 1028, \"path\": \"poc/Cargo.lock\"}], \"notes\": [\"Cargo source: registry+https://github.com/rust-lang/crates.io-index\"], \"scope\": \"runtime\"}",
+      "versionInfo": "1.0.23",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
+        }
+      ],
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE_MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:cargo/zmij@1.0.23"
         }
       ]
     },
@@ -4335,6 +4779,86 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-1724928dc347705509ab"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-81da6ac3475bd2365bd4"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-12ef3684638b8a5c808e"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6482374db8bf03fa5335"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-5710c277853dffdc3366"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-cea61d63f57e9d2fd52c"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6c26c9a00ec6c7eefd3f"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-3f8bbf90c5c2cd6ec098"
+    },
+    {
+      "spdxElementId": "SPDXRef-1724928dc347705509ab",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-45a043b2b595c7074fe4"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-169131ecface4dcee9c9"
+    },
+    {
+      "spdxElementId": "SPDXRef-169131ecface4dcee9c9",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
+    },
+    {
+      "spdxElementId": "SPDXRef-169131ecface4dcee9c9",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-12ef3684638b8a5c808e"
+    },
+    {
+      "spdxElementId": "SPDXRef-169131ecface4dcee9c9",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6482374db8bf03fa5335"
+    },
+    {
+      "spdxElementId": "SPDXRef-169131ecface4dcee9c9",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-5710c277853dffdc3366"
+    },
+    {
+      "spdxElementId": "SPDXRef-169131ecface4dcee9c9",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-45a043b2b595c7074fe4"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-97041d09cf5f0ef0d825"
     },
     {
@@ -4351,6 +4875,11 @@
       "spdxElementId": "SPDXRef-97041d09cf5f0ef0d825",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-48ac61ee77c7fccb1921"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6fb684a5c1ec172bdbf2"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4510,6 +5039,21 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-d824604a95ff79ad7a2c"
+    },
+    {
+      "spdxElementId": "SPDXRef-d824604a95ff79ad7a2c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-933f836951dbd7caa0b7"
+    },
+    {
+      "spdxElementId": "SPDXRef-d824604a95ff79ad7a2c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-7b39f8292cbba829d69b"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-334ab6a1343ff5cf1aaf"
     },
     {
@@ -4620,12 +5164,182 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-12ef3684638b8a5c808e"
+    },
+    {
+      "spdxElementId": "SPDXRef-12ef3684638b8a5c808e",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
+    },
+    {
+      "spdxElementId": "SPDXRef-12ef3684638b8a5c808e",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-2a77cfce14bb4554fc93"
+    },
+    {
+      "spdxElementId": "SPDXRef-12ef3684638b8a5c808e",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c9f80b15c4e9a074fb22"
+    },
+    {
+      "spdxElementId": "SPDXRef-12ef3684638b8a5c808e",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-be3116b4eb397a3d45a1"
+    },
+    {
+      "spdxElementId": "SPDXRef-12ef3684638b8a5c808e",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-a8031210b162f8c70f5e"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c9f80b15c4e9a074fb22"
+    },
+    {
+      "spdxElementId": "SPDXRef-c9f80b15c4e9a074fb22",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
+    },
+    {
+      "spdxElementId": "SPDXRef-c9f80b15c4e9a074fb22",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-be3116b4eb397a3d45a1"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-be3116b4eb397a3d45a1"
+    },
+    {
+      "spdxElementId": "SPDXRef-be3116b4eb397a3d45a1",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
+    },
+    {
+      "spdxElementId": "SPDXRef-be3116b4eb397a3d45a1",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-ecf84d3b27863cbafc01"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-4f592ccaf584241517f2"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-f007e5f5da828c5a82c9"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-7b09dbf00f2621afb99e"
     },
     {
       "spdxElementId": "SPDXRef-7b09dbf00f2621afb99e",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-6fa243660745bdcda93b"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6482374db8bf03fa5335"
+    },
+    {
+      "spdxElementId": "SPDXRef-6482374db8bf03fa5335",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
+    },
+    {
+      "spdxElementId": "SPDXRef-6482374db8bf03fa5335",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c9f80b15c4e9a074fb22"
+    },
+    {
+      "spdxElementId": "SPDXRef-6482374db8bf03fa5335",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-be3116b4eb397a3d45a1"
+    },
+    {
+      "spdxElementId": "SPDXRef-6482374db8bf03fa5335",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-5710c277853dffdc3366"
+    },
+    {
+      "spdxElementId": "SPDXRef-6482374db8bf03fa5335",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-a8031210b162f8c70f5e"
+    },
+    {
+      "spdxElementId": "SPDXRef-6482374db8bf03fa5335",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-45a043b2b595c7074fe4"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-5710c277853dffdc3366"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6fb684a5c1ec172bdbf2"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-08faf646b9b39c46b560"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-2a77cfce14bb4554fc93"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c9f80b15c4e9a074fb22"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-be3116b4eb397a3d45a1"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-4f592ccaf584241517f2"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-f007e5f5da828c5a82c9"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-ecf84d3b27863cbafc01"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-a8031210b162f8c70f5e"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-2d53c037d426adc690fb"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-45a043b2b595c7074fe4"
+    },
+    {
+      "spdxElementId": "SPDXRef-5710c277853dffdc3366",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c48218e92e0114b7b817"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -4640,12 +5354,32 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-cea61d63f57e9d2fd52c"
+    },
+    {
+      "spdxElementId": "SPDXRef-cea61d63f57e9d2fd52c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-933f836951dbd7caa0b7"
+    },
+    {
+      "spdxElementId": "SPDXRef-cea61d63f57e9d2fd52c",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-7b39f8292cbba829d69b"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-10c72c20b80ada8f1628"
     },
     {
       "spdxElementId": "SPDXRef-10c72c20b80ada8f1628",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-81da6ac3475bd2365bd4"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-ecf84d3b27863cbafc01"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5115,6 +5849,36 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-3f8bbf90c5c2cd6ec098"
+    },
+    {
+      "spdxElementId": "SPDXRef-3f8bbf90c5c2cd6ec098",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-ecf84d3b27863cbafc01"
+    },
+    {
+      "spdxElementId": "SPDXRef-3f8bbf90c5c2cd6ec098",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-108ce2cc57feb757cd3e"
+    },
+    {
+      "spdxElementId": "SPDXRef-3f8bbf90c5c2cd6ec098",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6c517d3022b0b71b43f5"
+    },
+    {
+      "spdxElementId": "SPDXRef-3f8bbf90c5c2cd6ec098",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-bfa23ed9dd1e539460bf"
+    },
+    {
+      "spdxElementId": "SPDXRef-3f8bbf90c5c2cd6ec098",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-5c3ed677d20c735480ec"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-25d2c2ab690c22ecf2c6"
     },
     {
@@ -5131,6 +5895,21 @@
       "spdxElementId": "SPDXRef-25d2c2ab690c22ecf2c6",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-da9cc9eee808cce14fa1"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-8a7c2b941fa8a4f1520f"
+    },
+    {
+      "spdxElementId": "SPDXRef-8a7c2b941fa8a4f1520f",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-d824604a95ff79ad7a2c"
+    },
+    {
+      "spdxElementId": "SPDXRef-8a7c2b941fa8a4f1520f",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-933f836951dbd7caa0b7"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5216,6 +5995,26 @@
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-c4178888342f61dacd5d"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-9b902e98485fb8ce99a9"
+    },
+    {
+      "spdxElementId": "SPDXRef-9b902e98485fb8ce99a9",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-d820bc5580bd3aa1477f"
+    },
+    {
+      "spdxElementId": "SPDXRef-9b902e98485fb8ce99a9",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-ab9b38194fc42641bd6d"
+    },
+    {
+      "spdxElementId": "SPDXRef-9b902e98485fb8ce99a9",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-48ac61ee77c7fccb1921"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5375,12 +6174,27 @@
     {
       "spdxElementId": "SPDXRef-45a043b2b595c7074fe4",
       "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-8a7c2b941fa8a4f1520f"
+    },
+    {
+      "spdxElementId": "SPDXRef-45a043b2b595c7074fe4",
+      "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-d549b9fe5fbd05f23f0b"
     },
     {
       "spdxElementId": "SPDXRef-45a043b2b595c7074fe4",
       "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-9b902e98485fb8ce99a9"
+    },
+    {
+      "spdxElementId": "SPDXRef-45a043b2b595c7074fe4",
+      "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-7b39f8292cbba829d69b"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6410adb8f074ff621126"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5411,6 +6225,16 @@
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-e96acd1ba31f99c2eb8f"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-c48218e92e0114b7b817"
+    },
+    {
+      "spdxElementId": "SPDXRef-c48218e92e0114b7b817",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-6410adb8f074ff621126"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -5591,6 +6415,11 @@
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-f69e3b7bb26f74efcb06"
+    },
+    {
+      "spdxElementId": "SPDXRef-Repository",
+      "relationshipType": "DEPENDS_ON",
+      "relatedSpdxElement": "SPDXRef-5c3ed677d20c735480ec"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
