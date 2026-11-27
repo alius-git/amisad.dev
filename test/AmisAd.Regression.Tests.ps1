@@ -79,6 +79,7 @@ Describe 'AmisAd guest deployment contracts' {
     It 'passes the <Suite> contracts against the built services' -TestCases @(
         @{ Suite = 'service_contracts.py'; Binary = 'seller-svc' }
         @{ Suite = 'slice_runtime_http_contracts.py'; Binary = 'slice-runtime' }
+        @{ Suite = 'demo_host_http_contracts.py'; Binary = 'amisad-demo-host' }
     ) {
         param($Suite, $Binary)
         $bin = if ($env:AMISAD_BIN_DIR) { $env:AMISAD_BIN_DIR } else { Join-Path $script:RepoRoot 'poc/target/debug' }
@@ -899,6 +900,62 @@ Export-ModuleMember -Function Get-Password
             $env:YURUNA_LOG_DIR = $null
             Resolve-VmIp -Name 'fixture-vm' -YurunaRoot $script:FixtureRoot | Should -Be '192.0.2.15'
         } finally { $env:YURUNA_LOG_DIR = $previous }
+    }
+}
+
+Describe 'AmisAd demo firewall follows the selected listener' {
+    BeforeAll {
+        $source = Join-Path $script:RepoRoot 'poc/demo/AmisAd.DemoHost.psm1'
+        $ast = [Management.Automation.Language.Parser]::ParseFile($source, [ref]$null, [ref]$null)
+        $script:FirewallFixtures = $ast.FindAll({
+            param($node)
+            $node -is [Management.Automation.Language.FunctionDefinitionAst] -and
+                $node.Name -in ('Add-DemoFirewallRuleWindows', 'Add-DemoFirewallRuleMacOS')
+        }, $false)
+    }
+    It 'asks macOS to allow the native binary path with its spaces intact' {
+        foreach ($function in $script:FirewallFixtures) { . ([scriptblock]::Create($function.Extent.Text)) }
+        $calls = [Collections.Generic.List[object]]::new()
+        Mock Test-Path { $true } -ParameterFilter { $LiteralPath -eq '/usr/libexec/ApplicationFirewall/socketfilterfw' }
+        function Invoke-DemoNativeCommand {
+            param($FilePath, [string[]]$ArgumentList, [switch]$Elevated)
+            if ($ArgumentList[0] -eq '--getglobalstate') { return 'enabled' }
+            $calls.Add(@{ Path = $FilePath; Args = $ArgumentList; Elevated = $Elevated.IsPresent })
+        }
+        $native = '/path with spaces/amisad-demo-host'
+        Add-DemoFirewallRuleMacOS -Executable $native -Confirm:$false | Should -BeTrue
+        $calls.Count | Should -Be 2
+        $calls[0].Args | Should -Be @('--add', $native)
+        $calls[1].Args | Should -Be @('--unblockapp', $native)
+        $calls[0].Path | Should -Be '/usr/libexec/ApplicationFirewall/socketfilterfw'
+        $calls[0].Elevated | Should -BeTrue
+    }
+    It 'opens the Windows port for Rust while reserving http.sys URLs only for the old listener' {
+        foreach ($function in $script:FirewallFixtures) { . ([scriptblock]::Create($function.Extent.Text)) }
+        $calls = [Collections.Generic.List[string]]::new()
+        function Test-DemoAdministrator { return $true }
+        function Get-NetFirewallRule { [CmdletBinding()] param([string]$DisplayName); $null = $DisplayName }
+        function New-NetFirewallRule {
+            [CmdletBinding(SupportsShouldProcess)]
+            param([string]$DisplayName, [string]$Direction, [string]$Protocol, [int]$LocalPort, [string]$Action, [Alias('Profile')][string]$NetworkProfile)
+            if ($PSCmdlet.ShouldProcess($DisplayName, 'record fixture rule')) {
+                $calls.Add("$Direction $Protocol $LocalPort $Action $NetworkProfile")
+            }
+        }
+        function netsh {
+            $calls.Add(($args -join ' '))
+            Set-Variable -Name LASTEXITCODE -Scope Global -Value 0
+        }
+        $savedExitCode = $global:LASTEXITCODE
+        try {
+            Add-DemoFirewallRuleWindows -Port 8092 -RuleName 'demo fixture' -NativeListener -Confirm:$false | Should -BeTrue
+            $calls.ToArray() | Should -Be @('Inbound TCP 8092 Allow Any')
+            $calls.Clear()
+            Add-DemoFirewallRuleWindows -Port 8092 -RuleName 'demo fixture' -Confirm:$false | Should -BeTrue
+            $calls.Count | Should -Be 3
+            $calls[1] | Should -Be 'http show urlacl url=http://+:8092/'
+            $calls[2] | Should -Match '^http add urlacl url=http://\+:8092/ user='
+        } finally { Set-Variable -Name LASTEXITCODE -Scope Global -Value $savedExitCode }
     }
 }
 

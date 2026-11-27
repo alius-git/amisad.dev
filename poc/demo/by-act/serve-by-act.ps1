@@ -138,11 +138,12 @@ function Send-StaticFile($Response, [string]$UrlPath) {
     Write-Body -Response $Response -Status 200 -Bytes ([IO.File]::ReadAllBytes($full)) -ContentType $type
 }
 
+$native = Resolve-AmisAdDemoExecutable -DemoRoot $demoRoot -YurunaRoot $YurunaRoot
 $servesNetwork = $BindAddress -ne 'localhost'
 if ($servesNetwork -and -not $SkipFirewall) {
-    $null = Add-DemoFirewallRule -Port $Port -RuleName "AmisAd demo console ($Port)"
+    $null = Add-DemoFirewallRule -Port $Port -RuleName "AmisAd demo console ($Port)" -NativeExecutable $native
 }
-$listener = New-DemoListener -Port $Port -BindAddress $BindAddress
+if (-not $native) { $listener = New-DemoListener -Port $Port -BindAddress $BindAddress }
 
 # Lead with the address someone can actually type on another machine: a
 # localhost URL is unusable on a projector or read out to a person holding a
@@ -167,6 +168,17 @@ Write-Information "Topology: core=$(if ($CoreIp) { $CoreIp } else { '<unresolved
 Write-Information "Framework: $(if ($YurunaRoot) { $YurunaRoot } else { '<not located>' })" -InformationAction Continue
 if (-not $CoreIp) {
     Write-Warning 'amisad-core IP not resolved (host driver + handoff both empty) - pass -CoreIp; API calls will fail until then.'
+}
+if ($native) {
+    $nativeArgs = @{
+        Executable = $native; Mode = 'by-act'; DemoRoot = $demoRoot; Port = $Port; BindAddress = $BindAddress
+        YurunaRoot = $YurunaRoot; CoreIp = $CoreIp; EdgeAIp = $EdgeAIp; EdgeBIp = $EdgeBIp
+        PersonaUsers = $personaUsers; SharePersonaPasswords = $SharePersonaPasswords
+    }
+
+    try { $code = Invoke-AmisAdNativeDemo @nativeArgs }
+    finally { $http.Dispose() }
+    exit $code
 }
 $keyStop = Enable-DemoStopKey
 Write-Information $(if ($keyStop) { 'Press Ctrl+C, End or Q to stop.' } else { 'Press Ctrl+C to stop.' }) -InformationAction Continue

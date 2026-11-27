@@ -84,7 +84,9 @@ class ClusterGates(unittest.TestCase):
     def fixture(self, directory, subnet=True, short_budget=False):
         root = Path(directory)
         (root / 'bin').mkdir()
-        text = SCRIPT.read_text()
+        text = SCRIPT.read_text().replace('/usr/local/bin/amisad-provision',
+                                          shlex.quote((root / 'native-core-ready').as_posix()))
+        text = text.replace('REAL_HOME=$(eval echo "~$REAL_USER")', 'REAL_HOME="$HOME"')
         self.assertIn('amisad_wait_apiserver 300 ||', text)
         self.assertIn('amisad_wait_flannel 300 ||', text)
         text = text.replace('amisad_wait_apiserver 300 ||', 'amisad_wait_apiserver 3 ||')
@@ -129,6 +131,29 @@ class ClusterGates(unittest.TestCase):
                 self.assertIn('--noproxy * --connect-timeout 1 --max-time 2 -sf', check)
             self.assertGreater(actions.index(checks[0]), actions.index(rollouts[-1]))
             self.assertIn('every NodePort answering', result.stdout)
+
+    def test_uses_installed_native_readiness_without_starting_the_old_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory)
+            native = root / 'native-core-ready'
+            native.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > selected\nexit 19\n')
+            native.chmod(0o755)
+            result = run_case(root)
+            self.assertEqual(result.returncode, 19, result.stderr)
+            self.assertEqual((root / 'selected').read_text(), 'core-ready\n')
+            self.assertFalse((root / 'actions').exists())
+
+    def test_uses_native_readiness_from_the_deployed_release_bundle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory)
+            native = root / 'home/amisad.dev/poc/target/release/amisad-provision'
+            native.parent.mkdir(parents=True)
+            native.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > selected\nexit 18\n')
+            native.chmod(0o755)
+            result = run_case(root)
+            self.assertEqual(result.returncode, 18, result.stderr)
+            self.assertEqual((root / 'selected').read_text(), 'core-ready\n')
+            self.assertFalse((root / 'actions').exists())
 
     def test_api_failure_prevents_restarts_and_http(self):
         with tempfile.TemporaryDirectory() as directory:

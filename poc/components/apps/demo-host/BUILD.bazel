@@ -1,0 +1,25 @@
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42d8104d-27c5-4e53-b0d5-ff519e954d82
+
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "amisad-demo-host",
+    srcs = ["src/main.rs", "src/bridge.rs"],
+    edition = "2021",
+    deps = [
+        "//components/lib/amisad-common",
+        "@crates//:bytes",
+        "@crates//:http-body-util",
+        "@crates//:hyper",
+        "@crates//:hyper-util",
+        "@crates//:if-addrs",
+        "@crates//:percent-encoding",
+        "@crates//:serde_json",
+        "@crates//:tokio",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+exports_files(["Cargo.toml"])

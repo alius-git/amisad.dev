@@ -21,6 +21,9 @@ echo "== boot-time IP reporter =="
 sudo tee /usr/local/lib/amisad-ip-report.sh >/dev/null <<'EOS'
 #!/bin/bash
 set -eu
+if [ -x /usr/local/bin/amisad-provision ]; then
+    exec /usr/local/bin/amisad-provision edge-report
+fi
 for _ in $(seq 1 30); do
     # Both ends of this report can move while it is being made. host.env is
     # re-read per attempt because yuruna-host-locate refreshes it when the HOST

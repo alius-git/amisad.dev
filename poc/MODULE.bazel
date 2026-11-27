@@ -46,6 +46,8 @@ crate.from_cargo(
         "//components/services/seller-svc:Cargo.toml",
         "//components/edge/slice-runtime:Cargo.toml",
         "//components/apps/buyer-client:Cargo.toml",
+        "//components/apps/demo-host:Cargo.toml",
+        "//components/apps/guest-provision:Cargo.toml",
     ],
 )
 use_repo(crate, "crates")

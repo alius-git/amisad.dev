@@ -9,9 +9,17 @@
 # the restore instead of failing the scenario that was about to use it.
 # --- REGION: Initialize environment
 set -euo pipefail
+if [ -x /usr/local/bin/amisad-provision ]; then
+    exec /usr/local/bin/amisad-provision core-ready
+fi
 
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
+# The deploy step verifies the release bundle before extracting it here.
+PROVISION="$REAL_HOME/amisad.dev/poc/target/release/amisad-provision"
+if [ -x "$PROVISION" ]; then
+    exec "$PROVISION" core-ready
+fi
 
 # kubectl does not retry a refused TCP dial, and the snapshot's static-pod
 # apiserver only starts answering seconds after shell login, so poll a raw

@@ -1,0 +1,7 @@
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 42edc7e5-6587-45dc-9762-72570bc65061
+
+[toolchain]
+channel = "1.99.1"
+profile = "minimal"

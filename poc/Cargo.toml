@@ -8,4 +8,6 @@ members = [
     "components/services/*",
     "components/edge/slice-runtime",
     "components/apps/buyer-client",
+    "components/apps/demo-host",
+    "components/apps/guest-provision",
 ]

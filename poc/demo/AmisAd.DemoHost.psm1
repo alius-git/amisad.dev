@@ -114,14 +114,15 @@ function Add-DemoFirewallRule {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)][int]$Port,
-        [Parameter(Mandatory)][string]$RuleName
+        [Parameter(Mandatory)][string]$RuleName,
+        [string]$NativeExecutable
     )
     # Opening an inbound port is a real change to the machine, so it is
     # announced before it happens, it is idempotent, and every failure is a
     # warning rather than a stop: the demo still works for anyone who can
     # already reach the port.
-    if ($IsWindows) { return Add-DemoFirewallRuleWindows -Port $Port -RuleName $RuleName }
-    if ($IsMacOS) { return Add-DemoFirewallRuleMacOS }
+    if ($IsWindows) { return Add-DemoFirewallRuleWindows -Port $Port -RuleName $RuleName -NativeListener:([bool]$NativeExecutable) }
+    if ($IsMacOS) { return Add-DemoFirewallRuleMacOS -Executable $NativeExecutable }
     return Add-DemoFirewallRuleLinux -Port $Port
 }
 
@@ -150,9 +151,10 @@ function Add-DemoFirewallRuleWindows {
     #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([bool])]
-    param([int]$Port, [string]$RuleName)
+    param([int]$Port, [string]$RuleName, [switch]$NativeListener)
 
-    if (-not $PSCmdlet.ShouldProcess("port $Port", 'open inbound firewall port and reserve listener URL')) { return $false }
+    $action = if ($NativeListener) { 'open inbound firewall port' } else { 'open inbound firewall port and reserve listener URL' }
+    if (-not $PSCmdlet.ShouldProcess("port $Port", $action)) { return $false }
     $quotedRule = $RuleName.Replace("'", "''")
     $quotedUser = "$env:USERDOMAIN\$env:USERNAME".Replace("'", "''")
     $inner = @"
@@ -160,10 +162,12 @@ function Add-DemoFirewallRuleWindows {
 if (-not (Get-NetFirewallRule -DisplayName '$quotedRule' -ErrorAction SilentlyContinue)) {
     New-NetFirewallRule -DisplayName '$quotedRule' -Direction Inbound -Protocol TCP -LocalPort $Port -Action Allow -Profile Any -ErrorAction Stop | Out-Null
 }
-`$reservation = @(& netsh http show urlacl 'url=http://+:$Port/' 2>&1) -join ' '
-if (`$LASTEXITCODE -ne 0 -or `$reservation -notmatch [regex]::Escape('http://+:$Port/')) {
-    & netsh http add urlacl 'url=http://+:$Port/' 'user=$quotedUser' | Out-Null
-    if (`$LASTEXITCODE -ne 0) { throw 'Listener URL reservation failed.' }
+if ('$NativeListener' -ne 'True') {
+    `$reservation = @(& netsh http show urlacl 'url=http://+:$Port/' 2>&1) -join ' '
+    if (`$LASTEXITCODE -ne 0 -or `$reservation -notmatch [regex]::Escape('http://+:$Port/')) {
+        & netsh http add urlacl 'url=http://+:$Port/' 'user=$quotedUser' | Out-Null
+        if (`$LASTEXITCODE -ne 0) { throw 'Listener URL reservation failed.' }
+    }
 }
 "@
     try {
@@ -188,22 +192,22 @@ if (`$LASTEXITCODE -ne 0 -or `$reservation -notmatch [regex]::Escape('http://+:$
 function Add-DemoFirewallRuleMacOS {
     <#
     .SYNOPSIS
-    Lets this PowerShell accept incoming connections through the macOS firewall.
+    Lets the listener executable accept incoming connections through the macOS firewall.
     #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([bool])]
-    param()
+    param([string]$Executable)
 
     $fw = '/usr/libexec/ApplicationFirewall/socketfilterfw'
     if (-not (Test-Path -LiteralPath $fw)) { return $true }
     try {
         $globalState = (Invoke-DemoNativeCommand -FilePath $fw -ArgumentList '--getglobalstate') -join ' '
         if ($globalState -notmatch 'enabled') { return $true }
-        $pwshPath = (Get-Process -Id $PID).Path
-        if (-not $PSCmdlet.ShouldProcess($pwshPath, 'allow incoming connections')) { return $false }
-        Invoke-DemoNativeCommand -FilePath $fw -ArgumentList @('--add', $pwshPath) -Elevated | Out-Null
-        Invoke-DemoNativeCommand -FilePath $fw -ArgumentList @('--unblockapp', $pwshPath) -Elevated | Out-Null
-        Write-Information 'Firewall: this PowerShell may accept incoming connections.' -InformationAction Continue
+        $listener = if ($Executable) { $Executable } else { (Get-Process -Id $PID).Path }
+        if (-not $PSCmdlet.ShouldProcess($listener, 'allow incoming connections')) { return $false }
+        Invoke-DemoNativeCommand -FilePath $fw -ArgumentList @('--add', $listener) -Elevated | Out-Null
+        Invoke-DemoNativeCommand -FilePath $fw -ArgumentList @('--unblockapp', $listener) -Elevated | Out-Null
+        Write-Information "Firewall: $listener may accept incoming connections." -InformationAction Continue
         return $true
     } catch {
         Write-Warning "Firewall: could not update the application firewall ($($_.Exception.Message))."
@@ -501,6 +505,156 @@ function Write-Json($Response, [int]$Status, $Object, [int]$Depth = 8) {
     Write-Body -Response $Response -Status $Status -Bytes $bytes -ContentType 'application/json'
 }
 
+# --- REGION: Receive-AmisAdDemoArtifact
+function Receive-AmisAdDemoArtifact {
+    <#
+    .SYNOPSIS
+    Resolve a pinned native demo for this project checkout.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([string]$YurunaRoot, [string]$DemoRoot)
+    if (-not $YurunaRoot) { return '' }
+    $configPath = if ($env:YURUNA_CONFIG_PATH) { $env:YURUNA_CONFIG_PATH } else { Join-Path $YurunaRoot 'test/test.config.yml' }
+    if (-not [IO.File]::Exists($configPath)) { return '' }
+    $configPath = [IO.Path]::GetFullPath($configPath)
+    Import-Module (Join-Path $YurunaRoot 'test/modules/Test.Config.psm1') -DisableNameChecking -ErrorAction Stop
+    $config = Read-TestConfig -Path $configPath
+    $builderFile = [string]$config.vmStart.buildServiceConfigFile
+    if (-not $builderFile) { return '' }
+    $builderPath = [IO.Path]::GetFullPath($builderFile, (Split-Path -Parent $configPath))
+    if (-not [IO.File]::Exists($builderPath)) { return '' }
+    $builder = [IO.File]::ReadAllText($builderPath) | ConvertFrom-Json -AsHashtable -Depth 20
+    $consumer = $builder.consumer
+    $pins = $consumer.amisad
+    if (-not $pins) { return '' }
+    if ($pins -isnot [Collections.IDictionary] -or $pins.candidateId -cnotmatch '^[a-f0-9]{64}$' -or
+        $pins.manifestSha256 -cnotmatch '^[a-f0-9]{64}$' -or -not $consumer.trustedPublicKeyFile -or -not $consumer.baseUrl) {
+        throw 'The AmisAd artifact candidate, digest, builder address, or enrolled public key is invalid.'
+    }
+    $project = [IO.Path]::GetFullPath((Join-Path $DemoRoot '../../..'))
+    $revision = [string](& git -C $project rev-parse --verify 'HEAD^{commit}' 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $revision -cnotmatch '^[a-f0-9]{40}$') { throw 'Cannot identify the AmisAd checkout revision.' }
+    $key = [IO.Path]::GetFullPath([string]$consumer.trustedPublicKeyFile, (Split-Path -Parent $builderPath))
+    Import-Module (Join-Path $YurunaRoot 'test/extension/build-service/default.psm1') -DisableNameChecking -ErrorAction Stop
+    return Receive-BuildServiceArtifact -BaseUrl $consumer.baseUrl -CandidateId $pins.candidateId `
+        -ManifestSha256 $pins.manifestSha256 -TrustedKeyFile $key -RequiredRevision $revision -Binary 'amisad-demo-host' `
+        -InstallRoot (Join-Path $HOME '.yuruna/verified-artifacts') -Confirm:$false
+}
+
+# --- REGION: Resolve-AmisAdDemoExecutable
+function Resolve-AmisAdDemoExecutable {
+    <#
+    .SYNOPSIS
+    Find the native demo beside the project's other built executables.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param([Parameter(Mandatory)][string]$DemoRoot, [string]$YurunaRoot)
+    $verified = Receive-AmisAdDemoArtifact -DemoRoot $DemoRoot -YurunaRoot $YurunaRoot
+    if ($verified) { return $verified }
+    $name = if ($IsWindows) { 'amisad-demo-host.exe' } else { 'amisad-demo-host' }
+    $directories = if ($env:AMISAD_BIN_DIR) { @($env:AMISAD_BIN_DIR) } else {
+        @((Join-Path $DemoRoot '../../target/release'), (Join-Path $DemoRoot '../../target/debug'))
+    }
+    foreach ($directory in $directories) {
+        $candidate = Join-Path $directory $name
+        if ([IO.File]::Exists($candidate)) { return [IO.Path]::GetFullPath($candidate) }
+    }
+    return ''
+}
+
+# --- REGION: Invoke-AmisAdNativeDemo
+function Invoke-AmisAdNativeDemo {
+    <#
+    .SYNOPSIS
+    Run the demo's native HTTP service with access to the host's existing providers.
+    .DESCRIPTION
+    The child requests persona and VM data on its inherited pipes. The Rust
+    routes check which HTTP clients may obtain secrets before requesting them.
+    #>
+    [CmdletBinding()]
+    [OutputType([int])]
+    param(
+        [Parameter(Mandatory)][string]$Executable,
+        [Parameter(Mandatory)][ValidateSet('by-act', 'data-view')][string]$Mode,
+        [Parameter(Mandatory)][string]$DemoRoot,
+        [Parameter(Mandatory)][int]$Port,
+        [Parameter(Mandatory)][string]$BindAddress,
+        [AllowEmptyString()][string]$YurunaRoot,
+        [AllowEmptyString()][string]$CoreIp,
+        [AllowEmptyString()][string]$EdgeAIp,
+        [AllowEmptyString()][string]$EdgeBIp,
+        [Parameter(Mandatory)][string[]]$PersonaUsers,
+        [scriptblock]$VmReport,
+        [switch]$SharePersonaPasswords
+    )
+    $info = [Diagnostics.ProcessStartInfo]::new($Executable)
+    $info.UseShellExecute = $false
+    $info.RedirectStandardInput = $true
+    $info.RedirectStandardOutput = $true
+    $info.StandardInputEncoding = [Text.UTF8Encoding]::new($false)
+    $info.StandardOutputEncoding = [Text.UTF8Encoding]::new($false)
+    foreach ($argument in @($Mode, '--host-bridge', '--port', "$Port", '--bind-address', $BindAddress,
+        '--demo-root', $DemoRoot, '--core-ip', $CoreIp, '--edge-a-ip', $EdgeAIp, '--edge-b-ip', $EdgeBIp)) {
+        $info.ArgumentList.Add($argument)
+    }
+    if ($SharePersonaPasswords) { $info.ArgumentList.Add('--share-persona-passwords') }
+    $keyStop = Enable-DemoStopKey
+    $process = $null
+    Write-Information $(if ($keyStop) { 'Press Ctrl+C, End or Q to stop.' } else { 'Press Ctrl+C to stop.' }) -InformationAction Continue
+    try {
+        $process = [Diagnostics.Process]::Start($info)
+        $line = $process.StandardOutput.ReadLineAsync()
+        while ($true) {
+            if ($keyStop -and (Test-DemoStopKey)) {
+                if (-not $process.HasExited) {
+                    $process.StandardInput.WriteLine('{"kind":"stop"}')
+                    $process.StandardInput.Flush()
+                }
+                break
+            }
+            if (-not $line.Wait(200)) { continue }
+            $text = $line.GetAwaiter().GetResult()
+            if ($null -eq $text) { break }
+            if ($text.StartsWith('AMISAD-HOST ', [StringComparison]::Ordinal)) {
+                $request = $text.Substring(12) | ConvertFrom-Json -AsHashtable -Depth 4
+                if (($request.id -isnot [int] -and $request.id -isnot [long]) -or $request.id -le 0) {
+                    throw 'Invalid native demo host request.'
+                }
+                $value = $null
+                try {
+                    if ($request.resource -ceq 'personas') {
+                        $value = Get-PersonaSecret -YurunaRoot $YurunaRoot -Usernames $PersonaUsers
+                    } elseif ($request.resource -ceq 'vms' -and $VmReport) {
+                        $value = @(& $VmReport)
+                    }
+                } catch {
+                    # A provider error is unavailable data. Do not print a vault response.
+                    Write-Verbose "Native demo host resource unavailable: $($_.Exception.GetType().Name)"
+                }
+                $reply = @{ kind = 'response'; id = $request.id; value = $value } | ConvertTo-Json -Depth 6 -Compress
+                $process.StandardInput.WriteLine($reply)
+                $process.StandardInput.Flush()
+            } else {
+                Write-Information $text -InformationAction Continue
+            }
+            $line = $process.StandardOutput.ReadLineAsync()
+        }
+        if (-not $process.WaitForExit(5000)) { $process.Kill($true); $process.WaitForExit() }
+        return $process.ExitCode
+    } finally {
+        if ($process) {
+            try {
+                $process.StandardInput.Close()
+                if (-not $process.WaitForExit(5000)) { $process.Kill($true); $process.WaitForExit() }
+            } finally { $process.Dispose() }
+        }
+        if ($keyStop) { Disable-DemoStopKey }
+    }
+}
+
 Export-ModuleMember -Function Get-DemoHostIp, Get-DemoHostIpList, Test-DemoAdministrator,
     Add-DemoFirewallRule, New-DemoListener, Enable-DemoStopKey, Disable-DemoStopKey, Test-DemoStopKey, `
-    Resolve-VmIp, Get-PersonaSecret, Test-LoopbackClient, Test-DemoRequestHost, Test-DemoSameOrigin, Write-Body, Write-Json
+    Resolve-VmIp, Get-PersonaSecret, Test-LoopbackClient, Test-DemoRequestHost, Test-DemoSameOrigin, Write-Body, Write-Json,
+    Resolve-AmisAdDemoExecutable, Invoke-AmisAdNativeDemo

@@ -158,12 +158,12 @@ else
     exit 5
 fi
 
-echo "== test + release build (produces all 12 binaries) =="
+echo "== test + release build =="
 cargo test --workspace
 cargo build --release --workspace
 
 echo "== pack binaries =="
-BINS="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc slice-runtime buyer-client"
+BINS="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc slice-runtime buyer-client amisad-provision"
 # Label amisad-<arch>-binaries: see poc/test.md "Stash artifact naming".
 ARCH=$(uname -m)
 TARBALL="/tmp/amisad-${ARCH}-binaries.tgz"
