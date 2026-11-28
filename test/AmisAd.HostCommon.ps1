@@ -90,6 +90,45 @@ function Initialize-AmisAdHost {
     return $hostType
 }
 
+function Get-AmisAdActiveRunner {
+    <#
+    .SYNOPSIS
+        Identify the runner that blocks a standalone lab teardown.
+    #>
+    [CmdletBinding()]
+    [OutputType([int])]
+    param([Parameter(Mandatory)][string]$YurunaRoot)
+
+    if ($env:YURUNA_CYCLE_CONTEXT) { return }
+    if (Get-AmisAdVerifiedHostBinary -YurunaRoot $YurunaRoot) {
+        $verb = 'amisad-lab-active-runner'
+        try {
+            $reply = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb $verb -Argument @{ Root = $YurunaRoot } -TimeoutSeconds 5
+        } catch {
+            if ($_.Exception.Message -cne "host-binary-command-failed: $verb (unknown-verb)") { throw }
+            $reply = @{ Used = $false }
+        }
+        if ($reply.Used) {
+            $value = $reply.Value
+            if ($value -isnot [Collections.IDictionary] -or $value['handled'] -isnot [bool] -or
+                -not $value.Contains('pid') -or ($null -ne $value.pid -and
+                ($value.pid -isnot [long] -or $value.pid -lt 1 -or $value.pid -gt [int]::MaxValue -or -not $value.handled))) {
+                throw 'The native active runner check returned invalid evidence.'
+            }
+            if ($value.handled) {
+                if ($null -ne $value.pid) { return [int]$value.pid }
+                return
+            }
+        }
+    }
+
+    $runnerPidFile = Join-Path $YurunaRoot 'test/status/runtime/runner.pid'
+    if (Test-Path -LiteralPath $runnerPidFile) {
+        try { $runnerPid = [int]((Get-Content -LiteralPath $runnerPidFile -Raw).Trim()) } catch { $runnerPid = 0 }
+        if ($runnerPid -gt 0 -and (Get-Process -Id $runnerPid -ErrorAction SilentlyContinue)) { return $runnerPid }
+    }
+}
+
 # --- REGION: Stop-LabConsole
 function Stop-LabConsole {
     <#
@@ -105,15 +144,27 @@ function Stop-LabConsole {
         operator's console to an unrelated VM is left alone.
     #>
     [CmdletBinding(SupportsShouldProcess)]
-    param([Parameter(Mandatory)][string]$HostType)
+    param([Parameter(Mandatory)][string]$HostType, [string]$YurunaRoot)
 
     if ($HostType -ne 'host.windows.hyper-v') {
         Write-Verbose "Stop-LabConsole: no separate console process on '$HostType' (VNC-driven); nothing to close."
         return
     }
-    if ($PSCmdlet.ShouldProcess('lab vmconnect consoles', 'Stop process')) {
-        Get-Process vmconnect -ErrorAction SilentlyContinue |
-            Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
-            Stop-Process -Force -ErrorAction SilentlyContinue
+    if (-not $PSCmdlet.ShouldProcess('lab vmconnect consoles', 'Stop process')) { return }
+    if ($YurunaRoot -and (Get-Command Get-AmisAdVerifiedHostBinary -ErrorAction SilentlyContinue)) {
+        try {
+            if (Get-AmisAdVerifiedHostBinary -YurunaRoot $YurunaRoot) {
+                $native = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb 'hyperv-close-lab-consoles' -Argument @{} -TimeoutSeconds 25
+                if ($native.Used) { return }
+            }
+        } catch {
+            if ($_.Exception.Message -cne 'host-binary-command-failed: hyperv-close-lab-consoles (unknown-verb)') {
+                Write-Verbose "Could not confirm the native console sweep. $($_.Exception.Message)"
+                return
+            }
+        }
     }
+    Get-Process vmconnect -ErrorAction SilentlyContinue |
+        Where-Object { $_.MainWindowTitle -match 'amisad|test-' } |
+        Stop-Process -Force -ErrorAction SilentlyContinue
 }

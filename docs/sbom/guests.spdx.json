@@ -3,7 +3,7 @@
   "dataLicense": "CC0-1.0",
   "SPDXID": "SPDXRef-DOCUMENT",
   "name": "amisad.dev-guests",
-  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/2902b86498ba0a8207e7b27d09398fca5ae995e8959d44e554c35478009b3c4b",
+  "documentNamespace": "https://github.com/alius-git/amisad.dev/sbom/guests/f3188433d57c3ed4ad820408b9eb2eea9c130bf619a4bb173fb91d24775934f8",
   "creationInfo": {
     "created": "2026-10-03T16:48:41Z",
     "creators": [
@@ -25,7 +25,7 @@
       "licenseDeclared": "LicenseRef-Yuruna",
       "copyrightText": "NOASSERTION",
       "supplier": "Organization: Alisson Sol et al.",
-      "comment": "Declared guests inventory; source-inputs SHA256 2902b86498ba0a8207e7b27d09398fca5ae995e8959d44e554c35478009b3c4b. Not an installed-system scan.",
+      "comment": "Declared guests inventory; source-inputs SHA256 f3188433d57c3ed4ad820408b9eb2eea9c130bf619a4bb173fb91d24775934f8. Not an installed-system scan.",
       "versionInfo": "2026.11.26"
     },
     {
@@ -36,7 +36,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=build-essential; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 12, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=build-essential; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 32, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
     },
     {
       "name": "ca-certificates-java",
@@ -46,7 +46,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=ca-certificates-java; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 150, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=ca-certificates-java; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 177, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.compile.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
     },
     {
       "name": "curl",
@@ -56,7 +56,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=curl; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 12, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=curl; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 14, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=curl; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 32, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=curl; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 55, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
     },
     {
       "name": "git",
@@ -66,7 +66,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=git; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 12, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=git; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 32, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
     },
     {
       "name": "pkg-config",
@@ -76,17 +76,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=pkg-config; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 12, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
-    },
-    {
-      "name": "postgresql",
-      "SPDXID": "SPDXRef-2a214e234ca892fc378e",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=postgresql; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 146, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=pkg-config; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 32, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
     },
     {
       "name": "python3",
@@ -96,7 +86,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=python3; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 12, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=python3; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 14, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"apt\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=python3; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 32, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=apt-get install; requested=python3; conditional provisioning input; installed version and transitive dependencies unresolved\", \"line\": 55, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.deploy.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}"
     },
     {
       "name": "bazelbuild/bazelisk",
@@ -106,19 +96,8 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.30.0/bazelisk-linux-amd64; installed payload dependencies unresolved\", \"line\": 124, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.30.0/bazelisk-linux-arm64; installed payload dependencies unresolved\", \"line\": 124, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.30.0/bazelisk-linux-amd64; installed payload dependencies unresolved\", \"line\": 144, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/bazelbuild/bazelisk/releases/download/v1.30.0/bazelisk-linux-arm64; installed payload dependencies unresolved\", \"line\": 144, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.30.0"
-    },
-    {
-      "name": "nats-io/nats-server",
-      "SPDXID": "SPDXRef-a2a25e519124fb33a401",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 84, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-amd64.tar.gz; installed payload dependencies unresolved\", \"line\": 86, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 84, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://github.com/nats-io/nats-server/releases/download/v2.15.1/nats-server-v2.15.1-linux-arm64.tar.gz; installed payload dependencies unresolved\", \"line\": 86, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
-      "versionInfo": "2.15.1"
     },
     {
       "name": "rustup-init",
@@ -128,7 +107,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.3/aarch64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved\", \"line\": 78, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved\", \"line\": 78, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"download\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.3/aarch64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved\", \"line\": 98, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=downloaded provisioning artifact; source=https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init; installed payload dependencies unresolved\", \"line\": 98, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.29.3"
     },
     {
@@ -242,16 +221,6 @@
       "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=shared-or-configured; action=container image declaration; reference=localhost:5000/amisad/seller-svc:latest; tags may move; transitive image contents unresolved\", \"line\": 5, \"path\": \"poc/workloads/services/seller-svc/values.yaml\"}], \"group\": \"amisad.dev:guests:shared-or-configured\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"latest\"}"
     },
     {
-      "name": "registry",
-      "SPDXID": "SPDXRef-caefaced660302525654",
-      "downloadLocation": "NOASSERTION",
-      "filesAnalyzed": false,
-      "licenseConcluded": "NOASSERTION",
-      "licenseDeclared": "NOASSERTION",
-      "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"oci\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=container run; reference=registry:2.8.3; tags may move; transitive image contents unresolved\", \"line\": 30, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.workload.k8s.amisad.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\", \"versionConstraint\": \"2.8.3\"}"
-    },
-    {
       "name": "rust",
       "SPDXID": "SPDXRef-53af0dac7859137f8fbd",
       "downloadLocation": "NOASSERTION",
@@ -269,7 +238,7 @@
       "licenseConcluded": "NOASSERTION",
       "licenseDeclared": "NOASSERTION",
       "copyrightText": "NOASSERTION",
-      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"rustup\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=rustup toolchain install; requested=1.99.1; release channel may be floating\", \"line\": 105, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=rustup-init --default-toolchain; compiler/toolchain declaration\", \"line\": 87, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
+      "comment": "{\"completeness\": \"source-declared\", \"ecosystem\": \"rustup\", \"evidence\": [{\"detail\": \"target=ubuntu-server-24; action=rustup toolchain install; requested=1.99.1; release channel may be floating\", \"line\": 125, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}, {\"detail\": \"target=ubuntu-server-24; action=rustup-init --default-toolchain; compiler/toolchain declaration\", \"line\": 107, \"path\": \"poc/test/ubuntu.server.24/ubuntu.server.24.amisad-build.tools.sh\"}], \"group\": \"amisad.dev:guests:ubuntu-server-24\", \"notes\": [\"Conditional source declaration; installed state and transitive dependencies are not resolved.\"], \"scope\": \"runtime\"}",
       "versionInfo": "1.99.1"
     }
   ],
@@ -307,22 +276,12 @@
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-2a214e234ca892fc378e"
-    },
-    {
-      "spdxElementId": "SPDXRef-Repository",
-      "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-f5d83d9f93e7446aa6c3"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-1f0f6e6dbf516f1e71b5"
-    },
-    {
-      "spdxElementId": "SPDXRef-Repository",
-      "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-a2a25e519124fb33a401"
     },
     {
       "spdxElementId": "SPDXRef-Repository",
@@ -383,11 +342,6 @@
       "spdxElementId": "SPDXRef-Repository",
       "relationshipType": "DEPENDS_ON",
       "relatedSpdxElement": "SPDXRef-c4802700a054cd605e9d"
-    },
-    {
-      "spdxElementId": "SPDXRef-Repository",
-      "relationshipType": "DEPENDS_ON",
-      "relatedSpdxElement": "SPDXRef-caefaced660302525654"
     },
     {
       "spdxElementId": "SPDXRef-Repository",

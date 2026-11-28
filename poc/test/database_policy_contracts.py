@@ -25,8 +25,8 @@ def sql(statement):
 class DatabasePolicy(unittest.TestCase):
     def test_provisioned_inventory_permissions(self):
         root = Path(__file__).resolve().parents[1]
-        source = (root / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.db.sh').read_text()
-        grants = re.search(r"<<'SQL'\n(.*?)\nSQL", source, re.DOTALL)
+        source = (root / 'components/apps/guest-provision/src/database.rs').read_text()
+        grants = re.search(r'const GRANTS: &str = "(GRANT .*?)";', source, re.DOTALL)
         self.assertIsNotNone(grants, 'database provisioning SQL block is missing')
         # Execute the provisioning grants against real PostgreSQL, then exercise
         # the application role rather than the schema owner's implicit access.

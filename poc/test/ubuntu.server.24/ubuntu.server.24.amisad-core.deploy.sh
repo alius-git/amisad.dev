@@ -6,8 +6,49 @@
 # --- REGION: Initialize environment
 set -euo pipefail
 
-REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
+REAL_USER="${SUDO_USER:-${USER:-$(id -un)}}"
+artifact_plan=/etc/yuruna/amisad-artifacts.json
+if [[ -e $artifact_plan || -L $artifact_plan ]]; then
+    if [[ ! -f $artifact_plan || -L $artifact_plan ]]; then
+        echo 'The enrolled AmisAd artifact plan is not a regular file.' >&2
+        exit 7
+    fi
+    artifact_root=/usr/local/lib/yuruna/amisad-artifacts
+    bootstrap=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
+        "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 7
+    provision="$bootstrap/amisad-provision"
+    if [[ ${bootstrap%/*} != "$artifact_root" || ! ${bootstrap##*/} =~ ^[a-f0-9]{64}$ ||
+          ! -f $provision || -L $provision || ! -x $provision ]]; then
+        echo 'The verified AmisAd provisioner is unavailable.' >&2
+        exit 7
+    fi
+    capabilities=$("$provision" --help) || exit 7
+    if [[ $capabilities == *'|core-deploy-seeded|'* ]]; then
+        bundled=$("$provision" core-deploy-seeded-available) || exit 7
+        operation=
+        if [[ $bundled = true ]]; then
+            operation=core-deploy-seeded
+        elif [[ $bundled = false ]]; then
+            if [[ $capabilities == *'|core-deploy-stash|'* ]]; then
+                operation=core-deploy-stash
+            fi
+        else
+            exit 7
+        fi
+        if [[ -n $operation ]]; then
+            if [[ $EUID -eq 0 ]]; then
+                exec runuser -u "$REAL_USER" -- "$provision" "$operation"
+            fi
+            exec "$provision" "$operation"
+        fi
+    fi
+fi
+
+IFS=: read -r _ _ _ _ _ REAL_HOME _ < <(getent -- passwd "$REAL_USER") || REAL_HOME=''
+if [[ $REAL_HOME != /* ]]; then
+    echo 'The guest administrator home is unavailable.' >&2
+    exit 7
+fi
 
 echo "== runtime deps (python3 for the scenario asserts; curl for the stash) =="
 export DEBIAN_FRONTEND=noninteractive
@@ -281,7 +322,6 @@ amisad_host_fetch "$AMISAD_WORK/project-poc.tar.gz" "yuruna-project-archive.tar.
 amisad_verify_download "$AMISAD_WORK/project-poc.tar.gz" "${AMISAD_PROJECT_ARCHIVE_SHA256:-}" \
     "the project archive (yuruna-project-archive.tar.gz)" AMISAD_PROJECT_ARCHIVE_SHA256 || exit 7
 
-artifact_plan=/etc/yuruna/amisad-artifacts.json
 runtime_bundle=no
 if [[ -e $artifact_plan || -L $artifact_plan ]]; then
     if [[ ! -f $artifact_plan || -L $artifact_plan ]]; then
@@ -352,6 +392,11 @@ if [ "$runtime_bundle" = no ]; then
 fi
 ls -l target/release/
 
+if [ "$runtime_bundle" = yes ] && target/release/amisad-provision --help | grep -q 'core-deploy'; then
+    target/release/amisad-provision core-deploy
+    exit $?
+fi
+
 # Confirm the binaries can actually run here before spending the deploy on
 # them. A mismatch is otherwise invisible until every pod crashes with "exec
 # format error" and the rollout wait burns its full timeout, which reports a
@@ -388,9 +433,8 @@ SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc co
 # $(AMISAD_DB_PASSWORD) expands the same way, from the Secret
 # amisad_publish_database_password created, so neither the Helm release nor the
 # Deployment carries the password.
+# shellcheck disable=SC2016
 DATABASE_URL='postgres://amisad:$(AMISAD_DB_PASSWORD)@$(NODE_IP):5432/amisad'
-# --- REGION: Resolve service endpoints
-NODE_IP=$(hostname -I | awk '{print $1}')
 # docker.io is unreachable in this lab: distroless base from gcr.io, thin images
 # from the prebuilt binaries, imported straight into the cluster's containerd
 # (no registry), charts pinned pullPolicy=Never.

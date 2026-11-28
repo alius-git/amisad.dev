@@ -7,6 +7,26 @@
 # --- REGION: Initialize environment
 set -euo pipefail
 
+# An enrolled build guest has a verified provisioner before its toolchain is
+# installed. Cold guests can still bootstrap the first signed build below.
+artifact_plan=/etc/yuruna/amisad-artifacts.json
+if [[ -e $artifact_plan || -L $artifact_plan ]]; then
+    if [[ ! -f $artifact_plan || -L $artifact_plan ]]; then
+        echo 'The enrolled AmisAd artifact plan is not a regular file.' >&2
+        exit 7
+    fi
+    artifact_root=/usr/local/lib/yuruna/amisad-artifacts
+    bootstrap=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
+        "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 7
+    provision="$bootstrap/amisad-provision"
+    if [[ ${bootstrap%/*} != "$artifact_root" || ! ${bootstrap##*/} =~ ^[a-f0-9]{64}$ ||
+          ! -f $provision || -L $provision || ! -x $provision ]]; then
+        echo 'The verified AmisAd provisioner is unavailable.' >&2
+        exit 7
+    fi
+    exec "$provision" build-tools
+fi
+
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update -y
 sudo apt-get install -y git curl build-essential pkg-config python3

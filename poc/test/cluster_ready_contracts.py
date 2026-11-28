@@ -22,7 +22,8 @@ from unittest import mock
 from bash_contract_support import find_usable_bash
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh'
+SCRIPT = ROOT / 'test/fixtures/core-ready-before-rust.sh.fixture'
+ACTIVE_SCRIPT = ROOT / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.ready.sh'
 BASH = find_usable_bash()
 CURL = shutil.which('curl')
 KUBECTL = shutil.which('kubectl')
@@ -81,6 +82,16 @@ def peer(responses=None, stall=0, observed_auth=None, tls_context=None):
 
 @unittest.skipUnless(BASH, 'A usable native-filesystem Bash is required for guest shell contracts')
 class ClusterGates(unittest.TestCase):
+    def native_fixture(self, directory):
+        root = Path(directory)
+        (root / 'bin').mkdir()
+        text = ACTIVE_SCRIPT.read_text().replace('/usr/local/bin/amisad-provision',
+                                                  shlex.quote((root / 'native-core-ready').as_posix()))
+        (root / 'case.sh').write_bytes(text.encode())
+        for vendor in ['kubectl', 'curl', 'sudo']:
+            write_command(root, vendor, 'echo "$0 $*" >> actions; exit 71')
+        return root
+
     def fixture(self, directory, subnet=True, short_budget=False):
         root = Path(directory)
         (root / 'bin').mkdir()
@@ -134,7 +145,7 @@ class ClusterGates(unittest.TestCase):
 
     def test_uses_installed_native_readiness_without_starting_the_old_path(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = self.fixture(directory)
+            root = self.native_fixture(directory)
             native = root / 'native-core-ready'
             native.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > selected\nexit 19\n')
             native.chmod(0o755)
@@ -145,7 +156,7 @@ class ClusterGates(unittest.TestCase):
 
     def test_uses_native_readiness_from_the_deployed_release_bundle(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = self.fixture(directory)
+            root = self.native_fixture(directory)
             native = root / 'home/amisad.dev/poc/target/release/amisad-provision'
             native.parent.mkdir(parents=True)
             native.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > selected\nexit 18\n')
@@ -153,6 +164,39 @@ class ClusterGates(unittest.TestCase):
             result = run_case(root)
             self.assertEqual(result.returncode, 18, result.stderr)
             self.assertEqual((root / 'selected').read_text(), 'core-ready\n')
+            self.assertFalse((root / 'actions').exists())
+
+    def test_elevated_readiness_runs_the_staged_provisioner_as_the_login(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.native_fixture(directory)
+            case = root / 'case.sh'
+            case.write_text(case.read_text().replace('$EUID', '0'))
+            write_command(root, 'getent', '''
+[[ "$*" = '-- passwd amisad-fixture' ]] || exit 29
+printf 'amisad-fixture:x:1000:1000::%s:/bin/bash\\n' "$HOME"
+''')
+            write_command(root, 'runuser', '''
+[[ $# = 5 && $1 = -u && $2 = amisad-fixture && $3 = -- ]] || exit 29
+echo "$2" > login
+shift 3
+exec "$@"
+''')
+            native = root / 'home/amisad.dev/poc/target/release/amisad-provision'
+            native.parent.mkdir(parents=True)
+            native.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > selected\nexit 18\n')
+            native.chmod(0o755)
+            result = run_case(root, {'SUDO_USER': 'amisad-fixture'})
+            self.assertEqual(result.returncode, 18, result.stderr)
+            self.assertEqual((root / 'login').read_text(), 'amisad-fixture\n')
+            self.assertEqual((root / 'selected').read_text(), 'core-ready\n')
+            self.assertFalse((root / 'actions').exists())
+
+    def test_no_backend_commands_run_when_neither_provisioner_exists(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.native_fixture(directory)
+            result = run_case(root)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn('readiness provisioner is unavailable', result.stderr)
             self.assertFalse((root / 'actions').exists())
 
     def test_api_failure_prevents_restarts_and_http(self):
@@ -488,11 +532,12 @@ current-context: fixture
 
 @unittest.skipUnless(BASH, 'A usable native-filesystem Bash is required for guest shell contracts')
 class GuestProvisioning(unittest.TestCase):
-    def fixture(self, directory, enrolled=True, script_name='edge.setup'):
+    def fixture(self, directory, enrolled=True, script_name='edge.setup', replay=False):
         root = Path(directory)
         for folder in ('bin', 'etc', 'lib', 'units'):
             (root / folder).mkdir()
-        script = SCRIPT.with_name(f'ubuntu.server.24.amisad-{script_name}.sh')
+        script = (ROOT / 'test/fixtures/edge-setup-before-rust.sh.fixture' if replay else
+                  ACTIVE_SCRIPT.with_name(f'ubuntu.server.24.amisad-{script_name}.sh'))
         text = script.read_text()
         for source, fixture in {
             '/etc/yuruna/host.env': 'etc/host.env',
@@ -519,15 +564,17 @@ class GuestProvisioning(unittest.TestCase):
         write_command(root, 'sync', ':')
         return root, artifact
 
-    def test_edge_selects_the_verified_artifact_before_enabling_the_service(self):
+    def test_edge_dispatches_service_installation_to_the_verified_artifact(self):
         with tempfile.TemporaryDirectory() as directory:
             root, artifact = self.fixture(directory)
+            native = root / artifact
+            native.write_text('#!/bin/sh\ntest -f verification || exit 7\nprintf "%s\\n" "$@" > native-actions\n')
             result = run_case(root)
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertEqual('--plan-file etc/amisad-artifacts.json lib/artifacts amisad-provision framework-revision\n',
                              (root / 'verification').read_text())
-            self.assertIn(f'ExecStart={artifact} edge-report', (root / 'units/amisad-ip-report.service').read_text())
-            self.assertIn('start amisad-ip-report.timer', (root / 'actions').read_text())
+            self.assertEqual('edge-install-reporter\n', (root / 'native-actions').read_text())
+            self.assertFalse((root / 'actions').exists())
             self.assertEqual('previous reporter\n', (root / 'lib/amisad-ip-report.sh').read_text())
 
     def test_signed_verification_failure_leaves_existing_reporter_and_service_untouched(self):
@@ -543,11 +590,21 @@ class GuestProvisioning(unittest.TestCase):
 
     def test_unenrolled_guest_keeps_the_baseline_reporter(self):
         with tempfile.TemporaryDirectory() as directory:
-            root, _ = self.fixture(directory, enrolled=False)
+            root, _ = self.fixture(directory, enrolled=False, replay=True)
             result = run_case(root)
             self.assertEqual(0, result.returncode, result.stderr)
             self.assertIn('ExecStart=lib/amisad-ip-report.sh', (root / 'units/amisad-ip-report.service').read_text())
             self.assertFalse((root / 'verification').exists())
+
+    def test_current_edge_requires_enrollment_before_changing_units(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, _ = self.fixture(directory, enrolled=False)
+            result = run_case(root)
+            self.assertEqual(1, result.returncode, result.stderr)
+            self.assertIn('Invalid enrolled AmisAd artifact plan', result.stderr)
+            self.assertFalse((root / 'verification').exists())
+            self.assertFalse((root / 'actions').exists())
+            self.assertFalse(any((root / 'units').iterdir()))
 
     def test_database_dispatches_the_signed_setup_and_preserves_the_schema_pin(self):
         with tempfile.TemporaryDirectory() as directory:

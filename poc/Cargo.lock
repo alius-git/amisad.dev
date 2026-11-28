@@ -32,6 +32,7 @@ dependencies = [
 name = "amisad-provision"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "bytes",
  "http-body-util",
  "hyper",

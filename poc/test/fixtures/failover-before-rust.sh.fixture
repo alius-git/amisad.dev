@@ -1,0 +1,214 @@
+#!/bin/bash
+# LICENSEURI https://yuruna.link/license
+# Copyright (c) 2026 by Alisson Sol et al.
+# GUID: 71c82748-4107-4bb9-bb42-53a556f94ae0
+# See https://yuruna.link/42010605-00be
+# --- REGION: Initialize environment
+set -euo pipefail
+
+REAL_USER="${SUDO_USER:-$USER}"
+REAL_HOME=$(eval echo "~$REAL_USER")
+POC="$REAL_HOME/amisad.dev/poc"
+cd "$POC"
+# --- REGION: Load scenario helpers
+# shellcheck source=../amisad-scenario.sh
+. "$POC/test/amisad-scenario.sh"
+
+# --- REGION: Resolve service endpoints
+NODE_IP=$(hostname -I | awk '{print $1}')
+LEDGER="http://${NODE_IP}:30081"
+RESOURCE="http://${NODE_IP}:30082"
+SELLER="http://${NODE_IP}:30083"
+PLATFORM="http://${NODE_IP}:30086"
+
+echo "== slice-runtime on BOTH edges (region identity attested) =="
+if [ -r /etc/yuruna/host.env ]; then
+    # shellcheck disable=SC1091
+    . /etc/yuruna/host.env
+fi
+if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ]; then
+    echo "no host.env - cannot resolve the edges" >&2
+    exit 2
+fi
+for provision in /usr/local/bin/amisad-provision target/release/amisad-provision; do
+    if [ -x "$provision" ] && "$provision" --help | grep -Fq '|scenario-failover-lab '; then
+        if REAL_HOME="$REAL_HOME" "$provision" scenario-failover-lab "$NODE_IP" \
+            "$YURUNA_STATUS_SERVICE_IP" "${YURUNA_STATUS_SERVICE_PORT:-}"; then
+            exit 0
+        else
+            rc=$?
+        fi
+        # Status 2 is only possible before either edge is modified.
+        [ "$rc" -eq 2 ] || exit "$rc"
+        break
+    fi
+done
+# See https://yuruna.link/4220a755-0019
+# --- REGION: start_slice
+start_slice() { # <edge-hostname> <region>
+    # Runs inside $( ) - errexit does NOT reach in here, so every step fails
+    # loudly by hand; the exit code escapes through pipefail to the caller.
+    local edge="$1" region="$2" ip
+    ip=$(amisad_edge_addr "$edge")
+    if [ -z "$ip" ]; then
+        echo "edge ${edge} IP report missing - s004 requires both edges live" >&2
+        exit 7
+    fi
+    amisad_deliver_slice_runtime "${edge}-admin@${ip}" "$LEDGER" "$RESOURCE" "$region" \
+        || { echo "slice-runtime delivery to ${edge} (${ip}) failed" >&2; exit 7; }
+    echo "$ip"
+}
+EDGE_A_IP=$(start_slice amisad-edge-a region-a | tail -n 1)
+EDGE_B_IP=$(start_slice amisad-edge-b region-b | tail -n 1)
+SLICE_A="http://${EDGE_A_IP}:8080"
+SLICE_B="http://${EDGE_B_IP}:8080"
+for ep in "$SLICE_A" "$SLICE_B"; do
+    amisad_wait_slice_runtime "$ep"
+done
+echo "slices: region-a at ${SLICE_A}, region-b at ${SLICE_B}"
+
+for provision in /usr/local/bin/amisad-provision target/release/amisad-provision; do
+    if [ -x "$provision" ] && "$provision" --help | grep -q 'scenario-failover'; then
+        exec "$provision" scenario-failover "$NODE_IP" "$SLICE_A" "$SLICE_B"
+    fi
+done
+
+export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
+# --- REGION: PSQL
+PSQL() { sudo -u postgres psql -d amisad -tAc "$1"; }
+
+echo "== Tom: allocation policy - two regions, region-b roomier, region-a sovereign =="
+amisad_curl -X POST "${RESOURCE}/v1/edges" \
+    -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_A}\",\"capacity\":2}"
+amisad_curl -X POST "${RESOURCE}/v1/edges" \
+    -d "{\"region\":\"region-b\",\"endpoint\":\"${SLICE_B}\",\"capacity\":10}"
+amisad_curl -X POST "${RESOURCE}/v1/policies" \
+    -d '{"jurisdiction":"region-a","regions":["region-a"]}'
+
+echo "== TVP pre-assert: default placement is capacity-greedy; only the policy pins region-a =="
+RESP=$(amisad_curl -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-unrestricted"}')
+echo "$RESP" | python3 -c "
+import sys, json
+p = json.load(sys.stdin)
+assert p['region'] == 'region-b', p  # roomier region wins without a policy
+print('ASSERT capacity-greedy default picks region-b OK')
+"
+RESP=$(amisad_curl -X POST "${RESOURCE}/v1/placements" -d '{"jurisdiction":"region-a"}')
+echo "$RESP" | python3 -c "
+import sys, json
+p = json.load(sys.stdin)
+assert p['region'] == 'region-a', p  # sovereignty excludes the roomier region
+print('ASSERT jurisdiction policy pins region-a OK')
+"
+
+echo "== seed Elena's offer =="
+amisad_curl -X POST "${SELLER}/v1/offers" \
+    -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
+
+echo "== harness: arm TWO consecutive isolation faults on the compliant slice =="
+RESP=$(amisad_curl -X POST "${SLICE_A}/v1/faults" -d '{"mode":"isolation","count":2}')
+echo "$RESP" | python3 -c "
+import sys, json
+assert json.load(sys.stdin)['armed'] == 2
+print('ASSERT faults armed OK')
+"
+
+echo "== the match: abort, abort (systemic), then a clean completion =="
+RESULT=$(target/release/buyer-client submit)
+MATCH_ID=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["match_id"])')
+ENV_OK=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["environment_id"])')
+echo "completed match ${MATCH_ID} in environment ${ENV_OK}"
+
+echo "== Tom's incident queue: both aborted slices, fault reason attached =="
+INCIDENTS=$(amisad_curl "${RESOURCE}/v1/incidents")
+ENV_ABORT_1=$(echo "$INCIDENTS" | python3 -c 'import sys,json;print(json.load(sys.stdin)["incidents"][0]["environment_id"])')
+ENV_ABORT_2=$(echo "$INCIDENTS" | python3 -c 'import sys,json;print(json.load(sys.stdin)["incidents"][1]["environment_id"])')
+echo "$INCIDENTS" | python3 -c "
+import sys, json
+i = json.load(sys.stdin)['incidents']
+assert len(i) == 2, i
+for entry in i:
+    assert entry['event'] == 'aborted' and entry['fault'] == 'isolation', entry
+    assert entry['region'] == 'region-a', entry
+print('ASSERT two isolation incidents queued OK')
+"
+
+echo "== TVP: aborted lifecycles read created-attested-aborted-destroyed, no egress =="
+for env in "$ENV_ABORT_1" "$ENV_ABORT_2"; do
+    RESP=$(amisad_curl "${LEDGER}/v1/attestations/env/${env}")
+    echo "$RESP" | python3 -c "
+import sys, json
+entries = json.load(sys.stdin)['entries']
+states = [e['lifecycle'] for e in entries]
+assert states == ['created', 'attested', 'aborted', 'destroyed'], states
+aborted = [e for e in entries if e['lifecycle'] == 'aborted'][0]
+assert aborted['fault'] == 'isolation', aborted
+text = json.dumps(entries).lower()
+for marker in ['maya', 'budget_cents', 'deadline_days', 'context', 'envelope', 'wish list']:
+    assert marker not in text, f'aborted environment leaked: {marker}'
+print('ASSERT aborted lifecycle + zero egress OK')
+"
+done
+RESP=$(amisad_curl "${LEDGER}/v1/attestations/env/${ENV_OK}")
+echo "$RESP" | python3 -c "
+import sys, json
+states = [e['lifecycle'] for e in json.load(sys.stdin)['entries']]
+assert states == ['created', 'attested', 'executed', 'destroyed'], states
+print('ASSERT completed lifecycle OK')
+"
+
+echo "== TVP: zero out-of-region attestation entries =="
+RESP=$(amisad_curl "${LEDGER}/v1/attestations")
+echo "$RESP" | python3 -c "
+import sys, json
+entries = json.load(sys.stdin)['entries']
+assert len(entries) == 12, len(entries)  # 3 environments x 4 lifecycle events
+for e in entries:
+    assert e['payload']['region'] == 'region-a', e
+print('ASSERT every allocation stayed in the compliant region OK')
+"
+
+echo "== the completed match settles; hosting revenue for it ONLY =="
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
+amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
+RESP=$(amisad_curl "${LEDGER}/v1/verify")
+echo "$RESP" | python3 -c "
+import sys, json
+v = json.load(sys.stdin)
+assert v['attestation_ok'] and v['settlement_ok'], v
+assert v['settlement_len'] == 4, v  # exactly one settled match (4 splits)
+print('ASSERT exactly one settlement OK')
+"
+RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
+echo "$RESP" | python3 -c "
+import sys, json
+s = json.load(sys.stdin)
+assert s['confirmed'] is True and s['total_cents'] == s['value_cents'] == 11000, s
+network = [e for e in s['entries'] if e['party'] == 'network']
+assert len(network) == 1, s  # hosting revenue once - nothing for the aborts
+print('ASSERT hosting revenue for the completed match only OK')
+"
+
+echo "== Tom escalates to Priya: cross-party case links both aborted lifecycles =="
+CASE_ID=$(amisad_curl -X POST "${PLATFORM}/v1/incidents" \
+    -d "{\"summary\":\"systemic isolation faults in region-a\",\"from\":\"resource-ops\",\"environment_ids\":[\"${ENV_ABORT_1}\",\"${ENV_ABORT_2}\"]}" \
+    | python3 -c 'import sys,json;print(json.load(sys.stdin)["case_id"])')
+RESP=$(amisad_curl "${PLATFORM}/v1/incidents/${CASE_ID}")
+echo "$RESP" | python3 -c "
+import sys, json
+case = json.load(sys.stdin)
+ids = case['environment_ids']
+assert ids == ['${ENV_ABORT_1}', '${ENV_ABORT_2}'], ids
+assert case['status'] == 'open', case
+print('ASSERT platform case references both aborted lifecycles OK')
+"
+
+echo "== durable store: all twelve attestation rows in PostgreSQL =="
+ROWS=$(PSQL "SELECT count(*) FROM ledger.attestation_ledger")
+if [ "$ROWS" != "12" ]; then
+    echo "attestation rows not persisted as expected (rows: ${ROWS})" >&2
+    exit 9
+fi
+echo "ASSERT PostgreSQL attestation write-through OK"
+
+echo "s004.failover HAPPY PATH PASSED"

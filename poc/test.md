@@ -254,7 +254,7 @@ one is deleted, the new one created from standard input). The ledger-svc,
 fabric-coordinator, seller-svc and platform-svc charts read it into
 `LEDGER_WRITE_TOKEN` (`ledgerWriteSecret`). ledger-svc answers any POST without
 `Authorization: Bearer <token>` with 401 `write_token_required`; GETs stay open.
-`test/amisad-scenario.sh` reads the Secret on `amisad-core` and pipes the token
+`amisad-provision` reads the Secret on `amisad-core` and pipes the token
 into the edge's SSH standard input, where the start command reads it into
 slice-runtime's environment; the single-VM fallback does the same locally. s008
 and s010 refund through platform-svc's `POST /v1/support/cases/refund`. Services
@@ -408,8 +408,9 @@ foreign build.
    `amisad-core`, `username: amisad-core-admin`, `hostname: amisad-core`.
    `component:` is a single `retry` block -- `loadDiskSnapshot`,
    `sshWaitReady`, then `sshFetchAndExecute` of
-   `...amisad-core.ready.sh`, which restarts the deployed services onto pods
-   that exist now and waits for every NodePort to answer. `workload:` is
+   `...amisad-core.ready.sh`, which runs the installed Rust provisioner.
+   The provisioner restarts the deployed services onto current pods and
+   waits for every NodePort to answer. `workload:` is
    `sshFetchAndExecute` of the scenario script plus `saveSystemDiagnostic`,
    outside the retry on purpose: putting the cluster in position is
    idempotent and worth a second attempt, while a scenario that passes only
@@ -453,9 +454,10 @@ private authentication fixture uses OpenSSL. Missing tools skip the relevant cas
 Run `flutter test` and `flutter analyze` in `components/apps/buyer-flutter` for
 request-deadline, navigation/disposal, and stale-response checks.
 
-Scenario HTTP diagnostics, edge lookup, and the slice-runtime start (delivery to
-the edge, the gated single-VM fallback, and the health wait) are shared in
-`test/amisad-scenario.sh`, loaded from the extracted project archive. `build/Publish-ProjectArchive.ps1`
+The fetched scenario entries use the provisioner staged with the core guest
+release. It owns HTTP diagnostics, edge lookup, delivery, the gated single-VM
+fallback, and the health wait. Failover checks both provisioners before it
+stops either edge. `build/Publish-ProjectArchive.ps1`
 is the canonical archive command; `build/serve-local.ps1` forwards for compatibility.
 Seller, ledger, and resource compile the database-specific `amisad-common/src/database.rs`
 module directly; the common library itself remains std-only. SQL errors return

@@ -25,6 +25,7 @@
 #>
 
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'AmisAd.LabWorkflow.ps1')
 
 # --- REGION: Resolve-StashService
 function Resolve-StashService {
@@ -77,8 +78,6 @@ function Resolve-StashService {
     $lines.Add('== Resolving the stash service ==')
 
     # See https://yuruna.link/42010605-00ac
-    $retryDelaySeconds = @(2, 5, 10)
-    $attemptCount = $retryDelaySeconds.Count + 1
     $canDiscover = [bool](Get-Command Get-ExtensionHostAddress -ErrorAction SilentlyContinue)
     $hasPin = (-not [string]::IsNullOrWhiteSpace($Pin)) -or
               (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_SERVICE_HOST))
@@ -86,16 +85,18 @@ function Resolve-StashService {
         # Nothing to retry: a missing framework verb is not a transient state,
         # and sleeping through the window would only delay the same answer.
         Write-Warning "The framework at $YurunaRoot has no Get-ExtensionHostAddress, so nothing can discover a stash service. Upgrade the framework checkout, or pin an address with `$env:YURUNA_STASH_SERVICE_HOST."
-        $attemptCount = 1
     }
 
-    for ($attempt = 1; $attempt -le $attemptCount; $attempt++) {
+    $status = Invoke-AmisAdLabPlan -YurunaRoot $YurunaRoot -Request @{
+        kind = 'stash'; pin = $Pin; environmentPin = [string]$env:YURUNA_STASH_SERVICE_HOST; canDiscover = $canDiscover
+    } -InvokeStep {
+        param($step)
+        if ($step.kind -cne 'probe-stash') { throw "Unexpected stash workflow step '$($step.kind)'." }
+        $attempt = [int]$step.attempt
         $candidates = [System.Collections.Generic.List[hashtable]]::new()
         $discoveryError = ''
-        if (-not [string]::IsNullOrWhiteSpace($Pin)) {
-            $candidates.Add(@{ Address = $Pin.Trim(); Source = 'pinned' })
-        } elseif (-not [string]::IsNullOrWhiteSpace($env:YURUNA_STASH_SERVICE_HOST)) {
-            $candidates.Add(@{ Address = $env:YURUNA_STASH_SERVICE_HOST.Trim(); Source = '$env:YURUNA_STASH_SERVICE_HOST' })
+        if ($step.address) {
+            $candidates.Add(@{ Address = $step.address; Source = $step.source })
         } elseif ($canDiscover) {
             # @(): a single discovered address unrolls to a scalar string, and
             # iterating THAT walks its characters.
@@ -115,9 +116,7 @@ function Resolve-StashService {
                 $null = Publish-StashServiceHost -Address $candidate.Address
                 $lines.Add("Stash service: $($candidate.Address) -- published for this cycle.")
                 $result.Address = $candidate.Address
-                $result.Lines = $lines.ToArray()
-                $result.Failures = $failures.ToArray()
-                return $result
+                return 0
             }
             $lines.Add(("  [FAIL] {0} ({1}) did not answer /healthz" -f $candidate.Address, $candidate.Source))
             $authority = [string]$candidate.Address
@@ -156,15 +155,14 @@ function Resolve-StashService {
                 attempt = $attempt })
         }
 
-        if ($attempt -lt $attemptCount) {
-            $delay = $retryDelaySeconds[$attempt - 1]
-            $lines.Add(("  .. nothing answered; re-asking in {0}s (attempt {1} of {2})." -f $delay, ($attempt + 1), $attemptCount))
-            Start-Sleep -Seconds $delay
+        if ($null -ne $step.delay) {
+            $lines.Add(("  .. nothing answered; re-asking in {0}s (attempt {1} of {2})." -f $step.delay, ($attempt + 1), $step.total))
         }
+        return 1
     }
     # Nothing answered: clear any address a previous cycle left behind so the
     # sequences cannot resolve one this cycle never confirmed.
-    $null = Publish-StashServiceHost -Address ''
+    if ($status -ne 0) { $null = Publish-StashServiceHost -Address '' }
     $result.Lines = $lines.ToArray()
     $result.Failures = $failures.ToArray()
     return $result

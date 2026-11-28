@@ -53,6 +53,7 @@ $ErrorActionPreference = 'Continue'
 $InformationPreference = 'Continue'
 
 . (Join-Path $PSScriptRoot 'AmisAd.HostCommon.ps1')
+. (Join-Path $PSScriptRoot 'AmisAd.LabWorkflow.ps1')
 # Resolve-StashService lives in a module, not here: poc/build/run-tests.ps1 runs
 # the same pre-flight, and the address a pass uploads its binaries to must not
 # depend on which entry point started it.
@@ -95,122 +96,55 @@ function Resolve-StageLogDir {
     return (Join-Path ([IO.Path]::GetTempPath()) 'amisad-tests')
 }
 
-$LogDir = Resolve-StageLogDir -Explicit $LogDir
-New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+function Invoke-AmisAdNativeStageLogDir {
+    [OutputType([string])]
+    param([string]$YurunaRoot, [string]$Explicit)
+
+    if (-not (Get-AmisAdVerifiedHostBinary -YurunaRoot $YurunaRoot)) { return }
+    $argument = @{ TemporaryRoot = [IO.Path]::GetTempPath() }
+    if (-not [string]::IsNullOrWhiteSpace($Explicit)) {
+        $provider = $null
+        $drive = $null
+        try {
+            $argument.ResolvedExplicit = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Explicit, [ref]$provider, [ref]$drive)
+        } catch {
+            Write-Verbose "Could not resolve the explicit native log directory: $($_.Exception.Message)"
+            return
+        }
+        if ($provider.Name -cne 'FileSystem') { return }
+        $argument.Explicit = $Explicit
+    }
+    $verb = 'amisad-lab-stage-log-dir'
+    try {
+        $reply = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb $verb -Argument $argument -TimeoutSeconds 30
+    } catch {
+        if ($_.Exception.Message -cne "host-binary-command-failed: $verb (unknown-verb)") { throw }
+        return
+    }
+    if (-not $reply.Used) { return }
+    $value = $reply.Value
+    if ($value -isnot [Collections.IDictionary] -or $value['handled'] -isnot [bool]) {
+        throw 'The native stage log directory reply is invalid.'
+    }
+    if (-not $value.handled) { return }
+    if ($value['path'] -isnot [string] -or [string]::IsNullOrWhiteSpace($value.path) -or
+        -not $value.Contains('error') -or ($null -ne $value.error -and $value.error -isnot [string])) {
+        throw 'The native stage log directory reply is invalid.'
+    }
+    if ($value.error) { Write-Error "Could not prepare the stage log directory '$($value.path)'. $($value.error)" }
+    return $value.path
+}
+
+$nativeLogDir = Invoke-AmisAdNativeStageLogDir -YurunaRoot $YurunaRoot -Explicit $LogDir
+if ($nativeLogDir) { $LogDir = $nativeLogDir } else {
+    $LogDir = Resolve-StageLogDir -Explicit $LogDir
+    New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+}
 $stageContext = @{ HostType = $HostType; SequenceScript = $ts; LogDir = $LogDir; NoProjectClone = $true }
 Write-Information "Per-stage logs: $LogDir"
 
-$useSignedBuild = Test-AmisAdFreshSignedBuild -YurunaRoot $YurunaRoot -HostType $HostType -StashPin $StashServiceHost
-$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeProvisioning' `
-    -IncludeDiskGrowth -UseSignedBuild:$useSignedBuild
-if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
+$warmup = Invoke-AmisAdWarmup -YurunaRoot $YurunaRoot -StageContext $stageContext -StashPin $StashServiceHost -NoConfigGate:$NoConfigGate
+if ($warmup -ne 0) { exit $warmup }
 
-# Opt-in virtual display for headless keystroke/OCR reliability on the cold
-# provisioning chains (no-op unless YURUNA_VIRTUAL_DISPLAY is truthy). The host
-# type is the DETECTED one -- hard-coding Hyper-V would leave KVM/UTM (headless
-# servers, the likeliest to need it) without the virtual display.
-Import-Module (Join-Path $YurunaRoot 'test/modules/Test.HostCondition.psm1') -Force -DisableNameChecking -ErrorAction SilentlyContinue
-if (Get-Command Initialize-HostDisplay -ErrorAction SilentlyContinue) {
-    Initialize-HostDisplay -HostType $HostType
-}
-
-# --- REGION: Remove legacy demo key
-# The core->edge keypair is generated INSIDE vm-core and its private half never
-# leaves it (stage [6] moves only the public half). A host that ran an older
-# version of this lab holds a pair under test/status/handoff, which the status
-# service serves to the whole LAN; it is deleted and said so.
-foreach ($line in (Remove-LegacyDemoKey -YurunaRoot $YurunaRoot -Confirm:$false)) { Write-Warning $line }
-
-if ($useSignedBuild) {
-    Write-Information "The fresh AmisAd core will use the signed build-service runtime."
-} else {
-    # --- REGION: Resolve stash service
-    # Reused guests can still have a stash-based seed. Resolve their
-    # artifact source before provisioning or running the build guest.
-    $stash = Resolve-StashService -YurunaRoot $YurunaRoot -Pin $StashServiceHost
-    foreach ($line in $stash.Lines) { Write-Information $line }
-    if (-not $stash.Address) {
-        Write-AmisAdStashFailure -YurunaRoot $YurunaRoot -Result $stash -HostType $HostType
-        Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and vm-core has nowhere to fetch them - stopping before the provisioning stages. " +
-            "Start one on this host (Start-StashServiceVM.ps1), join a pool that runs one, or pin an address with -StashServiceHost / `$env:YURUNA_STASH_SERVICE_HOST.")
-        exit 1
-    }
-
-    # --- REGION: Build binaries
-    if ((Invoke-AmisAdStage @stageContext -Name 'amisad-build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
-        Write-Error "Build stage failed; no binaries in the stash - stopping."
-        exit 1
-    }
-    try { $null = Stop-VMForce -VMName 'amisad-build' } catch { Write-Verbose "Stop-VMForce amisad-build: $($_.Exception.Message)" }
-    Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build' -HostType $HostType
-    Write-Information "amisad-build stopped (kept on disk)."
-}
-
-# --- REGION: Provision edges
-foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
-    if ((Invoke-AmisAdStage @stageContext -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline" -NoConfigGate:$NoConfigGate) -ne 0) {
-        Write-Error "$edge provisioning failed - stopping."
-        exit 1
-    }
-    Set-EdgeMemory -Name $edge -HostType $HostType
-    Remove-InstallMedia -Name $edge -SnapshotId $edge -HostType $HostType
-}
-
-# --- REGION: Deploy core
-if ((Invoke-AmisAdStage @stageContext -Name 'amisad-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
-    Write-Error "amisad-core deploy failed - stopping."
-    exit 1
-}
-Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core' -HostType $HostType
-
-$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeStart'
-if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
-
-# --- REGION: Start edges and wait for addresses
-# The scenarios resolve amisad-edge-a/-b from these boot-time reports; a stale
-# file from a prior run must not count, so delete first and anchor freshness to
-# THIS start. Only s004.failover needs region-B live; the rest ignore it.
-Write-Information "Starting amisad-edge-a + amisad-edge-b."
-$logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test/status/log' }
-$edges = 'amisad-edge-a', 'amisad-edge-b'
-$edgeStartup = Start-AmisAdEdge -Name $edges -LogRoot $logRoot -Confirm:$false
-foreach ($line in $edgeStartup.Lines) { Write-Information $line }
-if (-not $edgeStartup.Ok) {
-    # The classified record is what the cycle keeps: the orchestrator reads
-    # its class and description back, where this script's exit code alone
-    # would leave the failure as "exited 1". The control snapshot keeps what
-    # the hypervisor looked like while it still looks that way.
-    $edgeFailure = Get-AmisAdEdgeFailure -EdgeStartup $edgeStartup
-    $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage 'Start-AmisAdEdge' `
-        -FailureClass $edgeFailure.FailureClass -ErrorMessage $edgeFailure.ErrorMessage -DependencyFailures $edgeFailure.DependencyFailures
-    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -AdditionalVm 'amisad-core' -LogDir $LogDir
-    foreach ($line in $evidence.Lines) { Write-Information $line }
-    $snapshot = Save-AmisAdControlSnapshot -EdgeStartup $edgeStartup -LogDir $LogDir
-    if ($snapshot -and $snapshot.Written) { Write-Information "Hypervisor control snapshot: $($snapshot.Path)" }
-    Write-Error "$($edgeFailure.ErrorMessage). Stopping before the scenarios; VMs are left as-is for debugging."
-    exit 1
-}
-
-Write-Information "--- VM inventory ---"
-foreach ($vm in @('amisad-core', 'amisad-edge-a', 'amisad-edge-b', 'amisad-build')) {
-    Write-Information ("  {0,-16} {1}" -f $vm, (Get-VMState -VMName $vm))
-}
-
-
-# --- REGION: Authorize demo public key
-# See https://yuruna.link/42010605-00b1
-$edgeAddress = $edgeStartup.Address
-$keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
-foreach ($line in $keyHandoff.Lines) { Write-Information $line }
-if (-not $keyHandoff.Ok) {
-    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -AdditionalVm 'amisad-core' -EdgeAddress $edgeAddress -ReportedAt $edgeStartup.ReportedAt -LogDir $LogDir
-    foreach ($line in $evidence.Lines) { Write-Information $line }
-    $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage $keyHandoff.Stage -FailureClass $keyHandoff.FailureClass `
-        -ErrorMessage $keyHandoff.Reason -VMName $keyHandoff.VMName -StartupFailure $keyHandoff.StartupFailure `
-        -Address $keyHandoff.Address -ProbeFailure $keyHandoff.ProbeFailure
-    Write-Error "$($keyHandoff.Stage): $($keyHandoff.Reason). Stopping the warm-up before the scenarios."
-    exit 1
-}
-
-Write-Information "Warm-up complete. Live: amisad-core + $($edges -join ' + ')."
+Write-Information 'Warm-up complete. Live: amisad-core + amisad-edge-a + amisad-edge-b.'
 exit 0

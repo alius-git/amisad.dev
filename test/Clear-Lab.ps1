@@ -43,6 +43,7 @@ param(
 Set-StrictMode -Version Latest
 
 . (Join-Path $PSScriptRoot 'AmisAd.HostCommon.ps1')
+. (Join-Path $PSScriptRoot 'AmisAd.LabWorkflow.ps1')
 
 $YurunaRoot = Resolve-YurunaRoot -Explicit $YurunaRoot
 $HostType   = Initialize-AmisAdHost -YurunaRoot $YurunaRoot
@@ -62,18 +63,12 @@ $LabVmPrefix = 'amisad-'
 
 # --- REGION: Refuse concurrent runner
 # See https://yuruna.link/42010605-00af
-if (-not $env:YURUNA_CYCLE_CONTEXT) {
-    $runnerPidFile = Join-Path $YurunaRoot 'test/status/runtime/runner.pid'
-    if (Test-Path -LiteralPath $runnerPidFile) {
-        $runnerPid = 0
-        try { $runnerPid = [int]((Get-Content -LiteralPath $runnerPidFile -Raw).Trim()) } catch { $runnerPid = 0 }
-        if ($runnerPid -gt 0 -and (Get-Process -Id $runnerPid -ErrorAction SilentlyContinue)) {
-            throw "A Yuruna runner (PID $runnerPid) is active; stop it before clearing the project."
-        }
-    }
+$runnerPid = Get-AmisAdActiveRunner -YurunaRoot $YurunaRoot
+if ($runnerPid) {
+    throw "A Yuruna runner (PID $runnerPid) is active; stop it before clearing the project."
 }
 
-Stop-LabConsole -HostType $HostType
+Stop-LabConsole -HostType $HostType -YurunaRoot $YurunaRoot
 
 # --- REGION: Clean start
 # Remove-TestVMFiles.ps1 already force-stops and removes each matching VM
@@ -90,8 +85,10 @@ $exitCode = 0
 if ($PSCmdlet.ShouldProcess("VMs named $LabVmPrefix*", 'Stop, remove, and sweep files')) {
     # Child process isolates the framework script's own `exit`; elevation is
     # inherited from this (already elevated) session.
-    pwsh -NoProfile -File $sweepScript -Prefix $LabVmPrefix
-    $exitCode = $LASTEXITCODE
+    $exitCode = Invoke-AmisAdLabPlan -YurunaRoot $YurunaRoot -Request @{ kind = 'cleanup'; prefixes = @($LabVmPrefix) } -InvokeStep {
+        param($step)
+        Invoke-AmisAdConsoleStage -YurunaRoot $YurunaRoot -ScriptPath $sweepScript -ScriptArguments @('-Prefix', $step.prefix)
+    }
 }
 
 exit $exitCode

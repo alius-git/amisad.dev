@@ -256,11 +256,9 @@ previous values until the readiness step restarts them before each scenario.
 
 ## Lab edge delivery
 
-The helpers in `test/amisad-scenario.sh` deliver each build's slice-runtime to
-the edge VMs.
+The guest provisioner delivers each build's slice-runtime to the edge VMs.
 
-- `amisad_edge_addr` prints an edge's address, or nothing, and returns 0
-  either way: the caller decides what an unresolved edge means. `getent`
+- The edge lookup returns an address when it can resolve the edge. `getent`
   answers first, because vm-core resolves the edge without the host when it
   can. Otherwise the address comes from the handoff file the host's status
   service serves. The host can take a new address while a scenario runs, when
@@ -273,21 +271,18 @@ the edge VMs.
   binary. pkill returns as soon as SIGTERM is sent, not when the process is
   gone; until then, overwriting `/tmp/slice-runtime` fails with ETXTBSY (scp
   reports it as "dest open: Failure") and a fresh instance cannot bind the
-  port. `amisad_stop_slice_runtime` therefore waits for the exit, and sends
+  port. The native edge stop waits for the exit and sends
   SIGKILL to an instance that outlives the SIGTERM allowance.
-- `amisad_deliver_slice_runtime` copies the binary to an edge and starts it
-  once the previous instance has exited. vm-core logs in as the edge admin with
-  the demo keypair the users step generated in the admin home. Each step names
-  the edge when it fails and returns that step's status, so the function
-  behaves the same called plainly under errexit and inside `$( )`, where
-  errexit does not reach. An empty region starts the runtime without a region
-  identity, as an unset one does. Given an address variable, it also stores
-  there the address the edge reports for itself, which can differ from the one
-  it was reached at.
+- The provisioner copies the binary to an edge and starts it after the prior
+  instance exits. The core VM logs in as the edge administrator using the demo
+  key the users step created in its home directory. An empty region starts
+  the runtime without a region identity. A single-edge scenario uses the
+  address the edge reports after startup. Failover confirms that both edges
+  can run the native stop and start before stopping either one.
 - The ledger write token reaches the edge on the start session's standard
-  input, where the edge shell reads it into the runtime's environment.
-  `amisad_ledger_write_token` writes it, then a newline, for that pipe;
-  ledger-svc refuses appends without it. Without the Secret, as on a lab
+  input, where the edge provisioner reads it into the runtime's environment.
+  The core provisioner writes the token followed by a newline. The ledger
+  service refuses appends without it. In a lab without the Secret, such as one
   deployed by hand, the line is empty and a warning says so: the runtime then
   sends no token, which only a ledger started without one accepts.
 

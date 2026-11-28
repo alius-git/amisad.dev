@@ -3,122 +3,29 @@
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42c58eff-3c59-4af6-9a87-d1bbbbdfb8f3
 # See https://yuruna.link/42010605-00c4
-# --- REGION: Initialize environment
 set -euo pipefail
 
-REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
-POC="$REAL_HOME/amisad.dev/poc"
-cd "$POC"
-# --- REGION: Load scenario helpers
-# shellcheck source=../amisad-scenario.sh
-. "$POC/test/amisad-scenario.sh"
+account_home=${HOME:-}
+if [ "$EUID" -eq 0 ]; then
+    account=${SUDO_USER:-root}
+    IFS=: read -r _ _ account_uid _ _ account_home _ < <(getent -- passwd "$account") || account_home=''
+    if [[ $account_uid == 0 || $account_home != /* ]]; then
+        echo 'Run the AmisAd scenario as the guest administrator.' >&2
+        exit 1
+    fi
+fi
 
-# --- REGION: Resolve service endpoints
-NODE_IP=$(hostname -I | awk '{print $1}')
-LEDGER="http://${NODE_IP}:30081"
-RESOURCE="http://${NODE_IP}:30082"
-SELLER="http://${NODE_IP}:30083"
-PLATFORM="http://${NODE_IP}:30086"
-AUDIT="http://${NODE_IP}:30089"
-
-echo "== slice-runtime on amisad-edge-a WITH region identity (for residency) =="
-amisad_start_slice_runtime "$LEDGER" "$RESOURCE" region-a
-
-export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
-
-echo "== self-seed the evidence corpus =="
-amisad_curl -X POST "${RESOURCE}/v1/edges" -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
-amisad_curl -X POST "${SELLER}/v1/offers" \
-    -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
-
-# (1) a completed match, advanced to settled -> attestation + settlement.
-RESULT=$(target/release/buyer-client submit)
-MATCH_ID=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["match_id"])')
-ENV_ID=$(echo "$RESULT" | python3 -c 'import sys,json;print(json.load(sys.stdin)["environment_id"])')
-amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
-amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
-
-# (2) an injected abort: the fabric retries to a clean completion, so the
-# attestation log carries an aborted lifecycle too (like s004.failover).
-curl -sf -X POST "${SLICE_EP}/v1/faults" -d '{"mode":"isolation","count":1}' >/dev/null
-target/release/buyer-client submit >/dev/null
-
-# (3) consent grant + revoke, and (4) a mandate -> all three consent grant types.
-target/release/buyer-client resume >/dev/null       # participation + contribution grants
-target/release/buyer-client pause >/dev/null         # participation revoke
-target/release/buyer-client grant-mandate pat housewares 14000 >/dev/null
-
-# (5) a disclosure grant + a settlement adjustment referencing a support case.
-# Sam's identity-mock token carries the support case writes.
-SAM_TOKEN=$(amisad_curl -X POST "${IDENTITY_URL}/v1/tokens" -d '{"actor":"sam","class":"person"}' \
-    | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])')
-CASE_ID=$(amisad_curl -X POST "${PLATFORM}/v1/support/cases" \
-    -d "{\"token\":\"${SAM_TOKEN}\",\"match_id\":\"${MATCH_ID}\",\"metadata\":{\"order_state\":\"settled\"}}" \
-    | python3 -c 'import sys,json;print(json.load(sys.stdin)["case_id"])')
-curl -sf -X POST "${PLATFORM}/v1/support/cases/disclosure/request" -d "{\"token\":\"${SAM_TOKEN}\",\"case_id\":\"${CASE_ID}\"}" >/dev/null
-target/release/buyer-client disclose "${CASE_ID}" "delivery-photo-ref-77" 120 >/dev/null
-curl -sf -X POST "${PLATFORM}/v1/support/cases/refund" -d "{\"token\":\"${SAM_TOKEN}\",\"case_id\":\"${CASE_ID}\"}" >/dev/null
-echo "corpus seeded"
-
-echo "== Ingrid runs the certification: all four dimensions, zero violations =="
-RESP=$(amisad_curl -X POST "${AUDIT}/v1/certify")
-echo "$RESP" | python3 -c "
-import sys, json
-c = json.load(sys.stdin)
-for dim in ['attestation','residency','consent','settlement']:
-    assert c[dim]['ok'] is True and c[dim]['violations'] == 0, (dim, c[dim])
-assert c['certified'] is True and c['total_violations'] == 0, c
-print('ASSERT four-dimension certification clean OK')
-"
-
-echo "== TVP: the consent dimension certified real evidence, not an empty chain =="
-RESP=$(amisad_curl "${LEDGER}/v1/consents")
-echo "$RESP" | python3 -c "
-import sys, json
-uses = [e['payload'] for e in json.load(sys.stdin)['entries'] if e['payload']['action'] == 'use']
-assert any(u['grant_type'] == 'participation' and u.get('match_id') == '${MATCH_ID}' for u in uses), uses
-assert any(u['grant_type'] == 'disclosure' and u.get('scope') == '${CASE_ID}' for u in uses), uses
-print('ASSERT every seeded match and the disclosure carry a consent use OK')
-"
-
-echo "== TVP: a deliberate tamper is detected and localized to the exact record =="
-RESP=$(amisad_curl "${LEDGER}/v1/attestations")
-echo "$RESP" | python3 -c "
-import sys, json
-entries = json.load(sys.stdin)['entries']
-# Modify one record's payload after the fact (index 5 of the corpus).
-idx = 5
-entries[idx]['payload']['lifecycle'] = 'tampered-lifecycle'
-print(json.dumps({'entries': entries, 'expected': idx}))
-" > /tmp/tamper.json
-EXPECTED=$(python3 -c "import json;print(json.load(open('/tmp/tamper.json'))['expected'])")
-python3 -c "import json;d=json.load(open('/tmp/tamper.json'));json.dump({'entries':d['entries']},open('/tmp/tamper-body.json','w'))"
-RESP=$(amisad_curl -X POST "${AUDIT}/v1/certify/tamper" --data-binary @/tmp/tamper-body.json)
-echo "$RESP" | python3 -c "
-import sys, json
-r = json.load(sys.stdin)
-assert r['detected'] is True, r
-assert r['tampered_index'] == ${EXPECTED}, (r, ${EXPECTED})
-print('ASSERT tamper detected and localized OK')
-"
-
-echo "== Ingrid issues findings -> Priya receives them in the platform =="
-amisad_curl -X POST "${PLATFORM}/v1/incidents" \
-    -d "{\"summary\":\"certification findings: corpus certified, tamper detected\",\"from\":\"audit\",\"environment_ids\":[\"${ENV_ID}\"]}" \
-    | python3 -c 'import sys,json;assert json.load(sys.stdin)["case_id"];print("ASSERT findings delivered to the platform OK")'
-
-echo "== TVP: the auditor only ever READ - no writes, no personal data =="
-RESP=$(amisad_curl "${AUDIT}/v1/access-log")
-echo "$RESP" | python3 -c "
-import sys, json
-a = json.load(sys.stdin)['access']
-assert len(a) >= 3, a
-assert all(e['method'] == 'GET' for e in a), a
-text = json.dumps(a).lower()
-for marker in ['maya', 'subject', 'need_context', 'envelope', 'password']:
-    assert marker not in text, f'audit access log leaked: {marker}'
-print('ASSERT audit access is read-only, no personal data OK')
-"
-
-echo "s010.certification HAPPY PATH PASSED"
+cd "${account_home:?The guest administrator home is unavailable}/amisad.dev/poc"
+export REAL_HOME="$account_home"
+provision="$PWD/target/release/amisad-provision"
+if [[ ! -f $provision || -L $provision || ! -x $provision ]]; then
+    provision=/usr/local/bin/amisad-provision
+fi
+if [ ! -x "$provision" ]; then
+    echo 'The AmisAd scenario provisioner is unavailable.' >&2
+    exit 1
+fi
+if [ "$EUID" -eq 0 ]; then
+    exec runuser -u "$account" -- "$provision" scenario-run certification
+fi
+exec "$provision" scenario-run certification

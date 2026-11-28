@@ -40,6 +40,7 @@ $InformationPreference = 'Continue'
 
 $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 . (Join-Path $ProjectRoot 'test/AmisAd.HostCommon.ps1')
+. (Join-Path $ProjectRoot 'test/AmisAd.LabWorkflow.ps1')
 # Resolve-StashService lives in a module, not here: test/Initialize-Lab.ps1 runs
 # the same pre-flight, and the address a pass uploads its binaries to must not
 # depend on which entry point started it.
@@ -100,125 +101,22 @@ if (Test-Path -LiteralPath $runnerPidFile) {
 
 # --- REGION: Clean start
 # See https://yuruna.link/42010605-00b6
-Stop-LabConsole -HostType $HostType
+Stop-LabConsole -HostType $HostType -YurunaRoot $YurunaRoot
 $sweepScript = Join-Path $YurunaRoot 'test/Remove-TestVMFiles.ps1'
 if (-not (Test-Path -LiteralPath $sweepScript)) {
     Write-Error "Remove-TestVMFiles.ps1 not found at '$sweepScript' (set -YurunaRoot)."
     exit 1
 }
 # Child process isolates the framework script's own `exit`.
-$sweepExit = Invoke-AmisAdCleanup -SweepScript $sweepScript -Prefix @('amisad-', 'amisad.', 'test-') -LogDir $LogDir
+$sweepExit = Invoke-AmisAdCleanup -SweepScript $sweepScript -Prefix @('amisad-', 'amisad.', 'test-') -LogDir $LogDir -YurunaRoot $YurunaRoot
 if ($sweepExit -ne 0) {
     Write-Error "Clean-start sweep failed (exit $sweepExit); a lab VM survived - stopping before provisioning on top of it."
     exit 1
 }
-Stop-LabConsole -HostType $HostType
+Stop-LabConsole -HostType $HostType -YurunaRoot $YurunaRoot
 
-$useSignedBuild = Test-AmisAdFreshSignedBuild -YurunaRoot $YurunaRoot -HostType $HostType
-$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeProvisioning' `
-    -IncludeDiskGrowth -UseSignedBuild:$useSignedBuild
-if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
-
-# --- REGION: Remove legacy demo key
-# The core->edge demo keypair is generated INSIDE amisad-core (its deploy chain);
-# the private half never leaves it and only the public half is handed to the
-# edges, after both exist (see [4b] below and poc/usernames.md). A host that ran
-# an older version of this driver holds a pair under test/status/handoff, which
-# the status service serves to the whole LAN; it is deleted and said so.
-foreach ($line in (Remove-LegacyDemoKey -YurunaRoot $YurunaRoot -Confirm:$false)) { Write-Warning $line }
-
-if ($useSignedBuild) {
-    Write-Information "The fresh AmisAd core will use the signed build-service runtime."
-} else {
-    # --- REGION: Resolve stash service
-    # Reused guests can still have a stash-based seed. Resolve their
-    # artifact source before provisioning or running the build guest.
-    $stash = Resolve-StashService -YurunaRoot $YurunaRoot
-    foreach ($line in $stash.Lines) { Write-Information $line }
-    if (-not $stash.Address) {
-        Write-AmisAdStashFailure -YurunaRoot $YurunaRoot -Result $stash -HostType $HostType
-        Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and amisad-core has nowhere to fetch them - stopping before the provisioning stages. " +
-            "Start one on this host (Start-StashServiceVM.ps1), join a pool that runs one, or pin an address with `$env:YURUNA_STASH_SERVICE_HOST.")
-        exit 1
-    }
-
-    # --- REGION: Build binaries
-    if ((Invoke-AmisAdStage @stageContext -Name 'amisad-build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
-        Write-Error "Build stage failed; no binaries in the stash - stopping."
-        exit 1
-    }
-    try { $null = Stop-VMForce -VMName 'amisad-build' } catch { Write-Verbose "Stop-VMForce amisad-build: $($_.Exception.Message)" }
-    Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build' -Confirm:$false -HostType $HostType
-    Write-Information "amisad-build stopped (kept on disk)."
-}
-
-# --- REGION: Provision edges
-foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {
-    if ((Invoke-AmisAdStage @stageContext -Name $edge -Sequence "workload.guest.ubuntu.server.24.$edge.baseline" -NoConfigGate:$NoConfigGate) -ne 0) {
-        Write-Error "$edge provisioning failed - stopping."
-        exit 1
-    }
-    Set-EdgeMemory -Name $edge -Confirm:$false -HostType $HostType
-    Remove-InstallMedia -Name $edge -SnapshotId $edge -Confirm:$false -HostType $HostType
-}
-
-# --- REGION: Deploy core
-if ((Invoke-AmisAdStage @stageContext -Name 'amisad-core' -Sequence 'workload.guest.ubuntu.server.24.amisad-core.deploy' -NoConfigGate:$NoConfigGate) -ne 0) {
-    Write-Error "amisad-core deploy failed - stopping."
-    exit 1
-}
-Remove-InstallMedia -Name 'amisad-core' -SnapshotId 'amisad-core' -Confirm:$false -HostType $HostType
-
-$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeStart'
-if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
-
-# --- REGION: Start edges and wait for addresses
-# s004.failover needs the region-B edge live (jurisdiction-restricted
-# allocation must have a roomier non-compliant region to exclude); earlier
-# scenarios simply don't use it. Both stay live in the demo environment.
-Write-Information "Starting amisad-edge-a + amisad-edge-b."
-# The log-upload sink writes under YURUNA_LOG_DIR when overridden; resolve the
-# same way the server does, and anchor freshness to THIS start (a stale file
-# from a prior run/boot must not count).
-$logRoot = if ($env:YURUNA_LOG_DIR) { $env:YURUNA_LOG_DIR } else { Join-Path $YurunaRoot 'test/status/log' }
-$edges = 'amisad-edge-a', 'amisad-edge-b'
-# Start both first (they boot in parallel), then wait on both IP reports -
-# a serial start would add a full edge boot to the stage for nothing.
-$edgeStartup = Start-AmisAdEdge -Name $edges -LogRoot $logRoot -Confirm:$false
-foreach ($line in $edgeStartup.Lines) { Write-Information $line }
-if (-not $edgeStartup.Ok) {
-    $failure = Get-AmisAdEdgeFailure -EdgeStartup $edgeStartup
-    $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage 'Start-AmisAdEdge' `
-        -FailureClass $failure.FailureClass -ErrorMessage $failure.ErrorMessage -DependencyFailures $failure.DependencyFailures
-    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -AdditionalVm 'amisad-core' -LogDir $LogDir
-    foreach ($line in $evidence.Lines) { Write-Information $line }
-    Write-Error "$($failure.ErrorMessage). Stopping before the scenarios; VMs are left as-is for debugging."
-    exit 1
-}
-
-# --- REGION: Authorize demo public key
-# See https://yuruna.link/42010605-00b5
-$edgeAddress = $edgeStartup.Address
-$keyHandoff = Sync-AmisAdDemoKey -YurunaRoot $YurunaRoot -CoreVm 'amisad-core' -EdgeVm $edges -EdgeAddress $edgeAddress -Confirm:$false
-foreach ($line in $keyHandoff.Lines) { Write-Information $line }
-if (-not $keyHandoff.Ok) {
-    $evidence = Save-AmisAdEdgeAddressEvidence -EdgeVm $edges -AdditionalVm 'amisad-core' -EdgeAddress $edgeAddress -ReportedAt $edgeStartup.ReportedAt -LogDir $LogDir
-    foreach ($line in $evidence.Lines) { Write-Information $line }
-    $null = Write-AmisAdLabFailure -YurunaRoot $YurunaRoot -HostType $HostType -Stage $keyHandoff.Stage -FailureClass $keyHandoff.FailureClass `
-        -ErrorMessage $keyHandoff.Reason -VMName $keyHandoff.VMName -StartupFailure $keyHandoff.StartupFailure `
-        -Address $keyHandoff.Address -ProbeFailure $keyHandoff.ProbeFailure
-    Write-Error "$($keyHandoff.Stage): $($keyHandoff.Reason). Stopping before the scenarios; VMs are left as-is for debugging."
-    exit 1
-}
-
-# --- REGION: Run scenarios
-foreach ($s in $Scenarios) {
-    $name = ($s -split '\.')[-2..-1] -join '.'
-    if ((Invoke-AmisAdStage @stageContext -Name $name -Sequence $s -NoConfigGate:$NoConfigGate) -ne 0) {
-        Write-Error "Scenario $s FAILED - stopping the run; VMs are left as-is for debugging."
-        exit 1
-    }
-}
+$warmup = Invoke-AmisAdWarmup -YurunaRoot $YurunaRoot -StageContext $stageContext -Driver -Scenarios $Scenarios -NoConfigGate:$NoConfigGate
+if ($warmup -ne 0) { exit $warmup }
 
 Write-Information "ALL SCENARIOS PASSED. Demo environment live: amisad-core + amisad-edge-a + amisad-edge-b."
 Write-Information "--- final VM inventory ---"

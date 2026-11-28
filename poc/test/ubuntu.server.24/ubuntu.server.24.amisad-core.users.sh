@@ -3,42 +3,27 @@
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42cdea5e-5625-48dd-8d2b-9fef9861e44b
 # See https://yuruna.link/42010605-00c5
-# --- REGION: Initialize environment
 set -euo pipefail
 
-REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
-
-echo "== non-admin demo users (maya, elena, tom, priya, marcel, kai, pat, alex, sam, dana, ingrid) =="
-for u in maya elena tom priya marcel kai pat alex sam dana ingrid; do
-    if ! id -u "$u" >/dev/null 2>&1; then
-        sudo adduser --disabled-password --gecos "" "$u"
+if [ "$EUID" -eq 0 ]; then
+    account=${SUDO_USER:-}
+    if [ -z "$account" ] || [ "$account" = root ]; then
+        echo 'Run core provisioning as the guest administrator.' >&2
+        exit 1
     fi
-done
-# The accounts are NOT in sudoers; passwords come from the sensitive step.
-
-echo "== core->edge demo SSH keypair for the admin (generated here; the private key never leaves this VM) =="
-SSH_DIR="$REAL_HOME/.ssh"
-DEMO_KEY="$SSH_DIR/amisad-demo-key"
-mkdir -p "$SSH_DIR"
-chmod 700 "$SSH_DIR"
-# A key that already parses with an empty passphrase stays: the edges may
-# already authorize it. Anything else (absent, truncated, passphrase-protected)
-# is replaced, together with its .pub.
-if [ -f "$DEMO_KEY" ] && ssh-keygen -y -P '' -f "$DEMO_KEY" >/dev/null 2>&1; then
-    echo "keeping the existing demo key"
 else
-    rm -f "$DEMO_KEY" "$DEMO_KEY.pub"
-    ssh-keygen -q -t ed25519 -N '' -C 'amisad-demo' -f "$DEMO_KEY"
+    account=$(id -un)
 fi
-# The .pub is always derived from the private key, so a stale or hand-edited
-# copy cannot disagree with the key it is meant to describe. The comment field
-# (amisad-demo) is what an edge's authorized_keys uses to replace this key
-# instead of accumulating old ones.
-ssh-keygen -y -P '' -f "$DEMO_KEY" > "$DEMO_KEY.pub"
-chmod 600 "$DEMO_KEY"
-chmod 644 "$DEMO_KEY.pub"
-chown -R "$REAL_USER:$REAL_USER" "$SSH_DIR"
-echo "demo key fingerprint: $(ssh-keygen -lf "$DEMO_KEY.pub")"
 
-echo "amisad vm-core demo users provisioned"
+IFS=: read -r _ _ account_uid _ _ account_home _ < <(getent -- passwd "$account") || account_home=''
+provision="$account_home/amisad.dev/poc/target/release/amisad-provision"
+if [[ $account_uid == 0 || $account_home != /* || ! -f $provision || -L $provision || ! -x $provision ]]; then
+    echo 'The AmisAd core users provisioner is unavailable.' >&2
+    exit 1
+fi
+
+# The deployed binary and SSH keys belong to the guest administrator.
+if [ "$EUID" -eq 0 ]; then
+    exec runuser -u "$account" -- "$provision" core-users
+fi
+exec "$provision" core-users

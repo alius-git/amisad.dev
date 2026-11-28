@@ -11,6 +11,7 @@
 #requires -version 7
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'AmisAd.HostCommon.ps1')
+. (Join-Path $PSScriptRoot 'AmisAd.LabWorkflow.ps1')
 
 # --- REGION: Invoke-AmisAdScript
 function Invoke-AmisAdScript {
@@ -28,8 +29,12 @@ function Invoke-AmisAdScript {
         [Parameter(Mandatory)][string]$ScriptPath,
         [string[]]$ScriptArguments = @(),
         [Parameter(Mandatory)][string]$OutputPath,
-        [Parameter(Mandatory)][string]$ErrorPath
+        [Parameter(Mandatory)][string]$ErrorPath,
+        [string]$YurunaRoot
     )
+    $native = Invoke-AmisAdNativeStage -YurunaRoot $YurunaRoot -ScriptPath $ScriptPath -ScriptArguments $ScriptArguments `
+        -OutputPath $OutputPath -ErrorPath $ErrorPath
+    if ($null -ne $native) { return $native }
     $startInfo = [Diagnostics.ProcessStartInfo]::new((Get-Process -Id $PID).Path)
     $startInfo.UseShellExecute = $false
     $startInfo.WorkingDirectory = (Get-Location).ProviderPath
@@ -74,17 +79,19 @@ function Invoke-AmisAdStage {
         [Parameter(Mandatory)][string]$HostType,
         [Parameter(Mandatory)][string]$SequenceScript,
         [Parameter(Mandatory)][string]$LogDir,
+        [string]$YurunaRoot,
         [switch]$NoConfigGate,
         [switch]$NoProjectClone
     )
-    Stop-LabConsole -HostType $HostType
+    Stop-LabConsole -HostType $HostType -YurunaRoot $YurunaRoot
     $out = Join-Path $LogDir "$Name.out.log"
     $err = Join-Path $LogDir "$Name.err.log"
     $stageArgs = @($Sequence)
     if ($NoProjectClone) { $stageArgs += '-NoProjectClone' }
     if ($NoConfigGate) { $stageArgs += '-NoConfigGate' }
     Write-Information "===== [$Name] $Sequence  $([DateTime]::Now.ToString('s'))  (log: $out) =====" -InformationAction Continue
-    $exitCode = Invoke-AmisAdScript -ScriptPath $SequenceScript -ScriptArguments $stageArgs -OutputPath $out -ErrorPath $err
+    $exitCode = Invoke-AmisAdScript -ScriptPath $SequenceScript -ScriptArguments $stageArgs -OutputPath $out -ErrorPath $err `
+        -YurunaRoot $YurunaRoot
     Write-Information "===== [$Name] exited $exitCode  $([DateTime]::Now.ToString('s')) =====" -InformationAction Continue
     if ($exitCode -ne 0) {
         Get-Content -LiteralPath $out -Tail 25 -ErrorAction SilentlyContinue | Out-Host
@@ -94,6 +101,43 @@ function Invoke-AmisAdStage {
 }
 
 # --- REGION: Test-AmisAdFreshSignedBuild
+function Get-AmisAdNativeFreshBuild {
+    [OutputType([bool])]
+    param([string]$YurunaRoot, [string]$BuilderConfig, [string]$BuilderModule, [string]$HostType)
+
+    if (-not (Get-AmisAdVerifiedHostBinary -YurunaRoot $YurunaRoot)) { return }
+    $verb = 'amisad-lab-fresh-build'
+    try {
+        $prepared = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb $verb `
+            -Argument @{ Operation = 'prepare'; ConfigPath = $BuilderConfig; HostType = $HostType } -TimeoutSeconds 10
+    } catch {
+        if ($_.Exception.Message -cne "host-binary-command-failed: $verb (unknown-verb)") { throw }
+        return
+    }
+    if (-not $prepared.Used) { return }
+    $plan = $prepared.Value
+    if ($plan -isnot [Collections.IDictionary] -or $plan['handled'] -isnot [bool]) {
+        throw 'The native fresh build plan is invalid.'
+    }
+    if (-not $plan.handled) { return }
+    if ($plan['eligible'] -isnot [bool]) { throw 'The native fresh build plan is invalid.' }
+    if (-not $plan.eligible) { return $false }
+    if ($plan['candidate'] -cnotmatch '^[a-f0-9]{64}$' -or
+        $plan['target'] -cnotin 'x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu' -or
+        $plan['inventoryPrefixes'] -isnot [array] -or $plan['artifacts'] -isnot [array]) {
+        throw 'The native fresh build plan is invalid.'
+    }
+    # An enrolled manifest can only be applied to a newly seeded core.
+    if (@(Get-VMName -Prefix $plan.inventoryPrefixes -ErrorAction Stop).Count) { return $false }
+    Import-Module $BuilderModule -DisableNameChecking -ErrorAction Stop
+    $seed = Get-BuildServiceGuestSeed -ConfigPath $BuilderConfig -Target $plan.target -AmisAd -Binary $plan.artifacts -VerifyManifest
+    if (-not $seed) { return $false }
+    $verified = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb $verb -TimeoutSeconds 10 `
+        -Argument @{ Operation = 'confirm'; Candidate = $plan.candidate; Target = $plan.target } `
+        -InputBytes ([Text.Encoding]::UTF8.GetBytes($seed))
+    return ($verified.Used -and $verified.Value -is [bool] -and $verified.Value)
+}
+
 function Test-AmisAdFreshSignedBuild {
     <#
     .SYNOPSIS
@@ -121,6 +165,9 @@ function Test-AmisAdFreshSignedBuild {
         $config = Read-TestConfig -Path $configPath -ThrowOnError
         if (-not $config.vmStart.buildServiceConfigFile) { return $false }
         $builderConfig = [IO.Path]::GetFullPath($config.vmStart.buildServiceConfigFile, $testRoot)
+        $native = Get-AmisAdNativeFreshBuild -YurunaRoot $YurunaRoot -BuilderConfig $builderConfig `
+            -BuilderModule $builderModule -HostType $HostType
+        if ($null -ne $native) { return $native }
         $settings = [IO.File]::ReadAllText($builderConfig) | ConvertFrom-Json -AsHashtable -Depth 20 -ErrorAction Stop
         if ($settings.consumer.amisad.runtimeBundle -isnot [bool] -or -not $settings.consumer.amisad.runtimeBundle) { return $false }
         # Root names and the test VM prefix are both candidates for reuse.
@@ -157,21 +204,22 @@ function Invoke-AmisAdCleanup {
     param(
         [Parameter(Mandatory)][string]$SweepScript,
         [Parameter(Mandatory)][ValidateNotNullOrEmpty()][string[]]$Prefix,
-        [Parameter(Mandatory)][string]$LogDir
+        [Parameter(Mandatory)][string]$LogDir,
+        [string]$YurunaRoot
     )
     foreach ($value in $Prefix) {
         if ([string]::IsNullOrWhiteSpace($value)) { throw 'A cleanup prefix cannot be empty.' }
     }
-    $index = 0
-    foreach ($value in $Prefix) {
-        $out = Join-Path $LogDir "cleanup-$index.out.log"
-        $err = Join-Path $LogDir "cleanup-$index.err.log"
-        $exitCode = Invoke-AmisAdScript -ScriptPath $SweepScript -ScriptArguments @('-Prefix', $value) -OutputPath $out -ErrorPath $err
+    $cleanup = @{ Script = $SweepScript; LogDir = $LogDir; YurunaRoot = $YurunaRoot }
+    Invoke-AmisAdLabPlan -YurunaRoot $YurunaRoot -Request @{ kind = 'cleanup'; prefixes = $Prefix } -InvokeStep {
+        param($step)
+        $out = Join-Path $cleanup.LogDir "cleanup-$($step.index).out.log"
+        $err = Join-Path $cleanup.LogDir "cleanup-$($step.index).err.log"
+        $exitCode = Invoke-AmisAdScript -ScriptPath $cleanup.Script -ScriptArguments @('-Prefix', $step.prefix) -OutputPath $out -ErrorPath $err `
+            -YurunaRoot $cleanup.YurunaRoot
         Get-Content -LiteralPath $out, $err -ErrorAction SilentlyContinue | Out-Host
-        if ($exitCode -ne 0) { return $exitCode }
-        $index++
+        return $exitCode
     }
-    return 0
 }
 
 # --- REGION: Test-AmisAdStorageAdmission
@@ -200,30 +248,51 @@ function Test-AmisAdStorageAdmission {
     if ($HostType -ne 'host.windows.hyper-v') { return @{ allowed = $true; status = 'not-applicable'; reason = '' } }
     $evidence = @{ allowed = $true; status = 'unknown'; reason = 'Storage admission is unavailable: the host driver has no Test-VMStorageCapacity helper.';
                    timestamp = [DateTime]::UtcNow.ToString('o') }
+    $nativeAdmission = Test-AmisAdNativeStorageAdmission -YurunaRoot $YurunaRoot
     $capacityCommand = Get-Command Test-VMStorageCapacity -ErrorAction SilentlyContinue
     if ($capacityCommand) {
-        $requirements = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'host-storage.requirements.json') -Raw -ErrorAction Stop |
-            ConvertFrom-Json -AsHashtable -ErrorAction Stop
-        $memory = @{}
-        $growth = @{}
-        foreach ($vm in $requirements.virtualMachines) {
-            if ($UseSignedBuild -and $vm.name -eq 'amisad-build') { continue }
-            if (-not $IncludeDiskGrowth -and [long]$vm.startupMemoryBytes -eq 0) { continue }
-            $memory[$vm.name] = [long]$vm.startupMemoryBytes
-            if ($IncludeDiskGrowth) { $growth[$vm.name] = [long]$vm.additionalStorageBytes }
+        $policyPath = Join-Path $PSScriptRoot 'host-storage.requirements.json'
+        $supportsProvisioningMemory = $capacityCommand.Parameters.ContainsKey('ProvisioningMemoryBytes')
+        if ($nativeAdmission) {
+            $selection = @{ IncludeDiskGrowth = [bool]$IncludeDiskGrowth; UseSignedBuild = [bool]$UseSignedBuild;
+                SupportsProvisioningMemory = $supportsProvisioningMemory }
+            $plan = Invoke-AmisAdStorageVerb -YurunaRoot $YurunaRoot -Operation plan -Argument $selection `
+                -InputBytes ([IO.File]::ReadAllBytes($policyPath)) -TimeoutSeconds 5
+            if ($null -eq $plan) { $nativeAdmission = $false }
         }
-        if ($IncludeDiskGrowth -and -not $UseSignedBuild -and -not $memory.ContainsKey('amisad-build')) {
-            # The project-wide preflight reserves only the runtime topology.
-            # The fallback needs a build disk even though it is off at startup.
-            $memory['amisad-build'] = 0L
-            $growth['amisad-build'] = 16GB
-        }
-        try {
+        if ($nativeAdmission) {
+            if ($plan.vmName -isnot [array] -or $plan.startupMemoryBytes -isnot [Collections.IDictionary] -or
+                $plan.additionalStorageBytes -isnot [Collections.IDictionary] -or $plan.reserveBytes -isnot [long]) {
+                throw 'The native storage admission plan is invalid.'
+            }
+            $capacityArgs = @{ VMName = [string[]]$plan.vmName; StartupMemoryBytes = [hashtable]$plan.startupMemoryBytes;
+                AdditionalStorageBytes = [hashtable]$plan.additionalStorageBytes; ReserveBytes = $plan.reserveBytes }
+            if ($IncludeDiskGrowth -and $supportsProvisioningMemory) {
+                if ($plan.provisioningMemoryBytes -isnot [long]) { throw 'The native storage plan omitted the provisioning peak.' }
+                $capacityArgs.ProvisioningMemoryBytes = $plan.provisioningMemoryBytes
+            }
+        } else {
+            $requirements = Get-Content -LiteralPath $policyPath -Raw -ErrorAction Stop | ConvertFrom-Json -AsHashtable -ErrorAction Stop
+            $memory = @{}
+            $growth = @{}
+            foreach ($vm in $requirements.virtualMachines) {
+                if ($UseSignedBuild -and $vm.name -eq 'amisad-build') { continue }
+                if (-not $IncludeDiskGrowth -and [long]$vm.startupMemoryBytes -eq 0) { continue }
+                $memory[$vm.name] = [long]$vm.startupMemoryBytes
+                if ($IncludeDiskGrowth) { $growth[$vm.name] = [long]$vm.additionalStorageBytes }
+            }
+            if ($IncludeDiskGrowth -and -not $UseSignedBuild -and -not $memory.ContainsKey('amisad-build')) {
+                # The fallback needs a build disk even though the VM is off at startup.
+                $memory['amisad-build'] = 0L
+                $growth['amisad-build'] = 16GB
+            }
             $capacityArgs = @{ VMName = [string[]]$memory.Keys; StartupMemoryBytes = $memory;
                 AdditionalStorageBytes = $growth; ReserveBytes = [long]$requirements.reserveBytes }
-            if ($IncludeDiskGrowth -and $capacityCommand.Parameters.ContainsKey('ProvisioningMemoryBytes')) {
+            if ($IncludeDiskGrowth -and $supportsProvisioningMemory) {
                 $capacityArgs.ProvisioningMemoryBytes = [long]$requirements.provisioningMemoryBytes
             }
+        }
+        try {
             $evidence = Test-VMStorageCapacity @capacityArgs
         } catch {
             $evidence = @{ allowed = $true; status = 'unknown'; reason = "Storage admission is unavailable: $($_.Exception.Message)";
@@ -231,8 +300,22 @@ function Test-AmisAdStorageAdmission {
         }
     }
     try {
-        New-Item -ItemType Directory -Path $LogDir -Force -ErrorAction Stop | Out-Null
-        $evidence | ConvertTo-Json -Depth 15 | Set-Content -LiteralPath (Join-Path $LogDir "storage-admission.$Stage.json") -Encoding utf8 -ErrorAction Stop
+        $json = $evidence | ConvertTo-Json -Depth 15
+        $nativeWritten = $false
+        if ($nativeAdmission) {
+            $directory = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($LogDir)
+            $reply = Invoke-AmisAdStorageVerb -YurunaRoot $YurunaRoot -Operation evidence `
+                -Argument @{ LogDirectory = $directory; Stage = $Stage } `
+                -InputBytes ([Text.Encoding]::UTF8.GetBytes($json + [Environment]::NewLine)) -TimeoutSeconds 10
+            if ($null -ne $reply) {
+                if ($reply.written -ne $true) { throw 'The native host did not confirm the storage admission evidence write.' }
+                $nativeWritten = $true
+            }
+        }
+        if (-not $nativeWritten) {
+            New-Item -ItemType Directory -Path $LogDir -Force -ErrorAction Stop | Out-Null
+            $json | Set-Content -LiteralPath (Join-Path $LogDir "storage-admission.$Stage.json") -Encoding utf8 -ErrorAction Stop
+        }
     } catch { Write-Warning "Could not save storage admission evidence: $($_.Exception.Message)" }
     if ($evidence.status -eq 'unknown') { Write-Warning $evidence.reason }
     if (-not $evidence.allowed) {
@@ -250,12 +333,41 @@ function Remove-InstallMedia {
         Remove Hyper-V install DVDs and retake the checkpoint without their absolute paths.
     #>
     [CmdletBinding(SupportsShouldProcess)]
-    param([string]$Name, [string]$SnapshotId, [Parameter(Mandatory)][string]$HostType)
+    param([string]$Name, [string]$SnapshotId, [Parameter(Mandatory)][string]$HostType, [string]$YurunaRoot)
     if ($HostType -ne 'host.windows.hyper-v') {
         Write-Verbose "Remove-InstallMedia: not applicable on '$HostType'."
         return
     }
     if (-not $PSCmdlet.ShouldProcess($Name, 'Remove install media + retake checkpoint')) { return }
+    if ((-not $SnapshotId -or (Get-Command Update-HyperVGuestCheckpoint -ErrorAction SilentlyContinue)) -and
+        (Get-AmisAdVerifiedHostBinary -YurunaRoot $YurunaRoot)) {
+        $native = $null
+        try {
+            $native = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb 'hyperv-detach-install-media' `
+                -Argument @{ VMName = $Name } -TimeoutSeconds 95
+        } catch {
+            if ($_.Exception.Message -cne 'host-binary-command-failed: hyperv-detach-install-media (unknown-verb)') { throw }
+        }
+        if ($native -and $native.Used) {
+            if ($native.Value -isnot [Collections.IDictionary] -or $native.Value['supported'] -isnot [bool]) {
+                throw "Hyper-V did not confirm DVD removal for $Name."
+            }
+            if ($native.Value['supported']) {
+                $vmId = [guid]::Empty
+                if (-not [guid]::TryParse([string]$native.Value['vmId'], [ref]$vmId) -or $vmId -eq [guid]::Empty) {
+                    throw "Hyper-V did not confirm the DVD removal target for $Name."
+                }
+                if ($SnapshotId) {
+                    $retake = Update-HyperVGuestCheckpoint -VMName $Name -VMId $vmId -SnapshotName $SnapshotId -Confirm:$false
+                    if (-not $retake.Success) { throw "Could not retake checkpoint '$SnapshotId' on $Name." }
+                    if ($retake.Retaken) {
+                        Write-Information "Retook checkpoint '$SnapshotId' on $Name without install media." -InformationAction Continue
+                    }
+                }
+                return
+            }
+        }
+    }
     Hyper-V\Get-VMDvdDrive -VMName $Name -ErrorAction SilentlyContinue |
         Hyper-V\Remove-VMDvdDrive -ErrorAction SilentlyContinue
     if ($SnapshotId) {
@@ -275,13 +387,28 @@ function Set-EdgeMemory {
         Shrink Hyper-V edges before checkpointing; KVM/UTM memory is set during provisioning.
     #>
     [CmdletBinding(SupportsShouldProcess)]
-    param([string]$Name, [Parameter(Mandatory)][string]$HostType)
+    param([string]$Name, [Parameter(Mandatory)][string]$HostType, [string]$YurunaRoot)
     if ($HostType -ne 'host.windows.hyper-v') {
         Write-Verbose "Set-EdgeMemory: guest memory is a provisioning-time property on '$HostType'; leaving $Name as built."
         return
     }
     if (-not $PSCmdlet.ShouldProcess($Name, 'Set static memory to 4GB')) { return }
-    Hyper-V\Set-VM -Name $Name -StaticMemory -MemoryStartupBytes 4GB
+    $applied = $false
+    if (Get-AmisAdVerifiedHostBinary -YurunaRoot $YurunaRoot) {
+        if ([string]::IsNullOrWhiteSpace($Name) -or $Name -match '\p{Cc}') { throw 'Missing or invalid VM name.' }
+        try {
+            $native = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb 'hyperv-compute' `
+                -Argument @{ VMName = $Name; MemoryBytes = 4GB; StaticMemoryOnly = $true } -TimeoutSeconds 90
+            if ($native.Used) {
+                if ($native.Value -isnot [bool] -or -not $native.Value) { throw "Hyper-V did not confirm static memory for $Name." }
+                $applied = $true
+            }
+        } catch {
+            if ($_.Exception.Message -cnotin 'host-binary-command-failed: hyperv-compute (unknown-verb)', `
+                'host-binary-command-failed: hyperv-compute (invalid-arguments)') { throw }
+        }
+    }
+    if (-not $applied) { Hyper-V\Set-VM -Name $Name -StaticMemory -MemoryStartupBytes 4GB }
     Write-Information "$Name memory set to 4GB (slice-runtime only)." -InformationAction Continue
 }
 
@@ -293,7 +420,7 @@ function Start-VMConfirmed {
     #>
     [CmdletBinding(SupportsShouldProcess)]
     [OutputType([hashtable])]
-    param([string]$Name, [int]$RunningTimeoutSeconds = 60)
+    param([string]$Name, [int]$RunningTimeoutSeconds = 60, [string]$YurunaRoot)
     if (-not $PSCmdlet.ShouldProcess($Name, 'Start VM and confirm running')) {
         return @{ started = $false; reason = 'WhatIf' }
     }
@@ -319,15 +446,45 @@ function Start-VMConfirmed {
         if ($kind -eq 'none') { $result.kind = 'storage-capacity' }
     }
     if (-not $record.success) { return $result }
-    $deadline = (Get-Date).AddSeconds($RunningTimeoutSeconds)
-    while ((Get-Date) -lt $deadline) {
-        if ((Get-VMState -VMName $Name) -eq 'running') {
-            $result.started = $true; $result.reason = $null; $result.kind = 'none'; $result.controlHung = $false
-            return $result
+    $deadline = [Environment]::TickCount64 + ([long]$RunningTimeoutSeconds * 1000L)
+    $observed = $null
+    if ($YurunaRoot -and $RunningTimeoutSeconds -gt 0 -and $RunningTimeoutSeconds -le 7200) {
+        try {
+            if (Get-AmisAdVerifiedHostBinary -YurunaRoot $YurunaRoot) {
+                $reply = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb 'Wait-VMRunning' `
+                    -Argument @{ VMName = $Name; TimeoutSeconds = $RunningTimeoutSeconds; PollSeconds = 2
+                        ReportState = $true; DeadlineExpiryTick = $deadline } -TimeoutSeconds ($RunningTimeoutSeconds + 5)
+                if ($reply.Used) {
+                    $value = $reply.Value
+                    if ($value -isnot [Collections.IDictionary] -or $value['vmName'] -cne $Name -or
+                        $value['running'] -isnot [bool] -or $value['lastState'] -cnotin 'running', 'stopped', 'absent', 'unknown' -or
+                        ($value['running'] -and $value['lastState'] -cne 'running')) { throw 'Invalid native VM state confirmation.' }
+                    $observed = $value
+                }
+            }
+        } catch {
+            # Older verified builds accept the original Boolean wait only.
+            if ($_.Exception.Message -cnotin 'host-binary-command-failed: Wait-VMRunning (unknown-verb)', `
+                'host-binary-command-failed: Wait-VMRunning (invalid-arguments)') {
+                Write-Verbose "Could not confirm the native VM state. $($_.Exception.Message)"
+                $observed = @{ running = $false; lastState = 'unknown' }
+            }
         }
-        Start-Sleep -Seconds 2
     }
-    $result.reason = "start reported success but the VM is '$(Get-VMState -VMName $Name)' after ${RunningTimeoutSeconds}s"
+    if ($null -eq $observed) {
+        $running = $false
+        while ([Environment]::TickCount64 -lt $deadline) {
+            if ((Get-VMState -VMName $Name) -eq 'running') { $running = $true; break }
+            $remaining = $deadline - [Environment]::TickCount64
+            if ($remaining -gt 0) { Start-Sleep -Milliseconds ([math]::Min(2000L, $remaining)) }
+        }
+        $observed = @{ running = $running; lastState = if ($running) { 'running' } else { Get-VMState -VMName $Name } }
+    }
+    if ($observed['running']) {
+        $result.started = $true; $result.reason = $null; $result.kind = 'none'; $result.controlHung = $false
+        return $result
+    }
+    $result.reason = "start reported success but the VM is '$($observed['lastState'])' after ${RunningTimeoutSeconds}s"
     $result.kind = 'not-running'; $result.controlHung = $false
     return $result
 }
@@ -345,9 +502,17 @@ function Start-AmisAdEdge {
     param(
         [string[]]$Name = @('amisad-edge-a', 'amisad-edge-b'),
         [Parameter(Mandatory)][string]$LogRoot,
+        [string]$YurunaRoot,
         [ValidateRange(0, 3600)][int]$ReadyTimeoutSeconds = 480,
         [ValidateRange(0, 300)][int]$PollSeconds = 10
     )
+    if ($YurunaRoot) {
+        $caller = $PSCmdlet
+        $approval = { param($edge) $caller.ShouldProcess($edge, 'Remove stale IP report and start VM') }.GetNewClosure()
+        $startup = Invoke-AmisAdEdgeStartup -YurunaRoot $YurunaRoot -Names $Name -LogRoot $LogRoot `
+            -ReadySeconds $ReadyTimeoutSeconds -PollSeconds $PollSeconds -Approve $approval
+        if ($startup) { return $startup }
+    }
     $state = @{}
     $address = @{}
     $reportedAt = @{}
@@ -378,7 +543,7 @@ function Start-AmisAdEdge {
         Remove-Item -LiteralPath $report -Force -ErrorAction SilentlyContinue
         $state[$edge].Start = Get-Date
         foreach ($attempt in 1..3) {
-            $started = Start-VMConfirmed -Name $edge -Confirm:$false
+            $started = Start-VMConfirmed -Name $edge -YurunaRoot $YurunaRoot -Confirm:$false
             $state[$edge].Reason = $started.reason
             $state[$edge].Attempts = $attempt
             if ($started.Contains('kind') -and $started.kind) { $state[$edge].Kind = [string]$started.kind }
@@ -404,9 +569,44 @@ function Start-AmisAdEdge {
             if ($attempt -lt 3) { Start-Sleep -Seconds $PollSeconds }
         }
     }
+    $native = $null
+    if ($YurunaRoot -and $Name.Count -le 2 -and -not @($Name | Where-Object { $_ -cnotin @('amisad-edge-a', 'amisad-edge-b') }).Count) {
+        $entry = Join-Path $YurunaRoot 'test/modules/Test.HostBinaryChannel.psm1'
+        if (Test-Path -LiteralPath $entry -PathType Leaf) {
+            Import-Module $entry -DisableNameChecking
+            $edges = @($Name | Where-Object { $state[$_].Started } | ForEach-Object {
+                @{ name = $_; startedUnixTicks = $state[$_].Start.ToUniversalTime().Ticks - [DateTime]::UnixEpoch.Ticks }
+            })
+            if ($edges.Count) {
+                $root = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($LogRoot)
+                try {
+                    $native = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb 'amisad-wait-edge-reports' `
+                        -TimeoutSeconds ($ReadyTimeoutSeconds + 5) -Argument @{
+                            LogRoot = $root; Edges = $edges; ReadyTimeoutSeconds = $ReadyTimeoutSeconds; PollSeconds = $PollSeconds
+                        }
+                } catch {
+                    if ($_.Exception.Message -cne 'host-binary-command-failed: amisad-wait-edge-reports (unknown-verb)') {
+                        Write-Verbose "Native edge report check failed: $($_.Exception.GetType().Name)"
+                        $native = @{ Used = $true; Value = @{} }
+                    }
+                }
+            }
+        }
+    }
     $deadline = (Get-Date).AddSeconds($ReadyTimeoutSeconds)
     foreach ($edge in $Name) {
         if (-not $state[$edge].Started) { continue }
+        if ($native -and $native.Used) {
+            $reading = $native.Value[$edge]
+            if ($reading) {
+                $address[$edge] = [string]$reading.address
+                $reportedAt[$edge] = if ($reading.reportedAt -is [datetime]) { $reading.reportedAt.ToUniversalTime().ToString('o') } else { [string]$reading.reportedAt }
+                $lines.Add("$edge reported $($address[$edge]) at $($reportedAt[$edge]).")
+                $state[$edge].Ready = $true
+                $state[$edge].Reason = $null
+            } else { $state[$edge].Reason = 'started but never reported a fresh valid IP address' }
+            continue
+        }
         do {
             $report = $state[$edge].IpFile
             $written = if (Test-Path -LiteralPath $report -PathType Leaf) { (Get-Item -LiteralPath $report).LastWriteTime } else { $null }
@@ -547,18 +747,27 @@ function Write-AmisAdLabFailure {
         foreach ($moduleName in 'Test.SequenceFailureState.psm1', 'Test.StateFile.psm1', 'Test.RunnerInnerLoop.psm1') {
             Import-Module (Join-Path $YurunaRoot "test/modules/$moduleName") -Global -DisableNameChecking -ErrorAction Stop
         }
-        $rows = @($DependencyFailures)
-        if ($StartupFailure.Count) {
-            $row = @{ area = 'vm-start'; vmName = $VMName; outcome = 'start-failed'; detail = $ErrorMessage }
-            if ($Stage -like 'StorageAdmission-*') { $row.area = 'host-storage'; $row.outcome = 'admission-refused' }
-            foreach ($field in 'hostMemory', 'hostStorage', 'errorCode', 'kind') {
-                if ($StartupFailure.Contains($field)) { $row[$field] = $StartupFailure[$field] }
-            }
-            $rows += $row
+        $plan = Get-AmisAdEvidencePlan -YurunaRoot $YurunaRoot -Kind 'failure-rows' -Context @{
+            stage = $Stage; vmName = $VMName; errorMessage = $ErrorMessage; address = $Address;
+            dependencyFailures = @($DependencyFailures); startupFailure = $StartupFailure; probeFailure = $ProbeFailure
         }
-        if ($ProbeFailure.Count) {
-            $rows += @{ area = 'guest-ssh'; vmName = $VMName; address = $Address; outcome = 'probe-failed';
-                exitCode = $ProbeFailure.exitCode; output = $ProbeFailure.output }
+        if ($plan) {
+            if ($plan['rows'] -isnot [array]) { throw 'The native failure evidence has invalid rows.' }
+            $rows = $plan['rows']
+        } else {
+            $rows = @($DependencyFailures)
+            if ($StartupFailure.Count) {
+                $row = @{ area = 'vm-start'; vmName = $VMName; outcome = 'start-failed'; detail = $ErrorMessage }
+                if ($Stage -like 'StorageAdmission-*') { $row.area = 'host-storage'; $row.outcome = 'admission-refused' }
+                foreach ($field in 'hostMemory', 'hostStorage', 'errorCode', 'kind') {
+                    if ($StartupFailure.Contains($field)) { $row[$field] = $StartupFailure[$field] }
+                }
+                $rows += $row
+            }
+            if ($ProbeFailure.Count) {
+                $rows += @{ area = 'guest-ssh'; vmName = $VMName; address = $Address; outcome = 'probe-failed';
+                    exitCode = $ProbeFailure.exitCode; output = $ProbeFailure.output }
+            }
         }
         $writeArgs = @{ Stage = $Stage; FailureClass = $FailureClass; Severity = 'hard'; GuestKey = '(orchestration)';
             VMName = $VMName; ErrorMessage = $ErrorMessage; HostType = $HostType; DependencyFailures = [hashtable[]]$rows }
@@ -595,15 +804,24 @@ function Save-AmisAdControlSnapshot {
         Justification = 'Writes diagnostic evidence for a stage that has already failed; no lab resource is modified.')]
     param(
         [Parameter(Mandatory)][hashtable]$EdgeStartup,
-        [Parameter(Mandatory)][string]$LogDir
+        [Parameter(Mandatory)][string]$LogDir,
+        [string]$YurunaRoot
     )
     if (-not (Get-Command -Name Save-UtmControlSnapshot -ErrorAction SilentlyContinue)) { return $null }
-    $witness = ''
-    foreach ($edge in @($EdgeStartup['Missing'])) {
-        $edgeState = $EdgeStartup['State'][$edge]
-        if ($edgeState -and $edgeState['Started'] -and -not $edgeState['Ready']) { $witness = [string]$edge; break }
-    }
     try {
+        $witness = ''
+        $plan = Get-AmisAdEvidencePlan -YurunaRoot $YurunaRoot -Kind 'control-witness' -Context @{
+            missing = @($EdgeStartup['Missing']); state = $EdgeStartup['State']
+        }
+        if ($plan) {
+            if ($plan['vmName'] -isnot [string]) { throw 'The native control evidence did not identify a witness.' }
+            $witness = $plan['vmName']
+        } else {
+            foreach ($edge in @($EdgeStartup['Missing'])) {
+                $edgeState = $EdgeStartup['State'][$edge]
+                if ($edgeState -and $edgeState['Started'] -and -not $edgeState['Ready']) { $witness = [string]$edge; break }
+            }
+        }
         return (Save-UtmControlSnapshot -OutputDirectory $LogDir -Trigger 'initialize-lab-edge-start' -VMName $witness -Confirm:$false)
     } catch {
         Write-Verbose "Save-AmisAdControlSnapshot: $($_.Exception.Message)"
@@ -651,7 +869,8 @@ function Save-AmisAdEdgeAddressEvidence {
         [hashtable]$EdgeAddress = @{},
         [hashtable]$ReportedAt = @{},
         [Parameter(Mandatory)][string]$LogDir,
-        [string[]]$AdditionalVm = @()
+        [string[]]$AdditionalVm = @(),
+        [string]$YurunaRoot
     )
     $lines = [System.Collections.Generic.List[string]]::new()
     $records = [System.Collections.Generic.List[object]]::new()
@@ -726,9 +945,12 @@ function Save-AmisAdEdgeAddressEvidence {
     }
     $path = Join-Path $LogDir 'edge-address-evidence.json'
     try {
-        New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
-        [ordered]@{ capturedAtUtc = [DateTime]::UtcNow.ToString('o'); edges = $records.ToArray(); vmDiagnostics = $diagnostics } |
-            ConvertTo-Json -Depth 15 | Set-Content -LiteralPath $path -Encoding utf8
+        $evidence = [ordered]@{ capturedAtUtc = [DateTime]::UtcNow.ToString('o'); edges = $records.ToArray(); vmDiagnostics = $diagnostics }
+        $json = $evidence | ConvertTo-Json -Depth 15
+        if (-not (Write-AmisAdEdgeEvidenceFile -YurunaRoot $YurunaRoot -LogDir $LogDir -Json $json)) {
+            New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+            Set-Content -LiteralPath $path -Value $json -Encoding utf8
+        }
         $lines.Add("Edge address evidence: $path")
         return [pscustomobject]@{ Written = $true; Path = $path; Lines = [string[]]$lines }
     } catch {
@@ -756,17 +978,37 @@ function Remove-LegacyDemoKey {
 
     $handoff = Join-Path $YurunaRoot 'test/status/handoff'
     $lines = [System.Collections.Generic.List[string]]::new()
-    foreach ($name in 'amisad-demo-key', 'amisad-demo-key.pub') {
-        $path = Join-Path $handoff $name
-        if (-not (Test-Path -LiteralPath $path)) { continue }
+    $binding = $null
+    $root = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($YurunaRoot)
+    if (Get-AmisAdVerifiedHostBinary -YurunaRoot $YurunaRoot) {
+        try { $binding = Invoke-AmisAdLegacyKeyOperation -YurunaRoot $root -Action 'inspect' } catch {
+            if ($_.Exception.Message -cne 'host-binary-command-failed: amisad-legacy-key-files (unknown-verb)') { throw }
+        }
+    }
+    foreach ($item in @(@{ Name = 'amisad-demo-key'; Action = 'remove-private' }, @{ Name = 'amisad-demo-key.pub'; Action = 'remove-public' })) {
+        $path = Join-Path $handoff $item.Name
+        $present = if ($binding) { $item.Name -cin $binding['present'] } else { Test-Path -LiteralPath $path }
+        if (-not $present) { continue }
         if (-not $PSCmdlet.ShouldProcess($path, 'Delete the legacy served demo key')) { continue }
-        Remove-Item -LiteralPath $path -Force
+        if ($binding) {
+            $result = Invoke-AmisAdLegacyKeyOperation -YurunaRoot $root -Action $item.Action
+            if (-not $result -or $result['removed'] -isnot [bool]) { throw 'The native key cleanup did not confirm the file result.' }
+            if (-not $result['removed']) { continue }
+        } else { Remove-Item -LiteralPath $path -Force }
         $lines.Add("Removed the legacy demo key file '$path'. That directory is served to the whole LAN by the status service, so treat the key as exposed: a long-lived VM that still trusts it must be rebuilt, or have its authorized_keys line ending in 'amisad-demo' removed.")
     }
-    if ((Test-Path -LiteralPath $handoff -PathType Container) -and -not (Get-ChildItem -LiteralPath $handoff -Force)) {
-        if ($PSCmdlet.ShouldProcess($handoff, 'Remove the empty legacy hand-off directory')) {
-            Remove-Item -LiteralPath $handoff -Force
-        }
+    $empty = if ($binding) {
+        $after = Invoke-AmisAdLegacyKeyOperation -YurunaRoot $root -Action 'inspect'
+        if (-not $after) { throw 'The native key cleanup did not confirm the hand-off directory.' }
+        $after['empty']
+    } else {
+        (Test-Path -LiteralPath $handoff -PathType Container) -and -not (Get-ChildItem -LiteralPath $handoff -Force)
+    }
+    if ($empty -and $PSCmdlet.ShouldProcess($handoff, 'Remove the empty legacy hand-off directory')) {
+        if ($binding) {
+            $result = Invoke-AmisAdLegacyKeyOperation -YurunaRoot $root -Action 'remove-empty'
+            if (-not $result -or $result['removed'] -isnot [bool]) { throw 'The native key cleanup did not confirm the directory result.' }
+        } else { Remove-Item -LiteralPath $handoff -Force }
     }
     return [string[]]$lines
 }
@@ -865,6 +1107,8 @@ function Get-AmisAdEdgeLoginCommand {
         The edge's administrator account (<hostname>-admin).
     .PARAMETER EdgeAddress
         The edge's IP address.
+    .PARAMETER PreferNative
+        Use the activated core guest runtime when it supports the login proof.
     .OUTPUTS
         [string] a single-line command for vm-core's login shell.
     #>
@@ -872,11 +1116,53 @@ function Get-AmisAdEdgeLoginCommand {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)][string]$EdgeUser,
-        [Parameter(Mandatory)][string]$EdgeAddress
+        [Parameter(Mandatory)][string]$EdgeAddress,
+        [switch]$PreferNative
     )
     if ($EdgeUser -cnotmatch '^[a-z][a-z0-9-]*$') { throw "'$EdgeUser' is not an acceptable account name." }
     if ($EdgeAddress -cnotmatch '^[0-9A-Fa-f:.]+$') { throw "'$EdgeAddress' is not an IP address." }
-    return 'ssh -i "$HOME/.ssh/amisad-demo-key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 {0}@{1} true' -f $EdgeUser, $EdgeAddress
+    $legacy = 'ssh -i "$HOME/.ssh/amisad-demo-key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 {0}@{1} true' -f $EdgeUser, $EdgeAddress
+    if (-not $PreferNative) { return $legacy }
+    $native = 'p="$HOME/amisad.dev/poc/target/release/amisad-provision"; if [ -f "$p" ] && [ ! -L "$p" ] && [ -x "$p" ] && "$p" --help | grep -Fq ''|core-edge-login ''; then exec "$p" core-edge-login {0} {1}; fi; ' -f $EdgeUser, $EdgeAddress
+    return $native + $legacy
+}
+
+function Get-AmisAdVerifiedPublicKey {
+    param([string]$YurunaRoot, [string]$Text)
+    $channel = Join-Path $YurunaRoot 'test/modules/Test.HostBinaryChannel.psm1'
+    if (Test-Path -LiteralPath $channel -PathType Leaf) {
+        Import-Module $channel -DisableNameChecking -ErrorAction Stop
+        $probe = $null
+        try {
+            # An earlier host can refuse this verb before reading stdin.
+            $probe = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb 'amisad-demo-public-key' `
+                -Argument @{ Probe = $true } -TimeoutSeconds 3
+        } catch {
+            if ($_.Exception.Message -cnotin 'host-binary-command-failed: amisad-demo-public-key (unknown-verb)', `
+                'host-binary-command-failed: amisad-demo-public-key (invalid-arguments)') { throw }
+        }
+        if ($probe -and $probe.Used) {
+            if ($probe.Value -isnot [Collections.IDictionary] -or $probe.Value['protocol'] -ne 1) {
+                throw 'The native public key protocol is unsupported.'
+            }
+            try {
+                # Keep even an unexpected guest response off the process arguments.
+                $reply = Invoke-VerifiedYurunaHostVerb -RepoRoot $YurunaRoot -Verb 'amisad-demo-public-key' -Argument @{} `
+                    -InputBytes ([Text.Encoding]::UTF8.GetBytes($Text)) -TimeoutSeconds 5
+                if ($reply.Used) {
+                    if (-not $reply.Value['fingerprint'] -or -not $reply.Value['authorize']) { throw 'The native public key response was incomplete.' }
+                    return $reply.Value
+                }
+            } catch {
+                if ($_.Exception.Message -cne 'host-binary-command-failed: amisad-demo-public-key (amisad-public-key-invalid)') { throw }
+                # Keep the guest-facing validation detail when both runtimes refuse it.
+                $null = ConvertTo-AmisAdDemoPublicKey -Text $Text
+                throw 'The core did not return a usable ssh-ed25519 public key.'
+            }
+        }
+    }
+    $publicKey = ConvertTo-AmisAdDemoPublicKey -Text $Text
+    return @{ fingerprint = (Get-AmisAdKeyFingerprint -PublicKey $publicKey); authorize = (Get-AmisAdAuthorizeKeyCommand -PublicKey $publicKey) }
 }
 
 # --- REGION: Sync-AmisAdDemoKey
@@ -942,97 +1228,120 @@ function Sync-AmisAdDemoKey {
         return [pscustomobject]@{ Ok = $true; Lines = [string[]]@(); Fingerprint = ''; Reason = '' }
     }
 
-    if (-not $InvokeGuest) {
+    $useNativeLogin = -not $InvokeGuest
+    if ($useNativeLogin) {
         if (-not (Get-Command Invoke-GuestSsh -ErrorAction SilentlyContinue)) {
             Import-Module (Join-Path $YurunaRoot 'test/modules/Test.Ssh.psm1') -Global -DisableNameChecking -Verbose:$false
         }
         $InvokeGuest = {
             param([string]$VMName, [string]$User, [string]$Command, [int]$TimeoutSeconds, [string]$Address)
-            if ($Address) {
-                Invoke-GuestSsh -VMName $VMName -User $User -Command $Command -TimeoutSeconds $TimeoutSeconds -ResolvedAddress $Address
-            } else {
-                Invoke-GuestSsh -VMName $VMName -User $User -Command $Command -TimeoutSeconds $TimeoutSeconds
+            $connection = @{ VMName = $VMName; User = $User; Command = $Command; TimeoutSeconds = $TimeoutSeconds }
+            if ($Address) { $connection.ResolvedAddress = $Address }
+            # Older framework checkouts expose the same SSH function without
+            # the enrolled worker selector.
+            if ((Get-Command Invoke-GuestSsh).Parameters.ContainsKey('UseVerifiedTransport')) {
+                $connection.UseVerifiedTransport = $true
+                $connection.MaxCapturedChars = 1MB
             }
+            Invoke-GuestSsh @connection
         }
     }
 
-    # --- REGION: Wait for core SSH
-    if ((Get-Command Get-VMState -ErrorAction SilentlyContinue) -and ((Get-VMState -VMName $CoreVm) -ne 'running')) {
-        $lines.Add("Starting $CoreVm to read its demo public key.")
-        $started = Start-VMConfirmed -Name $CoreVm -Confirm:$false
-        if (-not $started.started) { return (& $fail "$CoreVm did not start: $($started.reason)" 'Start-AmisAdCore' $CoreVm $started) }
-    }
     $coreUser = "$CoreVm-admin"
-    $deadline = (Get-Date).AddSeconds($ReadySeconds)
-    $answering = $false
-    do {
-        $probe = & $InvokeGuest $CoreVm $coreUser 'true' 30
-        if ($probe.success) { $answering = $true; break }
-        Start-Sleep -Seconds $PollSeconds
-    } while ((Get-Date) -lt $deadline)
-    if (-not $answering) { return (& $fail "$CoreVm did not answer SSH within ${ReadySeconds}s ($($probe.output))" -VMName $CoreVm -ProbeFailure $probe) }
-
-    # --- REGION: Read demo public key
-    $read = & $InvokeGuest $CoreVm $coreUser 'cat "$HOME/.ssh/amisad-demo-key.pub"' 60
-    if (-not $read.success) {
-        return (& $fail "could not read $CoreVm's demo public key (exit $($read.exitCode)); did the users step of the deploy run? $($read.output)" -VMName $CoreVm)
+    $reportedAddresses = $EdgeAddress
+    $handoff = @{ Key = $null; Failure = $null; Reported = @{}; ProofAddress = @{} }
+    $code = Invoke-AmisAdLabPlan -YurunaRoot $YurunaRoot -Request @{
+        kind = 'public-key-handoff'; edges = $EdgeVm; readySeconds = $ReadySeconds; pollSeconds = $PollSeconds
+    } -InvokeStep {
+        param($step)
+        if ($step.kind -cin @('probe-edge', 'authorize-edge', 'prove-login')) {
+            $edge = [string]$step.name
+            $edgeUser = "$edge-admin"
+            $edgeTarget = if ($reportedAddresses.ContainsKey($edge)) { ([string]$reportedAddresses[$edge]).Trim() } else { '' }
+            $where = if ($edgeTarget) { "at $edgeTarget" } else { 'at its discovered address' }
+        }
+        switch -CaseSensitive ($step.kind) {
+            'start-core' {
+                if ((Get-Command Get-VMState -ErrorAction SilentlyContinue) -and ((Get-VMState -VMName $CoreVm) -ne 'running')) {
+                    $lines.Add("Starting $CoreVm to read its demo public key.")
+                    $started = Start-VMConfirmed -Name $CoreVm -YurunaRoot $YurunaRoot -Confirm:$false
+                    if (-not $started.started) {
+                        $handoff.Failure = @{ Reason = "$CoreVm did not start: $($started.reason)"; Stage = 'Start-AmisAdCore'; VMName = $CoreVm; StartupFailure = $started }
+                        return 1
+                    }
+                }
+            }
+            'probe-core' {
+                $probe = & $InvokeGuest $CoreVm $coreUser 'true' 30
+                if (-not $probe.success) {
+                    $handoff.Failure = @{ Reason = "$CoreVm did not answer SSH within ${ReadySeconds}s ($($probe.output))"; VMName = $CoreVm; ProbeFailure = $probe }
+                    return 1
+                }
+            }
+            'read-public-key' {
+                $read = & $InvokeGuest $CoreVm $coreUser 'cat "$HOME/.ssh/amisad-demo-key.pub"' 60
+                if (-not $read.success) {
+                    $handoff.Failure = @{ Reason = "could not read $CoreVm's demo public key (exit $($read.exitCode)); did the users step of the deploy run? $($read.output)"; VMName = $CoreVm }
+                    return 1
+                }
+                try { $handoff.Key = Get-AmisAdVerifiedPublicKey -YurunaRoot $YurunaRoot -Text $read.output }
+                catch {
+                    $handoff.Failure = @{ Reason = "$CoreVm's demo public key is unusable: $($_.Exception.Message)"; VMName = $CoreVm }
+                    return 1
+                }
+                $lines.Add("$CoreVm demo key: $($handoff.Key.fingerprint)")
+            }
+            'probe-edge' {
+                if (-not $handoff.Reported.ContainsKey($edge)) {
+                    if ($edgeTarget) { $lines.Add("Reaching $edge at $edgeTarget, the address it reported.") }
+                    else { $lines.Add("No reported address for $edge; the host driver's discovery chooses one.") }
+                    $handoff.Reported[$edge] = $true
+                }
+                $probe = & $InvokeGuest $edge $edgeUser 'true' 30 $edgeTarget
+                if (-not $probe.success) {
+                    $handoff.Failure = @{ Reason = "$edge did not answer SSH $where within ${ReadySeconds}s (exit $($probe.exitCode)): $($probe.output)";
+                        VMName = $edge; Address = $edgeTarget; ProbeFailure = $probe }
+                    return 1
+                }
+            }
+            'authorize-edge' {
+                $result = & $InvokeGuest $edge $edgeUser $handoff.Key.authorize 120 $edgeTarget
+                if (-not $result.success) {
+                    $handoff.Failure = @{ Reason = "could not authorize the demo key on $edge $where (exit $($result.exitCode)): $($result.output)";
+                        VMName = $edge; Address = $edgeTarget }
+                    return 1
+                }
+                $lines.Add("$edge now trusts $($handoff.Key.fingerprint) (any earlier amisad-demo entry replaced).")
+            }
+            'prove-login' {
+                if (-not $handoff.ProofAddress.ContainsKey($edge)) {
+                    $handoff.ProofAddress[$edge] = if ($reportedAddresses.ContainsKey($edge)) { [string]$reportedAddresses[$edge] }
+                                                  elseif (Get-Command Get-VMIp -ErrorAction SilentlyContinue) { [string](Get-VMIp -VMName $edge) }
+                                                  else { '' }
+                }
+                $address = $handoff.ProofAddress[$edge]
+                if ([string]::IsNullOrWhiteSpace($address)) {
+                    $lines.Add("Skipped the login check for ${edge}: no address is known for it yet.")
+                    return 0
+                }
+                $command = Get-AmisAdEdgeLoginCommand -EdgeUser $edgeUser -EdgeAddress $address.Trim() -PreferNative:$useNativeLogin
+                $result = & $InvokeGuest $CoreVm $coreUser $command 60
+                if (-not $result.success) {
+                    $handoff.Failure = @{ Reason = "$CoreVm cannot log in to $edge at $address with the demo key (exit $($result.exitCode)): $($result.output)";
+                        VMName = $edge; Address = $address.Trim() }
+                    return 1
+                }
+                $lines.Add("$CoreVm logs in to $edge at $address with the demo key.")
+            }
+            default { throw "Unexpected demo key workflow step '$($step.kind)'." }
+        }
+        return 0
     }
-    try { $publicKey = ConvertTo-AmisAdDemoPublicKey -Text $read.output }
-    catch { return (& $fail "$CoreVm's demo public key is unusable: $($_.Exception.Message)" -VMName $CoreVm) }
-    $fingerprint = Get-AmisAdKeyFingerprint -PublicKey $publicKey
-    $lines.Add("$CoreVm demo key: $fingerprint")
-
-    # --- REGION: Authorize demo public key
-    $authorize = Get-AmisAdAuthorizeKeyCommand -PublicKey $publicKey
-    foreach ($edge in $EdgeVm) {
-        $edgeUser = "$edge-admin"
-        $edgeTarget = if ($EdgeAddress.ContainsKey($edge)) { ([string]$EdgeAddress[$edge]).Trim() } else { '' }
-        $where = if ($edgeTarget) { "at $edgeTarget" } else { "at its discovered address" }
-        if ($edgeTarget) { $lines.Add("Reaching $edge at $edgeTarget, the address it reported.") }
-        else { $lines.Add("No reported address for $edge; the host driver's discovery chooses one.") }
-        $edgeDeadline = (Get-Date).AddSeconds($ReadySeconds)
-        $edgeProbe = $null
-        do {
-            $edgeProbe = & $InvokeGuest $edge $edgeUser 'true' 30 $edgeTarget
-            if ($edgeProbe.success) { break }
-            Start-Sleep -Seconds $PollSeconds
-        } while ((Get-Date) -lt $edgeDeadline)
-        if (-not $edgeProbe.success) {
-            return (& $fail "$edge did not answer SSH $where within ${ReadySeconds}s (exit $($edgeProbe.exitCode)): $($edgeProbe.output)" -VMName $edge -Address $edgeTarget -ProbeFailure $edgeProbe)
-        }
-        $done = $null
-        foreach ($attempt in 1..3) {
-            $done = & $InvokeGuest $edge $edgeUser $authorize 120 $edgeTarget
-            if ($done.success) { break }
-            if ($attempt -lt 3) { Start-Sleep -Seconds $PollSeconds }
-        }
-        if (-not $done.success) { return (& $fail "could not authorize the demo key on $edge $where (exit $($done.exitCode)): $($done.output)" -VMName $edge -Address $edgeTarget) }
-        $lines.Add("$edge now trusts $fingerprint (any earlier amisad-demo entry replaced).")
+    if ($code -ne 0) {
+        $failure = $handoff.Failure
+        return (& $fail @failure)
     }
-
-    # --- REGION: Verify core-to-edge login
-    foreach ($edge in $EdgeVm) {
-        $address = if ($EdgeAddress.ContainsKey($edge)) { [string]$EdgeAddress[$edge] }
-                   elseif (Get-Command Get-VMIp -ErrorAction SilentlyContinue) { [string](Get-VMIp -VMName $edge) }
-                   else { '' }
-        if ([string]::IsNullOrWhiteSpace($address)) {
-            $lines.Add("Skipped the login check for ${edge}: no address is known for it yet.")
-            continue
-        }
-        $login = Get-AmisAdEdgeLoginCommand -EdgeUser "$edge-admin" -EdgeAddress $address.Trim()
-        $proved = $null
-        foreach ($attempt in 1..6) {
-            $proved = & $InvokeGuest $CoreVm $coreUser $login 60
-            if ($proved.success) { break }
-            if ($attempt -lt 6) { Start-Sleep -Seconds $PollSeconds }
-        }
-        if (-not $proved.success) {
-            return (& $fail "$CoreVm cannot log in to $edge at $address with the demo key (exit $($proved.exitCode)): $($proved.output)" -VMName $edge -Address $address.Trim())
-        }
-        $lines.Add("$CoreVm logs in to $edge at $address with the demo key.")
-    }
-
-    return [pscustomobject]@{ Ok = $true; Lines = [string[]]$lines; Fingerprint = $fingerprint; Reason = '' }
+    return [pscustomobject]@{ Ok = $true; Lines = [string[]]$lines; Fingerprint = $handoff.Key.fingerprint; Reason = '' }
 }
 
 Export-ModuleMember -Function Invoke-AmisAdScript, Invoke-AmisAdStage, Invoke-AmisAdCleanup,

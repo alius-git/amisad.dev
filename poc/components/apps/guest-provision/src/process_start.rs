@@ -17,6 +17,12 @@ use std::{
 
 const TOKEN_LIMIT: usize = 16 * 1024;
 
+struct Placement<'a> {
+    executable: &'a Path,
+    log: &'a Path,
+    port: u16,
+}
+
 fn read_token(input: impl Read) -> io::Result<String> {
     let mut buffer = Vec::new();
     BufReader::new(input.take((TOKEN_LIMIT + 2) as u64)).read_until(b'\n', &mut buffer)?;
@@ -52,8 +58,7 @@ fn open_log(path: &Path, uid: u32) -> io::Result<File> {
 }
 
 async fn start(
-    executable: &Path,
-    log: &Path,
+    placement: Placement<'_>,
     region: &str,
     ledger: &str,
     resource: &str,
@@ -62,17 +67,17 @@ async fn start(
 ) -> io::Result<Child> {
     // SAFETY: geteuid takes no arguments and cannot affect memory.
     let uid = unsafe { libc::geteuid() };
-    let metadata = fs::symlink_metadata(executable)?;
+    let metadata = fs::symlink_metadata(placement.executable)?;
     if !metadata.is_file() || metadata.uid() != uid || metadata.permissions().mode() & 0o111 == 0 {
         return Err(io::Error::new(
             io::ErrorKind::PermissionDenied,
             "Expected the transferred slice-runtime executable",
         ));
     }
-    let log = open_log(log, uid)?;
-    let mut command = Command::new(executable);
+    let log = open_log(placement.log, uid)?;
+    let mut command = Command::new(placement.executable);
     command
-        .env("PORT", "8080")
+        .env("PORT", placement.port.to_string())
         .env("REGION", region)
         .env("LEDGER_URL", ledger)
         .env("RESOURCE_URL", resource)
@@ -105,8 +110,11 @@ pub(super) async fn run(region: &str, ledger: &str, resource: &str) -> Result<()
         |error: io::Error| Failure::new(1, format!("Could not start slice-runtime: {error}"));
     let token = read_token(io::stdin().lock()).map_err(failure)?;
     start(
-        Path::new("/tmp/slice-runtime"),
-        Path::new("/tmp/slice-runtime.log"),
+        Placement {
+            executable: Path::new("/tmp/slice-runtime"),
+            log: Path::new("/tmp/slice-runtime.log"),
+            port: 8080,
+        },
         region,
         ledger,
         resource,
@@ -116,6 +124,31 @@ pub(super) async fn run(region: &str, ledger: &str, resource: &str) -> Result<()
     .await
     .map_err(failure)?;
     println!("edge-started");
+    Ok(())
+}
+
+pub(super) async fn start_local(
+    region: &str,
+    ledger: &str,
+    resource: &str,
+    secret: Vec<u8>,
+) -> Result<(), Failure> {
+    let token =
+        String::from_utf8(secret).map_err(|_| Failure::new(1, "Invalid ledger token encoding"))?;
+    start(
+        Placement {
+            executable: Path::new("target/release/slice-runtime"),
+            log: Path::new("/tmp/slice-runtime.log"),
+            port: 8090,
+        },
+        region,
+        ledger,
+        resource,
+        &token,
+        Duration::from_secs(1),
+    )
+    .await
+    .map_err(|error| Failure::new(1, format!("Could not start local slice-runtime: {error}")))?;
     Ok(())
 }
 
@@ -152,8 +185,11 @@ mod tests {
         )).unwrap();
         fs::set_permissions(&executable, fs::Permissions::from_mode(0o755)).unwrap();
         let mut child = start(
-            &executable,
-            &log,
+            Placement {
+                executable: &executable,
+                log: &log,
+                port: 8080,
+            },
             "test region",
             "http://ledger/path?a=b&c=d",
             "http://resource",
@@ -185,8 +221,11 @@ mod tests {
         fs::write(&executable, "#!/bin/sh\necho fixture\nexit 19\n").unwrap();
         fs::set_permissions(&executable, fs::Permissions::from_mode(0o755)).unwrap();
         let error = start(
-            &executable,
-            &log,
+            Placement {
+                executable: &executable,
+                log: &log,
+                port: 8080,
+            },
             "",
             "",
             "",
@@ -203,8 +242,11 @@ mod tests {
         fs::write(&other, "preserve this").unwrap();
         std::os::unix::fs::symlink(&other, &log).unwrap();
         assert!(start(
-            &executable,
-            &log,
+            Placement {
+                executable: &executable,
+                log: &log,
+                port: 8080
+            },
             "",
             "",
             "",

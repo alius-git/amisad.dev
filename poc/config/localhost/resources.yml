@@ -7,7 +7,7 @@
 # TO-SET: ensure source context has the right name
 # --- REGION: globalVariables
 globalVariables:
-  runId:                 "$(-join ((97..122) | Get-Random -Count 6 | %{[char]$_}))"
+  runId:                 { generate: six-lowercase-distinct }
   runTag:                "localhost"
   project:               "amisad"
   namespace:             "${env:project}"

@@ -15,14 +15,15 @@ import shlex
 import shutil
 import subprocess
 import tempfile
+import threading
 import time
 import unittest
 
 from bash_contract_support import find_usable_bash
 
 ROOT = Path(__file__).resolve().parents[1]
-HELPERS = ROOT / 'test/amisad-scenario.sh'
-FAILOVER = ROOT / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.s004.failover.sh'
+HELPERS = ROOT / 'test/fixtures/scenario-helpers-before-rust.sh.fixture'
+FAILOVER = ROOT / 'test/fixtures/failover-before-rust.sh.fixture'
 BASH = find_usable_bash()
 
 
@@ -50,8 +51,8 @@ def wait_until(predicate, timeout=5):
     return predicate()
 
 
-def named_instances():
-    probe = subprocess.run(['pgrep', '-x', 'slice-runtime'], capture_output=True, text=True)
+def named_instances(group):
+    probe = subprocess.run(['pgrep', '-g', str(group), '-x', 'slice-runtime'], capture_output=True, text=True)
     return probe.stdout.split()
 
 
@@ -96,18 +97,21 @@ class SignedSliceStop(unittest.TestCase):
 @unittest.skipUnless(shutil.which('pgrep') and shutil.which('pkill'), 'procps pgrep/pkill are required')
 class StopSliceRuntime(unittest.TestCase):
     def setUp(self):
-        if named_instances():
-            self.skipTest('a slice-runtime process already runs on this machine; the helper would stop it')
         self.directory = tempfile.TemporaryDirectory(prefix='amisad slice-runtime stop ')
         self.root = Path(self.directory.name)
         (self.root / 'bin').mkdir()
         self.started = []
+        self.instance = None
+        for name in ('pgrep', 'pkill'):
+            # procps can install pkill as a link and select mode by argv[0].
+            command = shlex.quote(os.path.abspath(shutil.which(name)))
+            write_command(self.root, name, f'exec {command} -g "${{AMISAD_STOP_TEST_GROUP:?}}" "$@"')
 
     def tearDown(self):
-        for pid in self.started:
-            if alive(pid):
-                os.kill(pid, 9)
-                wait_until(lambda: not alive(pid))
+        for process, reaper in self.started:
+            if process.poll() is None:
+                process.kill()
+            reaper.join(timeout=5)
         self.directory.cleanup()
 
     def helpers(self, term_ticks=None, kill_ticks=None):
@@ -118,26 +122,36 @@ class StopSliceRuntime(unittest.TestCase):
             text = text.replace('\nterm_ticks=100\n', f'\nterm_ticks={term_ticks}\n')
         if kill_ticks is not None:
             text = text.replace('\nkill_ticks=50\n', f'\nkill_ticks={kill_ticks}\n')
+        text = text.replace('/etc/systemd/system/amisad-ip-report.service',
+                            shlex.quote((self.root / 'absent-edge.service').as_posix()))
         path = self.root / 'amisad-scenario.sh'
         path.write_text(text)
         return path
 
-    def start(self, path, *arguments):
-        # The lab starts the instance with `nohup ... &` from an SSH session that
-        # then exits, so the process is reparented and reaped by init. A direct
-        # child of this test would linger as a zombie that pgrep still lists.
-        launched = subprocess.run([BASH, '-c', 'nohup "$0" "$@" >/dev/null 2>&1 & echo $!', path.as_posix(), *arguments],
-                                  cwd=self.root, capture_output=True, text=True, timeout=10, check=True)
-        pid = int(launched.stdout.strip())
-        self.started.append(pid)
-        self.assertTrue(wait_until(lambda: str(pid) in named_instances()),
-                        'the fixture instance must be visible to pgrep -x slice-runtime')
-        return pid
+    def start(self, path, *arguments, ready=None, owned=True):
+        # The lab's init reaps its detached runtime. Reap the test child as
+        # soon as it exits too, so a zombie cannot keep the helper polling.
+        launched = subprocess.Popen([path, *arguments], cwd=self.root, stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL, start_new_session=True)
+        reaper = threading.Thread(target=launched.wait, daemon=True)
+        reaper.start()
+        self.started.append((launched, reaper))
+        self.assertTrue(wait_until(lambda: str(launched.pid) in named_instances(launched.pid)),
+                        'the fixture instance must be visible to procps in its own process group')
+        if ready:
+            self.assertTrue(wait_until(ready.is_file), 'the fixture must install its signal handler before stop')
+        if owned:
+            self.assertIsNone(self.instance)
+            self.instance = launched.pid
+        return launched.pid
 
     def stop(self, helpers, target='', *ssh_options, timeout=20):
         call = ' '.join(['amisad_stop_slice_runtime', repr(target) if target else "''", *ssh_options])
-        return subprocess.run([BASH, '-c', f'export PATH="$PWD/bin:$PATH"; . {helpers.as_posix()!r}; {call}'],
-                              cwd=self.root, capture_output=True, text=True, timeout=timeout)
+        group = str(self.instance) if self.instance is not None else '$$'
+        command = (f'export AMISAD_STOP_TEST_GROUP={group} PATH="$PWD/bin:$PATH"; '
+                   f'. {helpers.as_posix()!r}; {call}')
+        return subprocess.run([BASH, '-c', command], cwd=self.root, capture_output=True,
+                              text=True, timeout=timeout, start_new_session=True)
 
     def test_binary_is_writable_again_when_the_helper_returns(self):
         binary = self.root / 'bin' / 'slice-runtime'
@@ -156,12 +170,12 @@ class StopSliceRuntime(unittest.TestCase):
         self.assertFalse(alive(pid), 'the previous instance must have exited, not merely been signaled')
         with open(binary, 'ab'):
             pass
-        self.assertEqual(named_instances(), [])
+        self.assertEqual(named_instances(pid), [])
 
     def test_slow_exit_is_waited_for_rather_than_raced(self):
         script = write_command(self.root, 'slice-runtime',
-                               'trap "sleep 1; exit 0" TERM\nwhile :; do sleep 0.1; done')
-        pid = self.start(script)
+                               'trap "sleep 1; exit 0" TERM\ntouch ready\nwhile :; do sleep 0.1; done')
+        pid = self.start(script, ready=self.root / 'ready')
         started = time.monotonic()
         result = self.stop(self.helpers())
         elapsed = time.monotonic() - started
@@ -171,18 +185,30 @@ class StopSliceRuntime(unittest.TestCase):
         self.assertNotIn('SIGKILL', result.stdout)
 
     def test_instance_ignoring_sigterm_is_killed_and_reported(self):
-        script = write_command(self.root, 'slice-runtime', "trap '' TERM\nwhile :; do sleep 0.1; done")
-        pid = self.start(script)
+        script = write_command(self.root, 'slice-runtime', "trap '' TERM\ntouch ready\nwhile :; do sleep 0.1; done")
+        pid = self.start(script, ready=self.root / 'ready')
         result = self.stop(self.helpers(term_ticks=3))
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertFalse(alive(pid))
         self.assertIn('SIGKILL', result.stdout)
-        self.assertEqual(named_instances(), [])
+        self.assertEqual(named_instances(pid), [])
 
     def test_no_instance_is_a_silent_success(self):
         result = self.stop(self.helpers())
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, '')
+
+    def test_stop_leaves_the_same_process_name_in_another_group_running(self):
+        binary = self.root / 'bin' / 'slice-runtime'
+        shutil.copy2(shutil.which('sleep'), binary)
+        foreign = self.start(binary, '300', owned=False)
+        local = self.start(binary, '300')
+        result = self.stop(self.helpers())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(alive(local))
+        self.assertEqual(named_instances(foreign), [str(foreign)])
+        self.assertTrue(alive(foreign))
+        self.assertIn(f'stopped slice-runtime (pid {local})', result.stdout)
 
     def test_survivor_fails_loudly_instead_of_handing_scp_a_busy_binary(self):
         write_command(self.root, 'pgrep', 'echo 4242')
@@ -220,9 +246,16 @@ class StopSliceRuntime(unittest.TestCase):
             for plumbing in ('pkill', 'scp', 'nohup', 'AMISAD_ALLOW_SINGLE_VM', 'amisad-demo-key'):
                 self.assertIsNone(re.search(r'\b' + re.escape(plumbing) + r'\b', text),
                                   f'{scenario.name} must leave {plumbing} to the helper')
-            if re.search(r'^\s*amisad_(start|deliver)_slice_runtime ', text, re.M):
+            self.assertRegex(text, r'(?m)^exec "\$provision" scenario-run [a-z]+$')
+            if 'scenario-run suppression' not in text:
                 starting += 1
         self.assertGreaterEqual(starting, 9)
+        native = (ROOT / 'components/apps/guest-provision/src/slice_delivery.rs').read_text()
+        edge = native[native.index('async fn transfer('):native.index('struct FailoverEdge')]
+        self.assertLess(edge.index('slice-stop'), edge.index('child("scp"'))
+        self.assertLess(edge.index('child("scp"'), edge.index('start_edge('))
+        local = native[native.index('pub(super) async fn start_scenario('):native.index('async fn deliver(')]
+        self.assertLess(local.index('process_stop::run()'), local.index('process_start::start_local('))
         lines = HELPERS.read_text().splitlines()
         copies = [index for index, line in enumerate(lines) if re.match(r'\s*scp\b', line)]
         self.assertTrue(copies, 'the helper must deliver the binary')

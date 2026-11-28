@@ -6,8 +6,35 @@
 # --- REGION: Initialize environment
 set -euo pipefail
 
+artifact_plan=/etc/yuruna/amisad-artifacts.json
+if [[ -e $artifact_plan || -L $artifact_plan ]]; then
+    if [[ ! -f $artifact_plan || -L $artifact_plan ]]; then
+        echo 'The enrolled AmisAd artifact plan is not a regular file.' >&2
+        exit 7
+    fi
+    artifact_root=/usr/local/lib/yuruna/amisad-artifacts
+    bootstrap=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
+        "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 7
+    provision="$bootstrap/amisad-provision"
+    if [[ ${bootstrap%/*} != "$artifact_root" || ! ${bootstrap##*/} =~ ^[a-f0-9]{64}$ ||
+          ! -f $provision || -L $provision || ! -x $provision ]]; then
+        echo 'The verified AmisAd provisioner is unavailable.' >&2
+        exit 7
+    fi
+    REAL_USER="${SUDO_USER:-${USER:-$(id -un)}}"
+    IFS=: read -r _ _ _ _ _ REAL_HOME _ < <(getent -- passwd "$REAL_USER") || REAL_HOME=''
+    if [[ $REAL_HOME != /* ]]; then
+        echo 'The build account home is unavailable.' >&2
+        exit 7
+    fi
+    # shellcheck disable=SC1091
+    . "$REAL_HOME/.cargo/env"
+    exec "$provision" build-compile "$REAL_HOME"
+fi
+
 REAL_USER="${SUDO_USER:-$USER}"
 REAL_HOME=$(eval echo "~$REAL_USER")
+# shellcheck disable=SC1091
 . "$REAL_HOME/.cargo/env"
 
 echo "== obtain project tree (lab: host-served tarball of amisad.dev HEAD) =="

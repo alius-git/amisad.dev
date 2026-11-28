@@ -2,142 +2,29 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42297199-700a-4b3e-999e-018dc4b7df51
-# AmisAd POC - install NATS JetStream as a host systemd service. Deliberately
-# NOT in-cluster: docker.io pulls fail in this lab (invalid_token via the
-# caching path); the GitHub release binary avoids Docker Hub.
-# Services reach NATS at <node-ip>:4222; the in-cluster Service indirection
-# returns when the event-driven scenarios actually wire JetStream in.
-# --- REGION: Initialize environment
 set -euo pipefail
 
-# --- REGION: amisad_verify_pinned
-# See https://yuruna.link/42010605-00ce
-amisad_verify_pinned() { # <file> <sha256 pinned in this script> <label>
-    local file="$1" want="$2" label="$3" have
-    have=$(sha256sum "$file" 2>/dev/null) || have=''
-    have=${have%% *}
-    if [ -n "$have" ] && [ "$have" = "$want" ]; then
-        echo "  integrity: sha256 verified (${label})"
-        return 0
-    fi
-    rm -f -- "$file"
-    {
-        echo ""
-        echo "!! INTEGRITY MISMATCH -- refusing to use ${label}"
-        echo "!!   pinned:   ${want}"
-        echo "!!   actual:   ${have:-<unreadable>}"
-        echo "!!   The download was deleted and nothing was run or installed from it: the publisher's"
-        echo "!!   file is not the one this script pins (a truncated transfer, something on the path,"
-        echo "!!   or a release that replaced the pinned one)."
-        echo ""
-    } >&2
-    return 1
-}
-# End pinned download verification
-
-# Pinned (not 'latest'): resolving latest needs the unauthenticated GitHub
-# releases API, which 403s behind the shared NAT egress. Bump by editing these
-# lines: the version and both digests together. The digests are the release's own
-# SHA256SUMS entries for the two linux tarballs.
+# Update the release version and both publisher digests together.
 NATS_VERSION=v2.15.1
 NATS_SHA256_AMD64=bf5edc7b1ce98e885c368cb43a886eb148dc5d0551d99f3cf6141fb5e1954c70
 NATS_SHA256_ARM64=e2fbab4cad7d3c76e3052eb959570393c9d73ba756b70bf8e9eea61e9ae6d49c
-ARCH=$(uname -m)
-case "$ARCH" in
-    x86_64) NARCH=amd64; NATS_SHA256=$NATS_SHA256_AMD64 ;;
-    aarch64) NARCH=arm64; NATS_SHA256=$NATS_SHA256_ARM64 ;;
-    *) NARCH=amd64; NATS_SHA256=$NATS_SHA256_AMD64 ;;
+case "$(uname -m)" in
+    aarch64) NATS_SHA256=$NATS_SHA256_ARM64 ;;
+    *) NATS_SHA256=$NATS_SHA256_AMD64 ;;
 esac
 
 artifact_plan=/etc/yuruna/amisad-artifacts.json
-if [ -e "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
-    if [ ! -f "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
-        echo 'Invalid enrolled AmisAd artifact plan.' >&2
-        exit 1
-    fi
-    artifact_root=/usr/local/lib/yuruna/amisad-artifacts
-    artifact_dir=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
-        "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 1
-    provision="$artifact_dir/amisad-provision"
-    if [ "${artifact_dir%/*}" != "$artifact_root" ] || ! [[ ${artifact_dir##*/} =~ ^[a-f0-9]{64}$ ]] ||
-        [ ! -f "$provision" ] || [ -L "$provision" ] || [ ! -x "$provision" ]; then
-        echo 'The verified AmisAd provisioner is unavailable.' >&2
-        exit 1
-    fi
-    if "$provision" --help | grep -q 'nats-install'; then
-        exec "$provision" nats-install "$NATS_VERSION" "$NATS_SHA256"
-    fi
+if [ ! -f "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
+    echo 'Invalid enrolled AmisAd artifact plan.' >&2
+    exit 1
 fi
-
-changed=0
-installed_version=$(/usr/local/bin/nats-server --version 2>/dev/null || true)
-if [ "$installed_version" != "nats-server: $NATS_VERSION" ]; then
-    # Same exposure as the bazelisk download: one transient empty reply through
-    # the lab proxy ends the script under `set -e`. fetch-and-execute exports the
-    # framework's retry wrappers into this environment; without them, a bounded
-    # single attempt with wget's own retries is the most that can be asked for.
-    NATS_URL="https://github.com/nats-io/nats-server/releases/download/${NATS_VERSION}/nats-server-${NATS_VERSION}-linux-${NARCH}.tar.gz"
-    # A private directory (mode 0700), not loose files in /tmp: another local user
-    # could otherwise swap the tarball between its check and its extraction.
-    NATS_WORK=$(mktemp -d "${TMPDIR:-/tmp}/amisad-nats.XXXXXX")
-    if declare -F wget_try >/dev/null 2>&1; then
-        wget_try -qO "$NATS_WORK/nats-server.tar.gz" "$NATS_URL"
-    else
-        wget --tries=3 --waitretry=5 --retry-connrefused --read-timeout=60 \
-            -qO "$NATS_WORK/nats-server.tar.gz" "$NATS_URL"
-    fi
-    amisad_verify_pinned "$NATS_WORK/nats-server.tar.gz" "$NATS_SHA256" "the NATS server ${NATS_VERSION} (linux-${NARCH})" || {
-        rm -rf -- "$NATS_WORK"
-        exit 7
-    }
-    tar -xzf "$NATS_WORK/nats-server.tar.gz" -C "$NATS_WORK"
-    [ "$("$NATS_WORK/nats-server-${NATS_VERSION}-linux-${NARCH}/nats-server" --version)" = "nats-server: $NATS_VERSION" ]
-    sudo install -m 0755 "$NATS_WORK/nats-server-${NATS_VERSION}-linux-${NARCH}/nats-server" /usr/local/bin/nats-server
-    changed=1
-    rm -rf -- "$NATS_WORK"
+artifact_root=/usr/local/lib/yuruna/amisad-artifacts
+artifact_dir=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
+    "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 1
+provision="$artifact_dir/amisad-provision"
+if [ "${artifact_dir%/*}" != "$artifact_root" ] || ! [[ ${artifact_dir##*/} =~ ^[a-f0-9]{64}$ ]] ||
+    [ ! -f "$provision" ] || [ -L "$provision" ] || [ ! -x "$provision" ]; then
+    echo 'The verified AmisAd provisioner is unavailable.' >&2
+    exit 1
 fi
-
-unit_file=$(mktemp)
-trap 'rm -f "$unit_file"' EXIT
-cat > "$unit_file" <<'UNIT'
-# --- REGION: [Unit]
-[Unit]
-Description=NATS JetStream (AmisAd POC)
-After=network-online.target
-
-# --- REGION: [Service]
-[Service]
-ExecStart=/usr/local/bin/nats-server -js -m 8222
-Restart=always
-RestartSec=2
-
-# --- REGION: [Install]
-[Install]
-WantedBy=multi-user.target
-UNIT
-if ! cmp -s "$unit_file" /etc/systemd/system/nats.service; then
-    sudo install -m 0644 "$unit_file" /etc/systemd/system/nats.service
-    sudo systemctl daemon-reload
-    changed=1
-fi
-sudo systemctl enable nats
-if [ "$changed" -eq 1 ]; then
-    sudo systemctl restart nats
-else
-    sudo systemctl start nats
-fi
-
-for _ in $(seq 1 30); do
-    if curl -sf http://localhost:8222/healthz >/dev/null 2>&1 &&
-        curl -sf http://localhost:8222/varz | python3 -c 'import json,sys; sys.exit(json.load(sys.stdin).get("version") != sys.argv[1])' "${NATS_VERSION#v}"; then
-        # A snapshot without writeback would lose the just-written NATS
-        # binary/unit -- see poc/test.md "Snapshot page-cache flush".
-        sync
-        echo "NATS JetStream deployed"
-        exit 0
-    fi
-    sleep 2
-done
-echo "NATS failed to become healthy" >&2
-sudo systemctl status nats --no-pager | tail -10 || true
-exit 1
+exec "$provision" nats-install "$NATS_VERSION" "$NATS_SHA256"

@@ -268,7 +268,7 @@ anterior é excluído, e o novo é criado a partir da entrada padrão). Os chart
 fabric-coordinator, seller-svc e platform-svc o leem em
 `LEDGER_WRITE_TOKEN` (`ledgerWriteSecret`). O ledger-svc responde a qualquer POST sem
 `Authorization: Bearer <token>` com 401 `write_token_required`; os GETs continuam abertos.
-`test/amisad-scenario.sh` lê o Secret em `amisad-core` e envia o token pela
+`amisad-provision` lê o Secret em `amisad-core` e envia o token pela
 entrada padrão do ssh da borda, onde o comando de inicialização o carrega no ambiente
 do slice-runtime; o fallback de VM única faz o mesmo localmente. s008
 e s010 fazem o reembolso pelo `POST /v1/support/cases/refund` do platform-svc. Os serviços
@@ -482,10 +482,11 @@ correspondentes serem ignorados.
 Execute `flutter test` e `flutter analyze` em `components/apps/buyer-flutter` para
 verificar prazos limite de requisição, navegação/liberação de recursos e respostas desatualizadas.
 
-Os diagnósticos HTTP dos cenários, a resolução dos nós de borda e a inicialização do
-slice-runtime (entrega à borda, o fallback condicionado de VM única e a espera pela
-verificação de saúde) são compartilhados em `test/amisad-scenario.sh`,
-carregado do arquivo extraído do projeto. `build/Publish-ProjectArchive.ps1`
+Os scripts de cenário usam o provisionador da versão implantada no nó principal.
+Ele realiza os diagnósticos HTTP, a resolução dos nós de borda, a entrega,
+o fallback condicionado de VM única e a verificação de saúde. O cenário de
+failover verifica os dois provisionadores antes de parar qualquer nó de borda.
+`build/Publish-ProjectArchive.ps1`
 é o comando canônico de arquivamento; `build/serve-local.ps1` encaminha a chamada por compatibilidade.
 Seller, ledger e resource compilam diretamente o módulo de banco de dados `amisad-common/src/database.rs`;
 a biblioteca common em si continua usando apenas std. Erros SQL retornam

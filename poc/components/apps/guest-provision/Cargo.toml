@@ -14,7 +14,8 @@ http-body-util = "0.1.5"
 hyper = { version = "1.13", features = ["client", "http1"] }
 hyper-util = { version = "0.1.21", features = ["tokio"] }
 serde_json = "1"
-tokio = { version = "1.54.1", features = ["fs", "macros", "net", "process", "rt", "sync", "time"] }
+tokio = { version = "1.54.1", features = ["fs", "io-util", "macros", "net", "process", "rt", "sync", "time"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
+base64 = "0.22.1"
 libc = "0.2"

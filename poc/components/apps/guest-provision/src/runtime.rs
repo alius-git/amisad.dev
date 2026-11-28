@@ -51,6 +51,29 @@ fn verify_executable(path: &Path, machine: u16) -> io::Result<()> {
 }
 
 pub(super) fn activate(project: &Path, candidate: &Path, destination: &Path) -> io::Result<()> {
+    activate_from_source(project, candidate, destination, true)
+}
+
+pub(super) fn binaries() -> impl Iterator<Item = &'static str> {
+    SERVICES
+        .into_iter()
+        .chain(["slice-runtime", "buyer-client", "amisad-provision"])
+}
+
+pub(super) fn activate_stash(
+    project: &Path,
+    candidate: &Path,
+    destination: &Path,
+) -> io::Result<()> {
+    activate_from_source(project, candidate, destination, false)
+}
+
+fn activate_from_source(
+    project: &Path,
+    candidate: &Path,
+    destination: &Path,
+    signed: bool,
+) -> io::Result<()> {
     let machine = match std::env::consts::ARCH {
         "x86_64" => 0x3e,
         "aarch64" => 0xb7,
@@ -68,22 +91,19 @@ pub(super) fn activate(project: &Path, candidate: &Path, destination: &Path) -> 
             )));
         }
     }
-    if revision(&project.join(".yuruna-revision"))?
-        != revision(&candidate.join("framework-revision"))?
+    if signed
+        && revision(&project.join(".yuruna-revision"))?
+            != revision(&candidate.join("framework-revision"))?
     {
         return Err(invalid(
             "Signed runtime revision differs from the project archive",
         ));
     }
-    let binaries =
-        SERVICES
-            .into_iter()
-            .chain(["slice-runtime", "buyer-client", "amisad-provision"]);
     let target = project.join("poc/target");
     fs::create_dir(&target)?;
     let release = target.join("release");
     fs::create_dir(&release)?;
-    for binary in binaries {
+    for binary in binaries() {
         let source = candidate.join(binary);
         verify_executable(&source, machine)?;
         fs::copy(source, release.join(binary))?;

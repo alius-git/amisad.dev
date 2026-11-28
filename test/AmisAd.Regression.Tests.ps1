@@ -80,8 +80,13 @@ Describe 'AmisAd guest deployment contracts' {
         @{ Suite = 'service_contracts.py'; Binary = 'seller-svc' }
         @{ Suite = 'slice_runtime_http_contracts.py'; Binary = 'slice-runtime' }
         @{ Suite = 'demo_host_http_contracts.py'; Binary = 'amisad-demo-host' }
+        @{ Suite = 'scenario_contracts.py'; Binary = 'amisad-provision'; LinuxGuest = $true }
     ) {
-        param($Suite, $Binary)
+        param($Suite, $Binary, $LinuxGuest)
+        if ($LinuxGuest -and -not $IsLinux) {
+            Set-ItResult -Skipped -Because 'The scenario fixtures run the Linux guest provisioner and guest shell entry points.'
+            return
+        }
         $bin = if ($env:AMISAD_BIN_DIR) { $env:AMISAD_BIN_DIR } else { Join-Path $script:RepoRoot 'poc/target/debug' }
         if (-not $script:ContractPython) {
             Set-ItResult -Skipped -Because 'A runnable Python 3 interpreter is required.'
@@ -164,6 +169,159 @@ Describe 'AmisAd analyzer settings' {
     }
 }
 
+Describe 'AmisAd fresh signed build selection' {
+    BeforeAll {
+        $script:SignedBuildRoot = Join-Path $script:FixtureRoot 'signed build'
+        $testRoot = Join-Path $script:SignedBuildRoot 'test'
+        $script:SignedBuildConfig = Join-Path $testRoot 'builder pins.json'
+        $configModule = Join-Path $testRoot 'modules/Test.Config.psm1'
+        $builderModule = Join-Path $testRoot 'extension/build-service/default.psm1'
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $configModule))
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $builderModule))
+        Set-Content -LiteralPath (Join-Path $testRoot 'test.config.yml') -Value 'vmStart: {buildServiceConfigFile: builder pins.json}'
+        @'
+function Read-TestConfig { param($Path, [switch]$ThrowOnError) @{ vmStart = @{ buildServiceConfigFile = 'builder pins.json' } } }
+Export-ModuleMember -Function Read-TestConfig
+'@ | Set-Content -LiteralPath $configModule
+        @'
+function Get-BuildServiceGuestSeed {
+    param($ConfigPath, $Target, [switch]$AmisAd, [string[]]$Binary, [switch]$VerifyManifest)
+    @{ ConfigPath = $ConfigPath; Target = $Target; AmisAd = [bool]$AmisAd
+        Binary = $Binary; VerifyManifest = [bool]$VerifyManifest } | ConvertTo-Json -Compress |
+        Add-Content -LiteralPath $env:AMISAD_SIGNED_TEST_TRACE
+    if ($env:AMISAD_SIGNED_TEST_SEED -eq 'refuse') { throw 'Manifest did not verify.' }
+    return $env:AMISAD_SIGNED_TEST_SEED
+}
+Export-ModuleMember -Function Get-BuildServiceGuestSeed
+'@ | Set-Content -LiteralPath $builderModule
+        & (Get-Module AmisAd.Lab) {
+            function script:Get-VMName {
+                [CmdletBinding()] param([string[]]$Prefix)
+                @{ Inventory = $Prefix } | ConvertTo-Json -Compress | Add-Content -LiteralPath $env:AMISAD_SIGNED_TEST_TRACE
+                if ($env:AMISAD_SIGNED_TEST_INVENTORY -eq 'unavailable') { throw 'Inventory could not be proved.' }
+                if ($env:AMISAD_SIGNED_TEST_INVENTORY) { return $env:AMISAD_SIGNED_TEST_INVENTORY }
+            }
+        }
+    }
+
+    AfterAll { & (Get-Module AmisAd.Lab) { Remove-Item -LiteralPath Function:Get-VMName } }
+
+    It 'preserves fresh signed build selection for <Mode>' -TestCases @(
+        @{ Mode = 'an enrolled fresh core'; Expected = $true; InventoryCalls = 1; VerifyCalls = 1 }
+        @{ Mode = 'a different candidate'; Expected = $false; InventoryCalls = 1; VerifyCalls = 1 }
+        @{ Mode = 'a different target'; Expected = $false; InventoryCalls = 1; VerifyCalls = 1 }
+        @{ Mode = 'a rejected manifest'; Expected = $false; InventoryCalls = 1; VerifyCalls = 1 }
+        @{ Mode = 'a retained core'; Expected = $false; InventoryCalls = 1; VerifyCalls = 0 }
+        @{ Mode = 'an unavailable inventory'; Expected = $false; InventoryCalls = 1; VerifyCalls = 0 }
+        @{ Mode = 'project-only enrollment'; Expected = $false; InventoryCalls = 0; VerifyCalls = 0 }
+        @{ Mode = 'an explicit stash pin'; Expected = $false; InventoryCalls = 0; VerifyCalls = 0 }
+        @{ Mode = 'an environment stash pin'; Expected = $false; InventoryCalls = 0; VerifyCalls = 0 }
+    ) {
+        param($Mode, $Expected, $InventoryCalls, $VerifyCalls)
+        $saved = @{}
+        foreach ($name in 'YURUNA_STASH_SERVICE_HOST', 'AMISAD_SIGNED_TEST_TRACE', 'AMISAD_SIGNED_TEST_SEED', 'AMISAD_SIGNED_TEST_INVENTORY') {
+            $saved[$name] = [Environment]::GetEnvironmentVariable($name)
+            [Environment]::SetEnvironmentVariable($name, $null)
+        }
+        try {
+            $env:AMISAD_SIGNED_TEST_TRACE = Join-Path $script:SignedBuildRoot ([guid]::NewGuid().ToString('N'))
+            $candidate = 'a' * 64
+            $target = 'aarch64-unknown-linux-gnu'
+            $pins = @{ candidateId = $candidate; runtimeBundle = $true }
+            $consumer = if ($Mode -eq 'project-only enrollment') { @{ project = $pins } } else { @{ amisad = $pins } }
+            @{ consumer = $consumer } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $script:SignedBuildConfig
+            $seed = @{ candidate = $candidate; target = $target; runtimeBundle = $true }
+            if ($Mode -eq 'a different candidate') { $seed.candidate = 'b' * 64 }
+            if ($Mode -eq 'a different target') { $seed.target = 'x86_64-unknown-linux-gnu' }
+            $env:AMISAD_SIGNED_TEST_SEED = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(($seed | ConvertTo-Json -Compress)))
+            if ($Mode -eq 'a rejected manifest') { $env:AMISAD_SIGNED_TEST_SEED = 'refuse' }
+            if ($Mode -eq 'a retained core') { $env:AMISAD_SIGNED_TEST_INVENTORY = 'amisad-core' }
+            if ($Mode -eq 'an unavailable inventory') { $env:AMISAD_SIGNED_TEST_INVENTORY = 'unavailable' }
+            if ($Mode -eq 'an environment stash pin') { $env:YURUNA_STASH_SERVICE_HOST = '192.0.2.5' }
+            $stash = if ($Mode -eq 'an explicit stash pin') { '192.0.2.5' } else { '' }
+            Test-AmisAdFreshSignedBuild -YurunaRoot $script:SignedBuildRoot -HostType 'host.macos.utm' -StashPin $stash | Should -Be $Expected
+            $trace = @(Get-Content -LiteralPath $env:AMISAD_SIGNED_TEST_TRACE -ErrorAction SilentlyContinue | ConvertFrom-Json -AsHashtable)
+            $trace.Count | Should -Be ($InventoryCalls + $VerifyCalls)
+            if ($InventoryCalls) { ($trace[0].Inventory -join '|') | Should -Be 'amisad-core|test-' }
+            if ($VerifyCalls) {
+                $trace[1].ConfigPath | Should -Be $script:SignedBuildConfig
+                $trace[1].Target | Should -Be $target
+                $trace[1].AmisAd | Should -BeTrue
+                $trace[1].VerifyManifest | Should -BeTrue
+                ($trace[1].Binary -join '|') | Should -Be ('amisad-provision|framework-revision|seller-svc|resource-svc|ads-svc|' +
+                    'insights-svc|platform-svc|audit-svc|connect-svc|fabric-coordinator|identity-mock|ledger-svc|slice-runtime|buyer-client')
+            }
+        } finally { foreach ($name in $saved.Keys) { [Environment]::SetEnvironmentVariable($name, $saved[$name]) } }
+    }
+}
+
+Describe 'AmisAd standalone lab teardown' {
+    BeforeAll {
+        $script:CleanupEntry = Join-Path $PSScriptRoot 'Clear-Lab.ps1'
+        $script:CleanupModule = Join-Path $script:FixtureRoot 'test/modules/Test.HostContract.psm1'
+        $script:CleanupPid = Join-Path $script:FixtureRoot 'test/status/runtime/runner.pid'
+        $script:CleanupTrace = Join-Path $script:FixtureRoot 'test/sweep.txt'
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $script:CleanupModule))
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $script:CleanupPid))
+        @'
+function Get-HostType { 'host.ubuntu.kvm' }
+function Initialize-YurunaHost { param($RepoRoot, $HostType) }
+function Test-HostRequirement { param($HostType) $true }
+Export-ModuleMember -Function Get-HostType, Initialize-YurunaHost, Test-HostRequirement
+'@ | Set-Content -LiteralPath $script:CleanupModule
+        @'
+param([string]$Prefix)
+Set-Content -LiteralPath (Join-Path $PSScriptRoot 'sweep.txt') -Value $Prefix
+exit 0
+'@ | Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'test/Remove-TestVMFiles.ps1')
+    }
+    BeforeEach {
+        $script:CleanupCycleContext = $env:YURUNA_CYCLE_CONTEXT
+        $env:YURUNA_CYCLE_CONTEXT = $null
+        Remove-Item -LiteralPath $script:CleanupPid, $script:CleanupTrace -ErrorAction SilentlyContinue
+    }
+    AfterEach { $env:YURUNA_CYCLE_CONTEXT = $script:CleanupCycleContext }
+    AfterAll {
+        Get-Module Test.HostContract | Where-Object Path -EQ $script:CleanupModule |
+            Remove-Module -ErrorAction SilentlyContinue
+    }
+
+    It 'refuses the live runner PID before reaching the sweep' {
+        Set-Content -LiteralPath $script:CleanupPid -Value " $PID " -Encoding utf8BOM
+        { & $script:CleanupEntry -YurunaRoot $script:FixtureRoot } |
+            Should -Throw "A Yuruna runner (PID $PID) is active; stop it before clearing the project."
+        Test-Path -LiteralPath $script:CleanupTrace | Should -BeFalse
+        Get-Content -LiteralPath $script:CleanupPid | Should -Be " $PID "
+    }
+
+    It 'preserves recognition of a live PID in an older UTF16 record' {
+        Set-Content -LiteralPath $script:CleanupPid -Value "$PID" -Encoding unicode
+        { & $script:CleanupEntry -YurunaRoot $script:FixtureRoot } |
+            Should -Throw "A Yuruna runner (PID $PID) is active; stop it before clearing the project."
+        Test-Path -LiteralPath $script:CleanupTrace | Should -BeFalse
+    }
+
+    It 'retains the authorized in-cycle sweep even while the runner is live' {
+        $env:YURUNA_CYCLE_CONTEXT = '{}'
+        Set-Content -LiteralPath $script:CleanupPid -Value "$PID"
+        & $script:CleanupEntry -YurunaRoot $script:FixtureRoot
+        $LASTEXITCODE | Should -Be 0
+        Get-Content -LiteralPath $script:CleanupTrace | Should -Be 'amisad-'
+    }
+
+    It 'keeps the normal sweep available for an absent, stale or malformed runner record' {
+        $stale = [int]::MaxValue
+        Get-Process -Id $stale -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        foreach ($record in @('', "$stale", 'invalid PID')) {
+            if ($record) { Set-Content -LiteralPath $script:CleanupPid -Value $record }
+            & $script:CleanupEntry -YurunaRoot $script:FixtureRoot
+            $LASTEXITCODE | Should -Be 0
+            Get-Content -LiteralPath $script:CleanupTrace | Should -Be 'amisad-'
+            Remove-Item -LiteralPath $script:CleanupTrace
+        }
+    }
+}
+
 Describe 'AmisAd child process boundaries' {
     BeforeAll {
         $script:Sweep = Join-Path $script:FixtureRoot 'sweep.ps1'
@@ -236,6 +394,81 @@ exit 23
     }
 }
 
+Describe 'AmisAd Hyper-V provisioning retention' {
+    BeforeAll {
+        & (Get-Module AmisAd.Lab) {
+            function script:Invoke-VerifiedYurunaHostVerb {
+                param($RepoRoot, $Verb, $Argument, $TimeoutSeconds)
+                throw "Unmocked host call $Verb for $($Argument.VMName) at $RepoRoot with timeout $TimeoutSeconds."
+            }
+            function script:Update-HyperVGuestCheckpoint {
+                [CmdletBinding(SupportsShouldProcess)]
+                param($VMName, $VMId, $SnapshotName)
+                if ($PSCmdlet.ShouldProcess($VMName, "Retake $SnapshotName")) { throw "Unmocked checkpoint for $VMId" }
+            }
+        }
+    }
+    AfterAll {
+        & (Get-Module AmisAd.Lab) {
+            Remove-Item -LiteralPath Function:Invoke-VerifiedYurunaHostVerb, Function:Update-HyperVGuestCheckpoint
+        }
+    }
+    BeforeEach {
+        Mock Get-AmisAdVerifiedHostBinary -ModuleName AmisAd.Lab { 'verified-fixture' }
+        Mock Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab { @{ Used = $true; Value = $true } }
+    }
+
+    It 'requests exactly static 4 GB without changing the checkpoint policy' {
+        Set-EdgeMemory -Name 'amisad-edge-a' -HostType 'host.windows.hyper-v' -YurunaRoot $TestDrive -Confirm:$false
+        Should -Invoke Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab -Times 1 -Exactly -ParameterFilter {
+            $Verb -ceq 'hyperv-compute' -and $Argument.VMName -ceq 'amisad-edge-a' -and
+                $Argument.MemoryBytes -eq 4GB -and $Argument.StaticMemoryOnly -eq $true
+        }
+    }
+
+    It 'reports a refused native edit and honors WhatIf before contacting Hyper-V' {
+        Mock Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab { @{ Used = $true; Value = $false } }
+        Set-EdgeMemory -Name 'amisad-edge-a' -HostType 'host.windows.hyper-v' -YurunaRoot $TestDrive -WhatIf
+        Should -Invoke Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab -Times 0 -Exactly
+        { Set-EdgeMemory -Name 'amisad-edge-a' -HostType 'host.windows.hyper-v' -YurunaRoot $TestDrive -Confirm:$false } |
+            Should -Throw '*did not confirm static memory*'
+        Should -Invoke Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab -Times 1 -Exactly
+    }
+
+    It 'retakes only the checkpoint of the VM that had its DVD drives removed' {
+        Mock Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab {
+            @{ Used = $true; Value = @{ supported = $true; vmId = '1be1d34c-5633-449f-aaa9-c4e7190cb91b' } }
+        }
+        Mock Update-HyperVGuestCheckpoint -ModuleName AmisAd.Lab { @{ Success = $true; Retaken = $true } }
+        Remove-InstallMedia -Name 'amisad-edge-a' -SnapshotId 'amisad-edge-a' -HostType 'host.windows.hyper-v' -YurunaRoot $TestDrive -Confirm:$false
+        Should -Invoke Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab -Times 1 -Exactly -ParameterFilter {
+            $Verb -ceq 'hyperv-detach-install-media' -and $Argument.VMName -ceq 'amisad-edge-a'
+        }
+        Should -Invoke Update-HyperVGuestCheckpoint -ModuleName AmisAd.Lab -Times 1 -Exactly -ParameterFilter {
+            $VMName -ceq 'amisad-edge-a' -and $SnapshotName -ceq 'amisad-edge-a' -and [string]$VMId -eq '1be1d34c-5633-449f-aaa9-c4e7190cb91b'
+        }
+    }
+
+    It 'keeps the existing checkpoint when native DVD removal did not complete' {
+        Mock Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab { throw 'host-binary-command-incomplete: hyperv-detach-install-media' }
+        Mock Update-HyperVGuestCheckpoint -ModuleName AmisAd.Lab { throw 'checkpoint mutation after incomplete DVD removal' }
+        { Remove-InstallMedia -Name 'amisad-edge-a' -SnapshotId 'amisad-edge-a' -HostType 'host.windows.hyper-v' -YurunaRoot $TestDrive -Confirm:$false } |
+            Should -Throw '*host-binary-command-incomplete*'
+        Should -Invoke Update-HyperVGuestCheckpoint -ModuleName AmisAd.Lab -Times 0 -Exactly
+    }
+
+    It 'delegates a Hyper-V lab console sweep once and leaves VNC hosts alone' {
+        Mock Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab { @{ Used = $true; Value = @{ closed = 1 } } }
+        Mock Get-Process -ModuleName AmisAd.Lab { throw 'Unexpected title-only console sweep' }
+        & (Get-Module AmisAd.Lab) { param($Fixture) Stop-LabConsole -HostType 'host.ubuntu.kvm' -YurunaRoot $Fixture } $TestDrive
+        Should -Invoke Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab -Times 0 -Exactly
+        & (Get-Module AmisAd.Lab) { param($Fixture) Stop-LabConsole -HostType 'host.windows.hyper-v' -YurunaRoot $Fixture -Confirm:$false } $TestDrive
+        Should -Invoke Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab -Times 1 -Exactly -ParameterFilter {
+            $Verb -ceq 'hyperv-close-lab-consoles' -and $Argument.Count -eq 0
+        }
+    }
+}
+
 Describe 'AmisAd shared VM start helper' {
     BeforeAll {
         $fixtureModule = Join-Path $script:FixtureRoot 'AmisAdFixtureHost.psm1'
@@ -285,6 +518,51 @@ Export-ModuleMember -Function Start-VM, Get-VMState
         $result.reason | Should -Match "VM is 'stopped'"
         $result.kind | Should -Be 'not-running'
         $result.controlHung | Should -BeFalse
+    }
+
+    Context 'Enrolled VM observation' {
+        BeforeAll {
+            & (Get-Module AmisAd.Lab) {
+                function script:Invoke-VerifiedYurunaHostVerb {
+                    param($RepoRoot, $Verb, $Argument, $TimeoutSeconds)
+                    throw "Unmocked observation $Verb for $($Argument.VMName) at $RepoRoot with timeout $TimeoutSeconds."
+                }
+            }
+        }
+        AfterAll { & (Get-Module AmisAd.Lab) { Remove-Item -LiteralPath Function:Invoke-VerifiedYurunaHostVerb } }
+        BeforeEach {
+            Mock Start-VM -ModuleName AmisAd.Lab { @{ success = $true; errorMessage = $null } }
+            Mock Get-VMState -ModuleName AmisAd.Lab { throw 'PowerShell should not resample an enrolled observation' }
+            Mock Get-AmisAdVerifiedHostBinary -ModuleName AmisAd.Lab { 'verified-fixture' }
+        }
+
+        It 'uses the native last state and preserves the startup result and deadline' {
+            Mock Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab {
+                @{ Used = $true; Value = @{ vmName = 'fixture-vm'; running = $false; lastState = 'stopped' } }
+            }
+            $before = [Environment]::TickCount64
+            $result = Start-VMConfirmed -Name 'fixture-vm' -YurunaRoot $TestDrive -RunningTimeoutSeconds 4 -Confirm:$false
+            $result.started | Should -BeFalse
+            $result.kind | Should -BeExactly 'not-running'
+            $result.reason | Should -BeExactly "start reported success but the VM is 'stopped' after 4s"
+            $after = [Environment]::TickCount64
+            Should -Invoke Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab -Times 1 -Exactly -ParameterFilter {
+                $Verb -ceq 'Wait-VMRunning' -and $Argument.VMName -ceq 'fixture-vm' -and $Argument.ReportState -and
+                    $Argument.DeadlineExpiryTick -ge $before + 4000 -and $Argument.DeadlineExpiryTick -le $after + 4000
+            }
+            Should -Invoke Get-VMState -ModuleName AmisAd.Lab -Times 0 -Exactly
+        }
+
+        It 'does not confirm another registered VM from an invalid native reply' {
+            Mock Invoke-VerifiedYurunaHostVerb -ModuleName AmisAd.Lab {
+                @{ Used = $true; Value = @{ vmName = 'other-vm'; running = $true; lastState = 'running' } }
+            }
+            $result = Start-VMConfirmed -Name 'fixture-vm' -YurunaRoot $TestDrive -Confirm:$false
+            $result.started | Should -BeFalse
+            $result.vmName | Should -BeExactly 'fixture-vm'
+            $result.reason | Should -Match "VM is 'unknown'"
+            Should -Invoke Get-VMState -ModuleName AmisAd.Lab -Times 0 -Exactly
+        }
     }
 
     It 'reads the failure kind and the control verdict a driver puts in its record' {
@@ -681,6 +959,45 @@ Describe 'AmisAd topology storage admission' {
         $policy.reserveBytes | Should -Be 2GB
     }
 
+    It 'reserves provisioning growth through a driver without a peak memory parameter' {
+        Set-Item -Path 'function:global:Test-VMStorageCapacity' -Value {
+            param([string[]]$VMName, [hashtable]$StartupMemoryBytes, [hashtable]$AdditionalStorageBytes, [long]$ReserveBytes)
+            $script:CapacityArgs = @{ VMName = $VMName; Memory = $StartupMemoryBytes; Growth = $AdditionalStorageBytes; Reserve = $ReserveBytes }
+            return @{ allowed = $true; status = 'ready'; reason = '' }
+        }
+        $result = Test-AmisAdStorageAdmission -YurunaRoot $script:FixtureRoot -HostType 'host.windows.hyper-v' -LogDir $script:StorageDir `
+            -Stage 'BeforeProvisioning' -IncludeDiskGrowth
+        $result.allowed | Should -BeTrue
+        @($script:CapacityArgs.VMName).Count | Should -Be 4
+        $script:CapacityArgs.Growth['amisad-build'] | Should -Be 16GB
+        $script:CapacityArgs.Reserve | Should -Be 2GB
+        (Get-Content -Raw -LiteralPath (Join-Path $script:StorageDir 'storage-admission.BeforeProvisioning.json') | ConvertFrom-Json).status |
+            Should -BeExactly 'ready'
+    }
+
+    It 'preserves admission when a runtime change prevents planning before measurement' {
+        Mock Test-AmisAdNativeStorageAdmission -ModuleName AmisAd.Lab { $true }
+        Mock Invoke-AmisAdStorageVerb -ModuleName AmisAd.Lab { return }
+        $script:CapacityCalls = 0
+        Set-Item -Path 'function:global:Test-VMStorageCapacity' -Value {
+            param([string[]]$VMName, [hashtable]$StartupMemoryBytes, [hashtable]$AdditionalStorageBytes, [long]$ReserveBytes)
+            $script:CapacityCalls++
+            $VMName | Should -Contain 'amisad-build'
+            $StartupMemoryBytes['amisad-build'] | Should -Be 0
+            $AdditionalStorageBytes['amisad-build'] | Should -Be 16GB
+            $ReserveBytes | Should -Be 2GB
+            return @{ allowed = $false; status = 'insufficient'; reason = 'fixture shortage' }
+        }
+        $result = Test-AmisAdStorageAdmission -YurunaRoot $script:FixtureRoot -HostType 'host.windows.hyper-v' -LogDir $script:StorageDir `
+            -Stage 'BeforeProvisioning' -IncludeDiskGrowth
+        $result.allowed | Should -BeFalse
+        $script:CapacityCalls | Should -Be 1
+        Should -Invoke Invoke-AmisAdStorageVerb -ModuleName AmisAd.Lab -Times 1 -Exactly -ParameterFilter { $Operation -ceq 'plan' }
+        Should -Invoke Invoke-AmisAdStorageVerb -ModuleName AmisAd.Lab -Times 0 -Exactly -ParameterFilter { $Operation -ceq 'evidence' }
+        (Get-Content -Raw -LiteralPath (Join-Path $script:StorageDir 'storage-admission.BeforeProvisioning.json') | ConvertFrom-Json).reason |
+            Should -BeExactly 'fixture shortage'
+    }
+
     It 'rechecks final starts without charging the already provisioned disk growth again' {
         Set-Item -Path 'function:global:Test-VMStorageCapacity' -Value {
             param([string[]]$VMName, [hashtable]$StartupMemoryBytes, [hashtable]$AdditionalStorageBytes, [long]$ReserveBytes)
@@ -704,7 +1021,9 @@ Describe 'AmisAd topology entry points' {
         foreach ($directory in 'test', 'poc/build') { New-Item -ItemType Directory -Path (Join-Path $script:EntryProject $directory) -Force | Out-Null }
         New-Item -ItemType Directory -Path (Join-Path $script:EntryFramework 'test') -Force | Out-Null
         foreach ($file in 'Debug-TestSequence.ps1', 'Remove-TestVMFiles.ps1') { Set-Content -LiteralPath (Join-Path $script:EntryFramework "test/$file") -Value '# fixture' }
-        foreach ($file in 'test/Initialize-Lab.ps1', 'poc/build/run-tests.ps1') { Copy-Item -LiteralPath (Join-Path $script:RepoRoot $file) -Destination (Join-Path $script:EntryProject $file) }
+        foreach ($file in 'test/Initialize-Lab.ps1', 'test/AmisAd.LabWorkflow.ps1', 'poc/build/run-tests.ps1') {
+            Copy-Item -LiteralPath (Join-Path $script:RepoRoot $file) -Destination (Join-Path $script:EntryProject $file)
+        }
         @'
 function Resolve-YurunaRoot { param($Explicit) return $Explicit }
 function Initialize-AmisAdHost { param($YurunaRoot) return 'host.windows.hyper-v' }
@@ -772,6 +1091,54 @@ Export-ModuleMember -Function *
     AfterAll {
         $env:AMISAD_FIXTURE_TRACE = $script:SavedFixtureTrace
         $env:AMISAD_FIXTURE_BLOCK = $script:SavedFixtureBlock
+    }
+
+    It 'Initialize-Lab prepares stage logs for <Mode>' -TestCases @(
+        @{ Mode = 'an explicit relative directory'; Explicit = $true; Active = $true; Malformed = $false }
+        @{ Mode = 'a live cycle'; Explicit = $false; Active = $true; Malformed = $false }
+        @{ Mode = 'an ended cycle'; Explicit = $false; Active = $false; Malformed = $false }
+        @{ Mode = 'an unreadable cycle context'; Explicit = $false; Active = $false; Malformed = $true }
+    ) {
+        param($Mode, $Explicit, $Active, $Malformed)
+        $caseRoot = Join-Path $TestDrive $Mode
+        $cycle = Join-Path $caseRoot "cycle with spaces and 'quotes'"
+        $scratch = Join-Path $caseRoot 'scratch'
+        $cycleLogs = Join-Path $cycle 'initialize-lab.stage-logs'
+        [void][IO.Directory]::CreateDirectory($scratch)
+        if ($Active) { [void][IO.Directory]::CreateDirectory($cycle) }
+        $env:AMISAD_FIXTURE_TRACE = Join-Path $caseRoot 'trace'
+        $env:AMISAD_FIXTURE_BLOCK = 'BeforeProvisioning'
+        $saved = @{}
+        foreach ($variable in 'TMP', 'TEMP', 'TMPDIR', 'YURUNA_CYCLE_CONTEXT') {
+            $saved[$variable] = [Environment]::GetEnvironmentVariable($variable)
+        }
+        Push-Location -LiteralPath $caseRoot
+        try {
+            foreach ($variable in 'TMP', 'TEMP', 'TMPDIR') { [Environment]::SetEnvironmentVariable($variable, $scratch) }
+            $env:YURUNA_CYCLE_CONTEXT = if ($Malformed) { '{unreadable' } else {
+                ConvertTo-Json -InputObject @{ rootCycleFolder = $cycle } -Compress
+            }
+            $scratchLogs = Join-Path $scratch 'amisad-tests'
+            $expected = if ($Active) { $cycleLogs } else { $scratchLogs }
+            $reported = $expected
+            $arguments = @('-YurunaRoot', $script:EntryFramework)
+            if ($Explicit) {
+                $reported = "requested logs with 'quotes'"
+                $expected = Join-Path $caseRoot $reported
+                $arguments += @('-LogDir', $reported)
+            }
+            $output = "$env:AMISAD_FIXTURE_TRACE.out"
+            Invoke-AmisAdScript -ScriptPath (Join-Path $script:EntryProject 'test/Initialize-Lab.ps1') `
+                -ScriptArguments $arguments -OutputPath $output -ErrorPath "$env:AMISAD_FIXTURE_TRACE.err" | Should -Be 1
+            Test-Path -LiteralPath $expected -PathType Container | Should -BeTrue
+            Get-Content -LiteralPath $output | Should -Contain "Per-stage logs: $reported"
+            Test-Path -LiteralPath $cycle | Should -Be $Active
+            Test-Path -LiteralPath $cycleLogs | Should -Be ($Active -and -not $Explicit)
+            Test-Path -LiteralPath $scratchLogs | Should -Be (-not $Active)
+        } finally {
+            Pop-Location
+            foreach ($variable in $saved.Keys) { [Environment]::SetEnvironmentVariable($variable, $saved[$variable]) }
+        }
     }
 
     It '<Entry> proceeds directly to edge and core stages with a verified fresh bundle' -TestCases @(
@@ -1493,6 +1860,34 @@ Describe 'AmisAd demo key hand-off' {
         It 'prints the fingerprint ssh-keygen prints' {
             Get-AmisAdKeyFingerprint -PublicKey $script:PublicLine | Should -Be $script:Fingerprint
         }
+
+        It 'keeps public-key parsing available when an older verified host declines a probe without stdin' {
+            $fixture = Join-Path $TestDrive 'older-public-key-host'
+            $modules = Join-Path $fixture 'test/modules'
+            $null = New-Item -ItemType Directory -Path $modules -Force
+            $channel = Join-Path $modules 'Test.HostBinaryChannel.psm1'
+            @'
+function Invoke-VerifiedYurunaHostVerb {
+    param($RepoRoot, $Verb, $Argument, $TimeoutSeconds, [byte[]]$InputBytes)
+    $null = $RepoRoot, $TimeoutSeconds
+    if ($Verb -ceq 'amisad-demo-public-key' -and $Argument.Probe -and -not $PSBoundParameters.ContainsKey('InputBytes')) {
+        throw 'host-binary-command-failed: amisad-demo-public-key (unknown-verb)'
+    }
+    throw "Unexpected input to the older host: $($InputBytes.Length) bytes."
+}
+Export-ModuleMember -Function Invoke-VerifiedYurunaHostVerb
+'@ | Set-Content -LiteralPath $channel
+            try {
+                $reply = & (Get-Module AmisAd.Lab) {
+                    param($Root, $Key)
+                    Get-AmisAdVerifiedPublicKey -YurunaRoot $Root -Text $Key
+                } $fixture $script:PublicLine
+                $reply.fingerprint | Should -BeExactly $script:Fingerprint
+                $reply.authorize | Should -Match ([regex]::Escape($script:PublicLine))
+            } finally {
+                Get-Module -All -Name Test.HostBinaryChannel | Where-Object Path -EQ $channel | Remove-Module
+            }
+        }
     }
 
     Context 'what an edge is told to do' {
@@ -1579,6 +1974,39 @@ Describe 'AmisAd demo key hand-off' {
                 Should -Be 'ssh -i "$HOME/.ssh/amisad-demo-key" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 amisad-edge-a-admin@192.168.122.5 true'
             { Get-AmisAdEdgeLoginCommand -EdgeUser 'x; reboot' -EdgeAddress '192.168.122.5' } | Should -Throw
             { Get-AmisAdEdgeLoginCommand -EdgeUser 'amisad-edge-a-admin' -EdgeAddress '1.2.3.4; reboot' } | Should -Throw
+        }
+
+        It 'runs the activated core proof once and uses the shell only for an earlier runtime' -Skip:(-not (Get-Command bash -ErrorAction SilentlyContinue)) {
+            $work = Join-Path $script:FixtureRoot ('proof-' + [guid]::NewGuid().ToString('N'))
+            $release = Join-Path $work 'home/amisad.dev/poc/target/release'
+            [void](New-Item -ItemType Directory -Path $release -Force)
+            $binary = Join-Path $release 'amisad-provision'
+            $program = @'
+#!/bin/sh
+if [ "$1" = --help ]; then
+    printf '%s\n' '<core-ready|core-edge-login USER ADDRESS>'
+    exit 0
+fi
+printf '%s\n' "$*"
+exit 27
+'@
+            [IO.File]::WriteAllText($binary, ($program -replace "`r`n", "`n"), [Text.UTF8Encoding]::new($false))
+            $command = Get-AmisAdEdgeLoginCommand -EdgeUser 'amisad-edge-a-admin' -EdgeAddress '192.168.122.5' -PreferNative
+            $prefix = 'HOME="$PWD/home"; export HOME; ssh() { printf "legacy\n"; }; '
+            Push-Location -LiteralPath $work
+            try {
+                & $script:Bash.Source -c 'chmod +x "$PWD/home/amisad.dev/poc/target/release/amisad-provision"'
+                $LASTEXITCODE | Should -Be 0
+                $native = & $script:Bash.Source -c ($prefix + $command)
+                $LASTEXITCODE | Should -Be 27
+                $native | Should -Be 'core-edge-login amisad-edge-a-admin 192.168.122.5'
+
+                $older = ($program -replace '\|core-edge-login USER ADDRESS', '') -replace "`r`n", "`n"
+                [IO.File]::WriteAllText($binary, $older, [Text.UTF8Encoding]::new($false))
+                $baseline = & $script:Bash.Source -c ($prefix + $command)
+                $LASTEXITCODE | Should -Be 0
+                $baseline | Should -Be 'legacy'
+            } finally { Pop-Location }
         }
     }
 
@@ -2064,7 +2492,7 @@ Describe 'AmisAd key handling policy' {
             $calls = $ast.FindAll({ param($node) $node -is [Management.Automation.Language.CommandAst] -and $node.GetCommandName() -like 'ssh-keygen*' }, $true)
             foreach ($call in $calls) { $offenders.Add("$($file.FullName):$($call.Extent.StartLineNumber)") }
         }
-        foreach ($file in $script:Sources | Where-Object { $_.Extension -eq '.sh' -and $_.Name -ne $script:UsersScript }) {
+        foreach ($file in $script:Sources | Where-Object { $_.Extension -eq '.sh' }) {
             $hits = Select-String -LiteralPath $file.FullName -Pattern '\bssh-keygen\b' | Where-Object { $_.Line -notmatch '^\s*#' }
             foreach ($hit in $hits) { $offenders.Add("$($file.FullName):$($hit.LineNumber)") }
         }
@@ -2075,8 +2503,21 @@ Describe 'AmisAd key handling policy' {
         $users = $script:Sources | Where-Object { $_.Name -eq $script:UsersScript }
         $users | Should -Not -BeNullOrEmpty
         $text = Get-Content -LiteralPath $users.FullName -Raw
-        $text | Should -Match 'ssh-keygen -q -t ed25519 -N '''' -C ''amisad-demo'' -f "\$DEMO_KEY"'
+        $text | Should -Match 'exec "\$provision" core-users'
         $text | Should -Not -Match '\b(wget|curl|amisad_host_fetch)\b'
+    }
+
+    It 'uses only the existing admin-owned guest runtime for native demo key generation' {
+        $users = Get-Content -LiteralPath ($script:Sources | Where-Object { $_.Name -eq $script:UsersScript }).FullName -Raw
+        $users | Should -Match 'provision="\$account_home/amisad\.dev/poc/target/release/amisad-provision"'
+        $users | Should -Match 'exec "\$provision" core-users'
+        $users | Should -Match 'exec runuser -u "\$account" -- "\$provision" core-users'
+        $native = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'poc/components/apps/guest-provision/src/core_users.rs') -Raw
+        ($native -replace '\s+', '') | Should -Match '"ssh-keygen",&\["-q","-t","ed25519","-N","","-C","amisad-demo"'
+        $native | Should -Not -Match '\b(wget|curl|amisad_host_fetch)\b'
+        @(Get-ChildItem -LiteralPath (Join-Path $script:RepoRoot 'poc/components/apps/guest-provision/src') -Filter '*.rs' -Recurse |
+            Select-String -Pattern '"ssh-keygen"' |
+            Where-Object Filename -ne 'core_users.rs') | Should -BeNullOrEmpty
     }
 
     It 'never names the legacy served key path outside the tests that guard it' {
@@ -2097,17 +2538,18 @@ Describe 'AmisAd key handling policy' {
     }
 
     It 'leaves the scenarios that reach an edge reading the key from the admin home of vm-core' {
-        # The scenarios reach an edge only through the shared helper, which
-        # holds the one login that names the key.
-        $helper = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'poc/test/amisad-scenario.sh') -Raw
-        $helper | Should -Match 'ssh_opts=\(-i "\$REAL_HOME/\.ssh/amisad-demo-key"'
+        $delivery = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'poc/components/apps/guest-provision/src/slice_delivery.rs') -Raw
+        $delivery | Should -Match 'env::var\("REAL_HOME"\)'
+        $delivery | Should -Match '"\{home\}/\.ssh/amisad-demo-key"'
+        $delivery | Should -Match '(?s)"-i", &key, "-o", "StrictHostKeyChecking=accept-new"'
         $scenarios = @($script:Sources | Where-Object { $_.Name -match '^ubuntu\.server\.24\.amisad-core\.s\d{3}\..+\.sh$' })
         $scenarios.Count | Should -BeGreaterOrEqual 10
         $reachingAnEdge = 0
         foreach ($scenario in $scenarios) {
             $text = Get-Content -LiteralPath $scenario.FullName -Raw
-            $text | Should -Not -Match 'amisad-demo-key' -Because "$($scenario.Name) logs in to an edge through the helper"
-            if ($text -match '(?m)^\s*amisad_(start|deliver)_slice_runtime ') { $reachingAnEdge++ }
+            $text | Should -Not -Match 'amisad-demo-key' -Because "$($scenario.Name) logs in to an edge through the provisioner"
+            $text | Should -Match '(?m)^exec "\$provision" scenario-run [a-z]+$'
+            if ($text -notmatch 'scenario-run suppression') { $reachingAnEdge++ }
         }
         $reachingAnEdge | Should -BeGreaterOrEqual 9 -Because 'the scenarios that start slice-runtime on an edge all log in with the key'
     }

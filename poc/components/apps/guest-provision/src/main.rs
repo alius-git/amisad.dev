@@ -2,7 +2,19 @@
 // Copyright (c) 2026 by Alisson Sol et al.
 // GUID: 42a213ce-83c5-4071-9071-ddb88d146d42
 
+#[cfg(target_os = "linux")]
+mod build_compile;
+#[cfg(target_os = "linux")]
+mod build_tools;
+#[cfg(target_os = "linux")]
+mod core_deploy;
+#[cfg(target_os = "linux")]
+mod core_deploy_seed;
+#[cfg(target_os = "linux")]
+mod core_users;
 mod database;
+#[cfg(target_os = "linux")]
+mod edge_key;
 mod edge_report;
 mod nats;
 #[cfg(target_os = "linux")]
@@ -11,6 +23,12 @@ mod process_start;
 mod process_stop;
 #[cfg(target_os = "linux")]
 mod runtime;
+#[cfg(target_os = "linux")]
+mod scenario_lifecycle;
+#[cfg(target_os = "linux")]
+mod scenarios;
+#[cfg(target_os = "linux")]
+mod slice_delivery;
 
 use bytes::Bytes;
 use http_body_util::{BodyExt, Empty, Limited};
@@ -369,14 +387,37 @@ async fn core_ready(
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> ExitCode {
     let args: Vec<_> = std::env::args().skip(1).collect();
-    const USAGE: &str = "Usage: amisad-provision <core-ready|edge-report|db-setup|nats-install VERSION SHA256|slice-start REGION LEDGER_URL RESOURCE_URL|slice-stop|slice-wait ENDPOINT|activate-runtime PROJECT CANDIDATE DESTINATION>";
+    const USAGE: &str = "Usage: amisad-provision <core-ready|core-deploy|core-deploy-seeded|core-deploy-stash|core-deploy-skeletons|core-users|core-edge-login USER ADDRESS|edge-install-reporter|edge-authorize-demo-key|edge-report|edge-address NAME STATUS_IP STATUS_PORT|db-setup|nats-install VERSION SHA256|build-tools|build-compile BUILD_HOME|slice-start REGION LEDGER_URL RESOURCE_URL|slice-stop|slice-wait ENDPOINT|slice-deliver TARGET REGION LEDGER_URL RESOURCE_URL [report-address]|slice-scenario-start TARGET REGION LEDGER_URL RESOURCE_URL ALLOW_SINGLE|scenario-run NAME|scenario-fulfillment NODE_IP SLICE_ENDPOINT|scenario-fitting NODE_IP SLICE_ENDPOINT|scenario-silence NODE_IP SLICE_ENDPOINT|scenario-failover NODE_IP EDGE_A EDGE_B|scenario-failover-lab NODE_IP STATUS_IP STATUS_PORT|scenario-attribution NODE_IP SLICE_ENDPOINT|scenario-mandate NODE_IP SLICE_ENDPOINT|scenario-suppression NODE_IP|scenario-mediation NODE_IP SLICE_ENDPOINT|scenario-certification NODE_IP SLICE_ENDPOINT|scenario-inventory NODE_IP SLICE_ENDPOINT|activate-runtime PROJECT CANDIDATE DESTINATION>";
     let result = match args.as_slice() {
         [mode] if mode == "--help" => {
             println!("{USAGE}");
             return ExitCode::SUCCESS;
         }
         [mode] if mode == "core-ready" => core_ready(&LocalCluster, POLL_BUDGET, POLL_DELAY).await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "core-deploy" => core_deploy::run().await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "core-deploy-seeded" => core_deploy_seed::run(false).await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "core-deploy-stash" => core_deploy_seed::run(true).await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "core-deploy-skeletons" => core_deploy::deploy_skeletons().await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "core-deploy-seeded-available" => core_deploy_seed::available(),
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "core-users" => core_users::run().await,
+        #[cfg(target_os = "linux")]
+        [mode, user, address] if mode == "core-edge-login" => {
+            core_users::prove_edge_login(user, address).await
+        }
         [mode] if mode == "edge-report" => edge_report::run().await,
+        [mode, edge, ip, port] if mode == "edge-address" => {
+            edge_report::discover(edge, ip, port).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "edge-install-reporter" => edge_report::install().await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "edge-authorize-demo-key" => edge_key::run(),
         [mode] if mode == "db-setup" => database::run().await,
         #[cfg(target_os = "linux")]
         [mode] if mode == "slice-stop" => process_stop::run().await,
@@ -384,9 +425,63 @@ async fn main() -> ExitCode {
         [mode, region, ledger, resource] if mode == "slice-start" => {
             process_start::run(region, ledger, resource).await
         }
+        #[cfg(target_os = "linux")]
+        [mode, target, region, ledger, resource, flags @ ..] if mode == "slice-deliver" => {
+            slice_delivery::run(target, region, ledger, resource, flags).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, target, region, ledger, resource, allow_single]
+            if mode == "slice-scenario-start" =>
+        {
+            slice_delivery::scenario(target, region, ledger, resource, allow_single).await
+        }
         [mode, endpoint] if mode == "slice-wait" => {
             slice_wait(endpoint, Duration::from_secs(30), Duration::from_secs(2)).await
         }
+        #[cfg(target_os = "linux")]
+        [mode, name] if mode == "scenario-run" => scenario_lifecycle::run(name).await,
+        #[cfg(target_os = "linux")]
+        [mode, node, endpoint] if mode == "scenario-fulfillment" => {
+            scenarios::fulfillment(node, endpoint).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, endpoint] if mode == "scenario-fitting" => {
+            scenarios::fitting(node, endpoint).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, endpoint] if mode == "scenario-silence" => {
+            scenarios::silence::run(node, endpoint).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, endpoint] if mode == "scenario-attribution" => {
+            scenarios::attribution::run(node, endpoint).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, endpoint] if mode == "scenario-mediation" => {
+            scenarios::mediation::run(node, endpoint).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, endpoint] if mode == "scenario-certification" => {
+            scenarios::certification::run(node, endpoint).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, endpoint] if mode == "scenario-inventory" => {
+            scenarios::inventory::run(node, endpoint).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, endpoint] if mode == "scenario-mandate" => {
+            scenarios::mandate::run(node, endpoint).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, edge_a, edge_b] if mode == "scenario-failover" => {
+            scenarios::failover::run(node, edge_a, edge_b).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node, status_ip, status_port] if mode == "scenario-failover-lab" => {
+            slice_delivery::failover(node, status_ip, status_port).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, node] if mode == "scenario-suppression" => scenarios::suppression(node).await,
         #[cfg(target_os = "linux")]
         [mode, project, candidate, destination] if mode == "activate-runtime" => runtime::activate(
             Path::new(project),
@@ -394,6 +489,14 @@ async fn main() -> ExitCode {
             Path::new(destination),
         )
         .map_err(|error| Failure::new(7, format!("Could not activate signed runtime: {error}"))),
+        #[cfg(target_os = "linux")]
+        [mode, home] if mode == "build-compile" => build_compile::run(Path::new(home)).await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "build-tools" => build_tools::setup().await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "build-tools-configure" => build_tools::configure().await,
+        #[cfg(target_os = "linux")]
+        [mode, args @ ..] if mode == "build-tools-attempt" => build_tools::attempt(args).await,
         [mode, version, digest] if mode == "nats-install" => nats::run(version, digest).await,
         _ => {
             eprintln!("{USAGE}");

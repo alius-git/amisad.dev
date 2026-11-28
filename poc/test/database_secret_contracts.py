@@ -28,7 +28,8 @@ from bash_contract_support import find_usable_bash
 ROOT = Path(__file__).resolve().parents[1]
 GUEST = ROOT / 'test/ubuntu.server.24'
 DEPLOY = GUEST / 'ubuntu.server.24.amisad-core.deploy.sh'
-DB = GUEST / 'ubuntu.server.24.amisad-core.db.sh'
+DB = ROOT / 'test/fixtures/core-db-before-rust.sh.fixture'
+ACTIVE_DB = GUEST / 'ubuntu.server.24.amisad-core.db.sh'
 CHARTS = ROOT / 'workloads/services'
 BASH = find_usable_bash()
 FUNCTION = 'amisad_publish_database_password'
@@ -445,6 +446,62 @@ class DeployPath(unittest.TestCase):
                 else:
                     self.assertNotIn('ledgerWriteSecret', values + template)
                     self.assertNotIn('LEDGER_WRITE_TOKEN', template)
+
+
+@unittest.skipUnless(BASH, 'A usable native-filesystem Bash is required for guest shell contracts')
+class DatabaseGuestLaunch(unittest.TestCase):
+    def test_fetched_database_entry_requires_the_verified_provisioner(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'etc/yuruna').mkdir(parents=True)
+            (root / 'bin').mkdir()
+            script = root / 'case.sh'
+            source = ACTIVE_DB.read_text()
+            for prefix in ('/usr/local', '/etc/yuruna'):
+                source = source.replace(prefix, root.as_posix() + prefix)
+            script.write_text(source)
+
+            def command(name, body):
+                tool = root / 'bin' / name
+                tool.write_text('#!/bin/sh\n' + body + '\n')
+                tool.chmod(0o755)
+
+            command('sudo', 'exec "$@"')
+            for vendor in ('wget', 'curl', 'apt-get', 'psql'):
+                command(vendor, 'echo "legacy guest operation" >> actions; exit 88')
+
+            def run():
+                return subprocess.run([BASH, '-c', 'export PATH="$PWD/bin:$PATH"; exec "$BASH" case.sh'],
+                                      cwd=root, capture_output=True, text=True, timeout=15)
+
+            missing = run()
+            self.assertEqual(missing.returncode, 1, missing.stderr)
+            self.assertIn('Invalid enrolled AmisAd artifact plan', missing.stderr)
+            self.assertFalse((root / 'actions').exists())
+
+            plan = root / 'etc/yuruna/amisad-artifacts.json'
+            plan.write_text('{}\n')
+            installer = root / 'usr/local/lib/yuruna/install-rust-artifacts'
+            artifact = installer.parent / 'amisad-artifacts' / ('3' * 64)
+            artifact.mkdir(parents=True)
+            installer.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > loader\nprintf "%s\\n" "'
+                                 + artifact.as_posix() + '"\n')
+            installer.chmod(0o755)
+            backend = artifact / 'amisad-provision'
+            unrelated = artifact / 'some-other-program'
+            unrelated.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > selected\nexit 19\n')
+            unrelated.chmod(0o755)
+            backend.symlink_to(unrelated.name)
+            linked = run()
+            self.assertEqual(linked.returncode, 1, linked.stderr)
+            self.assertFalse((root / 'selected').exists())
+            backend.unlink()
+            unrelated.rename(backend)
+            selected = run()
+            self.assertEqual(selected.returncode, 19, selected.stderr)
+            self.assertEqual((root / 'selected').read_text(), 'db-setup\n')
+            self.assertTrue((root / 'loader').read_text().rstrip().endswith('amisad-provision framework-revision'))
+            self.assertFalse((root / 'actions').exists())
 
 
 if __name__ == '__main__':

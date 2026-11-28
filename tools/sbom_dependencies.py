@@ -132,7 +132,7 @@ def _manifest(path: str) -> bool:
                      'package-lock.json', 'libman.json', 'pubspec.yaml', 'MODULE.bazel',
                      '.bazelversion', 'pyproject.toml', 'Directory.Packages.props'}
             or base.endswith('.csproj') or base.startswith('Dockerfile') or _terraform_manifest(path)
-            or _helm_manifest(path)
+            or _helm_manifest(path) or path == 'rust/website/restore-assets.sh'
             or bool(re.fullmatch(r'(?:requirements|constraints)[^/]*\.txt', base)))
 
 
@@ -460,6 +460,24 @@ def _dotnet(c: _Collector) -> None:
                   version=_exact(version), version_constraint=version if not _exact(version) else None,
                   needle=entry['library'], detail='LibMan browser library',
                   notes=['Provider declaration only; restored browser files are not inventoried.'])
+
+
+# --- REGION: Verified browser asset declarations
+def _browser_assets(c: _Collector) -> None:
+    path = 'rust/website/restore-assets.sh'
+    if path not in c.text:
+        return
+    text = c.text[path]
+    declarations = re.search(r"(?m)<<'ASSETS'\n([\s\S]+?)^ASSETS$", text)
+    if not declarations:
+        raise ValueError(f'Browser asset declarations are missing in {path}')
+    for row in declarations[1].splitlines():
+        asset = re.fullmatch(r'([a-f0-9]{64}) ([\w.-]+)/([^/\s]+)/([^\s]+) (\S+)', row)
+        if not asset or not _exact(asset[3]):
+            raise ValueError(f'Invalid browser asset declaration in {path}: {row}')
+        checksum, name, version, source, destination = asset.groups()
+        c.add(name, 'cdnjs', path, version=version, needle=row,
+              detail=f'Verified CDN asset {source} installed at {destination} (SHA-256: {checksum})')
 
 
 # --- REGION: Flutter and Bazel declarations
@@ -938,6 +956,6 @@ def collect_dependencies(files: dict[str, bytes], repo_name: str) -> list[dict]:
     """
     normalized = {path.replace('\\', '/'): content for path, content in files.items()}
     collector = _Collector(normalized)
-    for parser in (_go, _cargo, _npm, _dotnet, _flutter, _bazel, _terraform, _helm, _docker, _python):
+    for parser in (_go, _cargo, _npm, _dotnet, _browser_assets, _flutter, _bazel, _terraform, _helm, _docker, _python):
         parser(collector)
     return collector.finish()

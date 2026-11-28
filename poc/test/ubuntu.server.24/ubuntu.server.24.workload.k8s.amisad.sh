@@ -2,43 +2,24 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42d0b04a-d061-440b-b09b-4a3303f612b8
-# AmisAd POC - build all service images and deploy the skeleton charts (idempotent).
-# --- REGION: Initialize environment
+# Install the POC skeleton charts through the signed guest provisioner.
 set -euo pipefail
 
-REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
-sudo chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.kube" 2>/dev/null || true
-
-POC="$REAL_HOME/git/yuruna/project/poc"
-
-SERVICES="seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator identity-mock ledger-svc"
-
-# Local distribution registry, as in the yuruna-project examples: one exact
-# release, and the port published on the loopback address only, because the
-# client that pushes and the node that pulls share this guest; open to the LAN,
-# it would take pushes from any machine there. A container an earlier run
-# published on every address is created again.
-REGISTRY_IMAGE="registry:2.8.3"
-if docker inspect registry >/dev/null 2>&1; then
-    registry_bind=$(docker inspect -f '{{range (index .HostConfig.PortBindings "5000/tcp")}}{{.HostIp}} {{end}}' registry 2>/dev/null || true)
-    if [ "$registry_bind" != "127.0.0.1 " ]; then
-        echo "Re-creating the registry container to publish port 5000 on 127.0.0.1 only"
-        docker rm -f registry >/dev/null 2>&1 || true
-    fi
+artifact_plan=/etc/yuruna/amisad-artifacts.json
+if [ ! -f "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
+    echo 'Invalid enrolled AmisAd artifact plan.' >&2
+    exit 1
 fi
-docker start registry 2>/dev/null || \
-    docker run -d -p 127.0.0.1:5000:5000 --restart=always --name registry "$REGISTRY_IMAGE"
-
-cd "$POC"
-for svc in $SERVICES; do
-    docker build -f "components/services/${svc}/Dockerfile" \
-        -t "localhost:5000/amisad/${svc}:latest" .
-    docker push "localhost:5000/amisad/${svc}:latest"
-    helm upgrade --install "$svc" "workloads/services/${svc}" \
-        --namespace amisad --create-namespace \
-        --set "image=localhost:5000/amisad/${svc}:latest"
-done
-
-kubectl -n amisad get deployments
-echo "AmisAd POC skeletons deployed"
+artifact_root=/usr/local/lib/yuruna/amisad-artifacts
+artifact_dir=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
+    "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 1
+provision="$artifact_dir/amisad-provision"
+if [ "${artifact_dir%/*}" != "$artifact_root" ] || ! [[ ${artifact_dir##*/} =~ ^[a-f0-9]{64}$ ]] ||
+    [ ! -f "$provision" ] || [ -L "$provision" ] || [ ! -x "$provision" ]; then
+    echo 'The verified AmisAd provisioner is unavailable.' >&2
+    exit 1
+fi
+if [[ $EUID -eq 0 ]]; then
+    exec runuser -u "${SUDO_USER:-${USER:-$(id -un)}}" -- "$provision" core-deploy-skeletons
+fi
+exec "$provision" core-deploy-skeletons

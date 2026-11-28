@@ -12,18 +12,19 @@ import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh'
+SCRIPT = ROOT / 'test/fixtures/core-nats-before-rust.sh.fixture'
+ACTIVE_SCRIPT = ROOT / 'test/ubuntu.server.24/ubuntu.server.24.amisad-core.nats.sh'
 TARBALL = b'fixture nats-server release tarball'
 
 
 class NatsInstaller(unittest.TestCase):
-    def fixture(self, directory, pin_the_fixture_tarball):
+    def fixture(self, directory, pin_the_fixture_tarball, entry=SCRIPT):
         """A disposable root with command fixtures; returns (root, script, env)."""
         root = Path(directory)
         posix = root.as_posix()
         for folder in ['bin', 'usr/local/bin', 'etc/systemd/system', 'etc/yuruna', 'tmp']:
             (root / folder).mkdir(parents=True, exist_ok=True)
-        source = SCRIPT.read_text()
+        source = entry.read_text()
         # Paths are spliced in POSIX form so the same file runs under Git Bash
         # (where a backslash in a script is an escape) and on Linux.
         for prefix in ['/tmp/', '/usr/local', '/etc/systemd', '/etc/yuruna']:
@@ -98,7 +99,7 @@ class NatsInstaller(unittest.TestCase):
 
     def test_signed_candidate_receives_the_architecture_pin(self):
         with tempfile.TemporaryDirectory() as directory:
-            root, _, env = self.fixture(directory, pin_the_fixture_tarball=False)
+            root, _, env = self.fixture(directory, pin_the_fixture_tarball=False, entry=ACTIVE_SCRIPT)
             (root / 'etc/yuruna/amisad-artifacts.json').write_text('{}\n')
             installer = root / 'usr/local/lib/yuruna/install-rust-artifacts'
             installer.parent.mkdir(parents=True)
@@ -119,6 +120,19 @@ class NatsInstaller(unittest.TestCase):
             self.assertEqual((root / 'native').read_text(),
                              'nats-install v2.15.1 bf5edc7b1ce98e885c368cb43a886eb148dc5d0551d99f3cf6141fb5e1954c70\n')
             self.assertFalse((root / 'actions').exists(), 'the verified command must own the setup')
+            (root / 'bin/uname').write_text('#!/bin/sh\necho aarch64\n')
+            result = self.run_installer(root, env)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual((root / 'native').read_text(),
+                             'nats-install v2.15.1 e2fbab4cad7d3c76e3052eb959570393c9d73ba756b70bf8e9eea61e9ae6d49c\n')
+
+    def test_current_entry_refuses_missing_enrollment_before_any_service_effect(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, _, env = self.fixture(directory, pin_the_fixture_tarball=False, entry=ACTIVE_SCRIPT)
+            result = self.run_installer(root, env)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertIn('Invalid enrolled AmisAd artifact plan', result.stderr)
+            self.assertFalse((root / 'actions').exists())
 
     def test_refuses_a_download_that_is_not_the_pinned_release(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -137,11 +151,13 @@ class NatsInstaller(unittest.TestCase):
             self.assertEqual([p.name for p in (root / 'tmp').iterdir() if p.name.startswith('amisad-nats')], [])
 
     def test_pins_are_the_publishers_values(self):
-        text = SCRIPT.read_text()
+        text = ACTIVE_SCRIPT.read_text()
         self.assertRegex(text, r'NATS_VERSION=v\d+\.\d+\.\d+\n')
         for arch in ('AMD64', 'ARM64'):
             self.assertRegex(text, rf'NATS_SHA256_{arch}=[0-9a-f]{{64}}\n')
         self.assertNotIn('latest', re.sub(r'#.*', '', text), 'the install must name a pinned release')
+        pins = r'(?m)^NATS_(?:VERSION|SHA256_(?:AMD64|ARM64))=.*$'
+        self.assertEqual(re.findall(pins, text), re.findall(pins, SCRIPT.read_text()))
 
 
 if __name__ == '__main__':

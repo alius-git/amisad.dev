@@ -3,129 +3,29 @@
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42129c1b-6851-42f3-90a4-337f9ec22427
 # See https://yuruna.link/42010605-00bf
-# --- REGION: Initialize environment
 set -euo pipefail
 
-REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
-POC="$REAL_HOME/amisad.dev/poc"
-cd "$POC"
-# --- REGION: Load scenario helpers
-# shellcheck source=../amisad-scenario.sh
-. "$POC/test/amisad-scenario.sh"
+account_home=${HOME:-}
+if [ "$EUID" -eq 0 ]; then
+    account=${SUDO_USER:-root}
+    IFS=: read -r _ _ account_uid _ _ account_home _ < <(getent -- passwd "$account") || account_home=''
+    if [[ $account_uid == 0 || $account_home != /* ]]; then
+        echo 'Run the AmisAd scenario as the guest administrator.' >&2
+        exit 1
+    fi
+fi
 
-# --- REGION: Resolve service endpoints
-NODE_IP=$(hostname -I | awk '{print $1}')
-LEDGER="http://${NODE_IP}:30081"
-RESOURCE="http://${NODE_IP}:30082"
-SELLER="http://${NODE_IP}:30083"
-ADS="http://${NODE_IP}:30087"
-
-echo "== slice-runtime (edge amisad-edge-a) =="
-amisad_start_slice_runtime "$LEDGER" "$RESOURCE"
-
-export COORDINATOR_URL="http://${NODE_IP}:30080" IDENTITY_URL="http://${NODE_IP}:30084"
-
-echo "== register edge + seed Elena's summer offer =="
-amisad_curl -X POST "${RESOURCE}/v1/edges" \
-    -d "{\"region\":\"region-a\",\"endpoint\":\"${SLICE_EP}\"}"
-amisad_curl -X POST "${SELLER}/v1/offers" \
-    -d '{"offer_id":"serving-set-01","tenant":"elena-atelier","title":"Ceramic serving set","category":"housewares","region":"region-a","price_cents":11000,"deliver_by_days":10,"auto_close":true}'
-
-echo "== Marcel: campaign + brief; Kai: asset; Marcel: activate =="
-CAMP=$(amisad_curl -X POST "${ADS}/v1/campaigns" \
-    -d '{"tenant":"elena-atelier","region":"region-a","category":"housewares","ad_cents_per_match":2000,"budget_cents":10000}')
-CAMPAIGN_ID=$(echo "$CAMP" | python3 -c 'import sys,json;print(json.load(sys.stdin)["campaign_id"])')
-amisad_curl -X POST "${ADS}/v1/briefs" -d "{\"campaign_id\":\"${CAMPAIGN_ID}\"}"
-# Kai sees the brief in the demand queue, then produces the asset.
-RESP=$(amisad_curl "${ADS}/v1/briefs")
-echo "$RESP" | python3 -c "
-import sys, json
-b = json.load(sys.stdin)['briefs']
-assert any(x['campaign_id'] == '${CAMPAIGN_ID}' for x in b), b
-print('ASSERT brief in creative queue OK')
-"
-ASSET=$(amisad_curl -X POST "${ADS}/v1/assets" \
-    -d "{\"campaign_id\":\"${CAMPAIGN_ID}\",\"creator\":\"kai\",\"creative\":\"summer-hero-01\"}")
-ASSET_ID=$(echo "$ASSET" | python3 -c 'import sys,json;print(json.load(sys.stdin)["asset_id"])')
-amisad_curl -X POST "${ADS}/v1/campaigns/activate" \
-    -d "{\"campaign_id\":\"${CAMPAIGN_ID}\",\"asset_id\":\"${ASSET_ID}\"}" | python3 -c "
-import sys, json
-assert json.load(sys.stdin)['state'] == 'active'
-print('ASSERT campaign active OK')
-"
-
-echo "== Maya's need -> shortlist carries Elena's offer boosted with Kai's creative =="
-SHORTLIST=$(target/release/buyer-client campaign)
-HANDLE=$(echo "$SHORTLIST" | python3 -c 'import sys,json;print(json.load(sys.stdin)["handle"])')
-echo "$SHORTLIST" | python3 -c "
-import sys, json
-s = json.load(sys.stdin)
-entry = [e for e in s['shortlist'] if e['offer_id'] == 'serving-set-01']
-assert len(entry) == 1, s
-c = entry[0].get('campaign')
-assert c and c['campaign_id'] == '${CAMPAIGN_ID}' and c['asset_id'] == '${ASSET_ID}', entry[0]
-assert c['creator'] == 'kai' and c['creative'] == 'summer-hero-01', c
-print('ASSERT offer boosted with the creative OK')
-"
-
-echo "== TVP: the creative appears in the environment ingress log =="
-RESP=$(amisad_curl "${SLICE_EP}/v1/ingress")
-echo "$RESP" | python3 -c "
-import sys, json
-entries = json.load(sys.stdin)['entries']
-assert any('summer-hero-01' in e for e in entries), entries
-print('ASSERT creative in ingress log OK')
-"
-
-echo "== Maya accepts -> the boosted match closes =="
-BOOK=$(target/release/buyer-client book "$HANDLE" serving-set-01)
-MATCH_ID=$(echo "$BOOK" | python3 -c 'import sys,json;print(json.load(sys.stdin)["match_id"])')
-echo "$BOOK" | python3 -c 'import sys,json;assert json.load(sys.stdin).get("boosted") is True;print("ASSERT booking is boosted OK")'
-amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"provisioning\"}"
-amisad_curl -X POST "${SELLER}/v1/orders/advance" -d "{\"match_id\":\"${MATCH_ID}\",\"state\":\"fulfilled\"}"
-
-echo "== TVP: settlement includes non-zero agency + creator credit =="
-RESP=$(amisad_curl "${LEDGER}/v1/settlements/match/${MATCH_ID}")
-echo "$RESP" | python3 -c "
-import sys, json
-s = json.load(sys.stdin)
-assert s['confirmed'] is True, s
-# value = price 11000 + ad commitment 2000 = 13000
-assert s['total_cents'] == s['value_cents'] == 13000, (s['total_cents'], s['value_cents'])
-parties = {e['party']: e['amount_cents'] for e in s['entries']}
-assert parties['agency'] == 1200 and parties['creator'] == 800, parties
-assert parties['seller'] == 9900, parties  # seller revenue unchanged from s001
-print('ASSERT agency + creator credit in settlement OK')
-"
-
-echo "== TVP: aggregate dashboards match the ledger; budget decremented by the commitment =="
-RESP=$(amisad_curl "${ADS}/v1/attributions")
-echo "$RESP" | python3 -c "
-import sys, json
-a = json.load(sys.stdin)
-assert a['closed_matches'] == 1, a
-assert a['agency_cents_total'] == 1200 and a['creator_cents_total'] == 800, a
-attr = a['attributions'][0]
-assert attr['campaign_id'] == '${CAMPAIGN_ID}' and attr['asset_id'] == '${ASSET_ID}', attr
-print('ASSERT aggregate attribution consistent with ledger OK')
-"
-RESP=$(amisad_curl "${ADS}/v1/campaigns/${CAMPAIGN_ID}")
-echo "$RESP" | python3 -c "
-import sys, json
-c = json.load(sys.stdin)
-assert c['spent_cents'] == 2000, c  # per-match commitment, not impressions
-print('ASSERT campaign budget decrement OK')
-"
-
-echo "== TVP: no buyer signal on the campaign side =="
-RESP=$(amisad_curl "${ADS}/v1/attributions")
-echo "$RESP" | python3 -c "
-import sys, json
-text = json.dumps(json.load(sys.stdin)).lower()
-for marker in ['maya', 'budget_cents', 'deadline_days', 'summer entertaining', 'envelope']:
-    assert marker not in text, f'campaign side leaked: {marker}'
-print('ASSERT zero buyer signal on the campaign side OK')
-"
-
-echo "s005.attribution HAPPY PATH PASSED"
+cd "${account_home:?The guest administrator home is unavailable}/amisad.dev/poc"
+export REAL_HOME="$account_home"
+provision="$PWD/target/release/amisad-provision"
+if [[ ! -f $provision || -L $provision || ! -x $provision ]]; then
+    provision=/usr/local/bin/amisad-provision
+fi
+if [ ! -x "$provision" ]; then
+    echo 'The AmisAd scenario provisioner is unavailable.' >&2
+    exit 1
+fi
+if [ "$EUID" -eq 0 ]; then
+    exec runuser -u "$account" -- "$provision" scenario-run attribution
+fi
+exec "$provision" scenario-run attribution

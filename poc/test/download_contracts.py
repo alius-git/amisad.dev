@@ -23,12 +23,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 GUEST = ROOT / 'test/ubuntu.server.24'
 SEQUENCES = ROOT / 'test'
-HELPERS = ROOT / 'test/amisad-scenario.sh'
+HELPERS = ROOT / 'test/fixtures/scenario-helpers-before-rust.sh.fixture'
 COMPILE = GUEST / 'ubuntu.server.24.amisad-build.compile.sh'
 DEPLOY = GUEST / 'ubuntu.server.24.amisad-core.deploy.sh'
-DB = GUEST / 'ubuntu.server.24.amisad-core.db.sh'
+DB = ROOT / 'test/fixtures/core-db-before-rust.sh.fixture'
+ACTIVE_DB = GUEST / 'ubuntu.server.24.amisad-core.db.sh'
 TOOLS = GUEST / 'ubuntu.server.24.amisad-build.tools.sh'
-NATS = GUEST / 'ubuntu.server.24.amisad-core.nats.sh'
+NATS = ROOT / 'test/fixtures/core-nats-before-rust.sh.fixture'
+ACTIVE_NATS = GUEST / 'ubuntu.server.24.amisad-core.nats.sh'
 SCRIPTS = [COMPILE, DEPLOY, DB]
 BEGIN = '# --- REGION: amisad_sha256'
 END = '# End download verification'
@@ -320,10 +322,15 @@ class PinnedUpstreamDownloads(Contract):
 
     def test_pins_are_publisher_digests_of_named_releases(self):
         tools = text_of(TOOLS)
+        native_tools = text_of(ROOT / 'components/apps/guest-provision/src/build_tools.rs')
         self.matches(r'(?m)^RUSTUP_VERSION=\d+\.\d+\.\d+$', tools, 'rustup-init is not pinned to a version')
         self.matches(r'(?m)^BAZELISK_VERSION=v\d+\.\d+\.\d+$', tools, 'bazelisk is not pinned to a version')
         for name in ('RUSTUP_SHA256_X86_64', 'RUSTUP_SHA256_AARCH64', 'BAZELISK_SHA256_AMD64', 'BAZELISK_SHA256_ARM64'):
             self.matches(rf'(?m)^{name}=[0-9a-f]{{64}}$', tools, f'{name} is not a pinned SHA-256')
+            self.assertIn(re.search(rf'(?m)^{name}=([0-9a-f]{{64}})$', tools)[1], native_tools)
+        for name in ('RUSTUP_VERSION', 'BAZELISK_VERSION'):
+            self.assertIn(re.search(rf'(?m)^{name}=(.+)$', tools)[1], native_tools)
+        self.assertIn('const TOOLCHAIN: &str = "1.99.1";', native_tools)
         for arch in ('AMD64', 'ARM64'):
             self.matches(rf'(?m)^NATS_SHA256_{arch}=[0-9a-f]{{64}}$', text_of(NATS), f'NATS_SHA256_{arch} is not a pinned SHA-256')
 
@@ -333,6 +340,67 @@ class PinnedUpstreamDownloads(Contract):
             self.never_matches(r'\|\s*(?:sudo\s+)?(?:ba)?sh\b', code, f'{script.name} pipes a download into a shell')
             self.lacks('sh.rustup.rs', code, f'{script.name} still runs the rustup shell installer')
             self.lacks('releases/latest', code, f'{script.name} installs whatever release is latest')
+
+    def test_build_tools_selects_verified_runtime_before_changes_and_keeps_cold_bootstrap(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            seed = root / 'etc/yuruna'
+            local = root / 'lib/yuruna'
+            store = local / 'amisad-artifacts'
+            candidate = store / ('c' * 64)
+            account = root / 'account'
+            for path in (seed, candidate, account / '.cargo'):
+                path.mkdir(parents=True)
+            (account / '.cargo/env').write_text('export BOOTSTRAP_CARGO_ENV=loaded\n')
+            plan = seed / 'amisad-artifacts.json'
+            provision = candidate / 'amisad-provision'
+            provision.write_text('#!/bin/bash\n[[ "$*" = build-tools ]] || exit 81\nprintf "%s\\n" "$*" > selected\nexit 37\n')
+            provision.chmod(0o755)
+            setup = f'''
+sudo() {{
+    if [[ "$1" = */install-rust-artifacts ]]; then
+        shift
+        printf '%s\\n' "$*" > verification
+        printf '%s\\n' '{candidate.as_posix()}'
+    else
+        printf '%s\\n' "$*" >> apt-log
+    fi
+}}
+rustup() {{ :; }}
+rustc() {{ [[ "$BOOTSTRAP_CARGO_ENV" = loaded ]] && echo 'rustc 1.99.1 (fixture)'; }}
+cargo() {{ :; }}
+bazel() {{ :; }}
+git() {{ :; }}
+python3() {{ :; }}
+sync() {{ echo sync >> apt-log; }}
+'''
+            launch = (text_of(TOOLS).replace('/etc/yuruna', seed.as_posix())
+                      .replace('/usr/local/lib/yuruna', local.as_posix()))
+            env = {'HOME': account.as_posix()}
+            plan.write_text('{}\n')
+            selected = run_bash(setup + launch, root, env)
+            self.assertEqual(selected.returncode, 37, selected.stderr)
+            self.assertEqual((root / 'selected').read_text(), 'build-tools\n')
+            self.assertEqual((root / 'verification').read_text(), f'--plan-file {plan} {store} amisad-provision framework-revision\n')
+            self.assertFalse((root / 'apt-log').exists())
+
+            plan.unlink()
+            (root / 'selected').unlink()
+            (root / 'verification').unlink()
+            plan.mkdir()
+            refused = run_bash(setup + launch, root, env)
+            self.assertEqual(refused.returncode, 7, refused.stderr)
+            self.assertFalse((root / 'apt-log').exists())
+            self.assertFalse((root / 'verification').exists())
+
+            plan.rmdir()
+            cold = run_bash(setup + launch, root, env)
+            self.assertEqual(cold.returncode, 0, cold.stderr)
+            self.assertIn('AmisAd build tools installed', cold.stdout)
+            self.assertEqual((root / 'apt-log').read_text().splitlines(), [
+                'apt-get update -y', 'apt-get install -y git curl build-essential pkg-config python3', 'sync',
+            ])
+            self.assertFalse((root / 'selected').exists())
 
     def test_every_install_checks_before_it_runs_or_installs(self):
         tools = text_of(TOOLS)
@@ -464,7 +532,7 @@ class ScriptsVerifyBeforeUse(Contract):
         self.assertEqual(text_of(DB).count("<<'SQL'"), 1)
 
     def test_scripts_stay_ascii(self):
-        for path in SCRIPTS + [GUEST / 'ubuntu.server.24.amisad-core.users.sh', GUEST / 'ubuntu.server.24.amisad-edge.setup.sh']:
+        for path in SCRIPTS + [ACTIVE_DB, ACTIVE_NATS, GUEST / 'ubuntu.server.24.amisad-core.users.sh', GUEST / 'ubuntu.server.24.amisad-edge.setup.sh']:
             path.read_bytes().decode('ascii')
 
 
@@ -490,12 +558,98 @@ class LaunchCommandsCarryTheDigests(Contract):
         self.assertIn('TARBALL="/tmp/amisad-${ARCH}-binaries.tgz"', text_of(COMPILE))
         self.assertLess(text.index('amisad-build.compile.sh'), text.index('digest.PublishGuestFileSha256'))
 
+    def test_enrolled_compile_uses_the_verified_provisioner_and_the_selected_account(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            seed = root / 'etc/yuruna'
+            local = root / 'lib/yuruna'
+            account = root / 'build account'
+            candidate = local / 'amisad-artifacts' / ('a' * 64)
+            for path in (seed, account / '.cargo', candidate):
+                path.mkdir(parents=True)
+            account_shell = subprocess.check_output(
+                ['bash', '-c', 'printf "%s/build account" "$PWD"'], cwd=root, text=True,
+            )
+            (seed / 'amisad-artifacts.json').write_text('{}\n')
+            (account / '.cargo/env').write_text('export BUILD_CARGO_ENV=loaded\n')
+            provisioner = candidate / 'amisad-provision'
+            provisioner.write_text('''#!/bin/bash
+printf '%s\\n' "$@" "$STASH_HOST" "$AMISAD_PROJECT_ARCHIVE_SHA256" "$BUILD_CARGO_ENV" > executed
+exit 37
+''')
+            provisioner.chmod(0o755)
+            setup = f'''
+sudo() {{
+    [[ "$1" = */install-rust-artifacts ]] || {{ : > unexpected; return 82; }}
+    printf '%s\\n' "$*" > verification
+    printf '%s\\n' '{candidate.as_posix()}'
+}}
+getent() {{
+    [[ "$*" = '-- passwd provision-build-user' ]] || return 82
+    printf '%s\\n' 'provision-build-user:x:1000:1000:Fixture:{account_shell}:/bin/bash'
+}}
+wget() {{ : > unexpected; return 82; }}
+'''
+            launch = (text_of(COMPILE).replace('/etc/yuruna', seed.as_posix())
+                      .replace('/usr/local/lib/yuruna', local.as_posix()))
+            pin = 'c' * 64
+            result = run_bash(setup + launch, root, {
+                'SUDO_USER': 'provision-build-user', 'STASH_HOST': 'stash.fixture', 'AMISAD_PROJECT_ARCHIVE_SHA256': pin,
+            })
+            self.assertEqual(result.returncode, 37, result.stderr)
+            self.assertEqual((root / 'executed').read_text().splitlines(), [
+                'build-compile', account_shell, 'stash.fixture', pin, 'loaded',
+            ])
+            self.assertTrue((root / 'verification').read_text().rstrip().endswith('amisad-provision framework-revision'))
+            self.assertFalse((root / 'unexpected').exists())
+
     def test_deploy_carries_both_digests(self):
         command = self.command_for('workload.guest.ubuntu.server.24.amisad-core.deploy.yml', 'amisad-core.deploy.sh')
         self.contains("AMISAD_PROJECT_ARCHIVE_SHA256='${ext:digest.GetArchiveSha256(project)}'", command,
                       'the deploy command does not carry the archive digest')
         self.contains("AMISAD_BINARIES_SHA256='${ext:digest.GetPublishedSha256(amisad-binaries)}'", command,
                       'the deploy command does not carry the binaries digest')
+
+    def test_enrolled_core_dispatches_before_installing_legacy_dependencies(self):
+        with tempfile.TemporaryDirectory(prefix='amisad-core-bundle-') as directory:
+            root = Path(directory)
+            local = root / 'usr/local'
+            seed = root / 'etc/yuruna'
+            artifact = local / 'lib/yuruna/amisad-artifacts' / ('c' * 64)
+            artifact.mkdir(parents=True)
+            seed.mkdir(parents=True)
+            (seed / 'amisad-artifacts.json').write_text('{"runtimeBundle":true}\n')
+            installer = local / 'lib/yuruna/install-rust-artifacts'
+            installer.write_text('#!/bin/sh\nprintf "%s\\n" "$*" > verification\nprintf "%s\\n" "'
+                                 + artifact.as_posix() + '"\n')
+            installer.chmod(0o755)
+            provisioner = artifact / 'amisad-provision'
+            provisioner.write_text('''#!/bin/sh
+case "$1" in
+    --help) echo 'core-ready|core-deploy-seeded|core-deploy-stash|core-users' ;;
+    core-deploy-seeded-available) cat bundle-flag ;;
+    core-deploy-seeded|core-deploy-stash)
+        printf '%s %s\\n' "$1" "$AMISAD_PROJECT_ARCHIVE_SHA256" > selected
+        exit 37 ;;
+    *) exit 84 ;;
+esac
+''')
+            provisioner.chmod(0o755)
+            dispatcher = (text_of(DEPLOY).replace('/etc/yuruna', seed.as_posix())
+                          .replace('/usr/local', local.as_posix()).replace('$EUID', '1000'))
+            setup = '''
+sudo() {
+    case "$1" in */install-rust-artifacts) "$@";; *) echo legacy > unexpected; return 88;; esac
+}
+'''
+            for bundled, operation in [('true', 'core-deploy-seeded'), ('false', 'core-deploy-stash')]:
+                with self.subTest(bundled=bundled):
+                    (root / 'bundle-flag').write_text(f'{bundled}\n')
+                    result = run_bash(setup + dispatcher, root, {'AMISAD_PROJECT_ARCHIVE_SHA256': 'f' * 64})
+                    self.assertEqual(result.returncode, 37, result.stderr)
+                    self.assertEqual((root / 'selected').read_text(), f'{operation} {"f" * 64}\n')
+                    self.assertTrue((root / 'verification').read_text().rstrip().endswith('amisad-provision framework-revision'))
+                    self.assertFalse((root / 'unexpected').exists())
 
     def test_db_step_carries_the_schema_digest_of_a_file_that_exists(self):
         command = self.command_for('workload.guest.ubuntu.server.24.amisad-core.k8s.yml', 'amisad-core.db.sh')
@@ -506,8 +660,13 @@ class LaunchCommandsCarryTheDigests(Contract):
 
     def test_every_digest_variable_a_script_reads_is_set_by_every_command_that_runs_it(self):
         sequences = sorted(SEQUENCES.glob('workload.guest.*.yml'))
-        for script in SCRIPTS:
-            variables = set(re.findall(r'\$\{(AMISAD_[A-Z_]*SHA256):-\}', text_of(script)))
+        for script in (COMPILE, DEPLOY, ACTIVE_DB):
+            if script == ACTIVE_DB:
+                self.assertIn('exec "$provision" db-setup', text_of(script))
+                backend = ROOT / 'components/apps/guest-provision/src/database.rs'
+                variables = set(re.findall(r'env::var\("(AMISAD_[A-Z_]*SHA256)"\)', text_of(backend)))
+            else:
+                variables = set(re.findall(r'\$\{(AMISAD_[A-Z_]*SHA256):-\}', text_of(script)))
             self.assertTrue(variables, script.name)
             runners = 0
             for sequence in sequences:
