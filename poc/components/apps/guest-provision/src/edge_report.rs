@@ -14,7 +14,7 @@ use tokio::net::TcpStream;
 use tokio::task::JoinSet;
 use tokio::time::{sleep, timeout};
 
-fn endpoint(text: &str) -> Option<SocketAddr> {
+pub(super) fn endpoint(text: &str) -> Option<SocketAddr> {
     let mut ip = None;
     let mut port = None;
     for line in text.lines() {

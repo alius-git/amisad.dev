@@ -11,6 +11,7 @@ import errno
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -60,6 +61,35 @@ def alive(pid):
     except ProcessLookupError:
         return False
     return True
+
+
+@unittest.skipUnless(BASH, 'A usable native-filesystem Bash is required for guest shell contracts')
+class SignedSliceStop(unittest.TestCase):
+    def test_enrolled_edge_returns_native_failure_without_repeating_the_stop(self):
+        with tempfile.TemporaryDirectory(prefix='amisad-signed-stop-') as directory:
+            root = Path(directory)
+            (root / 'bin').mkdir()
+            artifacts = root / 'artifacts'
+            candidate = artifacts / ('a' * 64)
+            candidate.mkdir(parents=True)
+            unit = root / 'edge.service'
+            provision = candidate / 'amisad-provision'
+            provision.write_bytes(b'#!/bin/sh\n'
+                                  b'if [ "$1" = --help ]; then echo slice-stop; exit 0; fi\n'
+                                  b'printf "%s\\n" "$*" > native-actions\nexit 17\n')
+            provision.chmod(0o755)
+            unit.write_text(f'ExecStart={provision.as_posix()} edge-report\n')
+            script = function_text(HELPERS, 'amisad_stop_slice_runtime')
+            script = script.replace('/etc/systemd/system/amisad-ip-report.service', unit.as_posix())
+            script = script.replace('/usr/local/lib/yuruna/amisad-artifacts', artifacts.as_posix())
+            write_command(root, 'pgrep', 'echo invoked > legacy-actions')
+            write_command(root, 'ssh', 'exec bash -c "${!#}"')
+            result = subprocess.run([BASH, '-c', 'export PATH="$PWD/bin:$PATH";\n' + script
+                                     + '\namisad_stop_slice_runtime amisad-edge-a-admin@192.0.2.10'],
+                                    cwd=root, capture_output=True, text=True, timeout=10)
+            self.assertEqual(17, result.returncode, result.stderr)
+            self.assertEqual('slice-stop\n', (root / 'native-actions').read_text())
+            self.assertFalse((root / 'legacy-actions').exists())
 
 
 @unittest.skipUnless(BASH, 'A usable native-filesystem Bash is required for guest shell contracts')
@@ -212,7 +242,11 @@ TOKEN = '5e' * 32
 STUBS = {
     # Each ssh session's standard input lands in ssh.stdin, one record per call.
     'ssh': RECORD + '\nprintf \'%s\\036\' "$(cat)" >> "$AMISAD_FIXTURE_DIR/ssh.stdin"\n'
-                    'case "${!#}" in *"hostname -I"*) echo "${FIXTURE_SELF_IP:-198.51.100.7}" ;; esac\n'
+                    'case "${!#}" in\n'
+                    '  *"pgrep -x slice-runtime"*) if [ -n "${FIXTURE_STARTER:-}" ]; then printf "AMISAD_SLICE_START=%s\\n" "$FIXTURE_STARTER"; fi ;;\n'
+                    '  *"slice-start"*) exit "${FIXTURE_START_RC:-0}" ;;\n'
+                    '  *"hostname -I"*) echo "${FIXTURE_SELF_IP:-198.51.100.7}" ;;\n'
+                    'esac\n'
                     'exit "${FIXTURE_SSH_RC:-0}"',
     'scp': RECORD + '\nexit "${FIXTURE_SCP_RC:-0}"',
     'curl': RECORD + '\ncount="$AMISAD_FIXTURE_DIR/curl.count"\n'
@@ -401,6 +435,31 @@ class StartSliceRuntime(unittest.TestCase):
                       result.stderr)
         self.assertEqual(self.ssh_stdin(), ['', '', ''])
         self.assertIn('slice-runtime at http://198.51.100.7:8080', result.stdout)
+
+    def test_the_verified_edge_launches_with_typed_arguments_and_the_token_on_stdin(self):
+        starter = '/usr/local/lib/yuruna/amisad-artifacts/' + ('a' * 64) + '/amisad-provision'
+        result = self.run_case("set -x\namisad_start_slice_runtime 'http://ledger/query?a=b&x=y' http://resource 'signed region'",
+                               EDGE_HOST='amisad-edge-a-admin@192.0.2.10', FIXTURE_STARTER=starter)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        delivery = self.calls('ssh', 'scp')
+        self.assertEqual([row[0] for row in delivery], ['ssh', 'scp', 'ssh', 'ssh'])
+        self.assertEqual(shlex.split(delivery[2][-1]),
+                         ['exec', starter, 'slice-start', 'signed region', 'http://ledger/query?a=b&x=y', 'http://resource'])
+        self.assertEqual(self.ssh_stdin(), ['', TOKEN, ''])
+        self.assertNotIn(TOKEN, result.stdout + result.stderr)
+        self.assertNotIn(TOKEN, delivery[2][-1])
+
+    def test_the_verified_start_refusal_ends_delivery_without_legacy_retry(self):
+        starter = '/usr/local/lib/yuruna/amisad-artifacts/' + ('a' * 64) + '/amisad-provision'
+        result = self.run_case('amisad_start_slice_runtime http://ledger http://resource',
+                               EDGE_HOST='amisad-edge-a-admin@192.0.2.10', FIXTURE_STARTER=starter,
+                               FIXTURE_START_RC='17')
+        self.assertEqual(result.returncode, 17, result.stderr)
+        self.assertIn('starting slice-runtime', result.stderr)
+        delivery = self.calls('ssh', 'scp')
+        self.assertEqual([row[0] for row in delivery], ['ssh', 'scp', 'ssh'])
+        self.assertIn('slice-start', delivery[2][-1])
+        self.assertEqual(self.calls('curl'), [])
 
     def test_the_single_vm_start_sets_the_token_without_showing_it(self):
         result = self.run_case('set -x\namisad_start_slice_runtime http://L http://R\necho "after: ${LEDGER_WRITE_TOKEN-<unset>}"',

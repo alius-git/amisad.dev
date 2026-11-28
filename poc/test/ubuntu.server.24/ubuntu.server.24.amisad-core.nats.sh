@@ -49,6 +49,26 @@ case "$ARCH" in
     *) NARCH=amd64; NATS_SHA256=$NATS_SHA256_AMD64 ;;
 esac
 
+artifact_plan=/etc/yuruna/amisad-artifacts.json
+if [ -e "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
+    if [ ! -f "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
+        echo 'Invalid enrolled AmisAd artifact plan.' >&2
+        exit 1
+    fi
+    artifact_root=/usr/local/lib/yuruna/amisad-artifacts
+    artifact_dir=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
+        "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 1
+    provision="$artifact_dir/amisad-provision"
+    if [ "${artifact_dir%/*}" != "$artifact_root" ] || ! [[ ${artifact_dir##*/} =~ ^[a-f0-9]{64}$ ]] ||
+        [ ! -f "$provision" ] || [ -L "$provision" ] || [ ! -x "$provision" ]; then
+        echo 'The verified AmisAd provisioner is unavailable.' >&2
+        exit 1
+    fi
+    if "$provision" --help | grep -q 'nats-install'; then
+        exec "$provision" nats-install "$NATS_VERSION" "$NATS_SHA256"
+    fi
+fi
+
 changed=0
 installed_version=$(/usr/local/bin/nats-server --version 2>/dev/null || true)
 if [ "$installed_version" != "nats-server: $NATS_VERSION" ]; then

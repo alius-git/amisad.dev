@@ -47,5 +47,5 @@ workloads:
     - chart: "services/ledger-svc"
       variables:
         installName: "ledger-svc"
-    - shell: 'Write-Information "-- Check containers started: kubectl get pods --all-namespaces"'
-    - shell: 'Write-Information ">>    Test: kubectl -n ${env:namespace} get deployments"'
+    - information: '-- Check containers started: kubectl get pods --all-namespaces'
+    - information: '>>    Test: kubectl -n ${env:namespace} get deployments'

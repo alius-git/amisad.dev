@@ -655,6 +655,32 @@ Describe 'AmisAd topology storage admission' {
         }
     }
 
+    It 'reserves the runtime VM disks and the existing peak for a verified fresh build' {
+        Set-Item -Path 'function:global:Test-VMStorageCapacity' -Value {
+            param([string[]]$VMName, [hashtable]$StartupMemoryBytes, [hashtable]$AdditionalStorageBytes, [long]$ReserveBytes, [long]$ProvisioningMemoryBytes)
+            $script:CapacityArgs = @{ VMName = $VMName; Memory = $StartupMemoryBytes; Growth = $AdditionalStorageBytes; Reserve = $ReserveBytes; Provisioning = $ProvisioningMemoryBytes }
+            return @{ allowed = (($AdditionalStorageBytes.Values | Measure-Object -Sum).Sum -le 48GB); status = 'ready'; reason = '' }
+        }
+        $result = Test-AmisAdStorageAdmission -YurunaRoot $script:FixtureRoot -HostType 'host.windows.hyper-v' -LogDir $script:StorageDir `
+            -Stage 'BeforeProvisioning' -IncludeDiskGrowth -UseSignedBuild
+        $result.allowed | Should -BeTrue
+        @($script:CapacityArgs.VMName).Count | Should -Be 3
+        $script:CapacityArgs.VMName | Should -Not -Contain 'amisad-build'
+        ($script:CapacityArgs.Growth.Values | Measure-Object -Sum).Sum | Should -Be 48GB
+        ($script:CapacityArgs.Memory.Values | Measure-Object -Sum).Sum | Should -Be 20GB
+        $script:CapacityArgs.Reserve | Should -Be 2GB
+        $script:CapacityArgs.Provisioning | Should -Be 12GB
+        Should -Invoke Write-AmisAdLabFailure -ModuleName AmisAd.Lab -Times 0 -Exactly
+    }
+
+    It 'declares only unconditional VM growth in the common preflight policy' {
+        $policy = Get-Content -LiteralPath (Join-Path $script:RepoRoot 'test/host-storage.requirements.json') -Raw | ConvertFrom-Json
+        $policy.virtualMachines.name | Should -Be @('amisad-core', 'amisad-edge-a', 'amisad-edge-b')
+        ($policy.virtualMachines.additionalStorageBytes | Measure-Object -Sum).Sum | Should -Be 48GB
+        $policy.provisioningMemoryBytes | Should -Be 12GB
+        $policy.reserveBytes | Should -Be 2GB
+    }
+
     It 'rechecks final starts without charging the already provisioned disk growth again' {
         Set-Item -Path 'function:global:Test-VMStorageCapacity' -Value {
             param([string[]]$VMName, [hashtable]$StartupMemoryBytes, [hashtable]$AdditionalStorageBytes, [long]$ReserveBytes)
@@ -685,15 +711,26 @@ function Initialize-AmisAdHost { param($YurunaRoot) return 'host.windows.hyper-v
 function Test-HostRequirement { param($HostType) return $true }
 '@ | Set-Content -LiteralPath (Join-Path $script:EntryProject 'test/AmisAd.HostCommon.ps1')
         @'
-function Resolve-StashService { param($YurunaRoot, $Pin) return @{ Address = '192.0.2.1'; Lines = @() } }
+function Resolve-StashService {
+    param($YurunaRoot, $Pin)
+    if ($env:AMISAD_FIXTURE_BLOCK -eq 'SignedBuild') { throw 'The signed path must not probe stash' }
+    return @{ Address = '192.0.2.1'; Lines = @() }
+}
 Export-ModuleMember -Function Resolve-StashService
 '@ | Set-Content -LiteralPath (Join-Path $script:EntryProject 'test/AmisAd.StashService.psm1')
         @'
 function Add-Trace { param($Text) Add-Content -LiteralPath $env:AMISAD_FIXTURE_TRACE -Value $Text }
 function Test-AmisAdStorageAdmission {
-    param($YurunaRoot, $HostType, $LogDir, $Stage, [switch]$IncludeDiskGrowth)
+    param($YurunaRoot, $HostType, $LogDir, $Stage, [switch]$IncludeDiskGrowth, [switch]$UseSignedBuild)
     Add-Trace "admission:$Stage"
+    Add-Trace "allocation:${Stage}:signed=$([bool]$UseSignedBuild)"
     return @{ allowed = $env:AMISAD_FIXTURE_BLOCK -ne $Stage; reason = 'fixture capacity shortage' }
+}
+function Test-AmisAdFreshSignedBuild {
+    param($YurunaRoot, $HostType, $StashPin)
+    $selected = $env:AMISAD_FIXTURE_BLOCK -eq 'SignedBuild'
+    Add-Trace "build-selection:$selected"
+    return $selected
 }
 function Invoke-AmisAdStage { param($Name) Add-Trace "stage:$Name"; return 0 }
 function Invoke-AmisAdCleanup { return 0 }
@@ -735,6 +772,45 @@ Export-ModuleMember -Function *
     AfterAll {
         $env:AMISAD_FIXTURE_TRACE = $script:SavedFixtureTrace
         $env:AMISAD_FIXTURE_BLOCK = $script:SavedFixtureBlock
+    }
+
+    It '<Entry> proceeds directly to edge and core stages with a verified fresh bundle' -TestCases @(
+        @{ Entry = 'test/Initialize-Lab.ps1' }
+        @{ Entry = 'poc/build/run-tests.ps1' }
+    ) {
+        param($Entry)
+        $env:AMISAD_FIXTURE_TRACE = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $env:AMISAD_FIXTURE_BLOCK = 'SignedBuild'
+        $arguments = @{
+            ScriptPath = Join-Path $script:EntryProject $Entry
+            ScriptArguments = @('-YurunaRoot', $script:EntryFramework, '-LogDir', $script:Logs)
+            OutputPath = "$env:AMISAD_FIXTURE_TRACE.out"
+            ErrorPath = "$env:AMISAD_FIXTURE_TRACE.err"
+        }
+        Invoke-AmisAdScript @arguments | Should -Be 1
+        $trace = @(Get-Content -LiteralPath $env:AMISAD_FIXTURE_TRACE)
+        @($trace | Where-Object { $_ -like 'build-selection:*' }) | Should -Be @('build-selection:True')
+        [array]::IndexOf($trace, 'build-selection:True') | Should -BeLessThan ([array]::IndexOf($trace, 'admission:BeforeProvisioning'))
+        $trace | Should -Contain 'allocation:BeforeProvisioning:signed=True'
+        $trace | Should -Not -Contain 'stage:amisad-build'
+        ($trace | Where-Object { $_ -like 'stage:*' }) | Should -Be @('stage:amisad-edge-a','stage:amisad-edge-b','stage:amisad-core')
+        (Get-Content -Raw -LiteralPath $arguments.ErrorPath) | Should -Not -Match 'must not probe stash'
+    }
+
+    It '<Entry> budgets and runs the fallback when <SelectionFailure>' -TestCases @(
+        @{ Entry = 'test/Initialize-Lab.ps1'; SelectionFailure = 'the builder signature fails' }
+        @{ Entry = 'poc/build/run-tests.ps1'; SelectionFailure = 'builder pins are unavailable' }
+    ) {
+        param($Entry, $SelectionFailure)
+        $env:AMISAD_FIXTURE_TRACE = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $env:AMISAD_FIXTURE_BLOCK = $SelectionFailure
+        Invoke-AmisAdScript -ScriptPath (Join-Path $script:EntryProject $Entry) `
+            -ScriptArguments @('-YurunaRoot', $script:EntryFramework, '-LogDir', $script:Logs) `
+            -OutputPath "$env:AMISAD_FIXTURE_TRACE.out" -ErrorPath "$env:AMISAD_FIXTURE_TRACE.err" | Should -Be 1
+        $trace = @(Get-Content -LiteralPath $env:AMISAD_FIXTURE_TRACE)
+        @($trace | Where-Object { $_ -like 'build-selection:*' }) | Should -Be @('build-selection:False')
+        $trace | Should -Contain 'allocation:BeforeProvisioning:signed=False'
+        [array]::IndexOf($trace, 'admission:BeforeProvisioning') | Should -BeLessThan ([array]::IndexOf($trace, 'stage:amisad-build'))
     }
 
     It '<Entry> stops at <Gate> before the next VM operation' -TestCases @(

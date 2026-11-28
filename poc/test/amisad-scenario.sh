@@ -73,6 +73,28 @@ amisad_stop_slice_runtime() { # <ssh-target|''> [ssh-option...]   ('' stops it o
     local target="$1" script
     shift
     script=$(cat <<'STOP'
+# An enrolled edge systemd unit names the immutable provisioner whose
+# signature was verified during setup. The standalone route still covers
+# older edges whose unit runs the legacy reporter.
+unit=/etc/systemd/system/amisad-ip-report.service
+if [ -r "$unit" ]; then
+    provision=$(sed -n 's/^ExecStart=\([^[:space:]]*\) edge-report$/\1/p' "$unit")
+    artifacts=/usr/local/lib/yuruna/amisad-artifacts
+    candidate=${provision%/*}
+    if [ "${provision##*/}" = amisad-provision ] && [ "${candidate%/*}" = "$artifacts" ] &&
+        printf '%s\n' "${candidate##*/}" | grep -Eq '^[a-f0-9]{64}$' &&
+        [ -f "$provision" ] && [ ! -L "$provision" ] && [ -x "$provision" ]; then
+        capabilities=$("$provision" --help)
+        if printf '%s\n' "$capabilities" | grep -q 'slice-stop'; then
+            if printf '%s\n' "$capabilities" | grep -q 'slice-start'; then
+                "$provision" slice-stop || exit $?
+                printf 'AMISAD_SLICE_START=%s\n' "$provision"
+                exit 0
+            fi
+            exec "$provision" slice-stop
+        fi
+    fi
+fi
 term_ticks=100
 kill_ticks=50
 pids=$(pgrep -x slice-runtime || true)
@@ -123,16 +145,29 @@ amisad_ledger_write_token() (
 # start session's standard input.
 # See poc/contracts/service-behavior.md, "Lab edge delivery".
 amisad_deliver_slice_runtime() { # <ssh-target> <ledger-url> <resource-url> <region|''> [address-variable]
-    local target="$1" ledger="$2" resource="$3" region="$4" rc reported
+    local target="$1" ledger="$2" resource="$3" region="$4" rc reported stop_reply line native_start='' start parameters region_arg=''
     local ssh_opts=(-i "$REAL_HOME/.ssh/amisad-demo-key" -o StrictHostKeyChecking=accept-new)
-    amisad_stop_slice_runtime "$target" "${ssh_opts[@]}" \
-        || { rc=$?; echo "stopping slice-runtime on ${target} failed" >&2; return "$rc"; }
+    stop_reply=$(amisad_stop_slice_runtime "$target" "${ssh_opts[@]}") \
+        || { rc=$?; printf '%s\n' "$stop_reply"; echo "stopping slice-runtime on ${target} failed" >&2; return "$rc"; }
     scp "${ssh_opts[@]}" target/release/slice-runtime "${target}:/tmp/slice-runtime" \
-        || { rc=$?; echo "copying slice-runtime to ${target} failed" >&2; return "$rc"; }
+        || { rc=$?; printf '%s\n' "$stop_reply"; echo "copying slice-runtime to ${target} failed" >&2; return "$rc"; }
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^AMISAD_SLICE_START=(/usr/local/lib/yuruna/amisad-artifacts/[a-f0-9]{64}/amisad-provision)$ ]]; then
+            native_start=${BASH_REMATCH[1]}
+        elif [ -n "$line" ]; then
+            printf '%s\n' "$line"
+        fi
+    done <<< "$stop_reply"
+    if [ -n "$native_start" ]; then
+        printf -v start 'exec %q slice-start %q %q %q' "$native_start" "$region" "$ledger" "$resource"
+    else
+        if [ -n "$region" ]; then printf -v region_arg '%q' "$region"; fi
+        printf -v parameters 'PORT=8080 REGION=%s LEDGER_URL=%q RESOURCE_URL=%q' "$region_arg" "$ledger" "$resource"
+        start="IFS= read -r LEDGER_WRITE_TOKEN; export LEDGER_WRITE_TOKEN; $parameters nohup /tmp/slice-runtime >/tmp/slice-runtime.log 2>&1 & sleep 1; echo edge-started"
+    fi
     # The start command is composed here and runs on the edge.
     # shellcheck disable=SC2029
-    amisad_ledger_write_token | ssh "${ssh_opts[@]}" "$target" \
-        "IFS= read -r LEDGER_WRITE_TOKEN; export LEDGER_WRITE_TOKEN; PORT=8080 REGION=${region} LEDGER_URL=${ledger} RESOURCE_URL=${resource} nohup /tmp/slice-runtime >/tmp/slice-runtime.log 2>&1 & sleep 1; echo edge-started" \
+    amisad_ledger_write_token | ssh "${ssh_opts[@]}" "$target" "$start" \
         || { rc=$?; echo "starting slice-runtime on ${target} failed" >&2; return "$rc"; }
     [ -n "${5:-}" ] || return 0
     reported=$(ssh "${ssh_opts[@]}" "$target" "hostname -I | awk '{print \$1}'") \
@@ -145,6 +180,16 @@ amisad_deliver_slice_runtime() { # <ssh-target> <ledger-url> <resource-url> <reg
 # last probe decide, so a runtime that never comes up fails the caller instead
 # of leaving the scenario to assert against nothing.
 amisad_wait_slice_runtime() { # <endpoint>
+    local provision rc
+    for provision in /usr/local/bin/amisad-provision target/release/amisad-provision; do
+        if [ -x "$provision" ] && "$provision" --help | grep -q 'slice-wait'; then
+            if "$provision" slice-wait "$1"; then return 0
+            else rc=$?
+            fi
+            [ "$rc" -eq 2 ] || return "$rc"
+            break
+        fi
+    done
     for _ in $(seq 1 15); do
         if curl -sf "$1/health" >/dev/null 2>&1; then break; fi
         sleep 2

@@ -100,7 +100,9 @@ New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $stageContext = @{ HostType = $HostType; SequenceScript = $ts; LogDir = $LogDir; NoProjectClone = $true }
 Write-Information "Per-stage logs: $LogDir"
 
-$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeProvisioning' -IncludeDiskGrowth
+$useSignedBuild = Test-AmisAdFreshSignedBuild -YurunaRoot $YurunaRoot -HostType $HostType -StashPin $StashServiceHost
+$storage = Test-AmisAdStorageAdmission -YurunaRoot $YurunaRoot -HostType $HostType -LogDir $LogDir -Stage 'BeforeProvisioning' `
+    -IncludeDiskGrowth -UseSignedBuild:$useSignedBuild
 if (-not $storage.allowed) { Write-Error "Topology storage admission refused: $($storage.reason)"; exit 1 }
 
 # Opt-in virtual display for headless keystroke/OCR reliability on the cold
@@ -119,27 +121,30 @@ if (Get-Command Initialize-HostDisplay -ErrorAction SilentlyContinue) {
 # service serves to the whole LAN; it is deleted and said so.
 foreach ($line in (Remove-LegacyDemoKey -YurunaRoot $YurunaRoot -Confirm:$false)) { Write-Warning $line }
 
-# --- REGION: Resolve stash service
-# A stash is a requirement of this pass, not an optimization, and the project
-# states no address of its own to fall back to -- so "none found" stops here,
-# where it costs seconds, rather than an hour later inside a guest chain.
-$stash = Resolve-StashService -YurunaRoot $YurunaRoot -Pin $StashServiceHost
-foreach ($line in $stash.Lines) { Write-Information $line }
-if (-not $stash.Address) {
-    Write-AmisAdStashFailure -YurunaRoot $YurunaRoot -Result $stash -HostType $HostType
-    Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and vm-core has nowhere to fetch them - stopping before the provisioning stages. " +
-        "Start one on this host (Start-StashServiceVM.ps1), join a pool that runs one, or pin an address with -StashServiceHost / `$env:YURUNA_STASH_SERVICE_HOST.")
-    exit 1
-}
+if ($useSignedBuild) {
+    Write-Information "The fresh AmisAd core will use the signed build-service runtime."
+} else {
+    # --- REGION: Resolve stash service
+    # Reused guests can still have a stash-based seed. Resolve their
+    # artifact source before provisioning or running the build guest.
+    $stash = Resolve-StashService -YurunaRoot $YurunaRoot -Pin $StashServiceHost
+    foreach ($line in $stash.Lines) { Write-Information $line }
+    if (-not $stash.Address) {
+        Write-AmisAdStashFailure -YurunaRoot $YurunaRoot -Result $stash -HostType $HostType
+        Write-Error ("No stash service answered /healthz; the build has nowhere to upload binaries and vm-core has nowhere to fetch them - stopping before the provisioning stages. " +
+            "Start one on this host (Start-StashServiceVM.ps1), join a pool that runs one, or pin an address with -StashServiceHost / `$env:YURUNA_STASH_SERVICE_HOST.")
+        exit 1
+    }
 
-# --- REGION: Build binaries
-if ((Invoke-AmisAdStage @stageContext -Name 'amisad-build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
-    Write-Error "Build stage failed; no binaries in the stash - stopping."
-    exit 1
+    # --- REGION: Build binaries
+    if ((Invoke-AmisAdStage @stageContext -Name 'amisad-build' -Sequence 'workload.guest.ubuntu.server.24.amisad-build.compile' -NoConfigGate:$NoConfigGate) -ne 0) {
+        Write-Error "Build stage failed; no binaries in the stash - stopping."
+        exit 1
+    }
+    try { $null = Stop-VMForce -VMName 'amisad-build' } catch { Write-Verbose "Stop-VMForce amisad-build: $($_.Exception.Message)" }
+    Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build' -HostType $HostType
+    Write-Information "amisad-build stopped (kept on disk)."
 }
-try { $null = Stop-VMForce -VMName 'amisad-build' } catch { Write-Verbose "Stop-VMForce amisad-build: $($_.Exception.Message)" }
-Remove-InstallMedia -Name 'amisad-build' -SnapshotId 'amisad-build' -HostType $HostType
-Write-Information "amisad-build stopped (kept on disk)."
 
 # --- REGION: Provision edges
 foreach ($edge in 'amisad-edge-a', 'amisad-edge-b') {

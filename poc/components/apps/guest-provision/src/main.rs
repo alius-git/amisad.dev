@@ -2,7 +2,15 @@
 // Copyright (c) 2026 by Alisson Sol et al.
 // GUID: 42a213ce-83c5-4071-9071-ddb88d146d42
 
+mod database;
 mod edge_report;
+mod nats;
+#[cfg(target_os = "linux")]
+mod process_start;
+#[cfg(target_os = "linux")]
+mod process_stop;
+#[cfg(target_os = "linux")]
+mod runtime;
 
 use bytes::Bytes;
 use http_body_util::{BodyExt, Empty, Limited};
@@ -10,7 +18,7 @@ use hyper::{header, Request};
 use hyper_util::rt::TokioIo;
 use std::future::Future;
 use std::net::{IpAddr, SocketAddr};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{ExitCode, Output, Stdio};
 use std::time::Duration;
 use tokio::net::TcpStream;
@@ -33,6 +41,11 @@ const SERVICES: [&str; 10] = [
 const POLL_BUDGET: Duration = Duration::from_secs(300);
 const POLL_DELAY: Duration = Duration::from_secs(1);
 
+// A concurrent fork can keep a fixture's writable executable descriptor
+// open until exec. Keep the fixtures that create and run files separate.
+#[cfg(all(test, target_os = "linux"))]
+static EXECUTABLE_FIXTURES: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+
 #[derive(Debug)]
 struct Failure {
     exit: u8,
@@ -48,12 +61,53 @@ impl Failure {
     }
 }
 
+struct Workspace(PathBuf);
+
+impl Workspace {
+    async fn create(parent: &Path, prefix: &str) -> Result<Self, Failure> {
+        let pattern = parent.join(format!("{prefix}.XXXXXXXXXX"));
+        let invalid = || Failure::new(1, "Could not create a private provisioning directory");
+        let result = child(
+            "mktemp",
+            &["-d", pattern.to_str().ok_or_else(invalid)?],
+            Duration::from_secs(5),
+        )
+        .await?;
+        let path = PathBuf::from(
+            std::str::from_utf8(&result.stdout)
+                .map_err(|_| invalid())?
+                .trim_end_matches(['\r', '\n']),
+        );
+        if path.parent() != Some(parent)
+            || !path
+                .file_name()
+                .is_some_and(|name| name.to_string_lossy().starts_with(prefix))
+            || !std::fs::symlink_metadata(&path).is_ok_and(|entry| entry.is_dir())
+        {
+            return Err(invalid());
+        }
+        Ok(Self(path))
+    }
+}
+
+impl Drop for Workspace {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
 async fn child(program: &str, arguments: &[&str], budget: Duration) -> Result<Output, Failure> {
+    child_with_input(program, arguments, budget, Stdio::null()).await
+}
+
+async fn child_with_input(
+    program: &str,
+    arguments: &[&str],
+    budget: Duration,
+    input: Stdio,
+) -> Result<Output, Failure> {
     let mut command = Command::new(program);
-    command
-        .args(arguments)
-        .stdin(Stdio::null())
-        .kill_on_drop(true);
+    command.args(arguments).stdin(input).kill_on_drop(true);
     let result = timeout(budget, command.output())
         .await
         .map_err(|_| {
@@ -121,6 +175,22 @@ trait Cluster {
 }
 
 struct LocalCluster;
+
+async fn slice_wait(endpoint: &str, budget: Duration, delay: Duration) -> Result<(), Failure> {
+    let address = endpoint
+        .strip_prefix("http://")
+        .and_then(|source| source.parse::<SocketAddr>().ok())
+        .ok_or_else(|| {
+            Failure::new(
+                2,
+                "The native slice probe needs an HTTP address with a port",
+            )
+        })?;
+    poll(budget, delay, |_| {
+        LocalCluster.health(address.ip(), address.port())
+    })
+    .await
+}
 
 impl Cluster for LocalCluster {
     async fn repair_kube_ownership(&self) {
@@ -299,15 +369,34 @@ async fn core_ready(
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> ExitCode {
     let args: Vec<_> = std::env::args().skip(1).collect();
+    const USAGE: &str = "Usage: amisad-provision <core-ready|edge-report|db-setup|nats-install VERSION SHA256|slice-start REGION LEDGER_URL RESOURCE_URL|slice-stop|slice-wait ENDPOINT|activate-runtime PROJECT CANDIDATE DESTINATION>";
     let result = match args.as_slice() {
         [mode] if mode == "--help" => {
-            println!("Usage: amisad-provision <core-ready|edge-report>");
+            println!("{USAGE}");
             return ExitCode::SUCCESS;
         }
         [mode] if mode == "core-ready" => core_ready(&LocalCluster, POLL_BUDGET, POLL_DELAY).await,
         [mode] if mode == "edge-report" => edge_report::run().await,
+        [mode] if mode == "db-setup" => database::run().await,
+        #[cfg(target_os = "linux")]
+        [mode] if mode == "slice-stop" => process_stop::run().await,
+        #[cfg(target_os = "linux")]
+        [mode, region, ledger, resource] if mode == "slice-start" => {
+            process_start::run(region, ledger, resource).await
+        }
+        [mode, endpoint] if mode == "slice-wait" => {
+            slice_wait(endpoint, Duration::from_secs(30), Duration::from_secs(2)).await
+        }
+        #[cfg(target_os = "linux")]
+        [mode, project, candidate, destination] if mode == "activate-runtime" => runtime::activate(
+            Path::new(project),
+            Path::new(candidate),
+            Path::new(destination),
+        )
+        .map_err(|error| Failure::new(7, format!("Could not activate signed runtime: {error}"))),
+        [mode, version, digest] if mode == "nats-install" => nats::run(version, digest).await,
         _ => {
-            eprintln!("Usage: amisad-provision <core-ready|edge-report>");
+            eprintln!("{USAGE}");
             return ExitCode::FAILURE;
         }
     };
@@ -324,6 +413,51 @@ async fn main() -> ExitCode {
 mod tests {
     use super::*;
     use std::cell::RefCell;
+
+    #[tokio::test]
+    async fn slice_wait_retries_unhealthy_http_until_a_success() {
+        use std::io::{BufRead, BufReader, Write};
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let endpoint = format!("http://{}", listener.local_addr().unwrap());
+        let serving = std::thread::spawn(move || {
+            for status in ["503 Service Unavailable", "204 No Content"] {
+                let (mut client, _) = listener.accept().unwrap();
+                client
+                    .set_read_timeout(Some(Duration::from_secs(2)))
+                    .unwrap();
+                let mut reader = BufReader::new(&mut client);
+                let mut line = String::new();
+                assert!(reader.read_line(&mut line).unwrap() > 0);
+                assert_eq!(line, "GET /health HTTP/1.1\r\n");
+                loop {
+                    line.clear();
+                    assert!(reader.read_line(&mut line).unwrap() > 0);
+                    if line == "\r\n" {
+                        break;
+                    }
+                }
+                client
+                    .write_all(
+                        format!(
+                            "HTTP/1.1 {status}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+                        )
+                        .as_bytes(),
+                    )
+                    .unwrap();
+            }
+        });
+        slice_wait(&endpoint, Duration::from_secs(2), Duration::from_millis(15))
+            .await
+            .unwrap();
+        serving.join().unwrap();
+        assert_eq!(
+            slice_wait("https://example.invalid", Duration::ZERO, Duration::ZERO)
+                .await
+                .unwrap_err()
+                .exit,
+            2
+        );
+    }
 
     #[derive(Default)]
     struct Fixture {

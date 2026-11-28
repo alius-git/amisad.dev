@@ -21,12 +21,12 @@ class NatsInstaller(unittest.TestCase):
         """A disposable root with command fixtures; returns (root, script, env)."""
         root = Path(directory)
         posix = root.as_posix()
-        for folder in ['bin', 'usr/local/bin', 'etc/systemd/system', 'tmp']:
+        for folder in ['bin', 'usr/local/bin', 'etc/systemd/system', 'etc/yuruna', 'tmp']:
             (root / folder).mkdir(parents=True, exist_ok=True)
         source = SCRIPT.read_text()
         # Paths are spliced in POSIX form so the same file runs under Git Bash
         # (where a backslash in a script is an escape) and on Linux.
-        for prefix in ['/tmp/', '/usr/local', '/etc/systemd']:
+        for prefix in ['/tmp/', '/usr/local', '/etc/systemd', '/etc/yuruna']:
             source = source.replace(prefix, posix + prefix)
         if pin_the_fixture_tarball:
             # Exercise the real comparison: pin the fixture's digest in place of the
@@ -95,6 +95,30 @@ class NatsInstaller(unittest.TestCase):
             self.assertIn('sha256 verified', result.stdout)
             # The private download directory is gone once the install finished.
             self.assertEqual([p.name for p in (root / 'tmp').iterdir() if p.name.startswith('amisad-nats')], [])
+
+    def test_signed_candidate_receives_the_architecture_pin(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, _, env = self.fixture(directory, pin_the_fixture_tarball=False)
+            (root / 'etc/yuruna/amisad-artifacts.json').write_text('{}\n')
+            installer = root / 'usr/local/lib/yuruna/install-rust-artifacts'
+            installer.parent.mkdir(parents=True)
+            artifact = installer.parent / 'amisad-artifacts' / ('a' * 64)
+            artifact.mkdir(parents=True)
+            installer.write_text('#!/bin/sh\n'
+                                 'printf "%s\\n" "$*" > "$FIXTURE/verification"\n'
+                                 'printf "%s\\n" "' + artifact.as_posix() + '"\n')
+            installer.chmod(0o755)
+            native = artifact / 'amisad-provision'
+            native.write_text('#!/bin/sh\n'
+                              'if [ "$1" = --help ]; then echo nats-install; exit 0; fi\n'
+                              'printf "%s\\n" "$*" > "$FIXTURE/native"\n')
+            native.chmod(0o755)
+            result = self.run_installer(root, env)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((root / 'verification').read_text().rstrip().endswith('amisad-provision framework-revision'))
+            self.assertEqual((root / 'native').read_text(),
+                             'nats-install v2.15.1 bf5edc7b1ce98e885c368cb43a886eb148dc5d0551d99f3cf6141fb5e1954c70\n')
+            self.assertFalse((root / 'actions').exists(), 'the verified command must own the setup')
 
     def test_refuses_a_download_that_is_not_the_pinned_release(self):
         with tempfile.TemporaryDirectory() as directory:

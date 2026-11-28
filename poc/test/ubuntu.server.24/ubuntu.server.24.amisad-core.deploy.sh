@@ -272,39 +272,84 @@ amisad_publish_ledger_write_token() (
 # Downloads land in a private directory (mode 0700), not loose in /tmp: another
 # local user could otherwise swap a file between its digest check and its use.
 AMISAD_WORK=$(mktemp -d "${TMPDIR:-/tmp}/amisad-fetch.XXXXXX")
-trap 'rm -rf -- "$AMISAD_WORK"' EXIT
+AMISAD_TREE=
+trap 'rm -rf -- "$AMISAD_WORK"; if [ -n "$AMISAD_TREE" ]; then rm -rf -- "$AMISAD_TREE"; fi' EXIT
 
 # Why this endpoint (and not /yuruna-repo/*): see poc/test.md "Repo delivery".
 # The previous tree is replaced only after the new archive verified.
 amisad_host_fetch "$AMISAD_WORK/project-poc.tar.gz" "yuruna-project-archive.tar.gz?nocache=${RANDOM}"
 amisad_verify_download "$AMISAD_WORK/project-poc.tar.gz" "${AMISAD_PROJECT_ARCHIVE_SHA256:-}" \
     "the project archive (yuruna-project-archive.tar.gz)" AMISAD_PROJECT_ARCHIVE_SHA256 || exit 7
-rm -rf "$REAL_HOME/amisad.dev"
-mkdir -p "$REAL_HOME/amisad.dev"
-tar -xzf "$AMISAD_WORK/project-poc.tar.gz" -C "$REAL_HOME/amisad.dev"
+
+artifact_plan=/etc/yuruna/amisad-artifacts.json
+runtime_bundle=no
+if [[ -e $artifact_plan || -L $artifact_plan ]]; then
+    if [[ ! -f $artifact_plan || -L $artifact_plan ]]; then
+        echo 'The enrolled AmisAd artifact plan is not a regular file.' >&2
+        exit 7
+    fi
+    runtime_bundle=$(python3 - "$artifact_plan" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "rb") as plan:
+    value = json.loads(plan.read(1048577)).get("runtimeBundle", False)
+if not isinstance(value, bool):
+    sys.exit("Invalid AmisAd runtime bundle flag")
+print("yes" if value else "no")
+PY
+    ) || exit 7
+fi
+if [ "$runtime_bundle" = yes ]; then
+    echo "== download and verify the enrolled AmisAd runtime bundle =="
+    installer=/usr/local/lib/yuruna/install-rust-artifacts
+    if [[ ! -x $installer || ! -f $installer || -L $installer ]]; then
+        echo 'The enrolled AmisAd artifact installer is unavailable.' >&2
+        exit 7
+    fi
+    # Verify the complete set together. Core's first-boot provisioner has its
+    # own cache and may already have installed a smaller set for this candidate.
+    artifact_dir=$("$installer" --plan-file "$artifact_plan" "$AMISAD_WORK/runtime" \
+        seller-svc resource-svc ads-svc insights-svc platform-svc audit-svc connect-svc fabric-coordinator \
+        identity-mock ledger-svc slice-runtime buyer-client amisad-provision framework-revision) || exit 7
+    # Stage on the destination filesystem. The verified provisioner checks the
+    # source revision and all executable architectures before swapping trees.
+    AMISAD_TREE=$(mktemp -d "$REAL_HOME/.amisad-deploy.XXXXXX")
+    project_dir="$AMISAD_TREE/project"
+else
+    project_dir="$REAL_HOME/amisad.dev"
+    rm -rf "$REAL_HOME/amisad.dev"
+fi
+mkdir -p "$project_dir"
+tar -xzf "$AMISAD_WORK/project-poc.tar.gz" -C "$project_dir"
+if [ "$runtime_bundle" = yes ]; then
+    "$artifact_dir/amisad-provision" activate-runtime "$project_dir" "$artifact_dir" "$REAL_HOME/amisad.dev" || exit $?
+fi
 rm -f "$AMISAD_WORK/project-poc.tar.gz"
 
 POC="$REAL_HOME/amisad.dev/poc"
 cd "$POC"
 
-echo "== download prebuilt binaries from the stash service =="
-# See https://yuruna.link/42010605-00d1
-if [ -z "${STASH_HOST:-}" ]; then
-    echo "STASH_HOST is empty - the sequence supplies it from \${ext:stash-service.ResolveHost(...)} and the cycle's warm-up publishes the address it verified. Nowhere to fetch the binaries from; aborting." >&2
-    exit 3
-fi
-STASH="http://${STASH_HOST}"
 ARCH=$(uname -m)
-LABEL="amisad-${ARCH}-binaries"
-curl -fsS --noproxy '*' --connect-timeout 20 "${STASH}/healthz" >/dev/null || {
-    echo "STASH UNREACHABLE at ${STASH} - is yuruna-stash-service running and reachable from this guest?" >&2
-    exit 3
-}
-mkdir -p target/release
-amisad_fetch_stash_binaries "$STASH" "$LABEL" "$AMISAD_WORK/amisad-binaries.tgz" || exit $?
-tar -xzf "$AMISAD_WORK/amisad-binaries.tgz" -C target/release
-chmod +x target/release/*
-echo "binaries retrieved from stash:"
+if [ "$runtime_bundle" = no ]; then
+    echo "== download prebuilt binaries from the stash service =="
+    # See https://yuruna.link/42010605-00d1
+    if [ -z "${STASH_HOST:-}" ]; then
+        echo "STASH_HOST is empty - the sequence supplies it from \${ext:stash-service.ResolveHost(...)} and the cycle's warm-up publishes the address it verified. Nowhere to fetch the binaries from; aborting." >&2
+        exit 3
+    fi
+    STASH="http://${STASH_HOST}"
+    LABEL="amisad-${ARCH}-binaries"
+    curl -fsS --noproxy '*' --connect-timeout 20 "${STASH}/healthz" >/dev/null || {
+        echo "STASH UNREACHABLE at ${STASH} - is yuruna-stash-service running and reachable from this guest?" >&2
+        exit 3
+    }
+    mkdir -p target/release
+    amisad_fetch_stash_binaries "$STASH" "$LABEL" "$AMISAD_WORK/amisad-binaries.tgz" || exit $?
+    tar -xzf "$AMISAD_WORK/amisad-binaries.tgz" -C target/release
+    chmod +x target/release/*
+    echo "binaries retrieved from stash:"
+fi
 ls -l target/release/
 
 # Confirm the binaries can actually run here before spending the deploy on

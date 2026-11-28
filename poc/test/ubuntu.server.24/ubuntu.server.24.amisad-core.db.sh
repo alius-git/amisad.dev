@@ -15,6 +15,27 @@ if [ -z "${YURUNA_STATUS_SERVICE_IP:-}" ] || [ -z "${YURUNA_STATUS_SERVICE_PORT:
     exit 2
 fi
 
+artifact_plan=/etc/yuruna/amisad-artifacts.json
+if [ -e "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
+    if [ ! -f "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
+        echo 'Invalid enrolled AmisAd artifact plan.' >&2
+        exit 1
+    fi
+    artifact_root=/usr/local/lib/yuruna/amisad-artifacts
+    artifact_dir=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
+        "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 1
+    provision="$artifact_dir/amisad-provision"
+    if [ "${artifact_dir%/*}" != "$artifact_root" ] || ! [[ ${artifact_dir##*/} =~ ^[a-f0-9]{64}$ ]] ||
+        [ ! -f "$provision" ] || [ -L "$provision" ] || [ ! -x "$provision" ]; then
+        echo 'The verified AmisAd provisioner is unavailable.' >&2
+        exit 1
+    fi
+    if "$provision" --help | grep -q 'db-setup'; then
+        export YURUNA_STATUS_SERVICE_IP YURUNA_STATUS_SERVICE_PORT
+        exec "$provision" db-setup
+    fi
+fi
+
 # --- REGION: amisad_host_fetch
 # See https://yuruna.link/4220a755-004d
 amisad_host_fetch() {
@@ -135,6 +156,7 @@ sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname='amisad'" | g
     sudo -u postgres createdb amisad
 # stdin, not -f <path>: the postgres user cannot open a file in the private
 # directory, and the bytes read are the bytes that were verified.
+# shellcheck disable=SC2024
 sudo -u postgres psql -v ON_ERROR_STOP=1 -d amisad -f - < "$SCHEMA"
 rm -f "$SCHEMA"
 

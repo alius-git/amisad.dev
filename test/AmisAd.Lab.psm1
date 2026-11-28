@@ -93,6 +93,56 @@ function Invoke-AmisAdStage {
     return $exitCode
 }
 
+# --- REGION: Test-AmisAdFreshSignedBuild
+function Test-AmisAdFreshSignedBuild {
+    <#
+    .SYNOPSIS
+        Select centralized binaries when the core will receive a fresh seed.
+    .DESCRIPTION
+        A configured builder cannot upgrade the seed inside a retained VM.
+        Require an empty core inventory as well as the enrolled signed set.
+        Any unknown inventory or unproven plan keeps the existing build path.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)][string]$YurunaRoot,
+        [Parameter(Mandatory)][string]$HostType,
+        [string]$StashPin
+    )
+    if ($StashPin -or $env:YURUNA_STASH_SERVICE_HOST) { return $false }
+    try {
+        $testRoot = Join-Path $YurunaRoot 'test'
+        $configPath = Join-Path $testRoot 'test.config.yml'
+        $configModule = Join-Path $testRoot 'modules/Test.Config.psm1'
+        $builderModule = Join-Path $testRoot 'extension/build-service/default.psm1'
+        if (@($configPath, $configModule, $builderModule | Where-Object { -not [IO.File]::Exists($_) }).Count) { return $false }
+        Import-Module $configModule -DisableNameChecking -ErrorAction Stop
+        $config = Read-TestConfig -Path $configPath -ThrowOnError
+        if (-not $config.vmStart.buildServiceConfigFile) { return $false }
+        $builderConfig = [IO.Path]::GetFullPath($config.vmStart.buildServiceConfigFile, $testRoot)
+        $settings = [IO.File]::ReadAllText($builderConfig) | ConvertFrom-Json -AsHashtable -Depth 20 -ErrorAction Stop
+        if ($settings.consumer.amisad.runtimeBundle -isnot [bool] -or -not $settings.consumer.amisad.runtimeBundle) { return $false }
+        # Root names and the test VM prefix are both candidates for reuse.
+        if (@(Get-VMName -Prefix @('amisad-core', 'test-') -ErrorAction Stop).Count) { return $false }
+        Import-Module $builderModule -DisableNameChecking -ErrorAction Stop
+        $arch = [Runtime.InteropServices.RuntimeInformation]::OSArchitecture
+        if ($arch -notin @('X64', 'Arm64')) { return $false }
+        $target = if ($HostType -like '*.utm' -or $arch -eq 'Arm64') { 'aarch64-unknown-linux-gnu' } else { 'x86_64-unknown-linux-gnu' }
+        $files = 'amisad-provision', 'framework-revision', 'seller-svc', 'resource-svc', 'ads-svc',
+            'insights-svc', 'platform-svc', 'audit-svc', 'connect-svc', 'fabric-coordinator',
+            'identity-mock', 'ledger-svc', 'slice-runtime', 'buyer-client'
+        $plan = Get-BuildServiceGuestSeed -ConfigPath $builderConfig -Target $target -AmisAd -Binary $files -VerifyManifest
+        if (-not $plan) { return $false }
+        $verified = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($plan)) | ConvertFrom-Json -AsHashtable -ErrorAction Stop
+        return ($verified.runtimeBundle -is [bool] -and $verified.runtimeBundle -and
+            $verified.target -ceq $target -and $verified.candidate -ceq $settings.consumer.amisad.candidateId)
+    } catch {
+        Write-Verbose "Centralized AmisAd artifacts not selected: $($_.Exception.Message)"
+        return $false
+    }
+}
+
 # --- REGION: Invoke-AmisAdCleanup
 function Invoke-AmisAdCleanup {
     <#
@@ -134,6 +184,8 @@ function Test-AmisAdStorageAdmission {
         An unavailable probe is recorded explicitly; a measured shortage stops the
         stage. Disk growth is reserved before provisioning, not charged again after
         the disks and checkpoints already exist.
+    .PARAMETER UseSignedBuild
+        The lab selected a verified centralized build and will not create an AmisAd build VM.
     #>
     [CmdletBinding()]
     [OutputType([hashtable])]
@@ -142,7 +194,8 @@ function Test-AmisAdStorageAdmission {
         [Parameter(Mandatory)][string]$HostType,
         [Parameter(Mandatory)][string]$LogDir,
         [Parameter(Mandatory)][ValidateSet('BeforeProvisioning', 'BeforeStart')][string]$Stage,
-        [switch]$IncludeDiskGrowth
+        [switch]$IncludeDiskGrowth,
+        [switch]$UseSignedBuild
     )
     if ($HostType -ne 'host.windows.hyper-v') { return @{ allowed = $true; status = 'not-applicable'; reason = '' } }
     $evidence = @{ allowed = $true; status = 'unknown'; reason = 'Storage admission is unavailable: the host driver has no Test-VMStorageCapacity helper.';
@@ -154,9 +207,16 @@ function Test-AmisAdStorageAdmission {
         $memory = @{}
         $growth = @{}
         foreach ($vm in $requirements.virtualMachines) {
+            if ($UseSignedBuild -and $vm.name -eq 'amisad-build') { continue }
             if (-not $IncludeDiskGrowth -and [long]$vm.startupMemoryBytes -eq 0) { continue }
             $memory[$vm.name] = [long]$vm.startupMemoryBytes
             if ($IncludeDiskGrowth) { $growth[$vm.name] = [long]$vm.additionalStorageBytes }
+        }
+        if ($IncludeDiskGrowth -and -not $UseSignedBuild -and -not $memory.ContainsKey('amisad-build')) {
+            # The project-wide preflight reserves only the runtime topology.
+            # The fallback needs a build disk even though it is off at startup.
+            $memory['amisad-build'] = 0L
+            $growth['amisad-build'] = 16GB
         }
         try {
             $capacityArgs = @{ VMName = [string[]]$memory.Keys; StartupMemoryBytes = $memory;
@@ -976,7 +1036,7 @@ function Sync-AmisAdDemoKey {
 }
 
 Export-ModuleMember -Function Invoke-AmisAdScript, Invoke-AmisAdStage, Invoke-AmisAdCleanup,
-    Test-AmisAdStorageAdmission,
+    Test-AmisAdStorageAdmission, Test-AmisAdFreshSignedBuild,
     Remove-InstallMedia, Set-EdgeMemory, Start-VMConfirmed, Start-AmisAdEdge, Get-AmisAdEdgeFailure, Write-AmisAdLabFailure, Save-AmisAdControlSnapshot,
     Save-AmisAdEdgeAddressEvidence, Remove-LegacyDemoKey,
     ConvertTo-AmisAdDemoPublicKey, Get-AmisAdKeyFingerprint, Get-AmisAdAuthorizeKeyCommand,

@@ -18,7 +18,25 @@ fi
 echo "== boot-time IP reporter =="
 # Posts this VM's IP to the status service's log-upload sink at every boot (and
 # now), so vm-core resolves the edge without DNS: GET /log/handoff/<hostname>.ip.txt
-sudo tee /usr/local/lib/amisad-ip-report.sh >/dev/null <<'EOS'
+artifact_plan=/etc/yuruna/amisad-artifacts.json
+if [ -e "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
+    if [ ! -f "$artifact_plan" ] || [ -L "$artifact_plan" ]; then
+        echo 'Invalid enrolled AmisAd artifact plan.' >&2
+        exit 1
+    fi
+    artifact_root=/usr/local/lib/yuruna/amisad-artifacts
+    artifact_dir=$(sudo /usr/local/lib/yuruna/install-rust-artifacts --plan-file \
+        "$artifact_plan" "$artifact_root" amisad-provision framework-revision) || exit 1
+    provision="$artifact_dir/amisad-provision"
+    if [ "${artifact_dir%/*}" != "$artifact_root" ] || ! [[ ${artifact_dir##*/} =~ ^[a-f0-9]{64}$ ]] ||
+        [ ! -f "$provision" ] || [ -L "$provision" ] || [ ! -x "$provision" ]; then
+        echo 'The verified AmisAd edge reporter is unavailable.' >&2
+        exit 1
+    fi
+    reporter="$provision edge-report"
+else
+    reporter=/usr/local/lib/amisad-ip-report.sh
+    sudo tee "$reporter" >/dev/null <<'EOS'
 #!/bin/bash
 set -eu
 if [ -x /usr/local/bin/amisad-provision ]; then
@@ -42,9 +60,10 @@ for _ in $(seq 1 30); do
 done
 exit 1
 EOS
-sudo chmod 755 /usr/local/lib/amisad-ip-report.sh
+    sudo chmod 755 "$reporter"
+fi
 
-sudo tee /etc/systemd/system/amisad-ip-report.service >/dev/null <<'EOS'
+sudo tee /etc/systemd/system/amisad-ip-report.service >/dev/null <<EOS
 # --- REGION: [Unit]
 [Unit]
 Description=Report this edge VM's IP to the Yuruna status service
@@ -54,7 +73,7 @@ After=network-online.target
 # --- REGION: [Service]
 [Service]
 Type=oneshot
-ExecStart=/usr/local/lib/amisad-ip-report.sh
+ExecStart=$reporter
 
 # --- REGION: [Install]
 [Install]

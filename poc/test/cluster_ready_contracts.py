@@ -2,7 +2,7 @@
 # LICENSEURI https://yuruna.link/license
 # Copyright (c) 2026 by Alisson Sol et al.
 # GUID: 42807cd6-9296-48ed-a92d-60b37836f927
-"""Restored-cluster gates in private paths, with real loopback HTTP probes."""
+"""Core readiness and edge reporter contracts in private paths."""
 import contextlib
 import http.server
 import json
@@ -484,6 +484,82 @@ current-context: fixture
             result, _ = self.probe(port, budget=0)
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(requests, [])
+
+
+@unittest.skipUnless(BASH, 'A usable native-filesystem Bash is required for guest shell contracts')
+class GuestProvisioning(unittest.TestCase):
+    def fixture(self, directory, enrolled=True, script_name='edge.setup'):
+        root = Path(directory)
+        for folder in ('bin', 'etc', 'lib', 'units'):
+            (root / folder).mkdir()
+        script = SCRIPT.with_name(f'ubuntu.server.24.amisad-{script_name}.sh')
+        text = script.read_text()
+        for source, fixture in {
+            '/etc/yuruna/host.env': 'etc/host.env',
+            '/etc/yuruna/amisad-artifacts.json': 'etc/amisad-artifacts.json',
+            '/usr/local/lib/yuruna/install-rust-artifacts': 'bin/verify-artifact',
+            '/usr/local/lib/yuruna/amisad-artifacts': 'lib/artifacts',
+            '/usr/local/lib/amisad-ip-report.sh': 'lib/amisad-ip-report.sh',
+            '/etc/systemd/system': 'units',
+        }.items():
+            text = text.replace(source, fixture)
+        (root / 'case.sh').write_bytes(text.encode())
+        (root / 'etc/host.env').write_text('YURUNA_STATUS_SERVICE_IP=192.0.2.1\nYURUNA_STATUS_SERVICE_PORT=8080\n')
+        (root / 'lib/amisad-ip-report.sh').write_text('previous reporter\n')
+        if enrolled:
+            (root / 'etc/amisad-artifacts.json').write_text('{}\n')
+        artifact = f'lib/artifacts/{"a" * 64}/amisad-provision'
+        (root / artifact).parent.mkdir(parents=True)
+        (root / artifact).touch(mode=0o755)
+        write_command(root, 'verify-artifact', 'echo "$*" > verification\n'
+                      'if [ "${VERIFIER_FAIL:-0}" -ne 0 ]; then exit 7; fi\n'
+                      f'echo "{Path(artifact).parent.as_posix()}"')
+        write_command(root, 'sudo', 'exec "$@"')
+        write_command(root, 'systemctl', 'echo "$*" >> actions')
+        write_command(root, 'sync', ':')
+        return root, artifact
+
+    def test_edge_selects_the_verified_artifact_before_enabling_the_service(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, artifact = self.fixture(directory)
+            result = run_case(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertEqual('--plan-file etc/amisad-artifacts.json lib/artifacts amisad-provision framework-revision\n',
+                             (root / 'verification').read_text())
+            self.assertIn(f'ExecStart={artifact} edge-report', (root / 'units/amisad-ip-report.service').read_text())
+            self.assertIn('start amisad-ip-report.timer', (root / 'actions').read_text())
+            self.assertEqual('previous reporter\n', (root / 'lib/amisad-ip-report.sh').read_text())
+
+    def test_signed_verification_failure_leaves_existing_reporter_and_service_untouched(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, _ = self.fixture(directory)
+            unit = root / 'units/amisad-ip-report.service'
+            unit.write_text('previous unit\n')
+            result = run_case(root, {'VERIFIER_FAIL': '1'})
+            self.assertNotEqual(0, result.returncode)
+            self.assertEqual('previous unit\n', unit.read_text())
+            self.assertEqual('previous reporter\n', (root / 'lib/amisad-ip-report.sh').read_text())
+            self.assertFalse((root / 'actions').exists())
+
+    def test_unenrolled_guest_keeps_the_baseline_reporter(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, _ = self.fixture(directory, enrolled=False)
+            result = run_case(root)
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertIn('ExecStart=lib/amisad-ip-report.sh', (root / 'units/amisad-ip-report.service').read_text())
+            self.assertFalse((root / 'verification').exists())
+
+    def test_database_dispatches_the_signed_setup_and_preserves_the_schema_pin(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, artifact = self.fixture(directory, script_name='core.db')
+            (root / artifact).write_bytes(b'#!/bin/sh\n'
+                                          b'if [ "$1" = --help ]; then echo db-setup; exit 0; fi\n'
+                                          b'printf "%s %s\\n" "$*" "$AMISAD_SCHEMA_SHA256" > database\n')
+            result = run_case(root, {'AMISAD_SCHEMA_SHA256': 'd' * 64})
+            self.assertEqual(0, result.returncode, result.stderr)
+            self.assertEqual(f'db-setup {"d" * 64}\n', (root / 'database').read_text())
+            self.assertTrue((root / 'verification').exists())
+            self.assertFalse((root / 'actions').exists())
 
 
 if __name__ == '__main__':

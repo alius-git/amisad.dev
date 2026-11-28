@@ -6,13 +6,15 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 rust_binary(
     name = "amisad-provision",
-    srcs = ["src/main.rs", "src/edge_report.rs"],
+    srcs = ["src/main.rs", "src/database.rs", "src/edge_report.rs", "src/nats.rs", "src/process_start.rs", "src/process_stop.rs", "src/runtime.rs"],
     edition = "2021",
     deps = [
         "@crates//:bytes",
         "@crates//:http-body-util",
         "@crates//:hyper",
         "@crates//:hyper-util",
+        "@crates//:libc",
+        "@crates//:serde_json",
         "@crates//:tokio",
     ],
     visibility = ["//visibility:public"],

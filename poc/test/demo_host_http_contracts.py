@@ -83,6 +83,16 @@ def request(port, method, path, headers=None, body=None):
         conn.close()
 
 
+def startup_log(process, mode):
+    # The PowerShell launcher relays child stdout independently of HTTP.
+    deadline = time.monotonic() + 3
+    while True:
+        log = process.demo_log.read_text()
+        if f"{mode} listening on" in log or process.poll() is not None or time.monotonic() >= deadline:
+            return log
+        time.sleep(0.02)
+
+
 @contextlib.contextmanager
 def demo(mode, port=None, core=None, framework=None, launcher=False, share=False, vault_log=None, artifact_log=None):
     port = port or free_port()
@@ -291,7 +301,7 @@ class DemoContracts(unittest.TestCase):
                     if mode == "data-view":
                         states = json.loads(request(port, "GET", "/api/vms")[2])
                         self.assertEqual([vm["state"] for vm in states], ["running", "stopped", "absent"])
-                    logs = process.demo_log.read_text()
+                    logs = startup_log(process, mode)
                     self.assertIn(f"{mode} listening on", logs)
                     self.assertNotIn("fixture-maya", logs)
                     self.assertNotIn("AMISAD-HOST ", logs)
@@ -361,7 +371,7 @@ Export-ModuleMember -Function Receive-BuildServiceArtifact
                 self.assertEqual(verified["ManifestSha256"], "b" * 64)
                 self.assertEqual(verified["TrustedKeyFile"], str(framework / "test/fixture-public-key.pem"))
                 self.assertEqual(verified["Binary"], "amisad-demo-host")
-                self.assertIn("by-act listening on", process.demo_log.read_text())
+                self.assertIn("by-act listening on", startup_log(process, "by-act"))
 
     def test_restart_after_an_interrupted_journal_upload(self):
         with demo("data-view") as (port, process):
